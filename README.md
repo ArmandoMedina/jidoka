@@ -3,7 +3,7 @@
 <p align="center"><strong>El Sistema de Producción Toyota para tu equipo de agentes de IA.</strong><br>
 Con un cordón <em>Andon</em> que sí para la línea.</p>
 
-<p align="center"><code>npx jidoka init</code></p>
+<p align="center"><code>npx jidoka-method init</code> · <em>instalador en camino — Sprint 3 (<a href="ROADMAP.md">roadmap</a>)</em></p>
 
 <p align="center">🧪 <strong>beta</strong> — el método está probado en repos reales; el empaquetado se está estrenando.<br>
 <a href="LICENSE">MIT</a> · úsalo, cópialo, modifícalo, hasta comercialmente. Sin ataduras.</p>
@@ -54,11 +54,11 @@ Todo verificado contra fuente primaria en [`doctrina/03-aviacion.md`](doctrina/0
 
 Un sprint de Jidoka es un lazo corto de cuatro tiempos. La tarjeta pasa por **Borrador → Aprobado → En curso → Revisión → Hecho**:
 
-1. **Planea** (`/jidoka:planea`) — la IA explora y escribe el plan en *plan mode*; **tú lo apruebas**. El plan aprobado *es* el sprint, y se archiva.
+1. **Planea** (`/jidoka:planea`, Sprint 2) — la IA explora y escribe el plan en *plan mode*; **tú lo apruebas**. El plan aprobado *es* el sprint, y se archiva.
 2. **Construye** — el agente `dev` avanza en rebanadas verticales, cada paso verde. El **Andon local avisa**; el **CI bloquea**.
 3. **Revisa en dos capas** — los **robots** revisan el código (`/code-review` + gates de CI); **tú** revisas el **Gemba**: el incremento visual, corriendo, que verificas contra lo que pediste.
    > **Regla de oro:** el cliente revisa el *demo*, nunca el PR.
-4. **Cierra** (`/jidoka:cierra`) — **Kaizen**: la retro al récord del sprint; el estado al HANDOFF. La lección viaja al siguiente sprint; el contexto no.
+4. **Cierra** (`/jidoka:cierra`, Sprint 2) — **Kaizen**: la retro al récord del sprint; el estado al HANDOFF. La lección viaja al siguiente sprint; el contexto no.
 
 Detalle del ritual en [`kanban/`](kanban/); la doctrina de gates en [`andon/`](andon/).
 
@@ -70,14 +70,30 @@ Detalle del ritual en [`kanban/`](kanban/); la doctrina de gates en [`andon/`](a
 - **Cinco roles acotados**, cada uno con una sola responsabilidad — no un enjambre que se pisa.
 - **Fundado en seguridad, no solo en productividad.** El linaje de manufactura y aviación (arriba) es el porqué, no un adorno.
 
+## Dónde va la beta (evidencia, no palabra)
+
+Este repo predica *evidencia-no-palabra*, así que el README no vende lo que no existe. Qué hay **hoy** y qué viene, sprint a sprint (detalle en [`ROADMAP.md`](ROADMAP.md)):
+
+| Sprint | Qué | Estado |
+|---|---|---|
+| **0 — Identidad** | Doctrina embebida, el sistema TPS, este README | ✅ Publicado (`v0.1.0-beta`) |
+| **1 — Motor Andon** | La ley (`blast-radius.json`) + verificador + self-test + hooks + CI, corriendo **sobre este mismo repo** | ✅ Existe — míralo morder en [`andon/`](andon/) |
+| **2 — Ritual Kanban** | Comandos `/jidoka:*`, roles, `gemba-stop`, templates de sprint | 🔜 |
+| **3 — Instalador** | `npx jidoka-method init` + el `kit/` completo, multiplataforma | 🔜 |
+| **4 — Beta estable** | Guías completas, pulido, presentación pública | 🔜 |
+
 ## Empezar
+
+**Hoy** (el instalador llega en Sprint 3): clona el repo, lee [`andon/`](andon/) y [`kanban/`](kanban/), y copia lo que te sirva — el motor de gates en [`tools/`](tools/) funciona ya y se enciende con dos pasos documentados en [`andon/README.md`](andon/README.md).
+
+**Desde Sprint 3:**
 
 ```bash
 # En un repo nuevo o existente
-npx jidoka init
+npx jidoka-method init
 ```
 
-El instalador pregunta el **arquetipo** de tu repo (code-first · docs-as-code · doc-only) y enciende solo la maquinaria que ese proyecto merece. **La disciplina escala con el riesgo:** un experimento personal no necesita la ceremonia de un sistema regulado. Es un menú, no un molde.
+El instalador preguntará el **arquetipo** de tu repo (code-first · docs-as-code · doc-only) y encenderá solo la maquinaria que ese proyecto merece. **La disciplina escala con el riesgo:** un experimento personal no necesita la ceremonia de un sistema regulado. Es un menú, no un molde.
 
 ¿Primera vez? La guía [`docs/guias/empezar-de-cero.md`](docs/guias/empezar-de-cero.md) no asume nada.
 

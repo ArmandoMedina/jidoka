@@ -1,0 +1,10 @@
+# La ley de line endings vive AQUI (el .editorconfig solo guia al editor;
+# git no lo lee en checkout). Sin esto, autocrlf=true materializa el pre-push
+# con CRLF en clones frescos de Windows y el sh de Git-for-Windows se rompe.
+* text=auto
+
+# Hooks de git: los ejecuta sh; SIEMPRE LF.
+.githooks/* text eol=lf
+
+# Scripts PowerShell: CRLF en el working tree (convencion Windows; PS lee ambos).
+*.ps1 text eol=crlf

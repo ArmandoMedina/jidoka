@@ -3,11 +3,19 @@
 # pre-push se salta con --no-verify; este check no (disparo no-verify-es-teatro:
 # el muro real es el required check server-side). Para que bloquee de verdad, un
 # humano debe marcarlo como required check en la branch protection de main
-# (ver andon/README.md).
+# (require PR + check requerido + sin bypass de admins; ver andon/README.md).
+#
+# El juez no viaja en el PR: el veredicto lo da el verificador y la ley de la
+# rama BASE (un PR no puede editar la ley que lo juzga; ADR 0003). Los cambios
+# legitimos a la ley rigen a partir del siguiente PR. La prueba de humo si corre
+# sobre el motor del PR: valida el motor nuevo que el PR propone.
 name: andon
 
 on:
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   andon:
@@ -25,8 +33,23 @@ jobs:
         shell: powershell
         run: .\tools\probar-gate.ps1
 
-      - name: andon sobre el rango del PR
+      - name: andon sobre el rango del PR (ley y verificador de la BASE)
         shell: powershell
         env:
           BASE_REF: ${{ github.base_ref }}
-        run: .\tools\verificar.ps1 -Base "origin/$env:BASE_REF"
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $ref = "origin/$env:BASE_REF"
+          git cat-file -e "${ref}:tools/verificar.ps1"; $okVeri = ($LASTEXITCODE -eq 0)
+          git cat-file -e "${ref}:tools/blast-radius.json"; $okLey = ($LASTEXITCODE -eq 0)
+          if ($okVeri -and $okLey) {
+            $veriBase = Join-Path $env:TEMP 'verificar-base.ps1'
+            $leyBase  = Join-Path $env:TEMP 'blast-radius-base.json'
+            git show "${ref}:tools/verificar.ps1"     | Out-File $veriBase -Encoding ascii
+            git show "${ref}:tools/blast-radius.json" | Out-File $leyBase  -Encoding ascii
+            & $veriBase -Base $ref -Manifiesto $leyBase -Repo "$env:GITHUB_WORKSPACE"
+          } else {
+            Write-Host "##[warning] La base $ref aun no trae el motor Andon; fallback al motor del PR (solo valido en el PR fundacional)."
+            .\tools\verificar.ps1 -Base $ref
+          }
+          exit $LASTEXITCODE

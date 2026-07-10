@@ -1,10 +1,11 @@
 #Requires -Version 5
 # probar-gate.ps1 - prueba de humo del Andon (disparo prueba-de-humo-del-gate:
 # un gate no se estrena sin correrlo contra escenarios de resultado conocido).
-# Ejercita las cuatro rutas del verificador contra la LEY REAL de Jidoka
-# (avisa / limpio / bloquea / pasa) y ademas la ruta de bloqueo con un manifiesto
-# sintetico, para que la rama que BLOQUEA no se pudra si la ley real cambia
-# (disparo prueba-de-vida-del-gate). Quien valida tambien se valida.
+# Ejercita las rutas del verificador contra la LEY REAL de Jidoka
+# (avisa / limpio / bloquea / pasa), la ruta de bloqueo con un manifiesto
+# sintetico (para que la rama que BLOQUEA no se pudra si la ley real cambia;
+# disparo prueba-de-vida-del-gate) y la ruta que FALLA CERRADO (un gate que no
+# puede medir no aprueba a ciegas). Quien valida tambien se valida.
 # CI lo corre antes de correr el gate sobre el rango del PR.
 #
 # Uso:  ./tools/probar-gate.ps1   (exit 0 = gate sano; exit 1 = el gate tiene un bug)
@@ -12,8 +13,10 @@
 
 $gate = Join-Path $PSScriptRoot 'verificar.ps1'
 $script:fallos = 0
+$script:casos = 0
 
 function Caso($nombre, $exitEsperado, $debeContener, $noDebeContener, $gateArgs) {
+  $script:casos++
   $out = (& $gate @gateArgs 6>&1 | Out-String)
   $code = $LASTEXITCODE
   $detalle = ''
@@ -59,10 +62,14 @@ Caso 'bloquea: doc_bloquea faltante (manifiesto sintetico)' 1 '[BLOQUEA]' '' `
 
 Remove-Item $tmp -ErrorAction SilentlyContinue
 
+# Falla CERRADO: si git no puede calcular el rango, el gate NO aprueba a ciegas (exit 2).
+Caso 'falla cerrado: base de git inexistente (no aprueba a ciegas)' 2 '[ERROR]' 'Todo limpio' `
+  @{ Base = 'origin/rama-que-no-existe-jamas' }
+
 Write-Host ""
 if ($script:fallos -gt 0) {
-  Write-Host "== $($script:fallos) caso(s) fallidos. El gate tiene un bug: no lo estrenes. ==" -ForegroundColor Red
+  Write-Host "== $($script:fallos) de $($script:casos) caso(s) fallidos. El gate tiene un bug: no lo estrenes. ==" -ForegroundColor Red
   exit 1
 }
-Write-Host "== Gate sano: los 5 casos se comportan como se espera. ==" -ForegroundColor Green
+Write-Host "== Gate sano: los $($script:casos) casos se comportan como se espera. ==" -ForegroundColor Green
 exit 0

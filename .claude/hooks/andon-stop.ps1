@@ -79,9 +79,12 @@ $ctx += "Sincroniza los docs duenos antes de cerrar. Si el cambio implica una DE
         "no la escribas suelta: agrega un ADR en docs/decisions/ y listalo en el indice. " +
         "NOTA: este hook ve cambios sin commitear (working tree). Si ya committeaste sin los docs, " +
         "el drift lo atrapan verificar.ps1 al push y el CI (andon.yml)."
+# El texto rico va en 'reason': es el campo que documentadamente llega al modelo
+# en un Stop hook (additionalContext no esta documentado para Stop; se conserva
+# por si el harness lo aprovecha, pero no se depende de el).
 $out = @{
   decision = 'block'
-  reason   = 'Faltan docs duenos (la ley: tools/blast-radius.json). Sincronizalos antes de cerrar.'
+  reason   = $ctx
   hookSpecificOutput = @{
     hookEventName     = 'Stop'
     additionalContext = $ctx

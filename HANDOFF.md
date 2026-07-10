@@ -4,23 +4,22 @@
 
 ## En una frase
 
-**Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint, instalable con `npx jidoka init`. Se construye por sprints, usando su propio ritual (dogfooding).
+**Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Instalador `npx jidoka-method init` en camino (Sprint 3, ver `ROADMAP.md`). Se construye por sprints, usando su propio ritual (dogfooding).
 
 ## Dónde estamos (2026-07-10)
 
-- **Sprint 0 — Esqueleto + identidad: HECHO y PÚBLICO.** Repo en https://github.com/ArmandoMedina/jidoka, tag `v0.1.0-beta`. Commit firmado con correo profesional (`amedina@arcadial.lat`), no el personal. README (pitch TPS + linaje de aviación + diferenciadores propios), ADR 0001, doctrina embebida, índices `kanban/` y `andon/`, 13 disparos sembrados.
-- **Sprint 1 — El motor Andon: CONSTRUIDO, demo verde (pendiente commit + push).** Motor en `tools/` (`blast-radius.json`, `verificar.ps1`, `probar-gate.ps1`), hooks (`no-memorias`, `andon-stop`) + `settings.json`, CI `andon.yml`, `.githooks/pre-push`. ADR 0002 + índice de decisiones. `probar-gate` 5/5 verde; bloqueo real verificado (ADR sin índice → PUSH DETENIDO). **Paso humano pendiente:** marcar el check `andon` como *required* en la protección de `main` (ver `andon/README.md`).
+- **Sprint 0 — Identidad: HECHO y PÚBLICO.** https://github.com/ArmandoMedina/jidoka, tag `v0.1.0-beta`.
+- **Sprint 1 — Motor Andon: en Revisión (PR #1), cierre auditado.** Una auditoría independiente revisó motor + procedimiento + superficies públicas; sus arreglos están en la misma rama (`sprint-1-andon`): el verificador **falla cerrado**, el CI ejecuta **la ley de la rama base** (ADR 0003), `.gitattributes`, paquete renombrado a `jidoka-method` (el nombre `jidoka` en npm es de un tercero), "12 disparos" (eran 12, no 13), `ROADMAP.md`, fronteras del muro documentadas.
+- **Rama default renombrada a `main`** (los docs ya la nombraban). Descripción pública del repo corregida.
 
-## Qué falta / siguiente (en orden de valor)
+## Checklist humana (el cordón es tuyo — nada de esto lo hace la IA)
 
-1. **Cerrar Sprint 1:** commit + push (los corres tú con `!`), y marcar el required check en GitHub.
-2. **Sprint 2 — El ritual Kanban + roles:** comandos `/jidoka:*`, skills, templates de sprint, hook `gemba-stop`, `qa_runs/`.
-3. **Sprint 3 — El instalador `npx jidoka init`** (CLI Node + `kit/`).
-4. **Sprint 4 — Estabilizar la beta:** guías completas, pulido, README de instalación real.
+- [ ] **Branch protection de `main`** (GitHub → Settings → Branches): require PR + check `andon` required + **do not allow bypass**. Sin las tres, no hay muro (ver `andon/README.md` § Encenderlo).
+- [ ] **Merge del PR #1** cuando el Gemba te convenza (corre tú los pasos de `docs/sprints/sprint-1-plan.md` § Verificación).
+- [ ] Al mergear: mover `[Sin publicar]` del CHANGELOG a `[0.2.0-beta]` y taggear.
 
-## Backlog (ideas fuera de sprint)
+## Qué sigue (en orden de valor — detalle en ROADMAP.md)
 
-- **Presentación pública / "cómo se vende" estilo BMAD** (petición del cliente, 2026-07-10): landing/README más visual de cara al público — badges (MIT, beta, Windows/PS), bloque Quick Start, banner/identidad visual, `ROADMAP.md`, y el device tipo `bmad-help` ("¿qué sigue?" → `/jidoka:que-sigue`, encaja en Sprint 2). Decisión abierta: comunidad (Discord/YouTube/Discussions). Encaja natural en Sprint 4 (beta pública), pero el device de ayuda es Sprint 2.
-- **Descripción del repo en GitHub** aún dice "Nuestra version de BMAD" — corregir con: `gh repo edit ArmandoMedina/jidoka --description "Jidoka - el Sistema de Produccion Toyota para agentes de IA. Gates deterministas fuera del LLM + revision por demo visual. npx jidoka init"`
-
-> Nota de flujo: `git push` a public lo bloquea el clasificador de modo automático; los pushes los corres tú con `!` (o das permiso a `gh`).
+1. **Sprint 2 — El ritual Kanban ejecutable:** comandos `/jidoka:*` (incl. `/jidoka:que-sigue`), roles, `gemba-stop`, `qa_runs/`, templates con ownership por sección.
+2. **Sprint 3 — El instalador** `jidoka-method` + kit completo + gemelos `.sh`; decisión abierta ADR 0003: el motor vive solo en `kit/` y este repo se instala su propio kit.
+3. **Sprint 4 — Beta estable:** guías, presentación pública (badges, quick start, banner), decisión de comunidad.

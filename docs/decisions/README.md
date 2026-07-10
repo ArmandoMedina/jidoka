@@ -8,3 +8,4 @@ Registro de las decisiones de arquitectura del proyecto. Cada ADR captura **una*
 |---|---|---|
 | [0001](0001-la-fusion-jidoka.md) | Jidoka: fusión de la doctrina, el método y el ritual de sprint | aceptado |
 | [0002](0002-motor-andon.md) | El motor Andon: gates deterministas sobre el propio Jidoka | aceptado |
+| [0003](0003-auditoria-del-motor.md) | La auditoría del motor: falla cerrado, el juez viaja en la base, y el nombre real | aceptado |

@@ -36,6 +36,14 @@ Fiel a la doctrina anti-fatiga: el manifiesto arranca casi todo en `avisa`, con 
 3. Editar `doctrina/00-tesis.md` sin tocar disparos → `verificar.ps1` **AVISA** (no bloquea).
 4. (Opcional) PR de juguete → el check `andon` corre en GitHub; marcarlo como required en la protección de `main`.
 
+## Cierre auditado
+
+Antes de mergear, un auditor independiente revisó el motor, el procedimiento y las superficies públicas. Sus hallazgos y las decisiones que produjeron están en el **ADR 0003**; los arreglos van en esta misma rama, para que el propio check `andon` los valide.
+
 ## Lo aprendido (Kaizen)
 
-_(Se llena al cerrar el sprint.)_
+1. **Lo irreversible va después del Gemba, nunca antes.** El repo se hizo público antes de la revisión con calma del cliente; las 3 correcciones que siguieron costaron un force-push que no borra todo (los commits huérfanos siguen respondiendo por SHA en GitHub). Publicar/mergear/taggear son el *final* del ritual.
+2. **Contar contra el artefacto, no de memoria.** "Los 13 disparos" eran 12; nadie los contó hasta la auditoría. *Evidencia-no-palabra* aplica también a los números propios.
+3. **Los pendientes humanos salen como checklist, no como prosa.** El fix de la descripción pública ("Nuestra version de BMAD") vivió una sesión entera perdido en el chat. Ahora el HANDOFF lleva checklist con casillas.
+4. **Un gate que falla abierto no es muro.** El verificador aprobaba a ciegas ante errores de git (verificado empíricamente: base inexistente → "Todo limpio"). Falla-cerrado es ahora regla del motor y caso del self-test.
+5. **El muro no puede viajar en el cambio que juzga.** El CI ejecutaba la ley desde la rama del PR — el hueco auto-referencial. El juez ahora viene de la base.
