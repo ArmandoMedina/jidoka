@@ -17,6 +17,7 @@
 - [x] ~~Branch protection de `main`~~ — hecha y verificada (2026-07-10).
 - [x] ~~Publicar el release `v0.1.0-beta`~~ — publicado por el cliente (2026-07-10): <https://github.com/ArmandoMedina/jidoka/releases/tag/v0.1.0-beta>.
 - [x] ~~Merge del PR #1~~ — mergeado por el cliente (2026-07-10); CHANGELOG movido a `[0.2.0-beta]` y tag puesto.
+- [ ] **Publicar el release `v0.2.0-beta`** (el clasificador se lo bloquea a la IA; el tag ya existe): las notas están listas, la IA te pasa el comando exacto.
 - [ ] **Merge del PR #2** cuando el Gemba del Sprint 1.5 te convenza (pasos en `docs/sprints/sprint-1.5-plan.md` § Verificación).
 - [ ] **Social preview** del repo (Settings → General → Social preview): solo se puede desde la UI. Banner definitivo = Sprint 4.
 
