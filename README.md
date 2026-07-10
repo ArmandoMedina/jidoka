@@ -5,8 +5,18 @@ Con un cordón <em>Andon</em> que sí para la línea.</p>
 
 <p align="center"><code>npx jidoka-method init</code> · <em>instalador en camino — Sprint 3 (<a href="ROADMAP.md">roadmap</a>)</em></p>
 
-<p align="center">🧪 <strong>beta</strong> — el método está probado en repos reales; el empaquetado se está estrenando.<br>
+<p align="center">
+<a href="LICENSE"><img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-green"></a>
+<img alt="Estado: beta" src="https://img.shields.io/badge/estado-beta-orange">
+<img alt="Windows / PowerShell 5.1" src="https://img.shields.io/badge/hoy-Windows%20%C2%B7%20PS%205.1-blue">
+<a href="ROADMAP.md"><img alt="Multiplataforma en Sprint 3" src="https://img.shields.io/badge/multiplataforma-Sprint%203-lightgrey"></a>
+</p>
+
+<p align="center">🧪 <strong>beta</strong> — nacido de cuatro repos internos; <strong>este repo se gobierna con su propio Andon</strong>:<br>
+los <a href="https://github.com/ArmandoMedina/jidoka/pulls?q=is%3Apr">PRs</a>, los <a href="https://github.com/ArmandoMedina/jidoka/actions">checks</a> y los <a href="docs/sprints/">sprints archivados</a> son la evidencia, no la palabra.<br>
 <a href="LICENSE">MIT</a> · úsalo, cópialo, modifícalo, hasta comercialmente. Sin ataduras.</p>
+
+<p align="center"><strong>En español, a propósito.</strong> El método nace en nuestro idioma y se defiende en él.</p>
 
 ---
 
@@ -67,7 +77,7 @@ Detalle del ritual en [`kanban/`](kanban/); la doctrina de gates en [`andon/`](a
 - **El gate vive fuera del LLM.** No le pedimos al agente que se porte bien: CI + branch protection bloquean de verdad. Un veredicto que el propio modelo escribe no es un muro — es una sugerencia.
 - **Revisas el demo, no el código.** El incremento te llega funcionando y visual. *"Hecho" = lo viste con tus ojos.* Pensado para quien dirige sin leer código.
 - **Un plan ligero es el sprint.** El plan que apruebas en *plan mode* es el contrato. Sin ceremonia de más.
-- **Cinco roles acotados**, cada uno con una sola responsabilidad — no un enjambre que se pisa.
+- **Asientos acotados, no enjambre.** Cada rol tiene una sola responsabilidad y un "lo que NO hace" explícito ([`kanban/roles.md`](kanban/roles.md)) — y no todo rol merece automatizarse.
 - **Fundado en seguridad, no solo en productividad.** El linaje de manufactura y aviación (arriba) es el porqué, no un adorno.
 
 ## Dónde va la beta (evidencia, no palabra)
