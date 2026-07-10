@@ -42,6 +42,7 @@
     "fuente": [".claude/commands/*", ".claude/skills/*"],
     "doc_bloquea": [],
     "doc_avisa": ["CHANGELOG.md"],
+    "product_avisa": ["product/capacidades/RIT-*"],
     "mensaje": "cambiaste el ritual ejecutable (un comando /jidoka:* o una skill-asiento): registra el cambio en CHANGELOG.md para que la beta tenga historia legible. Si solo corregiste typos o formato, este aviso no es para ti",
     "rol": "Escribano"
   },
@@ -57,6 +58,7 @@
     ],
     "doc_bloquea": [],
     "doc_avisa": ["andon/README.md"],
+    "product_avisa": ["product/capacidades/AND-*"],
     "revisa": true,
     "mensaje": "cambiaste un gate: actualiza andon/README.md (el mapa citable del motor). Un gate nuevo no se estrena sin correrlo contra el artefacto real (disparo prueba-de-humo-del-gate: corre tools/probar-gate.ps1)",
     "rol": "Escribano"

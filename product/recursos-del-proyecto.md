@@ -1,3 +1,7 @@
+---
+tipo: recursos
+estado: vigente
+---
 # Recursos del proyecto — Jidoka
 
 > **Lo que la sesión no debe preguntar al abrir.** Punteros, nunca secretos (ver la plantilla en `kit/.jidoka/templates/recursos-del-proyecto.md`). `/jidoka:arranca` lo lee.

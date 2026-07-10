@@ -156,7 +156,7 @@ foreach ($n in $allNotes) {
     if ($inbound.ContainsKey($st) -and $st -ne $srcStem) { $inbound[$st]++ }
   }
 }
-$exentTipos = @('ecosistema', 'solucion', 'backlog', 'proceso')
+$exentTipos = @('ecosistema', 'solucion', 'backlog', 'proceso', 'recursos', 'dominio')
 foreach ($t in $targets) {
   $stem = [System.IO.Path]::GetFileNameWithoutExtension($t.Name)
   if ($inbound[$stem] -gt 0) { continue }
