@@ -15,7 +15,7 @@
     "fuente": ["doctrina/*"],
     "doc_bloquea": [],
     "doc_avisa": ["kit/.jidoka/disparos/README.md", "doctrina/citas-verificadas.md"],
-    "mensaje": "si cambiaste una REGLA ACCIONABLE, su disparo compilado en kit/.jidoka/disparos/ se actualiza en el mismo commit (una doctrina accionable sin disparo esta incompleta). Si tocaste una cita que carga peso, re-verifica el ledger doctrina/citas-verificadas.md",
+    "mensaje": "si cambiaste una REGLA ACCIONABLE, su disparo compilado en kit/.jidoka/disparos/ se actualiza en el mismo commit (una doctrina accionable sin disparo esta incompleta). Si tocaste una cita que carga peso, re-verifica el ledger doctrina/citas-verificadas.md. Si tu cambio es de estilo, typos o enlaces, ninguno de los dos aplica",
     "rol": "Escribano"
   },
   {
@@ -24,7 +24,7 @@
     "fuente": ["kit/.jidoka/disparos/*"],
     "doc_bloquea": [],
     "doc_avisa": ["doctrina/00-tesis.md"],
-    "mensaje": "un disparo sin doctrina que lo respalde se poda: si agregaste o cambiaste un disparo, la tesis en doctrina/00-tesis.md debe respaldarlo (trazabilidad bidireccional)",
+    "mensaje": "un disparo sin doctrina que lo respalde se poda: si agregaste o cambiaste la REGLA de un disparo, la tesis en doctrina/00-tesis.md debe respaldarlo (trazabilidad bidireccional). Si solo corregiste rutas, typos o formato -- no la regla -- este aviso no es para ti",
     "rol": "Escribano"
   },
   {
@@ -33,7 +33,7 @@
     "fuente": ["kanban/*", "andon/*"],
     "doc_bloquea": [],
     "doc_avisa": ["CHANGELOG.md"],
-    "mensaje": "cambiaste el metodo (ritual o doctrina de gates): registra el cambio en CHANGELOG.md para que la beta tenga historia legible",
+    "mensaje": "cambiaste el metodo (ritual o doctrina de gates): registra el cambio en CHANGELOG.md para que la beta tenga historia legible. Si solo corregiste typos o formato, este aviso no es para ti",
     "rol": "Escribano"
   },
   {
@@ -49,6 +49,26 @@
     "doc_bloquea": [],
     "doc_avisa": ["andon/README.md"],
     "mensaje": "cambiaste un gate: actualiza andon/README.md (el mapa citable del motor). Un gate nuevo no se estrena sin correrlo contra el artefacto real (disparo prueba-de-humo-del-gate: corre tools/probar-gate.ps1)",
+    "rol": "Escribano"
+  },
+  {
+    "nombre": "raiz",
+    "desc": "tierra de nadie: un archivo suelto en la raiz casi siempre tiene un lugar con dueno en otra parte (patron heredado del laboratorio de campo)",
+    "fuente": ["*"],
+    "excluye": [
+      "README.md",
+      "CHANGELOG.md",
+      "HANDOFF.md",
+      "ROADMAP.md",
+      "CONTRIBUTING.md",
+      "LICENSE",
+      ".gitattributes",
+      ".editorconfig",
+      ".gitignore"
+    ],
+    "doc_bloquea": [],
+    "doc_avisa": ["HANDOFF.md"],
+    "mensaje": "aparecio un archivo suelto en la raiz. La raiz es de los canonicos (README, CHANGELOG, HANDOFF, ROADMAP, CONTRIBUTING, LICENSE): si es contenido, tiene lugar con dueno (docs/, kanban/, andon/, doctrina/, kit/, tools/); si es temporal, no se commitea. Si es un canonico nuevo decidido en un ADR, este aviso no es para ti",
     "rol": "Escribano"
   }
 ]

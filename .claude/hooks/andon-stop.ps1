@@ -11,7 +11,22 @@
 # Matcher: comodines -like; un patron SIN '/' solo casa archivos en la raiz del
 # repo; 'excluye' (opcional) resta rutas; 'mensaje' (opcional) se anexa al aviso.
 
-$ErrorActionPreference = 'SilentlyContinue'
+$ErrorActionPreference = 'Continue'
+
+# ALTO-04 (leccion del laboratorio de campo): cada git real revisa $LASTEXITCODE.
+# Si git falla de verdad (no instalado, repo corrupto), se AVISA en vez de callar:
+# tratar un fallo como "sin cambios" es un gate podrido en silencio. El hook no
+# bloquea por esto (es aviso); los que fallan cerrado son verificar.ps1 y el CI.
+function Avisa-SinVeredicto($detalle) {
+  $out = @{
+    hookSpecificOutput = @{
+      hookEventName     = 'Stop'
+      additionalContext = "[AVISO] andon-stop no pudo medir: $detalle. El gate de cierre queda sin veredicto esta vez; verificar.ps1 (pre-push) y el CI si fallan cerrado."
+    }
+  }
+  $out | ConvertTo-Json -Compress -Depth 5
+  exit 0
+}
 
 # 1. Leer el input del hook. Si este stop YA viene de un stop-hook, no re-bloquear.
 $raw = [Console]::In.ReadToEnd()
@@ -20,15 +35,19 @@ if ($inp -and $inp.stop_hook_active) { exit 0 }
 
 # 2. Obtener lista de archivos con cambios sin commitear.
 if ($env:CLAUDE_PROJECT_DIR) { Set-Location $env:CLAUDE_PROJECT_DIR }
-$repo = (git rev-parse --show-toplevel 2>$null)
-if (-not $repo) { exit 0 }
-$changed = (git status --porcelain) | ForEach-Object { if ($_.Length -gt 3) { $_.Substring(3).Trim() } }
+$repoRaw = git rev-parse --show-toplevel 2>&1
+if ($LASTEXITCODE -ne 0) { Avisa-SinVeredicto "git rev-parse fallo o no hay repo ($("$repoRaw".Trim() -split "`n" | Select-Object -First 1))" }
+$repo = "$repoRaw".Trim()
+$statusRaw = git status --porcelain 2>&1
+if ($LASTEXITCODE -ne 0) { Avisa-SinVeredicto "git status fallo ($("$statusRaw".Trim() -split "`n" | Select-Object -First 1))" }
+$changed = @($statusRaw) | ForEach-Object { $s = "$_"; if ($s.Length -gt 3) { $s.Substring(3).Trim() } }
 if (-not $changed) { exit 0 }
 
 # 3. Leer el manifiesto unico de blast-radius (la ley).
 $manifestPath = Join-Path $repo 'tools/blast-radius.json'
 if (-not (Test-Path $manifestPath)) { exit 0 }
-$manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
+try { $manifest = Get-Content $manifestPath -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop }
+catch { Avisa-SinVeredicto "la ley tools/blast-radius.json no se pudo leer o parsear" }
 
 function Test-Pattern($path, $pattern) {
   # Patron sin '/' = solo raiz del repo (un '*.md' no debe casar docs/x.md).
