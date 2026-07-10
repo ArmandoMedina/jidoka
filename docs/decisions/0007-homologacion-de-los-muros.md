@@ -44,6 +44,7 @@ También se siembra un **grafo `product/` mínimo** (dominio Método → módulo
 
 - **`gemba-stop` nace dormido en Jidoka** (no hay áreas visuales): su prueba de vida vive en el self-test (área visual sintética), no en el repo. Cuando Jidoka tenga UI, se enciende con un `rol: revisor-visual` en la ley.
 - **La frontera del mtime:** un `git checkout`/clone reescribe mtimes; por eso `gemba-stop` corre **local en el Stop** (mtime fiable), no en CI. Documentado en `andon/README.md`.
+- **Bordes conocidos del `/code-review` de la Fase B** (registrados para que nadie los redescubra a golpes, no silenciados): el marcador SHA de `review-stop` es ciego al contenido de archivos **untracked** (`git diff HEAD` no los ve); un archivo visual **eliminado** deja que `gemba-stop` acepte evidencia vieja como fresca; y el parseo de `git status --porcelain` no casa código dentro de un **directorio nuevo untracked**. Los tres son bordes heredados del código probado de los labs (6 sprints sin morder) — se documentan como límites, no se divergen del origen probado. El auditor colisiona stems de notas con el mismo nombre en carpetas distintas: irrelevante en el grafo actual, re-evaluar si crece.
 
 ---
 
