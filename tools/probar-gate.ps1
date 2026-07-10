@@ -41,6 +41,8 @@ Caso 'bloquea: ADR nuevo sin listar en el indice (ley real)' 1 '[BLOQUEA]' '' `
   @{ Cambiados = @('docs/decisions/0099-prueba.md') }
 Caso 'pasa: ADR nuevo listado en el indice en el mismo cambio (ley real)' 0 '' '[BLOQUEA]' `
   @{ Cambiados = @('docs/decisions/0099-prueba.md', 'docs/decisions/README.md') }
+Caso 'avisa: comando /jidoka:* nuevo sin CHANGELOG (area ritual, ley real)' 0 '[AVISO]' '[BLOQUEA]' `
+  @{ Cambiados = @('.claude/commands/jidoka/prueba.md') }
 
 # Manifiesto sintetico: guarda la rama que bloquea aunque la ley real cambie.
 $tmp = Join-Path $env:TEMP 'jidoka-blast-radius-prueba.json'

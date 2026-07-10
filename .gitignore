@@ -8,6 +8,11 @@ dist/
 # obligatorio del cierre — ver qa_runs/README.md). El README sí se versiona.
 qa_runs/*/
 
+# Plan de trabajo del dia (ADR 0006): efimero con hogar persistente. Sobrevive
+# la compactacion pero NO se versiona. Patron ANCLADO con '/' a la raiz para no
+# ignorar por accidente kit/.jidoka/ (el kit versionado).
+/.jidoka/
+
 # SO / editor
 .DS_Store
 Thumbs.db
