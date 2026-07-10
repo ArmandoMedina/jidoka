@@ -11,7 +11,8 @@
 - **Sprints 0, 1, 1.5 y el exprimido final del linaje (PR #4): MERGEADOS y PUBLICADOS.** Tags `v0.1.0-beta` → `v0.3.0-beta` en releases; `main` protegido (require PR + check `andon` required + no bypass). Los repos de método del linaje quedaron archivados; los 2 casos de éxito siguen vivos (sus pendientes viven en SUS HANDOFFs, no aquí).
 - **Sesión de hoy (auditoría externa + vitrina pública):** una auditoría de terceros corrió el motor (self-test 6/6) y lo comparó contra el panorama 2026 (Spec Kit, BMAD, Agent OS); veredicto: el diferenciador real es el muro server-side, las 5 grietas encontradas quedaron en `ROADMAP.md` → *Grietas de la auditoría externa*. Además se preparó la vitrina: Ko-fi/FUNDING, template de PR con disparos, templates de issues — detalle en `ROADMAP.md` → *Vitrina pública* (hecho ✅ / pendiente ⏳ con receta).
 - **Sesión consolidada y versionada**: la vitrina + auditoría viajó en su PR, se mergeó con orden nombrada del cliente y se publicó como `v0.4.0-beta` (que también libera el exprimido final, ADR 0005, que esperaba en `[Sin publicar]`).
-- **Sprint 2 sigue sin plan.** El alcance está en `ROADMAP.md` y la especificación fina en el ADR 0005. Debe **zanjar la contradicción del plan efímero** (deuda heredada, ADR 0005).
+- **Sprint 2 · Fase A — CONSTRUIDA, en PR (candidato `v0.5.0-beta`).** Rama `sprint-2a-ritual-ejecutable`. Entregó los 5 comandos `/jidoka:*`, las 4 skills-asiento, el área `ritual` en la ley (self-test 7/7) y el **ADR 0006** que zanja la contradicción del plan efímero (hogar persistente gitignored `/.jidoka/plan-actual.md`). El plan archivado en `docs/sprints/sprint-2a-plan.md`. **Falta:** que el cliente corra el demo Gemba (sección Verificación del plan) y dé la **orden nombrada de merge**; luego el release `v0.5.0-beta`.
+- **Sprint 2 · Fase B — pendiente (los muros).** gemba-stop, review-stop, harness de self-test de hooks, auditor del grafo + `product_avisa`, y las grietas 1/2/5 de la auditoría. Alcance en `ROADMAP.md` y spec fina en el ADR 0005; su plan se hace con `/jidoka:planea` cuando el cliente lo decida.
 
 ## Autorizaciones vigentes del cliente (dichas con nombre, 2026-07-10)
 
@@ -23,7 +24,8 @@
 - [ ] **Grabar el GIF del gate mordiendo** — guion paso a paso en `ROADMAP.md` → *Vitrina pública* ⏳1. La pieza más valiosa antes de compartir el repo.
 - [ ] **Social preview** (solo se puede desde la UI) — receta en `ROADMAP.md` → *Vitrina pública* ⏳2.
 - [ ] **Dos decisiones que solo tú puedes tomar**: el párrafo en inglés del README y el ADR de la licencia (MIT vs copyleft) — argumentos completos en `ROADMAP.md` → *Vitrina pública* ⏳4 y ⏳5.
-- [ ] **Aprobar el plan del Sprint 2** cuando la IA lo presente (modo plan).
+- [x] **Aprobar el plan del Sprint 2 · Fase A** — aprobado en plan mode (2026-07-10).
+- [ ] **Correr el demo Gemba de la Fase A** (sección Verificación de `docs/sprints/sprint-2a-plan.md`) y dar la **orden nombrada de merge** del PR; luego release `v0.5.0-beta`.
 
 ## Qué sigue (en orden de valor — detalle en ROADMAP.md)
 

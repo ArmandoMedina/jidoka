@@ -37,6 +37,15 @@
     "rol": "Escribano"
   },
   {
+    "nombre": "ritual",
+    "desc": "el ritual ejecutable de Jidoka: los comandos /jidoka:* y las skills-asiento (el metodo hecho maquinaria; Sprint 2)",
+    "fuente": [".claude/commands/*", ".claude/skills/*"],
+    "doc_bloquea": [],
+    "doc_avisa": ["CHANGELOG.md"],
+    "mensaje": "cambiaste el ritual ejecutable (un comando /jidoka:* o una skill-asiento): registra el cambio en CHANGELOG.md para que la beta tenga historia legible. Si solo corregiste typos o formato, este aviso no es para ti",
+    "rol": "Escribano"
+  },
+  {
     "nombre": "barreras",
     "desc": "el motor Andon de este repo: la ley, el verificador, el self-test, los hooks, el pre-push y el CI. Jidoka corre sus propios gates (dogfooding)",
     "fuente": [

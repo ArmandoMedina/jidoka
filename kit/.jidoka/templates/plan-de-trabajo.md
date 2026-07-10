@@ -1,6 +1,6 @@
 # Plan de trabajo — [tarea]
 
-> Para una tarea larga que puede morir a media ejecución (compactación, cierre de sesión). **Efímero: no se versiona** — vive fuera de git y se borra al terminar. Al retomar, verifica contra el código real, no contra el resumen de la sesión anterior (los resúmenes de compactación mienten).
+> Para una tarea larga que puede morir a media ejecución (compactación, cierre de sesión). **Efímero, con hogar persistente (ADR 0006):** vive en `/.jidoka/plan-actual.md` — fuera de git (no se versiona, historial limpio) pero en disco, así que **sobrevive la compactación**. `/jidoka:arranca` lo lee al abrir; `/jidoka:cierra` lo poda al terminar. Al retomar, verifica contra el código real, no contra el resumen de la sesión anterior (los resúmenes de compactación mienten — disparo `desconfia-de-la-compactacion`). No lo confundas con el plan de SPRINT (`docs/sprints/`), que **sí** se versiona: aquel es el contrato aprobado; este es tu andamiaje del día.
 
 ## Objetivo
 

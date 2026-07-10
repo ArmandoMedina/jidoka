@@ -12,3 +12,4 @@ Registro de las decisiones de arquitectura del proyecto. Cada ADR captura **una*
 | [0003](0003-auditoria-del-motor.md) | La auditoría del motor: falla cerrado, el juez viaja en la base, y el nombre real | aceptado |
 | [0004](0004-centralizacion-del-conocimiento.md) | Centralización del conocimiento del linaje: qué asciende ya, qué espera con registro, qué no asciende | aceptado |
 | [0005](0005-exprimido-final-del-linaje.md) | El exprimido final del linaje: última cosecha, archivado de los repos de método, los casos de éxito siguen vivos | aceptado |
+| [0006](0006-plan-efimero.md) | El plan de trabajo: efímero, con hogar persistente fuera de git (`/.jidoka/plan-actual.md`) | aceptado |
