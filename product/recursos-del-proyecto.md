@@ -21,10 +21,11 @@ estado: vigente
 ## Máquinas y ambientes
 
 - **Desarrollo**: Windows 11 / PowerShell 5.1. El recetario de entorno (BOM, acentos, `$LASTEXITCODE`, "los subagentes no leen la config global") vive en `docs/guias/entorno-windows-powershell51.md`. El motor (`*.ps1`) es ASCII a propósito y el CI corre en `windows-latest` con el mismo intérprete.
-- **Ambientes de prueba disponibles** (dos, en la máquina del autor):
-  - Uno **"que jala bien"** — el ambiente de pruebas preferido para correr el ritual, el motor y ensayar el instalador (Sprint 3).
-  - El **sandbox de Windows** ("el feo") — entorno desechable/aislado; útil para probar el motor en un repo limpio desde cero, aunque incómodo. Preferir el bueno salvo que se necesite aislamiento real.
-  - *(Cuando cada uno tenga nombre/forma de levantarse concretos, se anotan aquí para que la sesión sepa cuál usar para qué.)*
+- **Ambientes de prueba disponibles** (en la máquina del autor):
+  - **Máquinas virtuales** en este equipo — el ambiente ideal para el **smoke del instalador del Sprint 3** (`npx jidoka-method init` sobre un repo/entorno limpio, aislado del dev): permiten verificar la instalación desde cero sin ensuciar el equipo real. Es la pieza que vuelve verificable "corre en un repo ajeno" (el criterio de la 1.0).
+  - Uno **"que jala bien"** — el ambiente preferido para correr el ritual y el motor en el día a día.
+  - El **sandbox de Windows** ("el feo") — entorno desechable/aislado; útil para pruebas rápidas de un repo limpio, aunque incómodo. Preferir el bueno o una VM salvo que se necesite aislamiento efímero.
+  - *(Cuando cada VM/ambiente tenga nombre y forma concreta de levantarse, se anota aquí para que la sesión sepa cuál usar para qué.)*
 
 ## Convenciones que no se re-preguntan
 
