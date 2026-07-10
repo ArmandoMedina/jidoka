@@ -4,6 +4,10 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versiona
 
 ## [Sin publicar]
 
+_(vacío — lo que sigue es el Sprint 2, ver ROADMAP.md)_
+
+## [0.3.0-beta] — 2026-07-10
+
 ### Sprint 1.5 — Vitrina en español + centralización del conocimiento (ADR 0004)
 - **Todo en español, a propósito** — decisión de identidad, declarada en el README. Badges, topics, wiki apagada, release `v0.1.0-beta` publicado; el claim del hero ahora es verificable ("este repo se gobierna con su propio Andon").
 - **El andamio documentado:** `kanban/lazo.md` (Intención→Construcción→Verificación→Registro), `kanban/jerarquia.md` (QUÉ/CÓMO, 5 niveles, capacidad con Gherkin), `kanban/roles.md` (asiento ≠ skill, model-routing, reglas duras con incidentes) y `kanban/auditoria.md` (el ritual de auditoría en rama).
