@@ -1,0 +1,18 @@
+# Node / CLI
+node_modules/
+npm-debug.log*
+dist/
+
+# Evidencia de Gemba (capturas de demo) — récord local, no se versiona por defecto
+qa_runs/
+
+# SO / editor
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# Temporales
+*.tmp
+*.log
