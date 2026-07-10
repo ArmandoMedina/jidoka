@@ -31,4 +31,11 @@ Los artefactos de sprint declaran, por sección, quién es su **dueño** y quié
 
 Entre sprints viaja la **lección** (la retro Kaizen que el siguiente `/jidoka:planea` lee), no la ventana de contexto entera. El `dev` arranca cada sprint cargando solo el mínimo (`devLoadAlwaysFiles`) + el plan. Así el contexto no revienta.
 
-*(El formato concreto de los docs de sprint llega en Sprint 2, con los templates.)*
+## El detalle del método
+
+- [`lazo.md`](lazo.md) — lo que gira dentro de cada rebanada: **Intención → Construcción → Verificación → Registro**, y el registro repartido por caducidad (ADR / CHANGELOG / HANDOFF).
+- [`jerarquia.md`](jerarquia.md) — el QUÉ/CÓMO: dos sombreros, el puente de los ADR, y la jerarquía de 5 niveles hasta la **capacidad** con criterios Gherkin.
+- [`roles.md`](roles.md) — los asientos: asiento ≠ skill, el menú de roles con su "lo que NO hace", model-routing y las reglas duras pagadas con incidentes.
+- [`auditoria.md`](auditoria.md) — el ritual de auditoría en rama: fan-out de auditores → síntesis → veredictos GO/NO-GO separados.
+
+*(Templates de sprint: ya sembrados en [`kit/.jidoka/templates/`](../kit/.jidoka/templates/); los comandos y skills que los ejecutan llegan en Sprint 2.)*
