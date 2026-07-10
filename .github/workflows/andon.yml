@@ -29,9 +29,14 @@ jobs:
           # El gate evalua el rango base...HEAD del PR; necesita la historia completa.
           fetch-depth: 0
 
-      - name: prueba de humo del gate (quien valida tambien se valida)
+      - name: prueba de humo de los gates (quien valida tambien se valida)
         shell: powershell
-        run: .\tools\probar-gate.ps1
+        run: |
+          $ErrorActionPreference = 'Continue'
+          .\tools\probar-gate.ps1;    if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-hooks.ps1;   if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-auditor.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
+          exit 0
 
       - name: andon sobre el rango del PR (ley y verificador de la BASE)
         shell: powershell
@@ -47,9 +52,49 @@ jobs:
             $leyBase  = Join-Path $env:TEMP 'blast-radius-base.json'
             git show "${ref}:tools/verificar.ps1"     | Out-File $veriBase -Encoding ascii
             git show "${ref}:tools/blast-radius.json" | Out-File $leyBase  -Encoding ascii
-            & $veriBase -Base $ref -Manifiesto $leyBase -Repo "$env:GITHUB_WORKSPACE"
+            $out = (& $veriBase -Base $ref -Manifiesto $leyBase -Repo "$env:GITHUB_WORKSPACE" 6>&1 | Out-String)
           } else {
             Write-Host "##[warning] La base $ref aun no trae el motor Andon; fallback al motor del PR (solo valido en el PR fundacional)."
-            .\tools\verificar.ps1 -Base $ref
+            $out = (.\tools\verificar.ps1 -Base $ref 6>&1 | Out-String)
           }
-          exit $LASTEXITCODE
+          $code = $LASTEXITCODE
+          Write-Host $out
+          # Grieta 1 (auditoria externa): los avisos ya no viven solo en el log.
+          # Suben a la superficie del PR (job summary) para que un aviso ignorado
+          # deje de ser invisible en un check verde.
+          $hallazgos = @($out -split "`r?`n" | Where-Object { $_ -match '\[(AVISO|BLOQUEA)\]' })
+          "## Andon - blast-radius (rango del PR)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          if ($hallazgos.Count -gt 0) {
+            foreach ($h in $hallazgos) { "- " + $h.Trim() | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8 }
+          } else {
+            "Sin hallazgos: blast-radius al dia." | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
+          exit $code
+
+      - name: auditor del grafo de docs (product/) sobre el rango del PR
+        shell: powershell
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $ref = "origin/$env:BASE_REF"
+          $rango = "$ref...HEAD"
+          git cat-file -e "${ref}:tools/auditar.ps1"; $okAud = ($LASTEXITCODE -eq 0)
+          if ($okAud) {
+            $audBase = Join-Path $env:TEMP 'auditar-base.ps1'
+            git show "${ref}:tools/auditar.ps1" | Out-File $audBase -Encoding ascii
+            $out = (& $audBase -Range $rango -Bloquea -Repo "$env:GITHUB_WORKSPACE" 6>&1 | Out-String)
+          } else {
+            Write-Host "##[warning] La base $ref aun no trae el auditor del grafo; fallback al del PR (PR fundacional)."
+            $out = (.\tools\auditar.ps1 -Range $rango -Bloquea 6>&1 | Out-String)
+          }
+          $code = $LASTEXITCODE
+          Write-Host $out
+          $hallazgos = @($out -split "`r?`n" | Where-Object { $_ -match '\[(AVISO|BLOQUEA)\]' })
+          "## Andon - auditor del grafo (product/)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          if ($hallazgos.Count -gt 0) {
+            foreach ($h in $hallazgos) { "- " + $h.Trim() | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8 }
+          } else {
+            "Sin hallazgos: grafo integro." | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
+          exit $code

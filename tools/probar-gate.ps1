@@ -64,6 +64,30 @@ Caso 'bloquea: doc_bloquea faltante (manifiesto sintetico)' 1 '[BLOQUEA]' '' `
 
 Remove-Item $tmp -ErrorAction SilentlyContinue
 
+# product_avisa (manifiesto sintetico): tocar un area sin tocar su grafo de producto AVISA;
+# tocarlo junto con una nota de producto NO avisa. Dimension cosechada de los labs (Fase B).
+$tmpP = Join-Path $env:TEMP 'jidoka-blast-radius-producto.json'
+@'
+[
+  {
+    "nombre": "prueba-producto",
+    "desc": "escenario sintetico: cambio de area sin tocar el grafo de producto",
+    "fuente": ["src/*"],
+    "doc_bloquea": [],
+    "doc_avisa": [],
+    "product_avisa": ["product/capacidades/*"],
+    "rol": "prueba"
+  }
+]
+'@ | Set-Content -Path $tmpP -Encoding Ascii
+
+Caso 'avisa: area tocada sin el grafo de producto (product_avisa sintetico)' 0 '[AVISO]' '' `
+  @{ Cambiados = @('src/x.py'); Manifiesto = $tmpP }
+Caso 'pasa: area tocada CON su nota de producto (product_avisa sintetico)' 0 '' '[AVISO]' `
+  @{ Cambiados = @('src/x.py', 'product/capacidades/CAP-1.md'); Manifiesto = $tmpP }
+
+Remove-Item $tmpP -ErrorAction SilentlyContinue
+
 # Falla CERRADO: si git no puede calcular el rango, el gate NO aprueba a ciegas (exit 2).
 Caso 'falla cerrado: base de git inexistente (no aprueba a ciegas)' 2 '[ERROR]' 'Todo limpio' `
   @{ Base = 'origin/rama-que-no-existe-jamas' }

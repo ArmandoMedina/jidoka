@@ -105,6 +105,18 @@ foreach ($entry in $manifest) {
       $hayAviso = $true
     }
   }
+  # product_avisa: sincronia del GRAFO de producto (capacidades, modulos, dominios),
+  # no de un doc tecnico. Los targets son globs; si tocaste el area pero NINGUNA nota
+  # de producto cambio en el mismo cambio, avisa una sola vez (baja fatiga).
+  if ($entry.product_avisa -and $entry.product_avisa.Count -gt 0) {
+    $tocoProducto = $false
+    foreach ($tgt in $entry.product_avisa) { if (Match-Any $changed $tgt) { $tocoProducto = $true; break } }
+    if (-not $tocoProducto) {
+      $ej = ($entry.product_avisa | Select-Object -First 2) -join ', '
+      Note "[$($entry.nombre)] tocaste $quienes sin tocar el grafo de producto (ej: $ej). Si la capacidad cambio, actualiza su nota en product/; si fue interno (refactor, perf), este aviso no es para ti."
+      $hayAviso = $true
+    }
+  }
 }
 
 if (-not $hayFalta -and -not $hayAviso) { Ok "blast-radius al dia (o sin cambios en areas cubiertas)" }

@@ -1,0 +1,18 @@
+---
+tipo: capacidad
+estado: vigente
+clave: RIT-1
+modulo: MOD-ritual
+dominio: Metodo
+---
+# Capacidad — El ritual Kanban ejecutable
+
+Del módulo [[MOD-ritual]], dominio [[Metodo]]. La sesión gana el ritual como comandos que se invocan (`/jidoka:arranca|planea|gemba|cierra|que-sigue`) y los asientos como skills que se autoinvocan por contexto. El método deja de ser prosa que hay que recordar.
+
+## Criterios de aceptación
+
+- Dado que abro una sesión, cuando corro `/jidoka:arranca`, entonces lee el estado real (HANDOFF + recursos) y enuncia las reglas duras antes de tocar nada.
+- Dado que voy a construir un sprint, cuando corro `/jidoka:planea`, entonces exige el QUÉ aprobado por el cliente (R0 con STOP) antes de la primera línea de código.
+- Dado que digo una frase natural del rol, cuando aplica, entonces se autoinvoca la skill-asiento con sus límites ("lo que NO hace") visibles.
+
+No existe test automatizado: se verifica por demo Gemba (una sesión que corre el lazo completo). Entregado en `v0.5.0-beta`.
