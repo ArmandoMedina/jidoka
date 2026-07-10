@@ -15,7 +15,7 @@
 ## Checklist humana (el cordón es tuyo — nada de esto lo hace la IA)
 
 - [x] ~~Branch protection de `main`~~ — hecha y verificada (2026-07-10).
-- [ ] **Publicar el release `v0.1.0-beta`** (el clasificador se lo bloquea a la IA): `gh release create v0.1.0-beta --verify-tag --title "v0.1.0-beta — Nace Jidoka (Sprint 0: esqueleto + identidad)" -F <notas>` — las notas están listas (la IA te pasa el comando exacto).
+- [x] ~~Publicar el release `v0.1.0-beta`~~ — publicado por el cliente (2026-07-10): <https://github.com/ArmandoMedina/jidoka/releases/tag/v0.1.0-beta>.
 - [ ] **Merge del PR #1** cuando el Gemba te convenza (pasos en `docs/sprints/sprint-1-plan.md` § Verificación).
 - [ ] Al mergear PR #1: mover del CHANGELOG las secciones de Sprint 1 a `[0.2.0-beta]` y taggear.
 - [ ] **Abrir PR #2** (`sprint-1.5-vitrina-y-conocimiento` → `main`) tras el merge del #1 — estreno real del juez-desde-la-base.
