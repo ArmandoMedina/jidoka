@@ -9,8 +9,9 @@ el mensaje llega en el momento del disparo y no puede asumir que la IA leyó nad
 
 ### anti-memoria
 > Nada de memorias: todo al repo. Lo que ibas a guardar tiene un lugar con dueño: estado en vuelo
-> a HANDOFF.md; una decisión y su porqué a decisiones/ (ADR); hechos de dominio a product/;
-> recursos externos a docs de recursos. Esta regla se cablea porque repetirla en prosa falló.
+> a HANDOFF.md; una decisión y su porqué a docs/decisions/ (un ADR, listado en su índice); hechos
+> del dominio a los docs del dominio del repo; recursos externos a docs de recursos. Esta regla se
+> cablea porque repetirla en prosa falló.
 
 ### evidencia-no-palabra
 > Un veredicto sin artefacto no vale. El gate lee el artefacto (archivo, timestamp, diff, log de

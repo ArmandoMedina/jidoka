@@ -1,0 +1,54 @@
+[
+  {
+    "nombre": "decisiones",
+    "desc": "un ADR que no esta en el indice es una decision invisible: decision perdida",
+    "fuente": ["docs/decisions/*.md"],
+    "excluye": ["docs/decisions/README.md"],
+    "doc_bloquea": ["docs/decisions/README.md"],
+    "doc_avisa": [],
+    "mensaje": "agregaste o cambiaste un ADR: listalo en el indice docs/decisions/README.md en el mismo cambio. Este es el UNICO bloqueo real del manifiesto (alto valor, baja fatiga)",
+    "rol": "Escribano"
+  },
+  {
+    "nombre": "doctrina",
+    "desc": "el porque citable de Jidoka: tesis, linajes (manufactura, software, aviacion), como se pudre, receta de traslado, ledger de citas",
+    "fuente": ["doctrina/*"],
+    "doc_bloquea": [],
+    "doc_avisa": ["kit/.jidoka/disparos/README.md", "doctrina/citas-verificadas.md"],
+    "mensaje": "si cambiaste una REGLA ACCIONABLE, su disparo compilado en kit/.jidoka/disparos/ se actualiza en el mismo commit (una doctrina accionable sin disparo esta incompleta). Si tocaste una cita que carga peso, re-verifica el ledger doctrina/citas-verificadas.md",
+    "rol": "Escribano"
+  },
+  {
+    "nombre": "disparos",
+    "desc": "doctrina compilada a mensajes de gate (permissionDecisionReason, Stop hooks, CI)",
+    "fuente": ["kit/.jidoka/disparos/*"],
+    "doc_bloquea": [],
+    "doc_avisa": ["doctrina/00-tesis.md"],
+    "mensaje": "un disparo sin doctrina que lo respalde se poda: si agregaste o cambiaste un disparo, la tesis en doctrina/00-tesis.md debe respaldarlo (trazabilidad bidireccional)",
+    "rol": "Escribano"
+  },
+  {
+    "nombre": "metodo",
+    "desc": "el metodo de Jidoka: el ritual Kanban y la doctrina de gates Andon",
+    "fuente": ["kanban/*", "andon/*"],
+    "doc_bloquea": [],
+    "doc_avisa": ["CHANGELOG.md"],
+    "mensaje": "cambiaste el metodo (ritual o doctrina de gates): registra el cambio en CHANGELOG.md para que la beta tenga historia legible",
+    "rol": "Escribano"
+  },
+  {
+    "nombre": "barreras",
+    "desc": "el motor Andon de este repo: la ley, el verificador, el self-test, los hooks, el pre-push y el CI. Jidoka corre sus propios gates (dogfooding)",
+    "fuente": [
+      "tools/*",
+      ".githooks/*",
+      ".github/workflows/*",
+      ".claude/hooks/*",
+      ".claude/settings.json"
+    ],
+    "doc_bloquea": [],
+    "doc_avisa": ["andon/README.md"],
+    "mensaje": "cambiaste un gate: actualiza andon/README.md (el mapa citable del motor). Un gate nuevo no se estrena sin correrlo contra el artefacto real (disparo prueba-de-humo-del-gate: corre tools/probar-gate.ps1)",
+    "rol": "Escribano"
+  }
+]
