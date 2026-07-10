@@ -1,6 +1,6 @@
 # Doctrina — el porqué (Poka-yoke)
 
-> El **porqué** citable de Jidoka. La IA **no lee esto** en su trabajo diario (ADR 0003 del linaje): la doctrina le llega compilada como **disparos** — mensajes de gate en el momento del disparo (`kit/.jidoka/disparos/`). Esto es para los humanos: el fundamento verificable del método.
+> El **porqué** citable de Jidoka. La IA **no lee esto** en su trabajo diario ([ADR 0003 de la doctrina](decisiones/0003-doctrina-se-consume-via-disparos.md)): la doctrina le llega compilada como **disparos** — mensajes de gate en el momento del disparo (`kit/.jidoka/disparos/`). Esto es para los humanos: el fundamento verificable del método.
 
 ## La tesis en una línea
 
@@ -21,5 +21,6 @@ Sobre esa ley, la tesis dual (los dos pájaros): la disciplina cae sobre el robo
 | [`06-fronteras.md`](06-fronteras.md) | Qué es reclamable, qué se cita, qué se corrigió |
 | [`07-receta-de-traslado.md`](07-receta-de-traslado.md) | Portar el método a cualquier actividad: las 6 preguntas y los 5 mínimos |
 | [`citas-verificadas.md`](citas-verificadas.md) | El ledger de verificación adversarial contra fuente primaria |
+| [`decisiones/`](decisiones/) | Los ADRs de la doctrina misma: por qué repo propio, por qué NO una API de gobierno, por qué disparos y no lectura, cómo se anonimiza |
 
 > Las citas que cargan peso estructural fueron verificadas contra fuente primaria por agentes adversariales. Ante discrepancia, manda el ledger (`citas-verificadas.md`).

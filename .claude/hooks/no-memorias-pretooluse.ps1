@@ -25,8 +25,9 @@ $razon = "Nada de memorias: todo al repo (disparo anti-memoria de Jidoka). Lo qu
          "lugar con dueno: estado en vuelo o pendientes -> HANDOFF.md; una decision y su porque -> " +
          "docs/decisions/ (un ADR, y listalo en el indice); doctrina o hecho del dominio -> doctrina/; y si es " +
          "una regla accionable nueva, ademas su forma compilada -> kit/.jidoka/disparos/. Esta regla se cablea " +
-         "porque repetirla en prosa se olvida. Si de verdad es una preferencia personal trans-repo del usuario, " +
-         "pidele confirmacion explicita antes."
+         "porque en prosa fallo 4 veces en el laboratorio de campo antes de volverse hook (ADR 0003 de la " +
+         "doctrina). Si de verdad es una preferencia personal trans-repo del usuario, pidele confirmacion " +
+         "explicita antes."
 $out = @{
   hookSpecificOutput = @{
     hookEventName            = 'PreToolUse'
