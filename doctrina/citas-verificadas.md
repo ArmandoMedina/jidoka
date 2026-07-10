@@ -1,8 +1,8 @@
 # Ledger de verificación de citas ancla
 
 Verificación adversarial contra fuente primaria, 2026-07-04, por agentes independientes con la
-instrucción de REFUTAR cada afirmación. Ante discrepancia con el chat de `../fuentes/`, manda
-este ledger.
+instrucción de REFUTAR cada afirmación. Ante discrepancia con el chat fuente (el corpus interno
+del linaje, no publicado — ver la nota en `decisiones/README.md`), manda este ledger.
 
 ## Frente 1 — IA / software (verificado 2026-07-04)
 

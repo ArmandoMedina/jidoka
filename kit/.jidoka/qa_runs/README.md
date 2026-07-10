@@ -19,6 +19,10 @@ git add -f qa_runs/<corrida>/<archivo-citado>
 
 Y es **paso obligatorio del cierre**, no cortesía: en el linaje se descubrió una vez que 0 artefactos habían llegado a git — toda la evidencia era local y se habría perdido con el clon.
 
+## La evidencia sale del producto, no de scripts por fuera
+
+**Todo entregable que el cliente evalúe sale del pipeline real del producto, E2E.** Un script ad-hoc que arma el resultado por otra vía no prueba que el producto lo genere igual — y diverge en silencio. Dos técnicas probadas en el linaje: un harness headless que evalúa los scripts **reales** y emite snapshots abribles como artefacto; y el caso "visitante nuevo" que verifica la ausencia de una fuga buscando una lista de términos conocidos en lo que el visitante vería. Y para refactors de no-regresión: el par **before/after** como artefacto ("bit a bit idéntico" verificado, no declarado).
+
 ## El checkpoint final es humano
 
 La evidencia es el insumo para la revisión del cliente, no la revisión misma. El revisor-visual surte capturas y deja la corrida; **"¿se ve bien?" la responde el cliente con sus propios ojos** (Gemba).

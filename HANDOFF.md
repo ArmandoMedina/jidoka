@@ -6,11 +6,11 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Instalador `npx jidoka-method init` en camino (Sprint 3, ver `ROADMAP.md`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-10, cierre de sesión)
+## Dónde estamos (2026-07-10, exprimido final del linaje)
 
-- **Sprints 0, 1 y 1.5: MERGEADOS y PUBLICADOS.** Tags y releases `v0.1.0-beta`, `v0.2.0-beta`, `v0.3.0-beta` en https://github.com/ArmandoMedina/jidoka/releases. `main` protegido (require PR + check `andon` required + no bypass). El PR #2 fue el primer PR juzgado con la ley leída desde la rama base (ADR 0003) — el juez debutó y pasó.
-- **Este cierre viaja en el PR de relevo** (rama `cierre-sprint-1.5-relevo`): CHANGELOG a `[0.3.0-beta]` y estados reales. Mergearlo es el primer paso de la próxima sesión.
-- **Sprint 2 NO tiene plan aún.** El cliente pidió armarlo y luego decidió cerrar la sesión. El alcance está nombrado en `ROADMAP.md` y el inventario con rutas en el ADR 0004 — la próxima sesión arranca ahí: modo plan → plan del Sprint 2 → aprobación del cliente → construir.
+- **Sprints 0, 1 y 1.5: MERGEADOS y PUBLICADOS.** Tags y releases `v0.1.0-beta`, `v0.2.0-beta`, `v0.3.0-beta` en https://github.com/ArmandoMedina/jidoka/releases. `main` protegido (require PR + check `andon` required + no bypass). El PR de relevo (#3) ya se mergeó.
+- **El exprimido final del linaje viaja en su PR** (rama `exprimido-final-del-linaje`, ADR 0005): 4 agentes exprimieron los 4 repos letra por letra; todo el conocimiento faltante ascendió. Los 2 repos de **método** (doctrina y andamio) quedan **archivados con lápida**; los 2 **casos de éxito** siguen vivos (orden del cliente: "no es una migración, construimos una metodología").
+- **Sprint 2 NO tiene plan aún.** El alcance está en `ROADMAP.md` y la especificación fina en el ADR 0005 — la próxima sesión arranca ahí: modo plan → plan del Sprint 2 → aprobación del cliente → construir. Ojo: el Sprint 2 debe **zanjar la contradicción del plan efímero** (ADR 0005, deuda heredada).
 
 ## Autorizaciones vigentes del cliente (dichas con nombre, 2026-07-10)
 
@@ -19,9 +19,10 @@
 
 ## Checklist humana (el cordón es tuyo)
 
-- [ ] **Merge del PR de relevo** (`cierre-sprint-1.5-relevo` → `main`) — solo registro, sin código.
+- [ ] **Merge del PR del exprimido final** (`exprimido-final-del-linaje` → `main`) — conocimiento y registro, sin maquinaria nueva.
 - [ ] **Social preview** del repo (Settings → General → Social preview, imagen 1280×640 px): solo se puede desde la UI. La IA puede generarte una provisional; el banner definitivo es del Sprint 4.
 - [ ] **Aprobar el plan del Sprint 2** cuando la IA lo presente (modo plan).
+- [ ] **Pendientes de los casos de éxito (viven en SUS repos, no aquí):** el tracker tiene el PR #4 (Sprint 6) abierto, producción sirviendo una versión vieja del SW, y la purga de previews con datos filtrados sin evidencia de ejecutada; el laboratorio tiene decisiones "de oído" pendientes en su HANDOFF. Nada de eso bloquea a Jidoka.
 
 ## Qué sigue (en orden de valor — detalle en ROADMAP.md)
 

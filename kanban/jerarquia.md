@@ -22,17 +22,36 @@ De lo amplio a lo atómico, cada nivel responde una pregunta:
 
 La **capacidad es la unidad atómica**: se describe por comportamiento + criterios de aceptación en Gherkin (`Dado que… cuando… entonces…`), nunca por implementación. Una capacidad no se revisa aislada — siempre contra su módulo, su dominio y su alcance.
 
-Del lado del CÓMO, dos tipos de nota se conectan a las capacidades: el **componente del sistema** (¿qué pieza real lo soporta? — BD, API, plataforma) y la **especificación técnica** (¿cómo se implementa una capacidad concreta?).
+Del lado del CÓMO, tres tipos de nota se conectan a las capacidades: el **componente del sistema** (¿qué pieza real lo soporta? — BD, API, plataforma), la **especificación técnica** (¿cómo se implementa una capacidad concreta?) y el **modelo de datos** — con la distinción del linaje: la tabla es *la alacena* (qué se guarda, `TBL-<ORIGEN>-<NN>`) y la spec es *la receta* (cómo se llena). Cada nota lleva su `estado:` — el ciclo de vida completo vive en [`estados.md`](estados.md).
 
 ## Claves estables de trazabilidad
 
 Módulos, capacidades y specs llevan una `clave:` en su frontmatter que **no cambia al renombrar**: `FAM-MOD` (módulo), `FAM-MOD-NN` (capacidad, hereda el prefijo de su módulo), `TEC-<ORIGEN>-NN` (spec). Los cambios se propagan por el grafo usando la clave, no el título.
+
+## Cómo vive en disco (las convenciones del grafo)
+
+- **Formato híbrido de enlaces:** links markdown inline (GitHub navega) + una sección `## Relacionado con` al pie con `[[wikilinks]]` (Obsidian teje el grafo). No es redundancia: cada una sirve a una superficie distinta — el mismo git se lee desde GitHub, VS Code y Obsidian.
+- **Carpetas planas por tipo; la jerarquía vive en el grafo.** Anidar carpetas es rígido y lo transversal no tiene hogar único: el nivel lo dice el frontmatter y los enlaces, no la ruta.
+- **Diagramas en Mermaid por defecto** (texto, diffeable, rinde nativo en GitHub y Obsidian); formatos binarios solo para lo que Mermaid no alcanza.
+- **Un glosario como SSOT del vocabulario:** un término, un significado, el mismo nombre en todos los docs. Si renombras algo, búscalo en el resto antes de cerrar el cambio. Y el límite anti-duplicación: vocabulario de negocio en el glosario; campos y tablas técnicas en su componente dueño, solo enlazados. *Si dos áreas usan el término distinto, el conflicto es real y se resuelve — no se documentan dos versiones.*
 
 ## Las reglas de oro
 
 - **Define el comportamiento para que cualquiera implemente sin inventar reglas de negocio.** Lo ambiguo se **marca**, no se inventa.
 - **Regla de negocio ≠ criterio de aceptación.** La regla dice *qué es verdad*; el criterio dice *cómo lo pruebas*.
 - **¿Dónde va cada cosa?** Ante la duda de nivel, **sube uno**.
+
+## Mapa a marcos profesionales
+
+Nada de esto es invento; cada pieza reconoce su linaje profesional — para que quien llegue del gremio reconozca la forma:
+
+| Pieza de Jidoka | Marco |
+|---|---|
+| Jerarquía QUÉ/CÓMO | Espacio-problema vs espacio-solución; [DDD](https://martinfowler.com/bliki/DomainDrivenDesign.html) + [C4](https://c4model.com/) |
+| Glosario | Ubiquitous Language (DDD); [arc42 §12](https://docs.arc42.org/section-12/) |
+| Procesos (runtime) | [arc42 §6](https://docs.arc42.org/section-6/) |
+| ADRs | [MADR](https://adr.github.io/madr/); arc42 §9 |
+| Organización de la doc | [Diátaxis](https://diataxis.fr/) |
 
 ## Dónde está el ejemplo vivo
 

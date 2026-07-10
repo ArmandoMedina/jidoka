@@ -41,6 +41,13 @@ La IA no lee la doctrina. La doctrina le llega **compilada a disparos** — mens
 
 Un gate que nunca rechaza nada está podrido aunque el tablero esté verde. Por eso el motor Andon incluye un **self-test** (`probar-gate`): corre casos de resultado conocido —incluido uno que DEBE bloquear— para que la rama que bloquea no se pudra sin que nadie lo note. Quien valida, también se valida.
 
+## Cuatro reglas de campo (pagadas en el linaje)
+
+- **El gate gobierna hacia adelante; la historia tiene baseline.** Al estrenar un gate en un repo existente, el modo forense surfacea commits previos a la regla — eso no es deuda accionable: se limpia en un PR dedicado o se acepta como baseline. La autoridad del gate empieza el día que se enciende.
+- **Hay una segunda familia de barreras: las que protegen el proceso, no el repo.** Corren donde el artefacto vive (el envío, el despliegue), no en CI. Mismas leyes: choke point, deny/ask, ledger de lo realmente enviado ("el registro se hace SOLO tras enviar de verdad"), y sin historial el check **se degrada a lo verificable hoy y lo dice** — no truena. Un `ask` que grita en falso seguido se recalibra o se poda: un gate ruidoso entrena el reflejo de click-para-pasar.
+- **Un principio sin mecanismo es una promesa.** En el linaje, "nada sale del dispositivo" fue disciplina de código hasta que se volvió regla de plataforma (una CSP que lo hace imposible) — con la consecuencia deliberada de que violar el principio en el futuro exija revisitar el ADR a propósito. El costo de salida como diseño: poka-yoke aplicado a los propios ADRs.
+- **Sin descartes silenciosos.** Cuando un motor decide omitir o callar algo, el descarte queda en el artefacto de auditoría con su razón. Caso real: unos `continue` tiraban datos sin registrarlos y el reporte *mentía por omisión*. El silencio también es auditable.
+
 ## El motor, en concreto (Sprint 1)
 
 En este repo el motor son cuatro piezas en [`../tools/`](../tools/) más los hooks y el CI:
