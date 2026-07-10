@@ -3,8 +3,10 @@ node_modules/
 npm-debug.log*
 dist/
 
-# Evidencia de Gemba (capturas de demo) — récord local, no se versiona por defecto
-qa_runs/
+# Evidencia de Gemba: el bulto no se versiona; lo CITADO desde HANDOFF/CHANGELOG
+# se commitea selectivamente con `git add -f qa_runs/<corrida>/<archivo>` (paso
+# obligatorio del cierre — ver qa_runs/README.md). El README sí se versiona.
+qa_runs/*/
 
 # SO / editor
 .DS_Store

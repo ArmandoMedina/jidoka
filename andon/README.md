@@ -47,10 +47,10 @@ En este repo el motor son cuatro piezas en [`../tools/`](../tools/) más los hoo
 
 | Pieza | Qué hace |
 |---|---|
-| [`tools/blast-radius.json`](../tools/blast-radius.json) | La ley. 5 áreas; casi todo `avisa`, **un** `doc_bloquea` real (un ADR nuevo debe listarse en su índice). |
+| [`tools/blast-radius.json`](../tools/blast-radius.json) | La ley. 6 áreas (incluida `raiz`, la tierra de nadie: un archivo suelto en la raíz avisa); casi todo `avisa`, **un** `doc_bloquea` real (un ADR nuevo debe listarse en su índice). Los mensajes enseñan también cuándo **no** aplican (anti-fatiga de falsos positivos). |
 | [`tools/verificar.ps1`](../tools/verificar.ps1) | El verificador. Corre local (pre-push) y en CI. **Avisa** los `doc_avisa`, **bloquea** los `doc_bloquea`, y **falla cerrado** (exit 2) si no puede medir. |
 | [`tools/probar-gate.ps1`](../tools/probar-gate.ps1) | El self-test. Casos de resultado conocido, incluido uno que DEBE bloquear. |
-| `.claude/hooks/` + `.github/workflows/andon.yml` | `no-memorias` y `andon-stop` (Stop) locales; el check `andon` en cada PR — **con la ley y el verificador leídos desde la rama base** (un PR no puede editar la ley que lo juzga; ADR 0003). |
+| `.claude/hooks/` + `.github/workflows/andon.yml` | `no-memorias` y `andon-stop` (Stop) locales — si git falla de verdad, el hook **avisa** en vez de callar (lección ALTO-04 del laboratorio de campo); el check `andon` en cada PR — **con la ley y el verificador leídos desde la rama base** (un PR no puede editar la ley que lo juzga; ADR 0003). |
 
 ### Encenderlo
 

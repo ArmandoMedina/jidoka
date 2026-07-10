@@ -26,7 +26,7 @@ del actor**. Eso es exactamente un hook.
   heroicos" hacia definido y repetible. **Un agente de IA es, por defecto, un actor nivel 1**
   (sin memoria persistente, propenso a olvidar): estos marcos son exactamente la disciplina que
   externaliza estado y procedimiento fuera del actor.
-- **Distribución del estado por caducidad** (patrón SGI, transferible): lo permanente (el porqué)
+- **Distribución del estado por caducidad** (patrón del laboratorio de campo, transferible): lo permanente (el porqué)
   → ADR; lo enviado → CHANGELOG; el camino → ROADMAP; lo efímero (dónde voy) → HANDOFF que se
   limpia al abrir; los datos externos que no se deducen del código → doc de recursos. La amnesia
   deja de importar porque nada importante vive en la cabeza del actor.

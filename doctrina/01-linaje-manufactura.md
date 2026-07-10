@@ -28,7 +28,7 @@ externa que hace el error imposible o lo atrapa en la fuente) funciona.
 - **James Reason** — la distinción central de la ciencia de seguridad moderna: **person approach**
   (culpar/exhortar → falla) vs **system approach** (rediseñar condiciones → funciona). Cita ancla:
   *"We cannot change the human condition, but we can change the conditions under which humans
-  work."* (BMJ, 2000). El hallazgo de SGI ("repetírselo no funcionó, hubo que cablearlo") es esta
+  work."* (BMJ, 2000). El hallazgo del laboratorio de campo ("repetírselo no funcionó, hubo que cablearlo") es esta
   distinción redescubierta desde el dolor.
 - **Checklists**: nacen del crash del Boeing Model 299/B-17 (1935, "too much airplane for one man
   to fly") — la respuesta no fue más entrenamiento sino una checklist. Gawande (2009): en dominios
