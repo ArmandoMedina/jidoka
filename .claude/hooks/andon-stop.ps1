@@ -87,6 +87,15 @@ foreach ($entry in $manifest) {
       $avisos += $linea
     }
   }
+  # product_avisa: el grafo de producto. Aviso unico por area si no se toco ninguna nota.
+  if ($entry.product_avisa -and $entry.product_avisa.Count -gt 0) {
+    $tocoProducto = $false
+    foreach ($tgt in $entry.product_avisa) { if (Match-Any $changed $tgt) { $tocoProducto = $true; break } }
+    if (-not $tocoProducto) {
+      $ej = ($entry.product_avisa | Select-Object -First 2) -join ', '
+      $avisos += "area '$($entry.nombre)': tocaste el area sin tocar el grafo de producto (ej: $ej). Si la capacidad cambio, actualiza su nota en product/."
+    }
+  }
 }
 
 # 5. Sin drift en doc_bloquea: dejar cerrar. Con drift: bloquear y mandar al Escribano.
