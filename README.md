@@ -12,7 +12,7 @@ Con un cordón <em>Andon</em> que sí para la línea.</p>
 <a href="ROADMAP.md"><img alt="Multiplataforma en Sprint 3" src="https://img.shields.io/badge/multiplataforma-Sprint%203-lightgrey"></a>
 </p>
 
-<p align="center">🧪 <strong>beta</strong> — nacido de cuatro repos internos; <strong>este repo se gobierna con su propio Andon</strong>:<br>
+<p align="center">🧪 <strong>beta</strong> — nacido de cuatro repos internos (<a href="docs/casos-de-exito.md">dos siguen vivos como casos de éxito</a>); <strong>este repo se gobierna con su propio Andon</strong>:<br>
 los <a href="https://github.com/ArmandoMedina/jidoka/pulls?q=is%3Apr">PRs</a>, los <a href="https://github.com/ArmandoMedina/jidoka/actions">checks</a> y los <a href="docs/sprints/">sprints archivados</a> son la evidencia, no la palabra.<br>
 <a href="LICENSE">MIT</a> · úsalo, cópialo, modifícalo, hasta comercialmente. Sin ataduras.</p>
 

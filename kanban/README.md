@@ -33,9 +33,12 @@ Entre sprints viaja la **lección** (la retro Kaizen que el siguiente `/jidoka:p
 
 ## El detalle del método
 
-- [`lazo.md`](lazo.md) — lo que gira dentro de cada rebanada: **Intención → Construcción → Verificación → Registro**, y el registro repartido por caducidad (ADR / CHANGELOG / HANDOFF).
-- [`jerarquia.md`](jerarquia.md) — el QUÉ/CÓMO: dos sombreros, el puente de los ADR, y la jerarquía de 5 niveles hasta la **capacidad** con criterios Gherkin.
+- [`lazo.md`](lazo.md) — lo que gira dentro de cada rebanada: **Intención → Construcción → Verificación → Registro**, el paso 0 (¿exploras o consolidas?), el registro repartido por caducidad y la poda.
+- [`jerarquia.md`](jerarquia.md) — el QUÉ/CÓMO: dos sombreros, el puente de los ADR, la jerarquía de 5 niveles hasta la **capacidad** con criterios Gherkin, y cómo vive el grafo en disco.
+- [`estados.md`](estados.md) — el ciclo de vida de una nota (estado ≠ prioridad, `vigente` ≠ construido), cómo se modulan los gates por estado, y la gobernanza documental del arquetipo regulado.
 - [`roles.md`](roles.md) — los asientos: asiento ≠ skill, el menú de roles con su "lo que NO hace", model-routing y las reglas duras pagadas con incidentes.
-- [`auditoria.md`](auditoria.md) — el ritual de auditoría en rama: fan-out de auditores → síntesis → veredictos GO/NO-GO separados.
+- [`verificacion.md`](verificacion.md) — la doctrina de pruebas: dos capas a prueba de migración, entrada hostil, e2e por clave, cerrar por medición.
+- [`auditoria.md`](auditoria.md) — el ritual de auditoría en rama: fan-out de auditores → síntesis → veredictos GO/NO-GO separados; y la corrida nocturna desatendida.
+- [`homologacion.md`](homologacion.md) — cómo el conocimiento de los proyectos asciende al método: el protocolo de 5 pasos y la regla 2–3 de maduración.
 
 *(Templates de sprint: ya sembrados en [`kit/.jidoka/templates/`](../kit/.jidoka/templates/); los comandos y skills que los ejecutan llegan en Sprint 2.)*

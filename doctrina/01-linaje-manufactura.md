@@ -39,5 +39,6 @@ externa que hace el error imposible o lo atrapa en la fuente) funciona.
   prematura), lockout (impide entrar al estado peligroso). El diseño hace el mal uso imposible en
   vez de confiar en que el usuario recuerde.
 
-Fuentes y URLs: ver reporte íntegro en `../fuentes/` (secciones "manufacturing/safety lineage").
+Fuentes y URLs: reporte íntegro en el corpus interno del linaje (no publicado; ver la nota en
+`decisiones/README.md`, secciones "manufacturing/safety lineage").
 Estado de verificación de citas: `citas-verificadas.md`.

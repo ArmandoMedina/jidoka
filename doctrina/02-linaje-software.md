@@ -49,4 +49,5 @@ No existe, a 2026, un sustrato multi-persona con gate inmutable que la IA domine
   artefactos cautivos, nunca como el muro: el puente transporta, el muro decide, y el muro vive
   fuera del modelo.
 
-Fuentes y URLs: reporte íntegro en `../fuentes/`. Verificación: `citas-verificadas.md`.
+Fuentes y URLs: reporte íntegro en el corpus interno del linaje (no publicado; ver la nota en
+`decisiones/README.md`). Verificación: `citas-verificadas.md`.

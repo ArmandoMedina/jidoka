@@ -34,8 +34,9 @@ El orquestador elige el modelo según la tarea: **pequeño** para lo mecánico, 
 
 1. **La lectura voluminosa SIEMPRE va a un subagente.** El subagente quema *su* contexto y devuelve solo el veredicto. Caso real: dos transcripts de ~250 KB leídos en el hilo principal degradaron la sesión entera.
 2. **Sobre-orquestar también es error.** No todo merece subagente — y **no todo rol merece hook**. Caso real: se decidió NO cablear el rol de validación numérica porque *"sus tests SON el asiento; cablearlo sería sobre-orquestar"*.
-3. **El paralelismo tiene tope.** Caso real: 5 subagentes con worktree en paralelo agotaron la cuota de la sesión; nació un gate determinista de concurrencia. El entusiasmo también se gobierna.
+3. **El paralelismo tiene tope.** Caso real: 5 subagentes con worktree en paralelo agotaron la cuota de la sesión; nació un gate determinista de concurrencia. El entusiasmo también se gobierna. Y el diseño de ese gate enseña tres cosas: el criterio de "pesado" es un **campo existente de la llamada**, no un juicio de la IA (*"pedirle a la sesión que se autorregule no es una barrera, es esperanza"*); la ventana de tiempo **se autolimpia** en vez de depender de un evento de cierre que puede no llegar; y vive en la config de la **cuenta**, no del repo — porque gobierna cuota de cuenta.
 4. **Delegación coherente.** Caso real: commit delegado a un subagente pero push hecho en sesión — la mitad de la ceremonia no cuenta. Si delegas una cadena, delega la cadena.
+5. **Una sola sesión escritora por working tree.** Caso real: el commit de una sesión paralela dejó **ciegos** los Stop hooks de la otra (solo ven lo no commiteado) y produjo un lost-update del HANDOFF. La segunda sesión es solo-lectura o se lleva su propio worktree; el HANDOFF tiene un solo dueño a la vez.
 
 ## La ley que gobierna todo el reparto
 

@@ -6,7 +6,7 @@
 
 1. **Rama + PR contra `main`.** Nadie pushea directo (branch protection); el check `andon` es required y corre la ley **desde la rama base** — un PR no puede editar la ley que lo juzga.
 2. **Enciende los hooks locales** (una vez por clon): `git config core.hooksPath .githooks`. El `pre-push` corre el verificador y te avisa antes que el CI. Saltarlo con `--no-verify` solo pospone el rojo (disparo `no-verify-es-teatro`).
-3. **Commits**: en español, imperativo, con el porqué en el cuerpo si no es obvio. Sin trailers de sesión de IA (ADR 0003).
+3. **Commits**: en español, imperativo, con el porqué en el cuerpo si no es obvio. Sin trailers de sesión de IA (ADR 0003). En PowerShell 5.1, los acentos exigen receta: mensaje a archivo UTF-8 **sin BOM** + `git commit -F` (el recetario completo: [`docs/guias/entorno-windows-powershell51.md`](docs/guias/entorno-windows-powershell51.md)).
 4. **Una decisión = un ADR.** Si tu cambio implica una decisión (no solo código), agrégala en `docs/decisions/` **y listala en su índice en el mismo commit** — es el único bloqueo duro de la ley, y es a propósito.
 
 ## Quién es dueño de qué (SSOT)
@@ -24,6 +24,12 @@ Cada hecho vive en UN doc dueño; los demás lo enlazan, no lo repiten:
 | Los gates y su ley | `andon/` (doctrina) + `tools/blast-radius.json` (la ley única) |
 
 La ley completa de qué-obliga-a-tocar-qué vive en `tools/blast-radius.json` — cambiarla ahí la cambia en el hook, el pre-push y el CI a la vez.
+
+## Versionar y publicar (el ritual de release)
+
+La pregunta que decide el salto: **¿rompe?** MAJOR (tuviste que avisar y quizá migrar) · **¿agrega?** MINOR (te gustará, no estorba) · **¿arregla?** PATCH (ni te enteras). En un repo de método como este, una reorganización que obliga a migrar notas **es** MAJOR.
+
+El ritual, en 6 pasos: working tree limpio → cerrar la sección del CHANGELOG → commit `chore(release)` → tag anotado → push **con OK del dueño** → GitHub release. Y la lección del linaje: la versión vive en **un** solo lugar y todo lo demás deriva — *eliminar la redundancia, no automatizar la sincronización*.
 
 ## El modelo de amenaza, en una línea
 

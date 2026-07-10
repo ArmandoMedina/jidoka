@@ -18,6 +18,7 @@
 - Hooks: `gemba-stop` (no se cierra con cambio visual sin evidencia fresca en `qa_runs/` — probado en el linaje) y `review-stop` (código sin `/code-review` frena el cierre; marcador SHA con sus grietas documentadas).
 - **Auditor determinista del grafo de docs** (frontmatter + wikilinks + Gherkin de capacidades vigentes + huérfanas, modulado por estado) + dimensión `product_avisa` en la ley.
 - Templates de sprint: ya sembrados en `kit/.jidoka/templates/` (Sprint 1.5); aquí los comandos los usan.
+- Especificación fina heredada del linaje (ADR 0005): mecánica del `gemba-stop` auto-configurado desde la ley; `recursos-del-proyecto.md` que `/jidoka:arranca` lee al abrir; la rebanada **R0 con STOP** en `/jidoka:planea`; anatomía probada de skill ("Entorno" embebido, no son `subagent_type`); regla doc-only (sin `/arranca`); **zanjar la contradicción del plan efímero** (válvula de excepción para tareas largas).
 
 ## Sprint 3 — El instalador · 🔜
 - CLI **`jidoka-method`** en npm (`npx jidoka-method init`): pregunta el arquetipo (code-first · docs-as-code · doc-only) y siembra solo la maquinaria que el proyecto merece.
@@ -26,6 +27,7 @@
 - CI de release + smoke del instalador (lección pagada: *un workflow que solo corre al cortar release se pudre en silencio* — `workflow_dispatch` como rescate).
 - Decisión abierta (ADR 0003): el motor vive SOLO en `kit/` y este repo **se instala su propio kit** — cero copias duplicadas de la ley.
 - El instalador enciende lo que hoy es manual: `core.hooksPath`, y guía la branch protection.
+- Especificación fina heredada del linaje (ADR 0005): inventario exacto de los 12 templates + PRODUCT_BRIEF + HANDOFF + benchmark; la matriz pieza×arquetipo como spec funcional del instalador; SSOT de versión (un literal, todo deriva); ensayo del empaquetado contra el manifiesto que el runtime usa; gate de UX en 3 capas; lint de alta señal.
 
 ## Sprint 4 — Beta estable · 🔜
 - Guías completas (`docs/guias/empezar-de-cero.md` deja de ser esqueleto).
