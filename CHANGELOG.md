@@ -12,6 +12,8 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versiona
 - **Hardening del laboratorio de campo:** ALTO-04 en `andon-stop` (git roto → aviso, no silencio), área `raiz` en la ley (6 áreas), mensajes que enseñan cuándo NO aplican.
 - `CONTRIBUTING.md` (flujo + tabla SSOT), `docs/sprints/README.md` (índice-récord), plantilla de ADR con "El camino que NO se toma".
 
+## [0.2.0-beta] — 2026-07-10
+
 ### Sprint 1 (cierre) — Auditoría del motor (ADR 0003)
 - **El verificador falla cerrado:** si git no puede calcular el rango (base inexistente, historia incompleta), exit 2 con `[ERROR]` — antes aprobaba a ciegas. Self-test ampliado a 6 casos.
 - **El juez viaja en la base:** el check `andon` de CI ejecuta la ley y el verificador de la rama base — un PR ya no puede editar la ley que lo juzga.
