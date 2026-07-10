@@ -8,18 +8,21 @@
 
 ## Dónde estamos (2026-07-10)
 
-- **Sprint 0 — Identidad: HECHO y PÚBLICO.** https://github.com/ArmandoMedina/jidoka, tag `v0.1.0-beta`.
-- **Sprint 1 — Motor Andon: en Revisión (PR #1), cierre auditado.** Una auditoría independiente revisó motor + procedimiento + superficies públicas; sus arreglos están en la misma rama (`sprint-1-andon`): el verificador **falla cerrado**, el CI ejecuta **la ley de la rama base** (ADR 0003), `.gitattributes`, paquete renombrado a `jidoka-method` (el nombre `jidoka` en npm es de un tercero), "12 disparos" (eran 12, no 13), `ROADMAP.md`, fronteras del muro documentadas.
-- **Rama default renombrada a `main`** (los docs ya la nombraban). Descripción pública del repo corregida.
+- **Sprint 0 — Identidad: HECHO y PÚBLICO.** https://github.com/ArmandoMedina/jidoka, tag `v0.1.0-beta` (release publicado).
+- **Sprint 1 — Motor Andon: en Revisión (PR #1), cierre auditado, check `andon` verde, `main` protegido** (require PR + check required + no bypass — hecho por la IA vía API, verificado).
+- **Sprint 1.5 — Vitrina + centralización del conocimiento: CONSTRUIDO en rama `sprint-1.5-vitrina-y-conocimiento`** (ADR 0004). Vitrina ES con bandera; `kanban/lazo|jerarquia|roles|auditoria`; 4 ADRs de doctrina heredados; templates + `qa_runs/` al kit; ALTO-04 + área `raiz` (probar-gate 6/6). PR #2 se abre **después** del merge del PR #1.
 
 ## Checklist humana (el cordón es tuyo — nada de esto lo hace la IA)
 
-- [ ] **Branch protection de `main`** (GitHub → Settings → Branches): require PR + check `andon` required + **do not allow bypass**. Sin las tres, no hay muro (ver `andon/README.md` § Encenderlo).
-- [ ] **Merge del PR #1** cuando el Gemba te convenza (corre tú los pasos de `docs/sprints/sprint-1-plan.md` § Verificación).
-- [ ] Al mergear: mover `[Sin publicar]` del CHANGELOG a `[0.2.0-beta]` y taggear.
+- [x] ~~Branch protection de `main`~~ — hecha y verificada (2026-07-10).
+- [ ] **Publicar el release `v0.1.0-beta`** (el clasificador se lo bloquea a la IA): `gh release create v0.1.0-beta --verify-tag --title "v0.1.0-beta — Nace Jidoka (Sprint 0: esqueleto + identidad)" -F <notas>` — las notas están listas (la IA te pasa el comando exacto).
+- [ ] **Merge del PR #1** cuando el Gemba te convenza (pasos en `docs/sprints/sprint-1-plan.md` § Verificación).
+- [ ] Al mergear PR #1: mover del CHANGELOG las secciones de Sprint 1 a `[0.2.0-beta]` y taggear.
+- [ ] **Abrir PR #2** (`sprint-1.5-vitrina-y-conocimiento` → `main`) tras el merge del #1 — estreno real del juez-desde-la-base.
+- [ ] **Social preview** del repo (Settings → General → Social preview): solo se puede desde la UI. Banner definitivo = Sprint 4.
 
 ## Qué sigue (en orden de valor — detalle en ROADMAP.md)
 
-1. **Sprint 2 — El ritual Kanban ejecutable:** comandos `/jidoka:*` (incl. `/jidoka:que-sigue`), roles, `gemba-stop`, `qa_runs/`, templates con ownership por sección.
-2. **Sprint 3 — El instalador** `jidoka-method` + kit completo + gemelos `.sh`; decisión abierta ADR 0003: el motor vive solo en `kit/` y este repo se instala su propio kit.
-3. **Sprint 4 — Beta estable:** guías, presentación pública (badges, quick start, banner), decisión de comunidad.
+1. **Sprint 2 — El ritual Kanban ejecutable:** comandos `/jidoka:*` (incl. `/jidoka:arranca` y `/jidoka:que-sigue`), skills-asiento, `gemba-stop` + `review-stop`, auditor del grafo, `product_avisa`. El conocimiento ya está en `kanban/` — solo falta volverlo máquina.
+2. **Sprint 3 — El instalador** `jidoka-method` + kit completo + gemelos `.sh` + `setup -Yes` + CI de release; decisión abierta ADR 0003: el motor vive solo en `kit/` y este repo se instala su propio kit.
+3. **Sprint 4 — Beta estable:** guías, banner/social preview definitivos, decisión de comunidad (Discussions/Discord).

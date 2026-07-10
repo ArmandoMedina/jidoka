@@ -12,11 +12,11 @@
 | OPA/Cedar interceptando tool-calls (PEP) | Structured output / Pydantic (validan forma; la corrección re-pregunta al modelo) |
 | Linters/validadores deterministas en hook/CI | Una API propia que la IA llama voluntariamente |
 
-Corolarios probados en la práctica (SimGhostInputs):
+Corolarios probados en la práctica (el laboratorio de campo del linaje):
 
 - Los mecanismos voluntarios (comando `/arranca`, subagentes, memorias, repetir reglas en prosa)
   fallaron todos. Los hooks ganaron **porque no le piden permiso a la IA**. Confesión textual del
-  propio hook anti-memoria de SGI: *"se hizo cumplir con hook porque repetirla no funcionó
+  propio hook anti-memoria del laboratorio: *"se hizo cumplir con hook porque repetirla no funcionó
   (4 veces en las sesiones reales de ESTE repo)"*.
 - El éxito no era de git-la-tecnología. Git regaló tres cosas que hay que nombrar para portarlas:
   (1) un **choke point** (el acto de commit/push como momento discreto de "esto se envía"),
@@ -60,5 +60,5 @@ modelo); nunca se lo **sustituye**.
 ## El límite honesto
 
 Nada de esto es técnicamente nuevo — cada mecanismo tiene décadas (ver linajes en `01-` y `02-`).
-Lo defendible es: (a) que funciona en la práctica con un agente concreto (SGI), y (b) la síntesis
+Lo defendible es: (a) que funciona en la práctica con un agente concreto (el laboratorio de campo), y (b) la síntesis
 integrada que nadie ha escrito (ver `06-fronteras.md`). El resto se cita, no se reclama.

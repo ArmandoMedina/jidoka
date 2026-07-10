@@ -9,15 +9,21 @@
 - La ley única (`tools/blast-radius.json`), verificador que **falla cerrado**, self-test con caso que DEBE bloquear, hooks (`no-memorias`, `andon-stop`), `pre-push`, check `andon` en CI **con la ley leída desde la rama base** (un PR no puede editar la ley que lo juzga — ADR 0003).
 - Cierre auditado: ver ADR 0003 y el Kaizen en `docs/sprints/sprint-1-plan.md`.
 
+## Sprint 1.5 — Vitrina + centralización del conocimiento · ✅ En curso (rama `sprint-1.5`)
+- Vitrina en español con bandera (badges, release, topics); el andamio documentado (`kanban/lazo|jerarquia|roles|auditoria`); los 4 ADRs de la doctrina; templates y `qa_runs/` al kit; hardening ALTO-04 + área `raiz`. Ver ADR 0004.
+
 ## Sprint 2 — El ritual Kanban ejecutable · 🔜
-- Comandos `/jidoka:planea`, `/jidoka:gemba`, `/jidoka:cierra` (+ `/jidoka:que-sigue`, el "¿y ahora qué?" que responde el sistema según el estado de la tarjeta).
-- **Roles acotados** (orquestador, dev, validador, escribano, revisor-visual) con una responsabilidad cada uno.
-- Hook `gemba-stop` (no se cierra sprint sin evidencia visual fresca) + `qa_runs/` (evidencia del demo).
-- Templates de sprint con **ownership por sección** (la sección *"Revisión del stakeholder"* con `owner: cliente`).
+- Comandos `/jidoka:planea`, `/jidoka:gemba`, `/jidoka:cierra` (+ `/jidoka:que-sigue`, el "¿y ahora qué?"; + `/jidoka:arranca` con las reglas duras de sesión — incl. "desconfía del resumen de compactación", caso real).
+- **Skills-asiento** (escribano, validador, revisor-visual; arquitecto-doc para doc-heavy) — el conocimiento ya está en `kanban/roles.md`; aquí se vuelven ejecutables. Referencia probada en el laboratorio de campo.
+- Hooks: `gemba-stop` (no se cierra con cambio visual sin evidencia fresca en `qa_runs/` — probado en el linaje) y `review-stop` (código sin `/code-review` frena el cierre; marcador SHA con sus grietas documentadas).
+- **Auditor determinista del grafo de docs** (frontmatter + wikilinks + Gherkin de capacidades vigentes + huérfanas, modulado por estado) + dimensión `product_avisa` en la ley.
+- Templates de sprint: ya sembrados en `kit/.jidoka/templates/` (Sprint 1.5); aquí los comandos los usan.
 
 ## Sprint 3 — El instalador · 🔜
 - CLI **`jidoka-method`** en npm (`npx jidoka-method init`): pregunta el arquetipo (code-first · docs-as-code · doc-only) y siembra solo la maquinaria que el proyecto merece.
-- El `kit/` completo; **gemelos `.sh`** del motor (multiplataforma).
+- El `kit/` completo (incl. jerarquía de templates de producto); **gemelos `.sh`** del motor (multiplataforma); `setup` desatendido (`-Yes`).
+- Barreras extra del verificador para repos code-first: lint/formato/tests/cobertura/CHANGELOG-gate (probadas en el laboratorio de campo).
+- CI de release + smoke del instalador (lección pagada: *un workflow que solo corre al cortar release se pudre en silencio* — `workflow_dispatch` como rescate).
 - Decisión abierta (ADR 0003): el motor vive SOLO en `kit/` y este repo **se instala su propio kit** — cero copias duplicadas de la ley.
 - El instalador enciende lo que hoy es manual: `core.hooksPath`, y guía la branch protection.
 
@@ -29,5 +35,5 @@
 
 ## Backlog (sin sprint asignado)
 - Publicar la doctrina suelta rebrandeada **"Poka-yoke"** (ADR 0001 lo deja abierto; solo entonces Jidoka la enlazaría como *further reading*).
-- `CONTRIBUTING.md` / `SECURITY.md` para colaboración externa.
-- Tablero de instrumentación (leading vs lagging, las 5 series de `doctrina/05`).
+- `SECURITY.md` para colaboración externa (`CONTRIBUTING.md` ya existe — Sprint 1.5).
+- Tablero de instrumentación (leading vs lagging, las 5 series de `doctrina/05`) — no existe en ningún repo del linaje; construirlo es frontera.
