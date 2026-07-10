@@ -10,6 +10,7 @@ Con un cordón <em>Andon</em> que sí para la línea.</p>
 <img alt="Estado: beta" src="https://img.shields.io/badge/estado-beta-orange">
 <img alt="Windows / PowerShell 5.1" src="https://img.shields.io/badge/hoy-Windows%20%C2%B7%20PS%205.1-blue">
 <a href="ROADMAP.md"><img alt="Multiplataforma en Sprint 3" src="https://img.shields.io/badge/multiplataforma-Sprint%203-lightgrey"></a>
+<a href="https://ko-fi.com/armandomedina2255"><img alt="Ko-fi" src="https://img.shields.io/badge/Ko--fi-Buy%20me%20a%20Coffee-FF5E5B?logo=ko-fi&logoColor=white"></a>
 </p>
 
 <p align="center">🧪 <strong>beta</strong> — nacido de cuatro repos internos (<a href="docs/casos-de-exito.md">dos siguen vivos como casos de éxito</a>); <strong>este repo se gobierna con su propio Andon</strong>:<br>
@@ -109,7 +110,7 @@ El instalador preguntará el **arquetipo** de tu repo (code-first · docs-as-cod
 
 ## Licencia
 
-[MIT](LICENSE). © 2026 Armando Medina y colaboradores de Jidoka. Úsalo, estúdialo, modifícalo y compártelo — incluso comercialmente — sin ataduras. Si te sirve, un ⭐ y avisa qué construiste.
+[MIT](LICENSE). © 2026 Armando Medina y colaboradores de Jidoka. Úsalo, estúdialo, modifícalo y compártelo — incluso comercialmente — sin ataduras. Si te sirve, un ⭐ y avisa qué construiste — y si te ahorró horas, [un café](https://ko-fi.com/armandomedina2255) mantiene la línea andando. ☕
 
 ---
 
