@@ -1,0 +1,32 @@
+# andon.yml - el muro server-side de Jidoka: porta el Andon (la ley
+# tools/blast-radius.json, tools/verificar.ps1) a un check de PR. El hook local
+# pre-push se salta con --no-verify; este check no (disparo no-verify-es-teatro:
+# el muro real es el required check server-side). Para que bloquee de verdad, un
+# humano debe marcarlo como required check en la branch protection de main
+# (ver andon/README.md).
+name: andon
+
+on:
+  pull_request:
+
+jobs:
+  andon:
+    name: andon blast-radius (la ley)
+    # windows-latest a proposito: shell 'powershell' es PS 5.1, el mismo interprete
+    # del gate local (el gate corre identico en el hook pre-push y aqui).
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # El gate evalua el rango base...HEAD del PR; necesita la historia completa.
+          fetch-depth: 0
+
+      - name: prueba de humo del gate (quien valida tambien se valida)
+        shell: powershell
+        run: .\tools\probar-gate.ps1
+
+      - name: andon sobre el rango del PR
+        shell: powershell
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: .\tools\verificar.ps1 -Base "origin/$env:BASE_REF"

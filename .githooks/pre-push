@@ -1,0 +1,8 @@
+#!/bin/sh
+# pre-push - dispara el Andon local (la ley tools/blast-radius.json) antes de cada
+# push. AVISA los doc_avisa faltantes y BLOQUEA los doc_bloquea. Jidoka corre su
+# propio Andon (dogfooding).
+# Se enciende una vez por clon:  git config core.hooksPath .githooks
+# Saltar a proposito:            git push --no-verify
+powershell -NoProfile -ExecutionPolicy Bypass -File "./tools/verificar.ps1"
+exit $?
