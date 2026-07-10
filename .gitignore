@@ -13,6 +13,11 @@ qa_runs/*/
 # ignorar por accidente kit/.jidoka/ (el kit versionado).
 /.jidoka/
 
+# Marcadores de revision de los Stop hooks (review-stop, gemba-stop): guardan el
+# SHA del diff ya revisado/aprobado por el humano. Son estado local, no se versionan.
+.claude/.review-marker
+.claude/.gemba-marker
+
 # SO / editor
 .DS_Store
 Thumbs.db
