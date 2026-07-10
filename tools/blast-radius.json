@@ -57,6 +57,7 @@
     ],
     "doc_bloquea": [],
     "doc_avisa": ["andon/README.md"],
+    "revisa": true,
     "mensaje": "cambiaste un gate: actualiza andon/README.md (el mapa citable del motor). Un gate nuevo no se estrena sin correrlo contra el artefacto real (disparo prueba-de-humo-del-gate: corre tools/probar-gate.ps1)",
     "rol": "Escribano"
   },
