@@ -2,6 +2,29 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.0.0] — 2026-07-11
+
+### Jidoka sale de beta — el método corre end-to-end en repos ajenos (ADR 0017)
+
+Se cumple, **con evidencia**, la vara de 1.0 del ROADMAP: *el método completo corre end-to-end en un repo
+ajeno*. El programa hacia 1.0 lo remató bajando el núcleo a **dos labs reales** por el lazo de sincronización.
+
+- **Los dos labs bajaron el núcleo `0.13.0-beta`** (ADR 0015): **SimGhostInputs `v2.6.0`** (Python) actualizó
+  el núcleo y curó un bug del sello; **tracker-financiero `v0.2.0`** (JS/PWA) se cableó al lazo (sello + canal
+  de subida + `core.hooksPath`). Ambos PRs con **CI verde server-side** —el `audit` de blast-radius y el
+  `gate-smoke` bloqueando de verdad, self-tests verdes— y evidencia en el `qa_runs/` de cada lab. Lo
+  code-first se preservó sin pisar una pieza.
+- **Segunda cosecha por el lazo** (ADR 0015): el mecanismo **probado en producción**; cuatro refinamientos que
+  suben (generalizar el sello bootstrap pristina-vs-customizada, `estado-motor -Detallado` por-hash, el drift
+  estructural núcleo↔labs, la épica `.local` code-first) quedan **registrados post-1.0** — ninguno bloquea.
+- **Licencia MIT consciente** (ADR 0016): se mantiene MIT sobre copyleft, ahora como decisión razonada con su
+  camino no tomado — no herencia.
+- **`tools/version.txt` → `1.0.0`** (sin `-beta`). Alcance **1.0 funcional**: lo público (social preview,
+  párrafo en inglés, `CODE_OF_CONDUCT`), el CLI npm/SSOT, multiplataforma y la reconciliación code-first vía
+  `.local` se difieren **explícitos** a post-1.0 (ROADMAP).
+- Evidencia: suite completa verde (`probar-version`/`gate`/`hooks`/`instalador`/`auditor` + `auditar` +
+  `verificar -Base main`); required check `andon` verde en el PR de release.
+
 ## [0.13.0-beta] — 2026-07-11
 
 ### Jidoka listo para 1.0 — los cuatro bloqueantes de "corre en un repo ajeno" (ADR 0014)
