@@ -18,3 +18,4 @@ Registro de las decisiones de arquitectura del proyecto. Cada ADR captura **una*
 | [0009](0009-arquetipos-ejecutables.md) | Los arquetipos ejecutables (matriz-como-manifiesto) y la poda a dos (docs-as-code + code-first; doc-only diferido) | aceptado (delegado · revisable) |
 | [0010](0010-roster-y-modo-desatendido.md) | El roster completo (`devops`), el modo desatendido general, y el casting neutral+persona (Homologación Etapa 1) | aceptado |
 | [0011](0011-homologacion-cosecha-sgi.md) | Cosecha de SGI: token neutral en la ley (`escribano` en minúscula) y tres maduraciones al casting (Homologación Etapa 2) | aceptado |
+| [0012](0012-lazo-sincronizacion-labs.md) | El lazo de sincronización labs↔Jidoka: sello de versión + `-Actualizar` (tres vías por hash) + aviso de divergencia + canal de subida | aceptado |

@@ -1,0 +1,46 @@
+== Evidencia del lazo de sincronizacion labs<->Jidoka (v0.11.0-beta, ADR 0012) ==
+Fecha: 2026-07-11  Rama: lazo-sincronizacion-labs
+
+--- Suite completa (exit por script) ---
+probar-version -> exit 0
+probar-gate -> exit 0
+probar-hooks -> exit 0
+probar-auditor -> exit 0
+probar-instalador -> exit 0
+auditar -> exit 0
+verificar (main...HEAD) -> exit 0
+
+--- Detalle del smoke del instalador (32 casos) ---
+  [PASA]  instala: el motor queda sembrado
+  [PASA]  instala: la ley del arquetipo queda sembrada
+  [PASA]  instala: los comandos /jidoka:* quedan sembrados
+  [PASA]  instala: core.hooksPath quedo configurado
+  [PASA]  sello: tools/jidoka-motor.json queda sembrado
+  [PASA]  sello: version == tools/version.txt
+  [PASA]  sello: registra al menos una pieza de motor
+  [PASA]  sello: cada hash casa con el archivo sembrado
+  [PASA]  self-test sembrado 'probar-gate' pasa en el destino
+  [PASA]  self-test sembrado 'probar-hooks' pasa en el destino
+  [PASA]  self-test sembrado 'probar-auditor' pasa en el destino
+  [PASA]  verificar sembrado corre limpio (exit 0)
+  [PASA]  no-clobber: la segunda instalacion NO pisa un archivo existente
+  [PASA]  actualizar: restaura una pieza NO customizada (hijo==sello, Jidoka avanzo)
+  [PASA]  actualizar: NO pisa una pieza divergente (hijo la customizo)
+  [PASA]  actualizar: deja <archivo>.jidoka-nuevo para la divergencia
+  [PASA]  actualizar: la instancia (HANDOFF) queda intacta
+  [PASA]  actualizar: el sello queda en la version de Jidoka
+  [PASA]  actualizar: el sello guarda el hash que Jidoka ENVIA (no el custom del hijo)
+  [PASA]  actualizar (2a vez): la divergencia persiste, lo demas converge
+  [PASA]  instala: estado-motor.ps1 queda sembrado
+  [PASA]  instala: reportar-leccion.ps1 queda sembrado (canal de subida)
+  [PASA]  instala: la guia de subida queda sembrada
+  [PASA]  estado-motor: sin -Jidoka informa y no bloquea (exit 0)
+  [PASA]  estado-motor: contra un Jidoka mas nuevo, avisa que difiere
+  [PASA]  estado-motor: contra Jidoka real (misma version), al dia
+  [PASA]  code-first: siembra PRODUCT_BRIEF y NO el grafo de notas
+  [PASA]  code-first: su ley parsea
+  [PASA]  code-first: el gate sembrado pasa en el destino
+  [PASA]  .local: sin extension, verificar corre limpio (exit 0)
+  [PASA]  .local: la extension se dot-sourcea y su Block cuenta (exit 1)
+  [PASA]  .local: al quitar la extension, verificar vuelve a exit 0
+== Instalador sano: los 32 casos se comportan como se espera. ==

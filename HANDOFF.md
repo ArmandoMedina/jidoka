@@ -6,7 +6,16 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Instalador `npx jidoka-method init` en camino (Sprint 3, ver `ROADMAP.md`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-11, cierre de la sesión de vitrina)
+## Dónde estamos (2026-07-11, sesión del lazo labs↔Jidoka)
+
+- **⏳ PENDIENTE DE TU REVISIÓN Y AUTORIZACIÓN: el lazo de sincronización labs↔Jidoka** (`v0.11.0-beta`, ADR 0012). Rama `lazo-sincronizacion-labs` en Jidoka; **PR abierto, sin mergear** (esperando tu OK). *La lección sube, la máquina baja*, mecanizado y probado (smoke **32/32**): sello de versión sembrado (`tools/jidoka-motor.json`) + SSOT (`tools/version.txt`, atado al CHANGELOG por `probar-version.ps1`); modo `-Actualizar` con conciencia de tres vías (mecánica converge, instancia/estética no se pisa, divergencia se preserva con `.jidoka-nuevo`); aviso de divergencia (`estado-motor.ps1`, no bloquea); canal de subida (`reportar-leccion.ps1` + guía); costura `.local` para converger sin clobber.
+- **PR de Jidoka: [#14](https://github.com/ArmandoMedina/jidoka/pull/14)** abierto, gate verde, **sin mergear**.
+- **SGI cableado como primer consumidor** (rama `lazo-sincronizacion-jidoka`, sin tocar su motor; pytest 450 verdes): sello retroactivo, canal de subida, reporte de divergencia y 3 lecciones draft en su `qa_runs/lazo-sync-20260711/`. ADR 0036. **Rama PUSHEADA** (su gate pasó "todo limpio"); **el PR NO se abrió** — el guardián lo detuvo por ser publicación en un repo público que no nombraste. Abrelo tú: `https://github.com/ArmandoMedina/SimGhostInputs/pull/new/lazo-sincronizacion-jidoka`.
+- **Retenido para tu vuelta (orden nombrada):** (1) **merge** del PR #14; (2) **abrir el PR de SGI** (link arriba) y mergearlo; (3) **tag + release** `v0.11.0-beta`; (4) **presentar las 3 lecciones** de SGI a Jidoka (redactadas en `SGI/qa_runs/lazo-sync-20260711/`, se suben con `tools/reportar-leccion.ps1`).
+- **Descubrimiento en vivo:** el aviso de divergencia ya funciona — `estado-motor` detectó que SGI (0.10.1-beta) queda atrás de `0.11.0-beta`. El lazo se probó a sí mismo.
+- **Meta-lección registrada** (backlog del ROADMAP): la claridad del límite orquestador↔subagente en `kanban/roles.md`/`lazo.md` — surgió en esta sesión y es justo lo que el lazo debe capturar aplicado al propio método.
+
+## Antes (2026-07-11, cierre de la sesión de vitrina)
 
 - **Todo MERGEADO y PUBLICADO hasta `v0.10.1-beta`.** PRs #1–#12 en MERGED; `main` limpio. Sprints 0–2 completos; Sprint 3 Fases 3.A/3.B publicadas; Homologación Etapa 1 + cosecha de SGI publicadas (`v0.9.0`/`v0.10.0-beta`, ADRs 0010/0011).
 - **Sesión de hoy (vitrina, PR #12 → `v0.10.1-beta`):** README reescrito con **7 lectores en frío** como evidencia (Gemba de prosa en `qa_runs/lector-en-frio-readme-20260711/`); **GIF del gate mordiendo** en el README — render fiel de una corrida REAL en SGI (`docs/assets/gate-bloqueando.gif`, procedencia en `docs/guias/guion-gif-del-gate.md`, evidencia en `qa_runs/gif-gate-20260711/`); **SimGhostInputs (público) nombrado y linkeado** como evidencia del linaje (grieta 4 avanzada); quickstart curado tras fact-check hostil (el snippet anterior NO bloqueaba — se reprodujo y se probó la cura en clon); doc-drift interno curado en cascada (versión, tabla de sprints, `docs/sprints/`, `kanban/README`, `empezar-de-cero`, ROADMAP).

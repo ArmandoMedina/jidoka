@@ -22,6 +22,11 @@ function Run-PS($file) {
   return $LASTEXITCODE
 }
 
+# Como Run-PS pero devuelve la salida (para inspeccionar avisos, no solo el exit).
+function Run-PS-Out($file) {
+  return (& powershell -NoProfile -ExecutionPolicy Bypass -File $file @args 2>&1 | Out-String)
+}
+
 Write-Host "== Smoke del instalador (tools/instalar.ps1) =="
 $tmp = Join-Path $env:TEMP ("jidoka-smoke-" + [guid]::NewGuid().ToString('N').Substring(0,8))
 
@@ -32,6 +37,28 @@ try {
   Check 'instala: la ley del arquetipo queda sembrada' (Test-Path (Join-Path $tmp 'tools/blast-radius.json')) "no aparecio la ley"
   Check 'instala: los comandos /jidoka:* quedan sembrados' (Test-Path (Join-Path $tmp '.claude/commands/jidoka/arranca.md')) "no aparecio arranca.md"
   Check 'instala: core.hooksPath quedo configurado' ((git -C $tmp config core.hooksPath) -eq '.githooks') "hooksPath no quedo"
+
+  # 1b. SELLO de version: el hijo sabe de que Jidoka viene su motor, con hashes que casan.
+  $selloPath = Join-Path $tmp 'tools/jidoka-motor.json'
+  Check 'sello: tools/jidoka-motor.json queda sembrado' (Test-Path $selloPath) "no aparecio el sello"
+  $verTxt = (Get-Content (Join-Path $PSScriptRoot 'version.txt') -Raw).Trim()
+  $selloVerOk = $false; $hashesOk = $false; $countOk = $false
+  if (Test-Path $selloPath) {
+    try {
+      $sello = Get-Content $selloPath -Raw | ConvertFrom-Json
+      $selloVerOk = ($sello.version -eq $verTxt)
+      $props = @($sello.sembrado_hashes.PSObject.Properties)
+      $countOk = ($props.Count -gt 0)
+      $hashesOk = $true
+      foreach ($p in $props) {
+        $abs = Join-Path $tmp $p.Name
+        if (-not (Test-Path -LiteralPath $abs) -or ((Get-FileHash -LiteralPath $abs -Algorithm SHA256).Hash -ne $p.Value)) { $hashesOk = $false; break }
+      }
+    } catch {}
+  }
+  Check 'sello: version == tools/version.txt' $selloVerOk "sello.version != $verTxt"
+  Check 'sello: registra al menos una pieza de motor' $countOk "sembrado_hashes vacio"
+  Check 'sello: cada hash casa con el archivo sembrado' $hashesOk "algun hash no coincide con lo sembrado"
 
   # 2. Commit inicial (un repo recien sembrado se commitea antes de que verificar mida).
   Push-Location $tmp
@@ -57,6 +84,57 @@ try {
   $after = Get-Content $handoff -Raw
   Check 'no-clobber: la segunda instalacion NO pisa un archivo existente' ($after -match $marca) "el archivo se sobrescribio"
 
+  # 5b. -ACTUALIZAR con conciencia de tres vias. Monto tres situaciones a la vez:
+  #   (a) probar-hooks.ps1: lo modifico Y ajusto el sello para que el hash sembrado
+  #       case con lo modificado -> el hijo "no lo toco" desde la siembra pero Jidoka
+  #       difiere -> debe ACTUALIZARse (restaurarse a la version de Jidoka).
+  #   (b) auditar.ps1: lo modifico SIN tocar el sello -> el hijo lo customizo ->
+  #       DIVERGENCIA: no se pisa, se deja el .jidoka-nuevo.
+  #   (c) HANDOFF.md (instancia, con la marca del paso 5) -> intacto siempre.
+  $hookChild = Join-Path $tmp 'tools/probar-hooks.ps1'
+  $audChild  = Join-Path $tmp 'tools/auditar.ps1'
+  Add-Content -Path $hookChild -Value '# tweak que Jidoka no tiene'
+  $selloObj = Get-Content $selloPath -Raw | ConvertFrom-Json
+  $selloObj.sembrado_hashes.'tools/probar-hooks.ps1' = (Get-FileHash -LiteralPath $hookChild -Algorithm SHA256).Hash
+  [System.IO.File]::WriteAllText($selloPath, ($selloObj | ConvertTo-Json -Depth 5), (New-Object System.Text.UTF8Encoding($false)))
+  Add-Content -Path $audChild -Value '# ajuste propio del hijo'
+
+  Run-PS $instalar -Destino $tmp -Actualizar | Out-Null
+  $hookRestaurado = -not ((Get-Content $hookChild -Raw) -match 'tweak que Jidoka no tiene')
+  Check 'actualizar: restaura una pieza NO customizada (hijo==sello, Jidoka avanzo)' $hookRestaurado "probar-hooks.ps1 no se restauro"
+  $audPreservado = ((Get-Content $audChild -Raw) -match 'ajuste propio del hijo')
+  Check 'actualizar: NO pisa una pieza divergente (hijo la customizo)' $audPreservado "auditar.ps1 se piso"
+  Check 'actualizar: deja <archivo>.jidoka-nuevo para la divergencia' (Test-Path "$audChild.jidoka-nuevo") "no aparecio el .jidoka-nuevo"
+  Check 'actualizar: la instancia (HANDOFF) queda intacta' ((Get-Content $handoff -Raw) -match $marca) "se toco HANDOFF"
+  $selloDespues = Get-Content $selloPath -Raw | ConvertFrom-Json
+  Check 'actualizar: el sello queda en la version de Jidoka' ($selloDespues.version -eq $verTxt) "version quedo $($selloDespues.version)"
+  $jidokaAudHash = (Get-FileHash -LiteralPath (Join-Path $PSScriptRoot 'auditar.ps1') -Algorithm SHA256).Hash
+  Check 'actualizar: el sello guarda el hash que Jidoka ENVIA (no el custom del hijo)' ($selloDespues.sembrado_hashes.'tools/auditar.ps1' -eq $jidokaAudHash) "el sello no guardo el hash de Jidoka"
+
+  # 5c. Segunda corrida: la divergencia persiste hasta reconciliar; lo restaurado ya esta al dia.
+  Run-PS $instalar -Destino $tmp -Actualizar | Out-Null
+  $persiste = ((Get-Content $audChild -Raw) -match 'ajuste propio del hijo') -and (Test-Path "$audChild.jidoka-nuevo")
+  Check 'actualizar (2a vez): la divergencia persiste, lo demas converge' $persiste "no fue idempotente"
+
+  # 5d. ESTADO-MOTOR: el aviso de divergencia (nunca bloquea; exit 0 siempre).
+  $em = Join-Path $tmp 'tools/estado-motor.ps1'
+  Check 'instala: estado-motor.ps1 queda sembrado' (Test-Path $em) "no aparecio estado-motor.ps1"
+  # Canal de subida (UP) sembrado: el helper + la guia para reportar lecciones a Jidoka.
+  Check 'instala: reportar-leccion.ps1 queda sembrado (canal de subida)' (Test-Path (Join-Path $tmp 'tools/reportar-leccion.ps1')) "no aparecio reportar-leccion.ps1"
+  Check 'instala: la guia de subida queda sembrada' (Test-Path (Join-Path $tmp 'docs/guias/reportar-leccion-a-jidoka.md')) "no aparecio la guia"
+  $emOut1 = Run-PS-Out $em
+  Check 'estado-motor: sin -Jidoka informa y no bloquea (exit 0)' ($LASTEXITCODE -eq 0) "exit $LASTEXITCODE"
+  # Contra un Jidoka FALSO mas nuevo: debe avisar que difiere.
+  $fakeJ = Join-Path $env:TEMP ("jidoka-fake-" + [guid]::NewGuid().ToString('N').Substring(0,6))
+  New-Item -ItemType Directory -Path (Join-Path $fakeJ 'tools') -Force | Out-Null
+  Set-Content -Path (Join-Path $fakeJ 'tools/version.txt') -Value '9.9.9-nuevo' -Encoding ASCII
+  $emOut2 = Run-PS-Out $em -Jidoka $fakeJ
+  Check 'estado-motor: contra un Jidoka mas nuevo, avisa que difiere' (($emOut2 -match '9\.9\.9-nuevo') -and ($emOut2 -match 'AVISO')) "no aviso divergencia"
+  # Contra el Jidoka REAL (misma version del sello): al dia.
+  $emOut3 = Run-PS-Out $em -Jidoka (Split-Path -Parent $PSScriptRoot)
+  Check 'estado-motor: contra Jidoka real (misma version), al dia' ($emOut3 -match 'al dia') "no dijo al dia"
+  Remove-Item $fakeJ -Recurse -Force -ErrorAction SilentlyContinue
+
   # 6. Segundo arquetipo: code-first siembra DISTINTO (brief, no grafo) y su gate pasa.
   $tmp2 = Join-Path $env:TEMP ("jidoka-smoke2-" + [guid]::NewGuid().ToString('N').Substring(0,8))
   try {
@@ -73,6 +151,17 @@ try {
     Pop-Location
     $gc = Run-PS (Join-Path $tmp2 'tools/probar-gate.ps1')
     Check 'code-first: el gate sembrado pasa en el destino' ($gc -eq 0) "exit $gc"
+
+    # Costura .local: verificar dot-sourcea tools/verificar.local.ps1 si existe.
+    # (repo recien commiteado y limpio: aisla el efecto de la extension del git-state)
+    $vLimpio = Run-PS (Join-Path $tmp2 'tools/verificar.ps1')
+    Check '.local: sin extension, verificar corre limpio (exit 0)' ($vLimpio -eq 0) "exit $vLimpio"
+    Set-Content -Path (Join-Path $tmp2 'tools/verificar.local.ps1') -Value 'Block "check local de prueba"' -Encoding ASCII
+    $vConLocal = Run-PS (Join-Path $tmp2 'tools/verificar.ps1')
+    Check '.local: la extension se dot-sourcea y su Block cuenta (exit 1)' ($vConLocal -eq 1) "exit $vConLocal (esperaba 1)"
+    Remove-Item (Join-Path $tmp2 'tools/verificar.local.ps1') -Force
+    $vSinLocal = Run-PS (Join-Path $tmp2 'tools/verificar.ps1')
+    Check '.local: al quitar la extension, verificar vuelve a exit 0' ($vSinLocal -eq 0) "exit $vSinLocal"
   }
   finally { Remove-Item $tmp2 -Recurse -Force -ErrorAction SilentlyContinue }
 }

@@ -18,7 +18,8 @@
 param(
   [Parameter(Mandatory = $true)][string]$Destino,
   [string]$Arquetipo = 'docs-as-code',
-  [switch]$Yes
+  [switch]$Yes,
+  [switch]$Actualizar
 )
 
 $ErrorActionPreference = 'Stop'
@@ -49,12 +50,134 @@ function Copy-DirSafe($srcDir, $dstDir) {
   }
 }
 
-Write-Host "== Instalador de Jidoka (arquetipo: $Arquetipo) =="
+# SHA256 de un archivo (hash del sello / deteccion de divergencia).
+function Get-MotorHash($path) { return (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash }
+
+# Enumera los archivos que una entrada de motor cubre en $root (aplana dirs).
+# Devuelve objetos { rel = ruta relativa con '/'; abs = ruta absoluta }.
+function Get-MotorFiles($entry, $root) {
+  $dst = Join-Path $root $entry.destino
+  if (-not (Test-Path -LiteralPath $dst)) { return @() }
+  if ($entry.dir) {
+    return Get-ChildItem -LiteralPath $dst -Recurse -File | ForEach-Object {
+      $rel = $_.FullName.Substring($root.Length).TrimStart('\', '/').Replace('\', '/')
+      [pscustomobject]@{ rel = $rel; abs = $_.FullName }
+    }
+  }
+  return ,([pscustomobject]@{ rel = ($entry.destino.Replace('\', '/')); abs = $dst })
+}
+
+# ---------------------------------------------------------------------------
+# Modo -Actualizar: re-siembra SOLO la mecanica (clase=mecanica) con conciencia
+# de TRES VIAS por hash (estilo dpkg conffiles). Por cada archivo de motor:
+#   - hijo ausente                       -> lo agrega (nuevo en esta version)
+#   - hijo == Jidoka                     -> al dia (no toca)
+#   - hijo == hash sembrado (no lo toco) -> lo actualiza a la version de Jidoka
+#   - hijo != hash sembrado (lo customizo) -> DIVERGENCIA: NO pisa; escribe
+#                                             <archivo>.jidoka-nuevo y lo reporta
+# La INSTANCIA (ley, stubs, product/, HANDOFF, ADRs) nunca se toca: solo se itera
+# 'motor'. El sello registra la version de Jidoka a la que se sincronizo y, por
+# archivo, el hash que Jidoka ENVIA ahora (para el siguiente -Actualizar).
+function Invoke-Actualizar($jidoka, $manif, $Destino, $utf8) {
+  $selloDst = Join-Path $Destino 'tools/jidoka-motor.json'
+  if (-not (Test-Path -LiteralPath $selloDst)) {
+    Die "no hay sello (tools/jidoka-motor.json) en '$Destino': no parece un hijo instalado. Usa la instalacion normal (sin -Actualizar)."
+  }
+  $sello = Get-Content $selloDst -Raw | ConvertFrom-Json
+  $seed = @{}
+  if ($sello.sembrado_hashes) {
+    foreach ($p in $sello.sembrado_hashes.PSObject.Properties) { $seed[$p.Name] = $p.Value }
+  }
+  $versionPath = Join-Path $jidoka 'tools/version.txt'
+  $versionNueva = if (Test-Path $versionPath) { (Get-Content $versionPath -Raw).Trim() } else { 'desconocida' }
+
+  Write-Host "== Actualizar motor: hijo en Jidoka $($sello.version) -> Jidoka $versionNueva =="
+  if ($sello.version -eq $versionNueva) { Info "(el sello ya declara $versionNueva; re-checando piezas por si cambiaron)" }
+
+  $nuevoSeed = [ordered]@{}
+  $alDia = 0; $agregados = 0; $actualizados = 0; $divergen = @()
+
+  # Limite conocido (estilo dpkg): -Actualizar re-siembra el motor ACTUAL de Jidoka.
+  # NO borra piezas que una version futura de Jidoka haya retirado -- un archivo viejo
+  # sigue en el hijo y cae del sello sin aviso. Removerlas es decision aparte (arriesga
+  # pisar algo que el hijo aun usa); por ahora se prefiere no borrar.
+  foreach ($e in $manif.motor) {
+    if ($e.clase -and $e.clase -ne 'mecanica') { continue }        # solo la mecanica converge
+    $srcRoot = Join-Path $jidoka $e.origen
+    if (-not (Test-Path -LiteralPath $srcRoot)) { continue }        # origen ausente en Jidoka: nada que sembrar
+
+    # Aplana la entrada a pares (rel, origen-abs) usando el arbol de Jidoka como verdad.
+    $pares = @()
+    if ($e.dir) {
+      Get-ChildItem -LiteralPath $srcRoot -Recurse -File | ForEach-Object {
+        $relEnOrigen = $_.FullName.Substring($srcRoot.Length).TrimStart('\', '/').Replace('\', '/')
+        $relDst = ($e.destino.Replace('\', '/')).TrimEnd('/') + '/' + $relEnOrigen
+        $pares += [pscustomobject]@{ rel = $relDst; src = $_.FullName }
+      }
+    } else {
+      $pares += [pscustomobject]@{ rel = $e.destino.Replace('\', '/'); src = $srcRoot }
+    }
+
+    foreach ($par in $pares) {
+      $jidokaHash = Get-MotorHash $par.src
+      $childAbs = Join-Path $Destino $par.rel
+      $nuevoSeed[$par.rel] = $jidokaHash                            # el sello guarda lo que Jidoka ENVIA ahora
+
+      if (-not (Test-Path -LiteralPath $childAbs)) {               # 1. nuevo en esta version
+        $parent = Split-Path -Parent $childAbs
+        if ($parent -and -not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+        Copy-Item -LiteralPath $par.src -Destination $childAbs -Force
+        Write-Host "  [NUEVO]  $($par.rel)" -ForegroundColor Green; $agregados++
+        continue
+      }
+      $childHash = Get-MotorHash $childAbs
+      if ($childHash -eq $jidokaHash) { $alDia++; continue }        # 2. al dia
+      $seedHash = $seed[$par.rel]
+      if ($seedHash -and $childHash -eq $seedHash) {                # 3. el hijo no lo toco -> actualiza
+        Copy-Item -LiteralPath $par.src -Destination $childAbs -Force
+        Write-Host "  [ACTUALIZA] $($par.rel)" -ForegroundColor Cyan; $actualizados++
+        continue
+      }
+      # 4. DIVERGENCIA: el hijo lo customizo. No se pisa; se deja la version de Jidoka al lado.
+      $nuevoPath = "$childAbs.jidoka-nuevo"
+      Copy-Item -LiteralPath $par.src -Destination $nuevoPath -Force
+      Write-Host "  [DIVERGE] $($par.rel) -> se dejo $($par.rel).jidoka-nuevo (revisa a mano)" -ForegroundColor Yellow
+      $divergen += $par.rel
+    }
+  }
+
+  # Actualiza el sello: version nueva + los hashes que Jidoka envia ahora.
+  $selloNuevo = [ordered]@{ version = $versionNueva; sembrado_hashes = $nuevoSeed }
+  [System.IO.File]::WriteAllText($selloDst, ($selloNuevo | ConvertTo-Json -Depth 5), $utf8)
+
+  Write-Host ""
+  Write-Host "== Motor: $alDia al dia | $actualizados actualizado(s) | $agregados nuevo(s) | $($divergen.Count) divergen ==" -ForegroundColor Green
+  if ($divergen.Count -gt 0) {
+    Write-Host "Divergencias (el hijo customizo estas piezas de mecanica; se preservaron):" -ForegroundColor Yellow
+    foreach ($d in $divergen) { Write-Host "  - $d  (compara con $d.jidoka-nuevo)" -ForegroundColor Yellow }
+    Write-Host "  Reconcilia a mano: adopta el .jidoka-nuevo o mueve tu ajuste a la costura .local." -ForegroundColor Yellow
+  }
+  Write-Host "Instancia (ley, product/, HANDOFF, ADRs) intacta: -Actualizar solo toca la mecanica." -ForegroundColor Cyan
+  Write-Host "Siguiente: revisa el diff en una rama y abrelo como PR (el diff ES la revision)." -ForegroundColor Cyan
+}
+
+$utf8 = New-Object System.Text.UTF8Encoding($false)
 
 # 1. Leer el manifiesto de siembra.
 $manifPath = Join-Path $jidoka 'kit/.jidoka/instalar/manifiesto.json'
 if (-not (Test-Path $manifPath)) { Die "no encuentro el manifiesto ($manifPath)" }
 $manif = Get-Content $manifPath -Raw | ConvertFrom-Json
+
+# Modo -Actualizar: re-siembra SOLO la mecanica sobre un hijo ya instalado, y termina.
+if ($Actualizar) {
+  if (-not (Test-Path -LiteralPath $Destino)) { Die "el destino '$Destino' no existe (para -Actualizar debe ser un hijo ya instalado)" }
+  $Destino = (Resolve-Path -LiteralPath $Destino).Path
+  if ($Destino -eq $jidoka) { Die "el destino no puede ser el propio repo de Jidoka" }
+  Invoke-Actualizar $jidoka $manif $Destino $utf8
+  exit 0
+}
+
+Write-Host "== Instalador de Jidoka (arquetipo: $Arquetipo) =="
 
 # 2. Validar el arquetipo.
 $arq = $manif.arquetipos.$Arquetipo
@@ -94,7 +217,6 @@ Copy-Safe $leySrc $leyDst
 
 # 6. Crear stubs (solo si faltan).
 Info "Creando stubs (solo los que falten)..."
-$utf8 = New-Object System.Text.UTF8Encoding($false)
 foreach ($s in $manif.stubs) {
   $dst = Join-Path $Destino $s.ruta
   if (Test-Path -LiteralPath $dst) { Skip $dst; $script:saltados++; continue }
@@ -116,6 +238,25 @@ foreach ($s in $extra) {
   if ($parent -and -not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
   [System.IO.File]::WriteAllText($dst, $s.contenido, $utf8)
   $script:stubs++
+}
+
+# 6c. Sellar la version del motor sembrado. El hijo sabe de que Jidoka viene su
+#     maquinaria (version + hash de cada pieza de motor). Es la linea base para el
+#     modo -Actualizar (conciencia de tres vias) y el aviso de divergencia. No-clobber:
+#     si el sello ya existe (re-instalacion), no se toca -- lo actualiza -Actualizar.
+$versionPath = Join-Path $jidoka 'tools/version.txt'
+$version = if (Test-Path $versionPath) { (Get-Content $versionPath -Raw).Trim() } else { 'desconocida' }
+$selloDst = Join-Path $Destino 'tools/jidoka-motor.json'
+if (Test-Path -LiteralPath $selloDst) { Skip $selloDst; $script:saltados++ }
+else {
+  $hashes = [ordered]@{}
+  foreach ($e in $manif.motor) {
+    if ($e.clase -and $e.clase -ne 'mecanica') { continue }
+    foreach ($f in (Get-MotorFiles $e $Destino)) { $hashes[$f.rel] = (Get-MotorHash $f.abs) }
+  }
+  $sello = [ordered]@{ version = $version; sembrado_hashes = $hashes }
+  [System.IO.File]::WriteAllText($selloDst, ($sello | ConvertTo-Json -Depth 5), $utf8)
+  Ok "sello de version: tools/jidoka-motor.json (Jidoka $version, $($hashes.Count) pieza(s) de motor)"
 }
 
 # 7. Encender lo manual: core.hooksPath.

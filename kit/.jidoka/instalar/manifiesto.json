@@ -1,5 +1,5 @@
 {
-  "descripcion": "Manifiesto de siembra del instalador (tools/instalar.ps1). 'motor' = archivos genericos comunes a todos los arquetipos (origen relativo a la raiz de Jidoka; destino relativo al -Destino). 'arquetipos' = la MATRIZ EJECUTABLE: cada arquetipo elige su ley, su semilla del QUE (grafo vs brief) y si lleva gobernanza. 'stubs' comunes + 'stubs_arquetipo' condicionados. Todo con no-clobber (solo si falta).",
+  "descripcion": "Manifiesto de siembra del instalador (tools/instalar.ps1). 'motor' = archivos genericos comunes a todos los arquetipos (origen relativo a la raiz de Jidoka; destino relativo al -Destino); cada entrada lleva 'clase': 'mecanica' = converge (el modo -Actualizar la re-siembra si el hijo no la toco). 'arquetipos' = la MATRIZ EJECUTABLE: cada arquetipo elige su ley, su semilla del QUE (grafo vs brief) y si lleva gobernanza. 'stubs' comunes + 'stubs_arquetipo' condicionados = INSTANCIA (nunca se actualiza). Todo con no-clobber en install (solo si falta). Al sembrar, el instalador escribe el SELLO tools/jidoka-motor.json (version de Jidoka + hash de cada pieza de motor) para que el hijo sepa de que version viene y detecte divergencia.",
   "arquetipos": {
     "docs-as-code": {
       "disponible": true,
@@ -22,20 +22,23 @@
   },
   "ley_destino": "tools/blast-radius.json",
   "motor": [
-    { "origen": "tools/verificar.ps1", "destino": "tools/verificar.ps1" },
-    { "origen": "tools/auditar.ps1", "destino": "tools/auditar.ps1" },
-    { "origen": "tools/probar-gate.ps1", "destino": "tools/probar-gate.ps1" },
-    { "origen": "tools/probar-hooks.ps1", "destino": "tools/probar-hooks.ps1" },
-    { "origen": "tools/probar-auditor.ps1", "destino": "tools/probar-auditor.ps1" },
-    { "origen": ".claude/settings.json", "destino": ".claude/settings.json" },
-    { "origen": ".claude/hooks", "destino": ".claude/hooks", "dir": true },
-    { "origen": ".claude/commands", "destino": ".claude/commands", "dir": true },
-    { "origen": ".claude/skills", "destino": ".claude/skills", "dir": true },
-    { "origen": ".githooks/pre-push", "destino": ".githooks/pre-push" },
-    { "origen": ".github/workflows/andon.yml", "destino": ".github/workflows/andon.yml" },
-    { "origen": "kit/.jidoka/templates", "destino": "kit/.jidoka/templates", "dir": true },
-    { "origen": "kit/.jidoka/disparos", "destino": "kit/.jidoka/disparos", "dir": true },
-    { "origen": "kit/.jidoka/qa_runs", "destino": "kit/.jidoka/qa_runs", "dir": true }
+    { "origen": "tools/verificar.ps1", "destino": "tools/verificar.ps1", "clase": "mecanica" },
+    { "origen": "tools/auditar.ps1", "destino": "tools/auditar.ps1", "clase": "mecanica" },
+    { "origen": "tools/probar-gate.ps1", "destino": "tools/probar-gate.ps1", "clase": "mecanica" },
+    { "origen": "tools/probar-hooks.ps1", "destino": "tools/probar-hooks.ps1", "clase": "mecanica" },
+    { "origen": "tools/probar-auditor.ps1", "destino": "tools/probar-auditor.ps1", "clase": "mecanica" },
+    { "origen": "tools/estado-motor.ps1", "destino": "tools/estado-motor.ps1", "clase": "mecanica" },
+    { "origen": "tools/reportar-leccion.ps1", "destino": "tools/reportar-leccion.ps1", "clase": "mecanica" },
+    { "origen": ".claude/settings.json", "destino": ".claude/settings.json", "clase": "mecanica" },
+    { "origen": ".claude/hooks", "destino": ".claude/hooks", "dir": true, "clase": "mecanica" },
+    { "origen": ".claude/commands", "destino": ".claude/commands", "dir": true, "clase": "mecanica" },
+    { "origen": ".claude/skills", "destino": ".claude/skills", "dir": true, "clase": "mecanica" },
+    { "origen": ".githooks/pre-push", "destino": ".githooks/pre-push", "clase": "mecanica" },
+    { "origen": ".github/workflows/andon.yml", "destino": ".github/workflows/andon.yml", "clase": "mecanica" },
+    { "origen": "docs/guias/reportar-leccion-a-jidoka.md", "destino": "docs/guias/reportar-leccion-a-jidoka.md", "clase": "mecanica" },
+    { "origen": "kit/.jidoka/templates", "destino": "kit/.jidoka/templates", "dir": true, "clase": "mecanica" },
+    { "origen": "kit/.jidoka/disparos", "destino": "kit/.jidoka/disparos", "dir": true, "clase": "mecanica" },
+    { "origen": "kit/.jidoka/qa_runs", "destino": "kit/.jidoka/qa_runs", "dir": true, "clase": "mecanica" }
   ],
   "stubs": [
     { "ruta": "HANDOFF.md", "contenido": "# HANDOFF - relevo entre sesiones\n\n> Estado en vuelo y pendientes. Se llena al cerrar, se lee y se limpia al abrir. Nada de memorias de la IA: todo va aqui.\n\n## En una frase\n\n[Que es este proyecto, en una frase.]\n\n## Estado actual (que esta hecho y validado)\n\n| Pieza | Que hace | Codigo | Validacion |\n|---|---|---|---|\n| [ejemplo] | [que hace] | [ruta] | [tests / demo / pendiente] |\n\n> La columna Validacion es lo que vuelve confiable retomar sin leer el codigo. Se concreto: '53/55 contra el historico', no 'casi listo'.\n\n## Que falta (proximos pasos, en orden de valor)\n\n- Sembrado con Jidoka. Corre /jidoka:arranca para empezar.\n" },

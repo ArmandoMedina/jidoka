@@ -69,7 +69,7 @@
     "excluye": ["tools/instalar.ps1", "tools/probar-instalador.ps1"],
     "doc_bloquea": [],
     "doc_avisa": ["andon/README.md"],
-    "product_avisa": ["product/capacidades/AND-*"],
+    "product_avisa": ["product/capacidades/AND-*", "product/capacidades/KIT-*"],
     "revisa": true,
     "mensaje": "cambiaste un gate: actualiza andon/README.md (el mapa citable del motor). Un gate nuevo no se estrena sin correrlo contra el artefacto real (disparo prueba-de-humo-del-gate: corre tools/probar-gate.ps1)",
     "rol": "escribano"
