@@ -26,7 +26,9 @@ Es el Sistema de Producción Toyota, aplicado al trabajo con agentes.</p>
 
 - **«Listo, todos los tests pasan»** — y no compilaba.
 - **Ayer lo sabía todo; hoy no recuerda nada** — cada sesión arranca de cero y re-decide lo ya decidido.
+- **Le escribiste memorias y ni las lee** — cada chat, a explicarle todo de cero, a ver si hay suerte.
 - **Arregló una cosa y rompió tres** — y te enteraste tú, no él.
+- **La documentación dice una cosa y el código otra** — y te enteras cuando ya nadie sabe cuál es la verdad.
 
 Programar con agentes de IA falla por ahí: pierden el contexto entre sesiones y **cooperan con su propia mentira** — te dicen "listo" cuando no, porque son un actor que no recuerda y no tiene nada que perder. Jidoka parte de una ley incómoda:
 
@@ -40,7 +42,9 @@ Programar con agentes de IA falla por ahí: pierden el contexto entre sesiones y
 - **Lo que ya funcionaba se defiende solo.** Se construye en rebanadas pequeñas que dejan el proyecto funcionando en cada paso, el CI es obligatorio, y los gates traen **prueba de vida**: un self-test con un caso que DEBE bloquear, para que el muro no se pudra en silencio.
 - **Tú diriges sin leer código.** Apruebas el QUÉ antes de que se construya y revisas el **demo corriendo** (Gemba), con tus propios ojos. *"Hecho" = lo viste funcionar.* El juicio se queda contigo; el procedimiento, en la máquina.
 
-## Míralo morder (hoy, en 3 pasos)
+## Velo bloquear un cambio malo (hoy, en 3 pasos)
+
+<!-- GIF del gate bloqueando: guion listo en docs/guias/guion-gif-del-gate.md — se graba y se incrusta aquí, arriba del texto -->
 
 **Lo que necesitas hoy:** Windows + PowerShell 5.1 y git. El ritual (`/jidoka:*`, skills) corre sobre [Claude Code](https://claude.com/claude-code); los gates funcionan con cualquier flujo de PRs en GitHub. Multiplataforma y el CLI `npx` vienen en el [roadmap](ROADMAP.md).
 
@@ -60,8 +64,6 @@ Set-Content docs\decisions\9999-demo.md '# ADR 9999 - demo'   # una decisión SI
 ./tools/verificar.ps1      # → [BLOQUEA] rojo. Lístala en docs/decisions/README.md → verde.
 Remove-Item docs\decisions\9999-demo.md                       # limpieza
 ```
-
-<!-- GIF del gate mordiendo: guion listo en docs/guias/guion-gif-del-gate.md — se graba y se incrusta aquí -->
 
 El paso 3 no es un truco de demo: es el **self-test** que corre en cada PR de este repo. Un gate que nunca rechaza nada está podrido aunque el tablero esté verde; aquí, quien valida también se valida.
 
@@ -110,7 +112,7 @@ Qué hay **hoy** y qué viene (detalle en [`ROADMAP.md`](ROADMAP.md)):
 
 ## Empezar
 
-El camino de hoy es el de [Míralo morder](#míralo-morder-hoy-en-3-pasos): clonar, sembrar con `instalar.ps1`, encender los gates. Para entender lo que sembraste: [`andon/`](andon/) (los gates y sus fronteras, dichas de frente) y [`kanban/`](kanban/) (el ritual completo). La guía para empezar de cero se completa en el Sprint 4.
+El camino de hoy es el de [Velo bloquear un cambio malo](#velo-bloquear-un-cambio-malo-hoy-en-3-pasos): clonar, sembrar con `instalar.ps1`, encender los gates. Para entender lo que sembraste: [`andon/`](andon/) (los gates y sus fronteras, dichas de frente) y [`kanban/`](kanban/) (el ritual completo). La guía para empezar de cero se completa en el Sprint 4.
 
 ## Licencia
 

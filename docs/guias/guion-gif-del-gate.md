@@ -1,6 +1,6 @@
 # Guion — el GIF del gate mordiendo
 
-> La pieza más valiosa de la vitrina (`ROADMAP.md` → *Vitrina pública* ⏳1). Todo lo de abajo está listo para copy-paste: solo abre la terminal, enciende [ScreenToGif](https://www.screentogif.com/) (Windows, gratis) y graba una toma de ~20 segundos. El GIF se incrusta en el README, en la sección *Míralo morder* (ya hay un comentario HTML marcando el lugar).
+> La pieza más valiosa de la vitrina (`ROADMAP.md` → *Vitrina pública* ⏳1). Todo lo de abajo está listo para copy-paste: solo abre la terminal, enciende [ScreenToGif](https://www.screentogif.com/) (Windows, gratis) y graba una toma de ~20 segundos. El GIF se incrusta en el README, hasta arriba de la sección *Velo bloquear un cambio malo* (ya hay un comentario HTML marcando el lugar).
 
 ## Preparación (fuera de cámara)
 
@@ -43,6 +43,6 @@ git status          # limpio otra vez
 ## Al terminar
 
 - Guarda el GIF como `docs/assets/gate-mordiendo.gif` (crea la carpeta si no existe).
-- En `README.md`, reemplaza el comentario `<!-- GIF del gate mordiendo... -->` por:
+- En `README.md`, reemplaza el comentario `<!-- GIF del gate bloqueando... -->` por:
   `![El gate Andon bloqueando un ADR sin listar, y pasando a verde al listarlo](docs/assets/gate-mordiendo.gif)`
 - Marca el ⏳1 de *Vitrina pública* en `ROADMAP.md` como hecho.
