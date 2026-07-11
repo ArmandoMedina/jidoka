@@ -2,6 +2,20 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.1.1] — 2026-07-11
+
+### Fix — el matcher Bash de `no-memorias` bloqueaba lecturas con `2>&1`/`2>/dev/null`
+
+Regresión de `v1.1.0` (ADR 0018), cazada por dogfooding minutos después de publicar: el token `>` de la lista
+de escritura casaba con `2>&1` y `2>/dev/null` (redirecciones de **stderr**, no escrituras a memoria), así que
+un comando de **lectura** común (`cat …/memory/x 2>&1`) se denegaba en falso.
+
+- **Fix**: la redirección se maneja aparte del `>` suelto — solo cuenta como escritura una redirección **cuyo
+  destino es la ruta de memoria** (`>`/`>>` seguido de la ruta, sin cruzar otro redirect/pipe), o un cmdlet de
+  escritura (`Set-Content`/`Out-File`/`cp`/`mv`/`tee`…) con la ruta. `2>&1`/`2>/dev/null` ya no cuentan.
+- Dos casos de regresión nuevos en `probar-hooks.ps1` (17/17): lectura de memoria con `2>&1` y con
+  `2>/dev/null` → **allow**; las escrituras siguen **deny**.
+
 ## [1.1.0] — 2026-07-11
 
 ### El muro cumple lo que promete — grietas 2 y 5 cerradas con invariantes testeables (ADR 0018)

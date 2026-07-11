@@ -26,17 +26,23 @@ $path = $inp.tool_input.file_path
 if ($path -and ($path.Replace('\', '/') -match $memoria)) { $bloquear = $true }
 
 # Bash: el destino viaja dentro de tool_input.command. Solo se bloquea la ESCRITURA
-# a la memoria (leer/recall es legitimo): ruta de memoria + un token de escritura.
-# La redireccion '>' cubre echo/printf/etc; los cmdlets y cp/mv/tee cubren el resto.
-# Limite conocido: aliases (sc/ac/ni) y rutas ofuscadas (base64, variables) evaden
-# el matcher heuristico; la cobertura server-side no existe (la memoria es conducta
-# del agente, no estado del repo). Frontera confesada en andon/README.md.
+# a la memoria (leer/recall es legitimo). Dos formas de escritura:
+#   1. un cmdlet/utilidad de escritura (Set-Content/Out-File/cp/mv/tee...) + la ruta;
+#   2. una redireccion CUYO DESTINO es la memoria ('>'/'>>' seguido de la ruta).
+# La redireccion se maneja aparte (no como token '>' suelto) a proposito: '2>&1' y
+# '2>/dev/null' son redirecciones de stderr, NO escrituras a memoria -- meter '>' en
+# la lista de tokens los bloqueaba en falso (regresion de v1.1.0, cazada por dogfood).
+# Limite conocido: aliases (sc/ac/ni) y rutas ofuscadas (base64, variables) evaden el
+# matcher heuristico; no hay cobertura server-side. Frontera confesada en andon/README.md.
 if (-not $bloquear) {
   $cmd = $inp.tool_input.command
   if ($cmd) {
     $cmdNorm = $cmd.Replace('\', '/')
-    $escritura = 'Set-Content|Add-Content|Out-File|New-Item|Tee-Object|Move-Item|Copy-Item|>|\btee\b|\bcp\b|\bmv\b'
-    if (($cmdNorm -match $memoria) -and ($cmdNorm -match $escritura)) { $bloquear = $true }
+    $cmdletEscritura = 'Set-Content|Add-Content|Out-File|New-Item|Tee-Object|Move-Item|Copy-Item|\btee\b|\bcp\b|\bmv\b'
+    # '>' o '>>' cuyo destino (sin cruzar otro redirect/pipe/&/;) contiene la ruta de memoria.
+    $redirAMemoria = '>>?[^>&|;]*' + $memoria
+    $escribeMemoria = (($cmdNorm -match $memoria) -and ($cmdNorm -match $cmdletEscritura)) -or ($cmdNorm -match $redirAMemoria)
+    if ($escribeMemoria) { $bloquear = $true }
   }
 }
 

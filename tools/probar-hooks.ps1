@@ -64,6 +64,12 @@ $outBashRead = Invoke-Hook $noMem '{"tool_name":"Bash","tool_input":{"command":"
 Check 'no-memorias: DEJA LEER memoria por Bash (recall no se bloquea)' (-not $outBashRead.Contains('deny')) "bloqueo una lectura: $outBashRead"
 $outBashNorm = Invoke-Hook $noMem '{"tool_name":"Bash","tool_input":{"command":"Set-Content -Path C:\\repo\\HANDOFF.md -Value hi"}}' $null
 Check 'no-memorias: DEJA pasar una escritura Bash normal del repo' (-not $outBashNorm.Contains('deny')) "denego de mas por Bash: $outBashNorm"
+# Regresion v1.1.0: el token '>' casaba con '2>&1'/'2>/dev/null' (redireccion de stderr,
+# NO escritura a memoria) y bloqueaba lecturas comunes. Deben DEJAR pasar.
+$outBashErr1 = Invoke-Hook $noMem '{"tool_name":"Bash","tool_input":{"command":"cat ~/.claude/projects/slug/memory/foo.md 2>&1"}}' $null
+Check 'no-memorias: DEJA LEER memoria con 2>&1 (no es escritura)' (-not $outBashErr1.Contains('deny')) "falso positivo 2>&1: $outBashErr1"
+$outBashErr2 = Invoke-Hook $noMem '{"tool_name":"Bash","tool_input":{"command":"ls -1 ~/.claude/projects/slug/memory/ 2>/dev/null"}}' $null
+Check 'no-memorias: DEJA LISTAR memoria con 2>/dev/null (no es escritura)' (-not $outBashErr2.Contains('deny')) "falso positivo 2>/dev/null: $outBashErr2"
 
 # --- stop_hook_active: los Stop-hooks no re-bloquean ---
 foreach ($h in @('review-stop.ps1','gemba-stop.ps1','andon-stop.ps1')) {
