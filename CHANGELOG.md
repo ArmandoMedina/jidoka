@@ -11,8 +11,10 @@ Quita el tipeo manual de versión del ritual de release: la versión se escribe 
 
 - **`tools/publicar.ps1`** (Jidoka-only): lee la versión del SSOT, extrae su sección del CHANGELOG (leída como
   UTF-8, para no corromper acentos/flechas en las notas), corre **la suite completa** de self-tests
-  (evidencia-no-palabra: no publica un motor roto), y crea el tag + release. `-DryRun` muestra todo sin crear
-  nada.
+  (evidencia-no-palabra: no publica un motor roto, bajo `ErrorActionPreference=Continue` para que un warning
+  benigno de git no aborte), y crea el tag + release. `-DryRun` muestra todo sin correr nada; `-SoloVerificar`
+  corre el preflight (suite) sin publicar. *(El estreno cazó un bug del propio `publicar.ps1` —el `Stop` volvía
+  fatal un warning `LF→CRLF`— antes de crear el tag: `prueba-de-humo-del-gate` en acción.)*
 - **`tools/probar-publicar.ps1`** (Jidoka-only, 4 casos): prueba de vida del `-DryRun` (deriva el tag del SSOT,
   no crea tags). Junto con `probar-version` quedan CI-gateados en Jidoka vía una guarda `Test-Path` en
   `andon.yml` (se saltan en un hijo que no los tiene).

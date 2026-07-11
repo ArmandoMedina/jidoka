@@ -4,11 +4,12 @@
 # suite de self-tests (evidencia-no-palabra: no se publica un motor roto), y crea el
 # tag + release de GitHub con esas notas. Quita el tipeo manual de version del ritual
 # (drift): la version se escribe UNA vez en version.txt y todo lo demas deriva.
-#   -DryRun   muestra que haria (version, titulo, notas, guardas) SIN crear nada. Testable.
+#   -DryRun          muestra que haria (version, titulo, notas) SIN correr nada ni publicar.
+#   -SoloVerificar   corre las guardas-suaves + la suite (preflight) pero NO publica. Testable.
 # Jidoka-only (NO se siembra): los hijos versionan su app con su propio esquema.
 # Nota: archivo ASCII a proposito, PS 5.1.
 
-param([switch]$DryRun)
+param([switch]$DryRun, [switch]$SoloVerificar)
 
 $ErrorActionPreference = 'Stop'
 $raiz = Split-Path -Parent $PSScriptRoot
@@ -58,11 +59,18 @@ if ($DryRun) {
   exit 0
 }
 
-if ($rama -ne 'main') { Die "no estas en main (rama: $rama): el release se corta desde main." }
-if (-not $limpio)     { Die "el arbol no esta limpio: commitea o descarta antes de publicar." }
-if ($tagExiste)       { Die "el tag $tag ya existe (sube la version en tools/version.txt + CHANGELOG)." }
+# Guardas de PUBLICACION (solo en modo real; -SoloVerificar las salta para correr la
+# suite en cualquier estado del repo, p.ej. desde el propio self-test).
+if (-not $SoloVerificar) {
+  if ($rama -ne 'main') { Die "no estas en main (rama: $rama): el release se corta desde main." }
+  if (-not $limpio)     { Die "el arbol no esta limpio: commitea o descarta antes de publicar." }
+  if ($tagExiste)       { Die "el tag $tag ya existe (sube la version en tools/version.txt + CHANGELOG)." }
+}
 
 # 4. La suite DEBE pasar antes de publicar (prueba de vida; no se estrena un motor roto).
+# Continue (no Stop): los self-tests comunican por EXIT CODE; un warning benigno de git
+# (2>&1, p.ej. "LF -> CRLF") dentro de un test no debe volverse error fatal (como andon.yml).
+$ErrorActionPreference = 'Continue'
 Write-Host "== Suite de self-tests (evidencia-no-palabra antes de publicar) =="
 foreach ($t in @('probar-version','probar-gate','probar-hooks','probar-auditor','probar-disparos','probar-instalador')) {
   & (Join-Path $PSScriptRoot "$t.ps1") *> $null
@@ -72,6 +80,8 @@ foreach ($t in @('probar-version','probar-gate','probar-hooks','probar-auditor',
 & (Join-Path $PSScriptRoot 'auditar.ps1') *> $null
 if ($LASTEXITCODE -ne 0) { Die "auditar.ps1 fallo: no se publica." }
 Write-Host "  [OK] auditar" -ForegroundColor Green
+
+if ($SoloVerificar) { Write-Host "== Verificado: suite verde. -SoloVerificar no publica. ==" -ForegroundColor Green; exit 0 }
 
 # 5. Crear el release (crea el tag en main). Notas = la seccion del CHANGELOG.
 $notasFile = Join-Path $env:TEMP ("jidoka-notas-$version.md")
