@@ -61,6 +61,21 @@ El orquestador elige el modelo según la tarea: **pequeño** para lo mecánico, 
 4. **Delegación coherente.** Caso real: commit delegado a un subagente pero push hecho en sesión — la mitad de la ceremonia no cuenta. Si delegas una cadena, delega la cadena.
 5. **Una sola sesión escritora por working tree.** Caso real: el commit de una sesión paralela dejó **ciegos** los Stop hooks de la otra (solo ven lo no commiteado) y produjo un lost-update del HANDOFF. La segunda sesión es solo-lectura o se lleva su propio worktree; el HANDOFF tiene un solo dueño a la vez.
 
+## Qué va a subagente vs qué se queda — el criterio en un vistazo
+
+Las reglas de arriba son los *porqués*; esto es el criterio operativo para no dudar en el momento (el hueco que un cliente nombró: *"la regla existe pero no es obvio cuándo aplica"*). La pregunta no es "¿puede un subagente hacerlo?" sino **"¿el hilo principal pierde más de lo que gana si lo hace él?"**
+
+| Va a **subagente** | Se queda **en sesión** (y se anuncia 🎭) |
+|---|---|
+| **Lectura voluminosa**: explorar árboles, leer transcripts o muchos archivos (regla 1) | **Decidir y tejer**: el trabajo propio del orquestador, y la síntesis de los veredictos que devuelven los subagentes |
+| Trabajo **aislado** que devuelve un veredicto: una búsqueda, una auditoría, un análisis | Edición quirúrgica **acoplada** con bucle TDD editar→correr→arreglar sobre los mismos archivos — un subagente devuelve una vez y el bucle se rompe |
+| Trabajo en **otro working tree** (otro repo o un worktree) — mantiene la sesión como escritora única (regla 5) | Cambios cortos cuyo contexto **ya vive en el hilo**: re-explicárselo a un subagente cuesta más que hacerlo |
+| Mutación de archivos **en paralelo** que chocarían — con el tope de concurrencia de la regla 3 | — |
+
+**Default cuando dudas:** lectura y trabajo pesado o aislado → subagente; si lo haces tú en sesión, **anúncialo** (`🎭 Asiento: <rol> (en sesión) — <por qué>`), para que sea elección deliberada y no olvido. Y no caigas al otro extremo (regla 2): sobre-orquestar —mandar a subagente lo trivial y acoplado— también degrada.
+
+*Ejemplo trabajado (una sesión real):* construir el lazo de sincronización labs↔Jidoka (ADR 0012) se repartió así — la exploración de dos repos y el cableado del lab hijo (**otro árbol**) fueron a **subagentes**; el motor y su self-test, **acoplados por TDD** sobre los mismos tres archivos, se hicieron **en sesión bajo `🎭 desarrollador+validador`**. Ni todo al hilo (lo envenena) ni todo a subagentes (sobre-orquestar): cada pieza donde pesa menos.
+
 ## La ley que gobierna todo el reparto
 
 > **El determinismo bloquea; el juicio orquesta; nada irreversible se automatiza sin checkpoint humano.**
