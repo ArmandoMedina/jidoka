@@ -146,8 +146,27 @@ try {
   Check 'estado-motor: contra un Jidoka mas nuevo, avisa que difiere' (($emOut2 -match '9\.9\.9-nuevo') -and ($emOut2 -match 'AVISO')) "no aviso divergencia"
   # Contra el Jidoka REAL (misma version del sello): al dia.
   $emOut3 = Run-PS-Out $em -Jidoka (Split-Path -Parent $PSScriptRoot)
-  Check 'estado-motor: contra Jidoka real (misma version), al dia' ($emOut3 -match 'al dia') "no dijo al dia"
+  Check 'estado-motor: contra Jidoka real (misma version), estado OK' ($emOut3 -match '\[OK\]') "no dio el OK de version"
   Remove-Item $fakeJ -Recurse -Force -ErrorAction SilentlyContinue
+
+  # 5e. -SELLAR: sella un hijo que convergio a mano, CLASIFICANDO pristina-vs-customizada
+  # (ADR 0019). Customizo una pieza pristina, borro el sello, y sello de cero: la
+  # customizada NO debe entrar en la semilla (asi -Actualizar la preservara); una pristina SI.
+  $auditorChild = Join-Path $tmp 'tools/probar-auditor.ps1'
+  Add-Content -Path $auditorChild -Value '# customizacion del hijo para -Sellar'
+  Remove-Item $selloPath -Force
+  Run-PS $instalar -Destino $tmp -Sellar | Out-Null
+  Check 'sellar: re-crea el sello' (Test-Path $selloPath) "no se escribio el sello"
+  $selloSel = Get-Content $selloPath -Raw | ConvertFrom-Json
+  Check 'sellar: el sello queda en la version de Jidoka' ($selloSel.version -eq $verTxt) "version quedo $($selloSel.version)"
+  Check 'sellar: NO registra una pieza customizada (se preservara)' (-not $selloSel.sembrado_hashes.'tools/probar-auditor.ps1') "registro la customizada"
+  Check 'sellar: SI registra una pieza pristina' ([bool]$selloSel.sembrado_hashes.'tools/probar-gate.ps1') "no registro la pristina"
+  # Tras -Sellar, -Actualizar debe PRESERVAR la customizada (child != seed=null -> DIVERGE).
+  Run-PS $instalar -Destino $tmp -Actualizar | Out-Null
+  Check 'sellar+actualizar: la pieza customizada se preserva (no se pisa)' ((Get-Content $auditorChild -Raw) -match 'customizacion del hijo para -Sellar') "se piso la customizada tras sellar"
+  # estado-motor -Detallado: la ve DIVERGE por-hash (la version sola no la veria).
+  $emDet = Run-PS-Out $em -Jidoka (Split-Path -Parent $PSScriptRoot) -Detallado
+  Check 'estado-motor -Detallado: lista la pieza divergente por-hash' (($emDet -match 'probar-auditor') -and ($emDet -match 'DIVERGE')) "no listo la divergencia"
 
   # 6. Segundo arquetipo: code-first siembra DISTINTO (brief, no grafo) y su gate pasa.
   $tmp2 = Join-Path $env:TEMP ("jidoka-smoke2-" + [guid]::NewGuid().ToString('N').Substring(0,8))

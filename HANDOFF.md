@@ -6,9 +6,16 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Instalador `npx jidoka-method init` en camino (Sprint 3, ver `ROADMAP.md`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-11, `v1.1.0` — post-1.0: muro endurecido)
+## Dónde estamos (2026-07-11, `v1.2.0` — post-1.0: batch en Jidoka, sin bajar aún)
 
-**Último release: `v1.1.0` — "El muro cumple lo que promete"** (ADR 0018): cerradas las grietas 2 y 5 de la auditoría con invariantes testeables. `no-memorias` ahora cubre Bash (deniega escritura a memoria vía comando; residual honesto: aliases/ofuscación/server-side). El **registro de disparos cableados** (`probar-disparos.ps1`, en CI) evita que el cableado se pudra en silencio — la grieta real era la falta de verificación. **Follow-through pendiente:** el hook mejorado + `probar-disparos` son mecánica → **bajan a SGI y TF por `-Actualizar`** (paso aparte, como Sprint B).
+**Modo de operación (decisión del cliente):** *avanzar Jidoka lo máximo posible acumulando releases y hacer UNA sola bajada a los labs al final* — la bajada (2 repos × PR/tests/merge) es la parte cara, no el release de Jidoka. Además, **el cliente elige el tamaño y la dirección del sprint; no preguntar** (yo decido por capacidad/esfuerzo, él frena si algo no cuadra).
+
+**Releases post-1.0 (acumulados, aún NO bajados a los labs):**
+- **`v1.1.0` — "El muro cumple lo que promete"** (ADR 0018): grietas 2 y 5 cerradas con invariantes. `no-memorias` cubre Bash; registro de disparos cableados (`probar-disparos.ps1`).
+- **`v1.1.1` — hotfix** (dogfood): el matcher Bash de `no-memorias` bloqueaba en falso lecturas con `2>&1`/`2>/dev/null` (el `>` casaba con la redirección de stderr). Cazado en vivo minutos después de publicar `v1.1.0`. `probar-hooks` 17/17.
+- **`v1.2.0` — "El lazo ve la divergencia"** (ADR 0019): `instalar.ps1 -Sellar` (sello bootstrap clasificador pristina-vs-customizada) + `estado-motor -Detallado` (divergencia por-hash). `probar-instalador` 41/41.
+
+**La ventana de bajada (cuando el batch esté maduro):** re-sellar SGI y TF con `-Sellar`, `-Actualizar` a la versión acumulada (baja hook mejorado + `probar-disparos` + los refinamientos), y hacer **ahí** la épica `.local` code-first y el drift estructural (tocan los labs). Una sola pasada.
 
 ### Antes — PROGRAMA HACIA 1.0 (COMPLETO · `v1.0.0`)
 
@@ -20,12 +27,18 @@
 - **Alcance 1.0 funcional.** Diferido explícito a post-1.0 (ROADMAP): lo público (social preview, párrafo en inglés, `CODE_OF_CONDUCT`), CLI npm/SSOT, multiplataforma, reconciliación code-first vía `.local`, grietas 2 y 5, y las 4 lecciones de ADR 0015.
 - **Estado de los labs:** SGI (`master`) y TF (`main`) corren el núcleo `0.13.0-beta`, cableados al lazo. La próxima mejora de Jidoka baja a ambos con `-Actualizar`.
 
-### Qué sigue (post-1.0, en orden de valor)
-1. **Presentación pública** (Sprint 4): social preview, párrafo en inglés (decisión abierta del cliente), badges/banner, `CODE_OF_CONDUCT`, comunidad.
-2. **Los 4 refinamientos del lazo** (ADR 0015 / backlog del ROADMAP): generalizar el sello bootstrap, `estado-motor -Detallado`, drift estructural núcleo↔labs, épica `.local` code-first.
-3. **Bajar `v1.1.0` a los labs por `-Actualizar`** (el hook `no-memorias` mejorado + `probar-disparos`): el follow-through del muro endurecido (como Sprint B).
-4. **CLI npm `npx jidoka-method init` + SSOT de versión** (hoy la versión vive en `version.txt`/CHANGELOG/tags) y **multiplataforma**.
-5. **Épica `.local` code-first** (ADR 0015): la "mecánica igual" completa sin romper los 453 tests de SGI.
+### Qué sigue (post-1.0, modo batch — avanzar Jidoka, bajar una vez)
+
+**Jidoka-interno (avanza sin tocar labs, acumulando releases):**
+1. **CLI npm `npx jidoka-method init` + SSOT de versión** (hoy vive en `version.txt`/CHANGELOG/tags) y **multiplataforma**. El mayor desbloqueo de adopción.
+2. **Dogfood ADR 0003** (motor solo en `kit/`, auto-instalación); arquetipo `doc-only` según encaje.
+3. **Presentación pública** (Sprint 4): social preview, párrafo en inglés, `CODE_OF_CONDUCT`, badges — tiene piezas gatilladas por el cliente.
+
+**En la ventana de bajada (necesitan labs, se hace UNA vez):**
+4. **Re-sellar SGI/TF con `-Sellar` + `-Actualizar`** el batch acumulado (hook mejorado, `probar-disparos`, refinamientos del lazo).
+5. **Épica `.local` code-first + drift estructural núcleo↔labs** (ADR 0015): la "mecánica igual" completa, sin romper los 453 tests de SGI.
+
+Refinamientos del lazo #1 y #2 (sello bootstrap, `estado-motor -Detallado`): ✅ hechos en `v1.2.0` (ADR 0019).
 
 ## Antes (2026-07-11, la cosecha del lazo — CERRADA)
 
