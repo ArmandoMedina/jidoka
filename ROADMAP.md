@@ -36,6 +36,11 @@ Enorme; se fasea. El hallazgo fundacional: el ancestro (`project-starter`) **no 
 ### Fase 3.C — lo que falta (diferido a propósito, que no se olvide)
 - **El arquetipo `doc-only`/regulado** (ley `capacidad→evidencia` + gobernanza `borrador→referencia→oficial`) — se estrena cuando un repo regulado real lo pida (regla 2–3).
 - **El instalador que de verdad pregunta el arquetipo** (hallazgo del fact-check 2026-07-11): hoy `-Arquetipo` es parámetro con default silencioso `docs-as-code`; el único `Read-Host` es para crear el directorio. Preguntar interactivo cuando no se pasa `-Yes`.
+- **El lazo de sincronización labs↔Jidoka** (pedido del cliente, 2026-07-11 — evita que las versiones diverjan). La regla: *la lección sube, la máquina baja*. Diseño propuesto, pendiente de su propio plan:
+  1. **Sello de versión sembrado** (`.jidoka/version` o campo en la ley): el repo hijo sabe de qué versión de Jidoka viene su maquinaria.
+  2. **Modo `-Actualizar` del instalador**: re-siembra SOLO la sección `motor` del manifiesto (hooks, `verificar`/`auditar`/`probar-*`, comandos y skills genéricos) — NUNCA la instancia (ley, `product/`, HANDOFF, ADRs, casting-persona). Corre en rama del hijo → PR → el humano ve el diff → merge. Reversible por diseño.
+  3. **Aviso de divergencia** en el verificador del hijo: compara el sello/hashes del motor contra la versión de Jidoka declarada y avisa "tu maquinaria está atrás" (aviso, no bloqueo — regla 2–3 antes de endurecer).
+  4. **El canal de subida ya existe y se usa tal cual**: el hijo NO parchea su maquinaria local — reporta con el issue `leccion.md` de Jidoka (o el protocolo de `kanban/homologacion.md`), Jidoka arregla en su repo con su ritual, y el hijo baja la corrección con el modo `-Actualizar`. (Precedente real: la cosecha de SGI, ADR 0011, fue la subida hecha a mano; esto la vuelve máquina.)
 - **El quickstart del README como caso end-to-end del self-test** (hallazgo del fact-check 2026-07-11): `probar-gate.ps1` inyecta la lista de cambiados; falta un caso que ejercite el flujo real commit→verificar en un repo fixture, para que la demo copy-paste del README no pueda romperse en silencio.
 - **La matriz de piezas más fina** (qué skills/tests/UI por arquetipo, más allá de ley+semilla).
 - **benchmark** verificado en vivo — portar/formalizar.
