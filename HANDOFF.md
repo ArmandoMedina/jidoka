@@ -6,14 +6,19 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Instalador `npx jidoka-method init` en camino (Sprint 3, ver `ROADMAP.md`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-11, sesión del lazo labs↔Jidoka)
+## Dónde estamos (2026-07-11, cosecha del lazo)
 
-- **⏳ PENDIENTE DE TU REVISIÓN Y AUTORIZACIÓN: el lazo de sincronización labs↔Jidoka** (`v0.11.0-beta`, ADR 0012). Rama `lazo-sincronizacion-labs` en Jidoka; **PR abierto, sin mergear** (esperando tu OK). *La lección sube, la máquina baja*, mecanizado y probado (smoke **32/32**): sello de versión sembrado (`tools/jidoka-motor.json`) + SSOT (`tools/version.txt`, atado al CHANGELOG por `probar-version.ps1`); modo `-Actualizar` con conciencia de tres vías (mecánica converge, instancia/estética no se pisa, divergencia se preserva con `.jidoka-nuevo`); aviso de divergencia (`estado-motor.ps1`, no bloquea); canal de subida (`reportar-leccion.ps1` + guía); costura `.local` para converger sin clobber.
-- **PR de Jidoka: [#14](https://github.com/ArmandoMedina/jidoka/pull/14)** abierto, gate verde, **sin mergear**.
-- **SGI cableado como primer consumidor** (rama `lazo-sincronizacion-jidoka`, sin tocar su motor; pytest 450 verdes): sello retroactivo, canal de subida, reporte de divergencia y 3 lecciones draft en su `qa_runs/lazo-sync-20260711/`. ADR 0036. **Rama PUSHEADA** (su gate pasó "todo limpio"); **el PR NO se abrió** — el guardián lo detuvo por ser publicación en un repo público que no nombraste. Abrelo tú: `https://github.com/ArmandoMedina/SimGhostInputs/pull/new/lazo-sincronizacion-jidoka`.
-- **Retenido para tu vuelta (orden nombrada):** (1) **merge** del PR #14; (2) **abrir el PR de SGI** (link arriba) y mergearlo; (3) **tag + release** `v0.11.0-beta`; (4) **presentar las 3 lecciones** de SGI a Jidoka (redactadas en `SGI/qa_runs/lazo-sync-20260711/`, se suben con `tools/reportar-leccion.ps1`).
-- **Descubrimiento en vivo:** el aviso de divergencia ya funciona — `estado-motor` detectó que SGI (0.10.1-beta) queda atrás de `0.11.0-beta`. El lazo se probó a sí mismo.
-- **Meta-lección registrada** (backlog del ROADMAP): la claridad del límite orquestador↔subagente en `kanban/roles.md`/`lazo.md` — surgió en esta sesión y es justo lo que el lazo debe capturar aplicado al propio método.
+- **⏳ PENDIENTE DE TU REVISIÓN: la primera cosecha por el lazo** (`v0.12.0-beta`, ADR 0013). Rama `cosecha-lazo-lecciones`; **sin PR abierto todavía** (lo dejo listo para tu orden). Tres lecciones de campo absorbidas con el ritual — la máquina del lazo en uso, no la mano:
+  1. **`gemba-stop` exige evidencia rastreada por git** (`.claude/hooks/gemba-stop.ps1`): cierra un Goodhart (evidencia por mtime que git nunca ve porque `qa_runs/` está gitignoreado). Ahora solo cuenta lo que `git ls-files` rastrea (`git add -f`). Self-test: **`probar-hooks.ps1` 11/11** (nuevo caso BLOQUEA + PASA).
+  2. **Excepción de dominio con nombre** para el mandato sintético (revisor-visual SKILL, `gemba.md`, `verificacion.md`) — disparo `excepciones-cableadas`.
+  3. **Criterio operativo de delegación** orquestador↔subagente (`kanban/roles.md`) — la meta-lección tuya, ahora con tabla al vistazo y ejemplo trabajado.
+- **Retenido para tu orden nombrada:** abrir PR + merge + release `v0.12.0-beta` (como con el lazo).
+- **Secuenciado como sprints propios** (registrado en ADR 0013): **B** — SGI converge su gate (`-Cambiados` + `probar-gate`, mueve ruff/pytest a `.local`; toca sus 453 tests); **C** — homologación de TF (el último lab).
+
+## Antes (2026-07-11, el lazo labs↔Jidoka — CERRADO)
+
+- **✅ Lazo de sincronización labs↔Jidoka MERGEADO y LIBERADO (`v0.11.0-beta`, ADR 0012).** PR #14 mergeado; [release publicado](https://github.com/ArmandoMedina/jidoka/releases/tag/v0.11.0-beta). *La lección sube, la máquina baja*: sello de versión (`tools/jidoka-motor.json`) + SSOT (`tools/version.txt`); `-Actualizar` de tres vías por hash; aviso de divergencia (`estado-motor.ps1`); canal de subida (`reportar-leccion.ps1`); costura `.local`. Smoke 32/32.
+- **✅ SGI = primer consumidor, MERGEADO** (SGI PR #57 squash a `master`, ADR 0036): sello retroactivo + canal + reporte de divergencia + 3 lecciones draft en `SGI/qa_runs/lazo-sync-20260711/` (pendientes de presentar con `reportar-leccion.ps1`). El aviso de divergencia se probó a sí mismo (SGI 0.10.1-beta detectado atrás de 0.11.0-beta).
 
 ## Antes (2026-07-11, cierre de la sesión de vitrina)
 

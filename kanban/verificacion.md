@@ -34,7 +34,7 @@ Cuando el input primario viene de afuera, lo hostil es caso **esperado**, y el c
 3. **Jamás calla** — lo ilegible va a errores con `ok=false`, nunca a un `NaN` silencioso.
 4. **La basura no contamina lo bueno.**
 
-Y la política de datos: **fixtures siempre sintéticos** (un builder parametrizable, nunca datos reales versionados — "motor sin datos"); la data real valida **fuera del repo** y el `.gitignore` excluye el formato crudo a propósito. La lección hermana ya es célebre en el linaje: la data real rompe el parser varias veces antes de estabilizar — se valida contra **toda** la data, no contra una muestra bonita.
+Y la política de datos: **fixtures sintéticos por defecto** (un builder parametrizable, nunca datos reales versionados — "motor sin datos"); la data real valida **fuera del repo** y el `.gitignore` excluye el formato crudo a propósito. La válvula cuando lo sintético *no ejercita el artefacto* (un render/HUD sobre telemetría real) es la **excepción de dominio cableada con nombre** (disparo `excepciones-cableadas`), no aflojar el mandato para todos: dato real fuera del repo, solo el resultado entra, y la excepción nombrada. La lección hermana ya es célebre en el linaje: la data real rompe el parser varias veces antes de estabilizar — se valida contra **toda** la data, no contra una muestra bonita.
 
 ## La verificación también mira hacia afuera
 
