@@ -1,17 +1,23 @@
 {
-  "descripcion": "Manifiesto de siembra del instalador (tools/instalar.ps1). 'motor' lista los archivos genericos que se copian del arbol de Jidoka al destino (origen relativo a la raiz de Jidoka; destino relativo al -Destino). 'ley' mapea arquetipo -> plantilla de ley, que se siembra en 'ley_destino'. 'stubs' se crean solo si faltan (no clobber).",
+  "descripcion": "Manifiesto de siembra del instalador (tools/instalar.ps1). 'motor' = archivos genericos comunes a todos los arquetipos (origen relativo a la raiz de Jidoka; destino relativo al -Destino). 'arquetipos' = la MATRIZ EJECUTABLE: cada arquetipo elige su ley, su semilla del QUE (grafo vs brief) y si lleva gobernanza. 'stubs' comunes + 'stubs_arquetipo' condicionados. Todo con no-clobber (solo si falta).",
   "arquetipos": {
     "docs-as-code": {
       "disponible": true,
-      "ley": "kit/.jidoka/leyes/blast-radius.docs-as-code.json"
+      "desc": "documentacion y codigo viajan juntos (herramienta operativa de equipo)",
+      "ley": "kit/.jidoka/leyes/blast-radius.docs-as-code.json",
+      "producto": "grafo",
+      "gobernanza": false
     },
     "code-first": {
-      "disponible": false,
-      "nota": "en camino (Sprint 3, fase siguiente; ver ROADMAP)"
+      "disponible": true,
+      "desc": "el metodo vive implicito en el codigo + un brief (herramienta o libreria personal)",
+      "ley": "kit/.jidoka/leyes/blast-radius.code-first.json",
+      "producto": "brief",
+      "gobernanza": false
     },
     "doc-only": {
       "disponible": false,
-      "nota": "en camino (Sprint 3, fase siguiente; ver ROADMAP)"
+      "nota": "diferido (regla 2-3: se construye cuando un repo regulado real lo pida; ver ROADMAP). Su ley y su gobernanza estan disenadas pero no se estrenan por metodo-ficcion."
     }
   },
   "ley_destino": "tools/blast-radius.json",
@@ -32,19 +38,23 @@
     { "origen": "kit/.jidoka/qa_runs", "destino": "kit/.jidoka/qa_runs", "dir": true }
   ],
   "stubs": [
-    { "ruta": "HANDOFF.md", "contenido": "# HANDOFF - relevo entre sesiones\n\n> Estado en vuelo y pendientes. Se llena al cerrar, se lee y se limpia al abrir. Nada de memorias de la IA: todo va aqui.\n\n## En una frase\n\n[Que es este proyecto, en una frase.]\n\n## Donde estamos\n\n- [Sembrado con Jidoka (npx jidoka-method / instalar.ps1). Corre /jidoka:arranca para empezar.]\n" },
+    { "ruta": "HANDOFF.md", "contenido": "# HANDOFF - relevo entre sesiones\n\n> Estado en vuelo y pendientes. Se llena al cerrar, se lee y se limpia al abrir. Nada de memorias de la IA: todo va aqui.\n\n## En una frase\n\n[Que es este proyecto, en una frase.]\n\n## Estado actual (que esta hecho y validado)\n\n| Pieza | Que hace | Codigo | Validacion |\n|---|---|---|---|\n| [ejemplo] | [que hace] | [ruta] | [tests / demo / pendiente] |\n\n> La columna Validacion es lo que vuelve confiable retomar sin leer el codigo. Se concreto: '53/55 contra el historico', no 'casi listo'.\n\n## Que falta (proximos pasos, en orden de valor)\n\n- Sembrado con Jidoka. Corre /jidoka:arranca para empezar.\n" },
     { "ruta": "ROADMAP.md", "contenido": "# Roadmap\n\n> Hacia donde va el proyecto. Cada sprint entrega un incremento demostrable (Gemba).\n\n## Sprint 1 - [nombre] - proximo\n- [Que capacidad gana el usuario.]\n" },
-    { "ruta": "CHANGELOG.md", "contenido": "# Changelog\n\nFormato: Keep a Changelog. Versionado: SemVer.\n\n## [Sin publicar]\n\n### Sembrado\n- Metodo Jidoka instalado (ritual + motor Andon, arquetipo docs-as-code).\n" },
+    { "ruta": "CHANGELOG.md", "contenido": "# Changelog\n\nFormato: Keep a Changelog. Versionado: SemVer.\n\n## [Sin publicar]\n\n### Sembrado\n- Metodo Jidoka instalado (ritual + motor Andon).\n" },
     { "ruta": "docs/decisions/README.md", "contenido": "# Decisiones (ADRs)\n\nRegistro de las decisiones de arquitectura. Cada ADR captura UNA decision y su porque.\n\n> Este indice es un doc dueno con bloqueo real: agregar un ADR sin listarlo aqui detiene el push.\n\n| # | Titulo | Estado |\n|---|---|---|\n| 0000 | Plantilla | plantilla |\n" },
     { "ruta": ".gitignore", "contenido": "# Evidencia de Gemba (el bulto no se versiona; lo citado se commitea con git add -f)\nqa_runs/*/\n\n# Marcadores de revision de los Stop hooks\n.claude/.review-marker\n.claude/.gemba-marker\n\n# Plan de trabajo del dia (efimero, persistente fuera de git)\n/.jidoka/\n\n# SO / editor\n.DS_Store\nThumbs.db\n*.swp\n" }
   ],
+  "stubs_arquetipo": {
+    "grafo": { "ruta": "product/README.md", "contenido": "# product/ - el grafo del QUE\n\nEl QUE en lenguaje llano: dominios -> modulos -> capacidades, cada nota con frontmatter (tipo, estado) y enlazada por wikilinks [[...]]. Lo mantiene integro tools/auditar.ps1 (frontmatter, links, criterios de las capacidades 'vigente'), modulado por estado.\n\n## Para empezar\n\n1. Define el producto (una frase de que es y para quien).\n2. Sus dominios (grandes areas del negocio).\n3. Los modulos y capacidades de cada dominio -- copia las plantillas de kit/.jidoka/templates/producto/ (capacidad, modulo, dominio...).\n4. Marca lo ambiguo como pendiente del cliente; no lo inventes.\n" },
+    "brief": { "ruta": "PRODUCT_BRIEF.md", "contenido": "# [Producto] - Brief\n\n> El QUE y el PORQUE en una pagina (arquetipo code-first: este es el unico doc de producto). Copia la estructura de kit/.jidoka/templates/PRODUCT_BRIEF.md.\n\n## En una frase\n\n[Que es y para quien.]\n\n## El problema\n\n[Que dolor real resuelve.]\n\n## Que hace\n\n- [Capacidad ancla, en lenguaje de usuario.]\n\n## Landscape\n\n[Las alternativas reales (verificadas en vivo) y que hace distinto a esto.]\n" }
+  },
   "post": {
     "hooksPath": ".githooks",
     "siguientes_pasos": [
       "Corre ./tools/probar-gate.ps1 para confirmar que el motor quedo sano.",
       "Corre /jidoka:arranca en una sesion de Claude Code para activar el ritual.",
       "Enciende el muro server-side (paso humano): branch protection en main con el check 'andon' requerido y sin bypass.",
-      "Copia una plantilla de kit/.jidoka/templates/ para tu primer plan o ADR."
+      "Copia una plantilla de kit/.jidoka/templates/ (ritual) o kit/.jidoka/templates/producto/ para tu primer plan, ADR o capacidad."
     ]
   }
 }

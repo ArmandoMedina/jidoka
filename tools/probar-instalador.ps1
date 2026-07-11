@@ -56,6 +56,25 @@ try {
   Run-PS $instalar -Destino $tmp -Yes | Out-Null
   $after = Get-Content $handoff -Raw
   Check 'no-clobber: la segunda instalacion NO pisa un archivo existente' ($after -match $marca) "el archivo se sobrescribio"
+
+  # 6. Segundo arquetipo: code-first siembra DISTINTO (brief, no grafo) y su gate pasa.
+  $tmp2 = Join-Path $env:TEMP ("jidoka-smoke2-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+  try {
+    Run-PS $instalar -Destino $tmp2 -Arquetipo 'code-first' -Yes | Out-Null
+    $brief = (Test-Path (Join-Path $tmp2 'PRODUCT_BRIEF.md'))
+    $grafo = (Test-Path (Join-Path $tmp2 'product/README.md'))
+    Check 'code-first: siembra PRODUCT_BRIEF y NO el grafo de notas' ($brief -and -not $grafo) "brief=$brief grafo=$grafo"
+    $leyOk = $false
+    try { Get-Content (Join-Path $tmp2 'tools/blast-radius.json') -Raw | ConvertFrom-Json | Out-Null; $leyOk = $true } catch {}
+    Check 'code-first: su ley parsea' $leyOk "la ley code-first no parsea"
+    Push-Location $tmp2
+    git add -A 2>&1 | Out-Null
+    git -c user.email='smoke@jidoka.local' -c user.name='smoke' -c commit.gpgsign=false commit -q -m 'sembrado' 2>&1 | Out-Null
+    Pop-Location
+    $gc = Run-PS (Join-Path $tmp2 'tools/probar-gate.ps1')
+    Check 'code-first: el gate sembrado pasa en el destino' ($gc -eq 0) "exit $gc"
+  }
+  finally { Remove-Item $tmp2 -Recurse -Force -ErrorAction SilentlyContinue }
 }
 finally {
   Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
