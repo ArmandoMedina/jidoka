@@ -21,6 +21,8 @@
 
 ## La corrida nocturna desatendida
 
+> El protocolo general de trabajo sin humano presente —las dos lanes `[agente]`/`[humano]`, la prioridad, el click-it-down, el fail-safe— vive ahora en [`desatendido.md`](desatendido.md) (aplica a cualquier actividad, no solo auditar) y en el comando `/jidoka:desatendido`. Aquí queda su primera aplicación: la auditoría nocturna.
+
 La variante sin humano presente, rodada en el linaje. Difiere del ritual interactivo en cuatro piezas:
 
 1. **Reconocimiento con veredicto completo:** la corrida reporta también lo re-verificado y **sano**, y confirma o refuta pistas previas — no solo hallazgos. Un informe que solo lista problemas no dice qué se revisó.
