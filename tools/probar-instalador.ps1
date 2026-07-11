@@ -67,6 +67,7 @@ try {
   $muertos = @()
   foreach ($md in (Get-ChildItem -LiteralPath $tmp -Recurse -File -Filter *.md)) {
     $txt = Get-Content -LiteralPath $md.FullName -Raw
+    $txt = [regex]::Replace($txt, 'https?://\S+', '')   # quita URLs: un link externo no es una ruta local
     foreach ($m in [regex]::Matches($txt, '(kanban|andon|doctrina|docs/guias)/[A-Za-z0-9_./-]+\.md')) {
       if (-not (Test-Path -LiteralPath (Join-Path $tmp $m.Value))) { $muertos += ("{0} -> {1}" -f $md.Name, $m.Value) }
     }

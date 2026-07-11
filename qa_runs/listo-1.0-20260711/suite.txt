@@ -1,0 +1,9 @@
+== Evidencia Sprint A - Jidoka listo para 1.0 (v0.13.0-beta, ADR 0014) ==
+Rama: jidoka-listo-1.0  Fecha: 2026-07-11
+
+probar-version -> exit 0
+probar-gate -> exit 0
+probar-hooks -> exit 0
+probar-auditor -> exit 0
+probar-instalador -> exit 0
+auditar -> exit 0
