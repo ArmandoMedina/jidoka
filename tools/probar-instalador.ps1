@@ -119,6 +119,9 @@ try {
   # 5d. ESTADO-MOTOR: el aviso de divergencia (nunca bloquea; exit 0 siempre).
   $em = Join-Path $tmp 'tools/estado-motor.ps1'
   Check 'instala: estado-motor.ps1 queda sembrado' (Test-Path $em) "no aparecio estado-motor.ps1"
+  # Canal de subida (UP) sembrado: el helper + la guia para reportar lecciones a Jidoka.
+  Check 'instala: reportar-leccion.ps1 queda sembrado (canal de subida)' (Test-Path (Join-Path $tmp 'tools/reportar-leccion.ps1')) "no aparecio reportar-leccion.ps1"
+  Check 'instala: la guia de subida queda sembrada' (Test-Path (Join-Path $tmp 'docs/guias/reportar-leccion-a-jidoka.md')) "no aparecio la guia"
   $emOut1 = Run-PS-Out $em
   Check 'estado-motor: sin -Jidoka informa y no bloquea (exit 0)' ($LASTEXITCODE -eq 0) "exit $LASTEXITCODE"
   # Contra un Jidoka FALSO mas nuevo: debe avisar que difiere.
