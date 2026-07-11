@@ -27,6 +27,17 @@ function Run-PS-Out($file) {
   return (& powershell -NoProfile -ExecutionPolicy Bypass -File $file @args 2>&1 | Out-String)
 }
 
+# SHA256 normalizado a LF (mismo hasheo agnostico-al-EOL que instalar.ps1/estado-motor;
+# ADR 0021). El self-test setea/compara hashes del sello, y deben casar el del instalador.
+function Get-HashLF($path) {
+  $bytes = [System.IO.File]::ReadAllBytes($path)
+  $sinCR = New-Object System.Collections.Generic.List[byte]
+  foreach ($b in $bytes) { if ($b -ne 13) { $sinCR.Add($b) } }
+  $sha = [System.Security.Cryptography.SHA256]::Create()
+  try { $h = $sha.ComputeHash($sinCR.ToArray()) } finally { $sha.Dispose() }
+  return ([System.BitConverter]::ToString($h) -replace '-', '')
+}
+
 Write-Host "== Smoke del instalador (tools/instalar.ps1) =="
 $tmp = Join-Path $env:TEMP ("jidoka-smoke-" + [guid]::NewGuid().ToString('N').Substring(0,8))
 
@@ -52,7 +63,7 @@ try {
       $hashesOk = $true
       foreach ($p in $props) {
         $abs = Join-Path $tmp $p.Name
-        if (-not (Test-Path -LiteralPath $abs) -or ((Get-FileHash -LiteralPath $abs -Algorithm SHA256).Hash -ne $p.Value)) { $hashesOk = $false; break }
+        if (-not (Test-Path -LiteralPath $abs) -or ((Get-HashLF $abs) -ne $p.Value)) { $hashesOk = $false; break }
       }
     } catch {}
   }
@@ -109,7 +120,7 @@ try {
   $audChild  = Join-Path $tmp 'tools/auditar.ps1'
   Add-Content -Path $hookChild -Value '# tweak que Jidoka no tiene'
   $selloObj = Get-Content $selloPath -Raw | ConvertFrom-Json
-  $selloObj.sembrado_hashes.'tools/probar-hooks.ps1' = (Get-FileHash -LiteralPath $hookChild -Algorithm SHA256).Hash
+  $selloObj.sembrado_hashes.'tools/probar-hooks.ps1' = (Get-HashLF $hookChild)
   [System.IO.File]::WriteAllText($selloPath, ($selloObj | ConvertTo-Json -Depth 5), (New-Object System.Text.UTF8Encoding($false)))
   Add-Content -Path $audChild -Value '# ajuste propio del hijo'
 
@@ -122,7 +133,7 @@ try {
   Check 'actualizar: la instancia (HANDOFF) queda intacta' ((Get-Content $handoff -Raw) -match $marca) "se toco HANDOFF"
   $selloDespues = Get-Content $selloPath -Raw | ConvertFrom-Json
   Check 'actualizar: el sello queda en la version de Jidoka' ($selloDespues.version -eq $verTxt) "version quedo $($selloDespues.version)"
-  $jidokaAudHash = (Get-FileHash -LiteralPath (Join-Path $PSScriptRoot 'auditar.ps1') -Algorithm SHA256).Hash
+  $jidokaAudHash = (Get-HashLF (Join-Path $PSScriptRoot 'auditar.ps1'))
   Check 'actualizar: el sello guarda el hash que Jidoka ENVIA (no el custom del hijo)' ($selloDespues.sembrado_hashes.'tools/auditar.ps1' -eq $jidokaAudHash) "el sello no guardo el hash de Jidoka"
 
   # 5c. Segunda corrida: la divergencia persiste hasta reconciliar; lo restaurado ya esta al dia.
@@ -167,6 +178,26 @@ try {
   # estado-motor -Detallado: la ve DIVERGE por-hash (la version sola no la veria).
   $emDet = Run-PS-Out $em -Jidoka (Split-Path -Parent $PSScriptRoot) -Detallado
   Check 'estado-motor -Detallado: lista la pieza divergente por-hash' (($emDet -match 'probar-auditor') -and ($emDet -match 'DIVERGE')) "no listo la divergencia"
+
+  # 5f. EOL-AGNOSTICO (ADR 0021): un hijo con working tree en LF debe reconciliar por
+  # CONTENIDO, no por bytes. Sin el fix, hash(LF) != seed(CRLF) y TODO divergiria (el
+  # defecto cazado al bajar a tracker-financiero). Instalo un hijo limpio, convierto su
+  # arbol a LF, y -Actualizar NO debe reportar ninguna divergencia (mismo contenido).
+  $tmpLF = Join-Path $env:TEMP ("jidoka-smokeLF-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+  try {
+    Run-PS $instalar -Destino $tmpLF -Yes | Out-Null
+    Get-ChildItem -LiteralPath $tmpLF -Recurse -File | ForEach-Object {
+      $b = [System.IO.File]::ReadAllBytes($_.FullName)
+      if ($b -contains 13) {
+        $lf = New-Object System.Collections.Generic.List[byte]
+        foreach ($x in $b) { if ($x -ne 13) { $lf.Add($x) } }
+        [System.IO.File]::WriteAllBytes($_.FullName, $lf.ToArray())
+      }
+    }
+    $outLF = Run-PS-Out $instalar -Destino $tmpLF -Actualizar
+    Check 'eol-agnostico: un hijo LF reconcilia por contenido (0 divergencias)' (($outLF -notmatch '\[DIVERGE\]') -and ($outLF -match '\|\s*0 divergen')) "un hijo LF diverge por EOL: $outLF"
+  }
+  finally { Remove-Item $tmpLF -Recurse -Force -ErrorAction SilentlyContinue }
 
   # 6. Segundo arquetipo: code-first siembra DISTINTO (brief, no grafo) y su gate pasa.
   $tmp2 = Join-Path $env:TEMP ("jidoka-smoke2-" + [guid]::NewGuid().ToString('N').Substring(0,8))

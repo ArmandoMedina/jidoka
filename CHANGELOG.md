@@ -2,6 +2,22 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.4.0] — 2026-07-11
+
+### El lazo es agnóstico al fin de línea — `Get-MotorHash` normaliza a LF (ADR 0021)
+
+Bug estructural del lazo, cazado al bajar el batch a los labs: **un hijo con `eol=lf` divergía en TODAS las
+piezas** porque el three-way comparaba `hash(LF del hijo)` vs `seed(CRLF de Jidoka)` — nunca casan, aunque el
+contenido sea idéntico. TF (LF) reportó `0 al día | 62 divergen`; SGI (CRLF, casa Jidoka) funcionó.
+
+- **`Get-MotorHash` hashea el contenido normalizado a LF** (quita `0x0D` antes de SHA256) → el hash es
+  agnóstico al fin de línea. Aplicado en `instalar.ps1` (`-Actualizar`/`-Sellar`/sembrado), `estado-motor.ps1`
+  (`-Detallado`) y `probar-instalador.ps1`. La política de EOL es del hijo, no de Jidoka.
+- **Caso nuevo en `probar-instalador.ps1`** (42/42): convierte un hijo entero a LF y verifica que `-Actualizar`
+  reporta **0 divergencias** (antes del fix: todo divergía).
+- **Consecuencia**: los sellos de SGI/TF (hashes CRLF de la bajada previa) se re-clasifican una vez; la bajada
+  del batch se **rehace** con el instalador arreglado en ambos labs.
+
 ## [1.3.0] — 2026-07-11
 
 ### El release se deriva del SSOT — `publicar.ps1` (ADR 0020)

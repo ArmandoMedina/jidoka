@@ -53,8 +53,19 @@ function Copy-DirSafe($srcDir, $dstDir) {
   }
 }
 
-# SHA256 de un archivo (hash del sello / deteccion de divergencia).
-function Get-MotorHash($path) { return (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash }
+# SHA256 del CONTENIDO NORMALIZADO A LF (sin CR): el hash es AGNOSTICO al fin de
+# linea. Sin esto, un hijo con politica eol=lf (working tree en LF) diverge de un
+# Jidoka con eol=crlf en TODAS las piezas, para siempre -- el three-way compara
+# hash(LF) vs seed(CRLF) y nunca casan (defecto cazado al bajar a tracker-financiero;
+# ADR 0021). El motor es 100% texto; normalizar quitando 0x0D es seguro aqui.
+function Get-MotorHash($path) {
+  $bytes = [System.IO.File]::ReadAllBytes($path)
+  $sinCR = New-Object System.Collections.Generic.List[byte]
+  foreach ($b in $bytes) { if ($b -ne 13) { $sinCR.Add($b) } }
+  $sha = [System.Security.Cryptography.SHA256]::Create()
+  try { $h = $sha.ComputeHash($sinCR.ToArray()) } finally { $sha.Dispose() }
+  return ([System.BitConverter]::ToString($h) -replace '-', '')
+}
 
 # Enumera los archivos que una entrada de motor cubre en $root (aplana dirs).
 # Devuelve objetos { rel = ruta relativa con '/'; abs = ruta absoluta }.
