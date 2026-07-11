@@ -14,6 +14,17 @@ param([string]$Jidoka = '', [switch]$Detallado)
 $raiz = Split-Path -Parent $PSScriptRoot
 $selloPath = Join-Path $raiz 'tools/jidoka-motor.json'
 
+# SHA256 del contenido normalizado a LF (sin CR): agnostico al fin de linea, igual
+# que el instalador -- si no, un hijo LF diverge de un Jidoka CRLF por puro EOL (ADR 0021).
+function Get-MotorHash($path) {
+  $bytes = [System.IO.File]::ReadAllBytes($path)
+  $sinCR = New-Object System.Collections.Generic.List[byte]
+  foreach ($b in $bytes) { if ($b -ne 13) { $sinCR.Add($b) } }
+  $sha = [System.Security.Cryptography.SHA256]::Create()
+  try { $h = $sha.ComputeHash($sinCR.ToArray()) } finally { $sha.Dispose() }
+  return ([System.BitConverter]::ToString($h) -replace '-', '')
+}
+
 Write-Host "== Estado del motor Jidoka =="
 if (-not (Test-Path $selloPath)) {
   Write-Host "  [AVISO] no hay sello (tools/jidoka-motor.json): no se de que version viene tu maquinaria." -ForegroundColor Yellow
@@ -77,8 +88,8 @@ if ($Detallado) {
     foreach ($par in $pares) {
       $childAbs = Join-Path $raiz $par.rel
       if (-not (Test-Path -LiteralPath $childAbs)) { Write-Host ("    [AUSENTE]  {0}" -f $par.rel) -ForegroundColor Yellow; $aus++; continue }
-      $jh = (Get-FileHash -LiteralPath $par.src -Algorithm SHA256).Hash
-      $ch = (Get-FileHash -LiteralPath $childAbs -Algorithm SHA256).Hash
+      $jh = Get-MotorHash $par.src
+      $ch = Get-MotorHash $childAbs
       if ($ch -eq $jh) { $alDia++ }
       else { Write-Host ("    [DIVERGE]  {0}" -f $par.rel) -ForegroundColor Yellow; $div++ }
     }

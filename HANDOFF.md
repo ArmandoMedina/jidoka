@@ -15,6 +15,9 @@
 - **`v1.1.1` — hotfix** (dogfood): el matcher Bash de `no-memorias` bloqueaba en falso lecturas con `2>&1`/`2>/dev/null` (el `>` casaba con la redirección de stderr). Cazado en vivo minutos después de publicar `v1.1.0`. `probar-hooks` 17/17.
 - **`v1.2.0` — "El lazo ve la divergencia"** (ADR 0019): `instalar.ps1 -Sellar` (sello bootstrap clasificador pristina-vs-customizada) + `estado-motor -Detallado` (divergencia por-hash). `probar-instalador` 41/41.
 - **`v1.3.0` — "El release se deriva del SSOT"** (ADR 0020): `tools/publicar.ps1` corta el tag+notas desde `version.txt`+CHANGELOG y corre la suite antes de publicar (Jidoka-only, dogfoodeado en su propio corte). `probar-publicar` 4/4.
+- **`v1.4.0` — "El lazo es agnóstico al EOL"** (ADR 0021): `Get-MotorHash` normaliza a LF. Bug estructural cazado al bajar a TF (un hijo `eol=lf` divergía en todo). `probar-instalador` 42/42 (caso LF nuevo).
+
+**⏳ BAJADA EN CURSO (autorizada: "ritual merch y versión").** El batch `v1.1.0→v1.4.0` baja a los labs. SGI (CRLF) bajó verde con el subagente (`v2.7.0` listo en rama `jidoka/actualizar-1.3`), PERO se **rehace** con el instalador `v1.4.0` (sello re-normalizado). TF (LF) se **detuvo** por el bug EOL —ahora arreglado— y se rehace. Siguiente paso concreto: re-`-Actualizar` ambos labs con Jidoka `v1.4.0`, verde, y ritual (PR→merge→release) SGI `v2.7.0` + TF `v0.3.0`.
 
 **La ventana de bajada (cuando el batch esté maduro):** re-sellar SGI y TF con `-Sellar`, `-Actualizar` a la versión acumulada (baja hook mejorado + `probar-disparos` + los refinamientos), y hacer **ahí** la épica `.local` code-first y el drift estructural (tocan los labs). Una sola pasada.
 
