@@ -17,7 +17,7 @@
 [CmdletBinding()]
 param(
   [Parameter(Mandatory = $true)][string]$Destino,
-  [string]$Arquetipo = 'docs-as-code',
+  [string]$Arquetipo = '',   # vacio = no se paso: pregunta interactivo (o docs-as-code con -Yes)
   [switch]$Yes,
   [switch]$Actualizar
 )
@@ -177,9 +177,29 @@ if ($Actualizar) {
   exit 0
 }
 
+# 2. Resolver el arquetipo. Si no se paso: pregunta interactivo (o docs-as-code con -Yes).
+#    Antes tenia un default silencioso 'docs-as-code' -- un repo code-first recibia el
+#    arquetipo equivocado sin enterarse. Ahora se pregunta salvo que corras desatendido.
+if (-not $Arquetipo) {
+  $disp = @($manif.arquetipos.PSObject.Properties | Where-Object { $_.Value.disponible })
+  if ($Yes) {
+    $Arquetipo = 'docs-as-code'   # desatendido: default explicito
+  }
+  else {
+    Write-Host "== Elige el arquetipo (que siembra Jidoka) =="
+    for ($i = 0; $i -lt $disp.Count; $i++) {
+      Write-Host ("  [{0}] {1} - {2}" -f ($i + 1), $disp[$i].Name, $disp[$i].Value.desc)
+    }
+    $sel = Read-Host "Numero o nombre (Enter = docs-as-code)"
+    if (-not $sel) { $Arquetipo = 'docs-as-code' }
+    elseif ($sel -match '^\d+$' -and [int]$sel -ge 1 -and [int]$sel -le $disp.Count) { $Arquetipo = $disp[[int]$sel - 1].Name }
+    else { $Arquetipo = $sel.Trim() }
+  }
+}
+
 Write-Host "== Instalador de Jidoka (arquetipo: $Arquetipo) =="
 
-# 2. Validar el arquetipo.
+# 2b. Validar el arquetipo.
 $arq = $manif.arquetipos.$Arquetipo
 if (-not $arq) { Die "arquetipo desconocido: '$Arquetipo'. Opciones: $($manif.arquetipos.PSObject.Properties.Name -join ', ')" }
 if (-not $arq.disponible) { Die "el arquetipo '$Arquetipo' aun no esta disponible: $($arq.nota)" }

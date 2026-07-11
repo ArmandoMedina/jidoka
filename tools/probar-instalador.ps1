@@ -164,6 +164,17 @@ try {
     Check '.local: al quitar la extension, verificar vuelve a exit 0' ($vSinLocal -eq 0) "exit $vSinLocal"
   }
   finally { Remove-Item $tmp2 -Recurse -Force -ErrorAction SilentlyContinue }
+
+  # 7. Arquetipo por default con -Yes (sin -Arquetipo): desatendido cae a docs-as-code
+  #    (grafo), no pregunta ni falla. El prompt interactivo se prueba a mano (Read-Host).
+  $tmp3 = Join-Path $env:TEMP ("jidoka-smoke3-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+  try {
+    Run-PS $instalar -Destino $tmp3 -Yes | Out-Null
+    $g3 = (Test-Path (Join-Path $tmp3 'product/README.md'))
+    $b3 = (Test-Path (Join-Path $tmp3 'PRODUCT_BRIEF.md'))
+    Check 'default -Yes sin -Arquetipo: cae a docs-as-code (grafo, no brief)' ($g3 -and -not $b3) "grafo=$g3 brief=$b3"
+  }
+  finally { Remove-Item $tmp3 -Recurse -Force -ErrorAction SilentlyContinue }
 }
 finally {
   Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
