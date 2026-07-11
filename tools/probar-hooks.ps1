@@ -84,14 +84,22 @@ Push-Location $r2; git add -A 2>&1 | Out-Null; git commit -q -m init 2>&1 | Out-
 Set-Content (Join-Path $r2 'ui/app.js') "// v2 cambio visual" -Encoding Ascii
 $oVBlock = Invoke-Hook (Join-Path $hooksDir 'gemba-stop.ps1') '{}' $r2
 Check 'gemba-stop: BLOQUEA cambio visual sin evidencia' ($oVBlock.Contains('"decision":"block"') -and $oVBlock.Contains('qa_runs')) "no bloqueo: $oVBlock"
-# Caso PASA: evidencia fresca en qa_runs/ (mtime posterior al cambio visual).
+# Caso BLOQUEA (Goodhart): evidencia fresca por mtime pero NO rastreada por git.
+# qa_runs/ esta gitignoreado; un archivo sin 'git add -f' satisface el mtime pero git
+# nunca lo vera -- no vale (evidencia-no-palabra: existe en git, no solo en disco).
+Set-Content (Join-Path $r2 '.gitignore') "qa_runs/" -Encoding Ascii
 $qa = Join-Path $r2 'qa_runs/gemba-prueba'
 New-Item -ItemType Directory -Path $qa -Force | Out-Null
 $log = Join-Path $qa 'LOG.md'
 Set-Content $log "corrida" -Encoding Ascii
-(Get-Item $log).LastWriteTime = (Get-Date).AddMinutes(5)   # garantiza mtime posterior
+(Get-Item $log).LastWriteTime = (Get-Date).AddMinutes(5)   # fresca por mtime, pero sin trackear
+$oVUntracked = Invoke-Hook (Join-Path $hooksDir 'gemba-stop.ps1') '{}' $r2
+Check 'gemba-stop: BLOQUEA evidencia fresca pero NO rastreada por git (Goodhart)' ($oVUntracked.Contains('"decision":"block"')) "no bloqueo evidencia no-commiteada: $oVUntracked"
+# Caso PASA: la misma evidencia, ahora forzada al indice con git add -f.
+Push-Location $r2; git add -f qa_runs/gemba-prueba/LOG.md 2>&1 | Out-Null; Pop-Location
+(Get-Item $log).LastWriteTime = (Get-Date).AddMinutes(5)   # re-garantiza mtime posterior al cambio
 $oVPass = Invoke-Hook (Join-Path $hooksDir 'gemba-stop.ps1') '{}' $r2
-Check 'gemba-stop: DEJA cerrar con evidencia fresca en qa_runs/' (-not $oVPass.Contains('"decision":"block"')) "bloqueo indebido: $oVPass"
+Check 'gemba-stop: DEJA cerrar con evidencia rastreada y fresca (git add -f)' (-not $oVPass.Contains('"decision":"block"')) "bloqueo indebido: $oVPass"
 Remove-Item $r2 -Recurse -Force -ErrorAction SilentlyContinue
 
 # --- gemba-stop DORMIDO: sin area rol revisor-visual, no dispara ---
