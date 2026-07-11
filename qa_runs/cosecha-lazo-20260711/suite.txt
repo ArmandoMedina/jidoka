@@ -1,0 +1,17 @@
+== Evidencia de la cosecha del lazo (v0.12.0-beta, ADR 0013) ==
+Fecha: 2026-07-11  Rama: cosecha-lazo-lecciones
+
+--- Suite completa (exit por script) ---
+probar-version -> exit 0
+probar-gate -> exit 0
+probar-hooks -> exit 0
+probar-auditor -> exit 0
+probar-instalador -> exit 0
+auditar -> exit 0
+
+--- Los casos nuevos de gemba-stop (cierre del Goodhart) ---
+  [PASA]  gemba-stop.ps1: respeta stop_hook_active (no re-bloquea)
+  [PASA]  gemba-stop: BLOQUEA cambio visual sin evidencia
+  [PASA]  gemba-stop: BLOQUEA evidencia fresca pero NO rastreada por git (Goodhart)
+  [PASA]  gemba-stop: DEJA cerrar con evidencia rastreada y fresca (git add -f)
+  [PASA]  gemba-stop: DORMIDO si no hay area revisor-visual
