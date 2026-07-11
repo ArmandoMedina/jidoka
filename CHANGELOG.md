@@ -2,6 +2,25 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.1.0] — 2026-07-11
+
+### El muro cumple lo que promete — grietas 2 y 5 cerradas con invariantes testeables (ADR 0018)
+
+Endurece la promesa central (*los gates son deterministas, no teatro*) cerrando dos huecos confesados de la
+auditoría externa, con tests y no con prosa.
+
+- **`no-memorias` cubre Bash** (grieta 2, cerrada en parte): el hook inspecciona `tool_input.command` y deniega
+  la **escritura** a la memoria de Claude vía Bash (`Set-Content`/`Out-File`/redirección `>`/`cp`/`mv`/`tee`);
+  la lectura/recall no se bloquea. Matcher `Write|Edit` → `Write|Edit|Bash`. Cuatro casos nuevos en
+  `probar-hooks.ps1` (15/15). **Residual honesto** (confesado en `andon/README.md`): aliases y rutas ofuscadas
+  evaden el matcher; server-side no es gateable (la memoria es conducta del agente, no estado del repo).
+- **El registro de disparos cableados** (grieta 5, cerrada): cada disparo de `kit/.jidoka/disparos/` declara
+  `Cableado en: <punto>` (que nombra su slug) o `Catalogo-solo: <razón>`. `tools/probar-disparos.ps1` (nuevo,
+  4/4, con caso sintético de rot) verifica que ningún cableado se caiga de su punto — la grieta real era la
+  falta de verificación, no de cableado. Tolerante a puntos no sembrados en un hijo (los omite con aviso
+  visible). Registrado en CI (`andon.yml`) y en el manifiesto (`mecanica`); `probar-instalador` 35/35.
+- **Follow-through**: el hook y `probar-disparos` son mecánica → bajarán a SGI y TF por `-Actualizar`.
+
 ## [1.0.0] — 2026-07-11
 
 ### Jidoka sale de beta — el método corre end-to-end en repos ajenos (ADR 0017)

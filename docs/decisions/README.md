@@ -24,3 +24,4 @@ Registro de las decisiones de arquitectura del proyecto. Cada ADR captura **una*
 | [0015](0015-segunda-cosecha-por-el-lazo.md) | Segunda cosecha por el lazo: el mecanismo probado en producción (2 labs bajados) y las cuatro lecciones que suben (sello pristina-vs-customizada, estado-motor por-hash, drift estructural, épica `.local` code-first) | aceptado |
 | [0016](0016-licencia-mit-consciente.md) | Licencia: MIT para máxima adopción (decisión consciente, no heredada; el camino copyleft no tomado) | aceptado |
 | [0017](0017-jidoka-1.0.md) | Jidoka 1.0.0: el criterio de "corre en un repo ajeno", cumplido con evidencia (2 labs, 2 lenguajes, CI verde server-side) | aceptado |
+| [0018](0018-muro-grietas-2-5.md) | El muro cumple lo que promete: grietas 2 (`no-memorias` cubre Bash) y 5 (registro de disparos cableados, testeable) cerradas con invariantes | aceptado |

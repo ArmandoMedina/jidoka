@@ -6,7 +6,11 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Instalador `npx jidoka-method init` en camino (Sprint 3, ver `ROADMAP.md`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-11, PROGRAMA HACIA 1.0 — COMPLETO · `v1.0.0`)
+## Dónde estamos (2026-07-11, `v1.1.0` — post-1.0: muro endurecido)
+
+**Último release: `v1.1.0` — "El muro cumple lo que promete"** (ADR 0018): cerradas las grietas 2 y 5 de la auditoría con invariantes testeables. `no-memorias` ahora cubre Bash (deniega escritura a memoria vía comando; residual honesto: aliases/ofuscación/server-side). El **registro de disparos cableados** (`probar-disparos.ps1`, en CI) evita que el cableado se pudra en silencio — la grieta real era la falta de verificación. **Follow-through pendiente:** el hook mejorado + `probar-disparos` son mecánica → **bajan a SGI y TF por `-Actualizar`** (paso aparte, como Sprint B).
+
+### Antes — PROGRAMA HACIA 1.0 (COMPLETO · `v1.0.0`)
 
 **Jidoka salió de beta.** El programa de 3 sprints hacia 1.0 cerró completo. La vara del ROADMAP (*el método corre end-to-end en un repo ajeno*) quedó cumplida **con evidencia**: el núcleo bajó a dos labs ajenos reales con CI verde server-side.
 
@@ -19,8 +23,9 @@
 ### Qué sigue (post-1.0, en orden de valor)
 1. **Presentación pública** (Sprint 4): social preview, párrafo en inglés (decisión abierta del cliente), badges/banner, `CODE_OF_CONDUCT`, comunidad.
 2. **Los 4 refinamientos del lazo** (ADR 0015 / backlog del ROADMAP): generalizar el sello bootstrap, `estado-motor -Detallado`, drift estructural núcleo↔labs, épica `.local` code-first.
-3. **CLI npm `npx jidoka-method init` + SSOT de versión** (hoy la versión vive en `version.txt`/CHANGELOG/tags) y **multiplataforma**.
-4. **Grietas 2 y 5** de la auditoría (matcher Bash de `no-memorias`; cablear los disparos restantes).
+3. **Bajar `v1.1.0` a los labs por `-Actualizar`** (el hook `no-memorias` mejorado + `probar-disparos`): el follow-through del muro endurecido (como Sprint B).
+4. **CLI npm `npx jidoka-method init` + SSOT de versión** (hoy la versión vive en `version.txt`/CHANGELOG/tags) y **multiplataforma**.
+5. **Épica `.local` code-first** (ADR 0015): la "mecánica igual" completa sin romper los 453 tests de SGI.
 
 ## Antes (2026-07-11, la cosecha del lazo — CERRADA)
 

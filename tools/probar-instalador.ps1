@@ -81,7 +81,7 @@ try {
   Pop-Location
 
   # 3. Los self-tests SEMBRADOS deben pasar en el destino.
-  foreach ($t in @('probar-gate', 'probar-hooks', 'probar-auditor')) {
+  foreach ($t in @('probar-gate', 'probar-hooks', 'probar-auditor', 'probar-disparos')) {
     $code = Run-PS (Join-Path $tmp "tools/$t.ps1")
     Check "self-test sembrado '$t' pasa en el destino" ($code -eq 0) "exit $code"
   }

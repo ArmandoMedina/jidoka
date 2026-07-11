@@ -33,9 +33,10 @@ jobs:
         shell: powershell
         run: |
           $ErrorActionPreference = 'Continue'
-          .\tools\probar-gate.ps1;    if ($LASTEXITCODE -ne 0) { exit 1 }
-          .\tools\probar-hooks.ps1;   if ($LASTEXITCODE -ne 0) { exit 1 }
-          .\tools\probar-auditor.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-gate.ps1;     if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-hooks.ps1;    if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-auditor.ps1;  if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-disparos.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           exit 0
 
       - name: andon sobre el rango del PR (ley y verificador de la BASE)

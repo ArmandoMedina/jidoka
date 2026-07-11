@@ -53,6 +53,18 @@ Check 'no-memorias: DENIEGA escritura a la carpeta de memoria' ($outDeny.Contain
 $outAllow = Invoke-Hook $noMem '{"tool_input":{"file_path":"C:\\repo\\HANDOFF.md"}}' $null
 Check 'no-memorias: DEJA pasar una ruta normal del repo' (-not $outAllow.Contains('deny')) "denego de mas: $outAllow"
 
+# Grieta 2 (auditoria externa): el bypass por Bash. Antes el matcher era solo Write|Edit
+# y un Set-Content/redireccion por Bash rodeaba el deny. Ahora se inspecciona
+# tool_input.command: ESCRITURA a la memoria bloquea; LECTURA (recall) no.
+$outBashSet = Invoke-Hook $noMem '{"tool_name":"Bash","tool_input":{"command":"Set-Content -Path C:\\Users\\x\\.claude\\projects\\slug\\memory\\foo.md -Value hola"}}' $null
+Check 'no-memorias: DENIEGA escritura a memoria por Bash (Set-Content)' ($outBashSet.Contains('"permissionDecision":"deny"')) "no denego el bypass: $outBashSet"
+$outBashRedir = Invoke-Hook $noMem '{"tool_name":"Bash","tool_input":{"command":"echo hola > ~/.claude/projects/slug/memory/foo.md"}}' $null
+Check 'no-memorias: DENIEGA escritura a memoria por Bash (redireccion >)' ($outBashRedir.Contains('"permissionDecision":"deny"')) "no denego el redirect: $outBashRedir"
+$outBashRead = Invoke-Hook $noMem '{"tool_name":"Bash","tool_input":{"command":"cat C:\\Users\\x\\.claude\\projects\\slug\\memory\\foo.md"}}' $null
+Check 'no-memorias: DEJA LEER memoria por Bash (recall no se bloquea)' (-not $outBashRead.Contains('deny')) "bloqueo una lectura: $outBashRead"
+$outBashNorm = Invoke-Hook $noMem '{"tool_name":"Bash","tool_input":{"command":"Set-Content -Path C:\\repo\\HANDOFF.md -Value hi"}}' $null
+Check 'no-memorias: DEJA pasar una escritura Bash normal del repo' (-not $outBashNorm.Contains('deny')) "denego de mas por Bash: $outBashNorm"
+
 # --- stop_hook_active: los Stop-hooks no re-bloquean ---
 foreach ($h in @('review-stop.ps1','gemba-stop.ps1','andon-stop.ps1')) {
   $o = Invoke-Hook (Join-Path $hooksDir $h) '{"stop_hook_active":true}' $null
