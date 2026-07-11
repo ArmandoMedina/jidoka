@@ -20,3 +20,4 @@ Registro de las decisiones de arquitectura del proyecto. Cada ADR captura **una*
 | [0011](0011-homologacion-cosecha-sgi.md) | Cosecha de SGI: token neutral en la ley (`escribano` en minúscula) y tres maduraciones al casting (Homologación Etapa 2) | aceptado |
 | [0012](0012-lazo-sincronizacion-labs.md) | El lazo de sincronización labs↔Jidoka: sello de versión + `-Actualizar` (tres vías por hash) + aviso de divergencia + canal de subida | aceptado |
 | [0013](0013-primera-cosecha-por-el-lazo.md) | Primera cosecha por el lazo: tres lecciones de campo absorbidas (gemba-stop rastreado, excepción de dominio con nombre, criterio de delegación) | aceptado |
+| [0014](0014-listo-para-1.0.md) | Jidoka listo para 1.0: cerrar los bloqueantes de "corre en un repo ajeno" (instalador pregunta arquetipo, sembrar el método, fixture del quickstart, guía empezar-de-cero) | aceptado |

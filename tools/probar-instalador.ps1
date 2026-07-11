@@ -60,6 +60,20 @@ try {
   Check 'sello: registra al menos una pieza de motor' $countOk "sembrado_hashes vacio"
   Check 'sello: cada hash casa con el archivo sembrado' $hashesOk "algun hash no coincide con lo sembrado"
 
+  # 1f. ENLACES DE METODO: ningun doc sembrado debe citar un doc de metodo ausente
+  #     (kanban/ andon/ doctrina/ docs/guias/) -- cierra los "enlaces muertos en un repo
+  #     ajeno" (bloqueante de 1.0). Se excluye docs/decisions/ (los ADR son procedencia
+  #     de Jidoka: apuntan a la fuente, no viven en el hijo).
+  $muertos = @()
+  foreach ($md in (Get-ChildItem -LiteralPath $tmp -Recurse -File -Filter *.md)) {
+    $txt = Get-Content -LiteralPath $md.FullName -Raw
+    $txt = [regex]::Replace($txt, 'https?://\S+', '')   # quita URLs: un link externo no es una ruta local
+    foreach ($m in [regex]::Matches($txt, '(kanban|andon|doctrina|docs/guias)/[A-Za-z0-9_./-]+\.md')) {
+      if (-not (Test-Path -LiteralPath (Join-Path $tmp $m.Value))) { $muertos += ("{0} -> {1}" -f $md.Name, $m.Value) }
+    }
+  }
+  Check 'enlaces de metodo: ningun doc sembrado cita un doc de metodo ausente' ($muertos.Count -eq 0) (($muertos | Select-Object -Unique -First 5) -join ' | ')
+
   # 2. Commit inicial (un repo recien sembrado se commitea antes de que verificar mida).
   Push-Location $tmp
   git add -A 2>&1 | Out-Null
@@ -164,6 +178,17 @@ try {
     Check '.local: al quitar la extension, verificar vuelve a exit 0' ($vSinLocal -eq 0) "exit $vSinLocal"
   }
   finally { Remove-Item $tmp2 -Recurse -Force -ErrorAction SilentlyContinue }
+
+  # 7. Arquetipo por default con -Yes (sin -Arquetipo): desatendido cae a docs-as-code
+  #    (grafo), no pregunta ni falla. El prompt interactivo se prueba a mano (Read-Host).
+  $tmp3 = Join-Path $env:TEMP ("jidoka-smoke3-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+  try {
+    Run-PS $instalar -Destino $tmp3 -Yes | Out-Null
+    $g3 = (Test-Path (Join-Path $tmp3 'product/README.md'))
+    $b3 = (Test-Path (Join-Path $tmp3 'PRODUCT_BRIEF.md'))
+    Check 'default -Yes sin -Arquetipo: cae a docs-as-code (grafo, no brief)' ($g3 -and -not $b3) "grafo=$g3 brief=$b3"
+  }
+  finally { Remove-Item $tmp3 -Recurse -Force -ErrorAction SilentlyContinue }
 }
 finally {
   Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue

@@ -6,14 +6,23 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Instalador `npx jidoka-method init` en camino (Sprint 3, ver `ROADMAP.md`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-11, cosecha del lazo)
+## Dónde estamos (2026-07-11, PROGRAMA HACIA 1.0 — Sprint A)
 
-- **⏳ PENDIENTE DE TU REVISIÓN: la primera cosecha por el lazo** (`v0.12.0-beta`, ADR 0013). Rama `cosecha-lazo-lecciones`; **sin PR abierto todavía** (lo dejo listo para tu orden). Tres lecciones de campo absorbidas con el ritual — la máquina del lazo en uso, no la mano:
-  1. **`gemba-stop` exige evidencia rastreada por git** (`.claude/hooks/gemba-stop.ps1`): cierra un Goodhart (evidencia por mtime que git nunca ve porque `qa_runs/` está gitignoreado). Ahora solo cuenta lo que `git ls-files` rastrea (`git add -f`). Self-test: **`probar-hooks.ps1` 11/11** (nuevo caso BLOQUEA + PASA).
-  2. **Excepción de dominio con nombre** para el mandato sintético (revisor-visual SKILL, `gemba.md`, `verificacion.md`) — disparo `excepciones-cableadas`.
-  3. **Criterio operativo de delegación** orquestador↔subagente (`kanban/roles.md`) — la meta-lección tuya, ahora con tabla al vistazo y ejemplo trabajado.
-- **Retenido para tu orden nombrada:** abrir PR + merge + release `v0.12.0-beta` (como con el lazo).
-- **Secuenciado como sprints propios** (registrado en ADR 0013): **B** — SGI converge su gate (`-Cambiados` + `probar-gate`, mueve ruff/pytest a `.local`; toca sus 453 tests); **C** — homologación de TF (el último lab).
+**Meta del cliente:** terminar Jidoka, bajar el núcleo a los 2 labs (SGI + TF), probar e2e, y sacar `v1.0.0`. Alcance **1.0 funcional** (diferir lo público y el CLI npm). Programa de 3 sprints (plan aprobado).
+
+- **⏳ PENDIENTE DE TU REVISIÓN: Sprint A — Jidoka listo para 1.0** (`v0.13.0-beta`, ADR 0014). Rama `jidoka-listo-1.0`; **sin PR todavía** (listo para tu orden). Cierra los 4 bloqueantes duros de "corre en un repo ajeno":
+  1. **El instalador pregunta el arquetipo** (`instalar.ps1`; con `-Yes` cae a docs-as-code).
+  2. **El método se siembra** (`kanban/`+`andon/`+`doctrina/`+guía entorno) → hijo autocontenido; verificador de enlaces en el smoke. Cierra los enlaces muertos.
+  3. **Fixture del quickstart** en `probar-gate.ps1` (flujo real commit→verificar por git).
+  4. **Guía `empezar-de-cero.md` completa** (`estado: vigente`).
+  - Evidencia: `probar-instalador` 34/34, `probar-gate` 10/10, suite verde.
+- **Retenido para tu orden nombrada:** abrir PR + merge + release `v0.13.0-beta`.
+- **Hallazgo que reencuadró el programa:** TF (tracker-financiero) **ya convergió al núcleo a mano** (ADR 0006, PR #6) — como SGI. Bajar no es adoptar de cero, es **cablear al lazo + `-Actualizar`**. El HANDOFF viejo (TF = "último lab por adoptar") estaba desactualizado.
+- **Siguientes sprints del programa:** **B** — bajar a los 2 labs (TF: sello + canal + `core.hooksPath` + CI + `-Actualizar`; SGI: `-Actualizar` a la versión actual). **C** — probar e2e en ambos + release `v1.0.0`. (La refactor profunda de SGI —`-Cambiados`/`probar-gate`/`.local`— sigue diferida post-1.0.)
+
+## Antes (2026-07-11, la cosecha del lazo — CERRADA)
+
+- **✅ Primera cosecha por el lazo MERGEADA y LIBERADA (`v0.12.0-beta`, ADR 0013).** PR #15 mergeado; [release](https://github.com/ArmandoMedina/jidoka/releases/tag/v0.12.0-beta). Tres lecciones absorbidas: gemba-stop exige evidencia rastreada por git, excepción de dominio con nombre, criterio operativo de delegación.
 
 ## Antes (2026-07-11, el lazo labs↔Jidoka — CERRADO)
 

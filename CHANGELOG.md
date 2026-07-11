@@ -2,6 +2,18 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [0.13.0-beta] — 2026-07-11
+
+### Jidoka listo para 1.0 — los cuatro bloqueantes de "corre en un repo ajeno" (ADR 0014)
+
+Cierra los bloqueantes duros del criterio de 1.0 (*el método corre end-to-end en un repo ajeno*). Alcance **1.0 funcional**: lo público y el CLI npm quedan post-1.0.
+
+- **El instalador pregunta el arquetipo** (`tools/instalar.ps1`): si no pasas `-Arquetipo` ni `-Yes`, menú interactivo (`docs-as-code`/`code-first`); con `-Yes` cae a `docs-as-code`. Antes el default silencioso sembraba el arquetipo equivocado a un repo code-first.
+- **El método se siembra** (fin de los enlaces muertos): el manifiesto ahora siembra `kanban/` + `andon/` + `doctrina/` + la guía de entorno como `mecanica` → el hijo es autocontenido. Un **verificador de enlaces** en `probar-instalador.ps1` lo vuelve invariante (ningún doc sembrado cita un doc de método ausente).
+- **Fixture del quickstart** (`probar-gate.ps1`): un caso que ejercita el flujo real commit→verificar por git, replicando el paso 3 del README (ADR sin listar → `[BLOQUEA]`; listarlo → pasa). La demo copy-paste no se rompe en silencio.
+- **Guía `docs/guias/empezar-de-cero.md` completa** (`estado: vigente`): walkthrough de instalación desde cero verificado contra el flujo real.
+- Evidencia: `probar-instalador.ps1` 34/34, `probar-gate.ps1` 10/10, suite completa verde.
+
 ## [0.12.0-beta] — 2026-07-11
 
 ### Primera cosecha por el lazo — tres lecciones de campo absorbidas (ADR 0013)
