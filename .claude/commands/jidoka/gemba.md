@@ -18,7 +18,7 @@ Incremento a demostrar: **$ARGUMENTS**
 2. **Deja los artefactos en `qa_runs/<rol|propósito>-<YYYYMMDD-HHMMSS>/`** (ej. `qa_runs/revisor-visual-20260710-170512/`):
    - Los artefactos reales: capturas, snapshots renderizados, logs, tablas `entrada → salida-obtenida → esperada`.
    - Un `LOG.md` que declare: **fecha, rama, método reproducible**, y los resultados como tabla `# | Caso | Check | Resultado (N/N)`.
-   - **Datos 100 % sintéticos, siempre** — perfiles ficticios, montos inventados; ninguna captura carga datos reales, ni en repos privados.
+   - **Datos 100 % sintéticos por defecto** — perfiles ficticios, montos inventados; ninguna captura carga datos reales, ni en repos privados. *Excepción de dominio con nombre* (disparo `excepciones-cableadas`): si lo sintético no ejercita el artefacto —un render/HUD sobre telemetría real—, corre con dato real **fuera del repo** y commitea solo capturas; **nómbrala**, no la toleres en silencio.
 3. **El veredicto NO vive en `qa_runs/`.** Va a `HANDOFF.md` o `CHANGELOG.md` **citando** el directorio de la corrida. Artefacto y veredicto se separan a propósito.
 
 ## El checkpoint es del cliente
