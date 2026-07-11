@@ -27,6 +27,7 @@
     { "origen": "tools/probar-gate.ps1", "destino": "tools/probar-gate.ps1", "clase": "mecanica" },
     { "origen": "tools/probar-hooks.ps1", "destino": "tools/probar-hooks.ps1", "clase": "mecanica" },
     { "origen": "tools/probar-auditor.ps1", "destino": "tools/probar-auditor.ps1", "clase": "mecanica" },
+    { "origen": "tools/probar-disparos.ps1", "destino": "tools/probar-disparos.ps1", "clase": "mecanica" },
     { "origen": "tools/estado-motor.ps1", "destino": "tools/estado-motor.ps1", "clase": "mecanica" },
     { "origen": "tools/reportar-leccion.ps1", "destino": "tools/reportar-leccion.ps1", "clase": "mecanica" },
     { "origen": ".claude/settings.json", "destino": ".claude/settings.json", "clase": "mecanica" },
