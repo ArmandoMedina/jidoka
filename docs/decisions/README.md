@@ -21,3 +21,6 @@ Registro de las decisiones de arquitectura del proyecto. Cada ADR captura **una*
 | [0012](0012-lazo-sincronizacion-labs.md) | El lazo de sincronización labs↔Jidoka: sello de versión + `-Actualizar` (tres vías por hash) + aviso de divergencia + canal de subida | aceptado |
 | [0013](0013-primera-cosecha-por-el-lazo.md) | Primera cosecha por el lazo: tres lecciones de campo absorbidas (gemba-stop rastreado, excepción de dominio con nombre, criterio de delegación) | aceptado |
 | [0014](0014-listo-para-1.0.md) | Jidoka listo para 1.0: cerrar los bloqueantes de "corre en un repo ajeno" (instalador pregunta arquetipo, sembrar el método, fixture del quickstart, guía empezar-de-cero) | aceptado |
+| [0015](0015-segunda-cosecha-por-el-lazo.md) | Segunda cosecha por el lazo: el mecanismo probado en producción (2 labs bajados) y las cuatro lecciones que suben (sello pristina-vs-customizada, estado-motor por-hash, drift estructural, épica `.local` code-first) | aceptado |
+| [0016](0016-licencia-mit-consciente.md) | Licencia: MIT para máxima adopción (decisión consciente, no heredada; el camino copyleft no tomado) | aceptado |
+| [0017](0017-jidoka-1.0.md) | Jidoka 1.0.0: el criterio de "corre en un repo ajeno", cumplido con evidencia (2 labs, 2 lenguajes, CI verde server-side) | aceptado |

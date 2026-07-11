@@ -6,19 +6,21 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Instalador `npx jidoka-method init` en camino (Sprint 3, ver `ROADMAP.md`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-11, PROGRAMA HACIA 1.0 — Sprint A)
+## Dónde estamos (2026-07-11, PROGRAMA HACIA 1.0 — COMPLETO · `v1.0.0`)
 
-**Meta del cliente:** terminar Jidoka, bajar el núcleo a los 2 labs (SGI + TF), probar e2e, y sacar `v1.0.0`. Alcance **1.0 funcional** (diferir lo público y el CLI npm). Programa de 3 sprints (plan aprobado).
+**Jidoka salió de beta.** El programa de 3 sprints hacia 1.0 cerró completo. La vara del ROADMAP (*el método corre end-to-end en un repo ajeno*) quedó cumplida **con evidencia**: el núcleo bajó a dos labs ajenos reales con CI verde server-side.
 
-- **⏳ PENDIENTE DE TU REVISIÓN: Sprint A — Jidoka listo para 1.0** (`v0.13.0-beta`, ADR 0014). Rama `jidoka-listo-1.0`; **sin PR todavía** (listo para tu orden). Cierra los 4 bloqueantes duros de "corre en un repo ajeno":
-  1. **El instalador pregunta el arquetipo** (`instalar.ps1`; con `-Yes` cae a docs-as-code).
-  2. **El método se siembra** (`kanban/`+`andon/`+`doctrina/`+guía entorno) → hijo autocontenido; verificador de enlaces en el smoke. Cierra los enlaces muertos.
-  3. **Fixture del quickstart** en `probar-gate.ps1` (flujo real commit→verificar por git).
-  4. **Guía `empezar-de-cero.md` completa** (`estado: vigente`).
-  - Evidencia: `probar-instalador` 34/34, `probar-gate` 10/10, suite verde.
-- **Retenido para tu orden nombrada:** abrir PR + merge + release `v0.13.0-beta`.
-- **Hallazgo que reencuadró el programa:** TF (tracker-financiero) **ya convergió al núcleo a mano** (ADR 0006, PR #6) — como SGI. Bajar no es adoptar de cero, es **cablear al lazo + `-Actualizar`**. El HANDOFF viejo (TF = "último lab por adoptar") estaba desactualizado.
-- **Siguientes sprints del programa:** **B** — bajar a los 2 labs (TF: sello + canal + `core.hooksPath` + CI + `-Actualizar`; SGI: `-Actualizar` a la versión actual). **C** — probar e2e en ambos + release `v1.0.0`. (La refactor profunda de SGI —`-Cambiados`/`probar-gate`/`.local`— sigue diferida post-1.0.)
+- **✅ Sprint A** (`v0.13.0-beta`, ADR 0014): los 4 bloqueantes de "corre en un repo ajeno" cerrados (instalador pregunta arquetipo, método sembrado completo, fixture del quickstart, guía empezar-de-cero). PR #16 mergeado, release publicado.
+- **✅ Sprint B** (labs): el núcleo bajó por el lazo. **SGI `v2.6.0`** (PR #58, 7/7 checks) — actualizar núcleo + **curar un bug del sello** (grababa piezas code-first como semilla pristina → auto-sanante). **TF `v0.2.0`** (PR #7, 5/5 checks) — cablear al lazo (sello + canal de subida + `core.hooksPath`) + convergencia ADR 0006. Ambos liberados, lo code-first preservado sin pisar nada. Evidencia en el `qa_runs/` de cada lab.
+- **✅ Sprint C** (`v1.0.0`, ADRs 0015/0016/0017): segunda cosecha por el lazo (4 lecciones al backlog), licencia **MIT consciente**, y la **declaración 1.0**. `tools/version.txt` → `1.0.0`.
+- **Alcance 1.0 funcional.** Diferido explícito a post-1.0 (ROADMAP): lo público (social preview, párrafo en inglés, `CODE_OF_CONDUCT`), CLI npm/SSOT, multiplataforma, reconciliación code-first vía `.local`, grietas 2 y 5, y las 4 lecciones de ADR 0015.
+- **Estado de los labs:** SGI (`master`) y TF (`main`) corren el núcleo `0.13.0-beta`, cableados al lazo. La próxima mejora de Jidoka baja a ambos con `-Actualizar`.
+
+### Qué sigue (post-1.0, en orden de valor)
+1. **Presentación pública** (Sprint 4): social preview, párrafo en inglés (decisión abierta del cliente), badges/banner, `CODE_OF_CONDUCT`, comunidad.
+2. **Los 4 refinamientos del lazo** (ADR 0015 / backlog del ROADMAP): generalizar el sello bootstrap, `estado-motor -Detallado`, drift estructural núcleo↔labs, épica `.local` code-first.
+3. **CLI npm `npx jidoka-method init` + SSOT de versión** (hoy la versión vive en `version.txt`/CHANGELOG/tags) y **multiplataforma**.
+4. **Grietas 2 y 5** de la auditoría (matcher Bash de `no-memorias`; cablear los disparos restantes).
 
 ## Antes (2026-07-11, la cosecha del lazo — CERRADA)
 

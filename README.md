@@ -9,12 +9,12 @@ Es el Sistema de Producción Toyota, aplicado al trabajo con agentes.</p>
 
 <p align="center">
 <a href="LICENSE"><img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-green"></a>
-<img alt="Estado: beta" src="https://img.shields.io/badge/estado-beta-orange">
+<img alt="Estado: 1.0 estable" src="https://img.shields.io/badge/estado-1.0%20estable-brightgreen">
 <img alt="Windows / PowerShell 5.1" src="https://img.shields.io/badge/hoy-Windows%20%C2%B7%20PS%205.1-blue">
 <a href="ROADMAP.md"><img alt="Multiplataforma en el roadmap" src="https://img.shields.io/badge/multiplataforma-roadmap-lightgrey"></a>
 </p>
 
-<p align="center">🧪 <strong>beta</strong> (<code>v0.10.0-beta</code>) — <strong>este repo se gobierna con su propio Andon</strong>: los <a href="https://github.com/ArmandoMedina/jidoka/pulls?q=is%3Apr">PRs</a>, los <a href="https://github.com/ArmandoMedina/jidoka/actions">checks</a> y los <a href="docs/sprints/">sprints archivados</a> son la evidencia, no la palabra.</p>
+<p align="center">🟢 <strong><code>v1.0.0</code></strong> — <strong>este repo se gobierna con su propio Andon</strong>: los <a href="https://github.com/ArmandoMedina/jidoka/pulls?q=is%3Apr">PRs</a>, los <a href="https://github.com/ArmandoMedina/jidoka/actions">checks</a> y los <a href="docs/sprints/">sprints archivados</a> son la evidencia, no la palabra.</p>
 
 <p align="center"><strong>En español, a propósito.</strong></p>
 
@@ -103,7 +103,7 @@ Un sprint de Jidoka es un lazo corto de cuatro tiempos. La tarjeta pasa por **Bo
 
 Tres reglas de diseño que lo atraviesan todo: **el plan ligero es el contrato** (sin ceremonia de más); **cada asiento tiene una sola responsabilidad** ([`kanban/roles.md`](kanban/roles.md)); y **la disciplina escala con el riesgo** — al instalar eliges el arquetipo de tu repo y se enciende solo la maquinaria que ese proyecto merece. Es un menú, no un molde.
 
-## Dónde va la beta
+## Dónde va Jidoka
 
 Qué hay **hoy** y qué viene (detalle en [`ROADMAP.md`](ROADMAP.md)):
 
@@ -114,7 +114,7 @@ Qué hay **hoy** y qué viene (detalle en [`ROADMAP.md`](ROADMAP.md)):
 | **2 — Ritual Kanban** | Comandos `/jidoka:*`, skills-asiento, `gemba-stop` + `review-stop`, auditor del grafo | ✅ `v0.5.0` · `v0.6.0-beta` |
 | **3 — Instalador** | `tools/instalar.ps1` con arquetipos ejecutables (`docs-as-code` · `code-first`) + 12 templates | 🔨 Fases A y B publicadas (`v0.7.0` · `v0.8.0-beta`); falta CLI `npx` + multiplataforma |
 | **Homologación** | Una sola metodología: Jidoka como superset de sus labs; las cosechas de SGI de vuelta al método | ✅ `v0.9.0` · `v0.10.0-beta` |
-| **4 — Beta estable** | Guías completas, presentación pública, `v1.0` cuando corra end-to-end en un repo ajeno | 🔜 |
+| **4 — Estable** | El método corre end-to-end en un repo ajeno; guías completas | ✅ `v1.0.0` — cumplido en 2 labs (SGI · TF); presentación pública post-1.0 |
 
 ## Empezar
 
