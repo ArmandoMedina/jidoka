@@ -121,6 +121,17 @@ foreach ($entry in $manifest) {
 
 if (-not $hayFalta -and -not $hayAviso) { Ok "blast-radius al dia (o sin cambios en areas cubiertas)" }
 
+# Costura .local: extension de mecanica ESPECIFICA del repo (p.ej. lint/tests de un
+# lenguaje: ruff, pytest). El motor generico NO se bifurca -- el hijo pone sus checks
+# aqui y siguen contando para $script:warn / $script:block (usa Note/Block/Ok). Es la
+# via sostenible para customizar sin romper -Actualizar. Ausente -> se ignora (la
+# mayoria de repos no la necesita). Ve $changed y las funciones del gate por dot-source.
+$local = Join-Path $PSScriptRoot 'verificar.local.ps1'
+if (Test-Path -LiteralPath $local) {
+  Write-Host "== Extension local del gate (tools/verificar.local.ps1) =="
+  . $local
+}
+
 Write-Host ""
 if ($script:block -gt 0) {
   Write-Host "== $($script:block) bloqueo(s). PUSH DETENIDO. ==" -ForegroundColor Red

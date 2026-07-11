@@ -22,6 +22,11 @@ function Run-PS($file) {
   return $LASTEXITCODE
 }
 
+# Como Run-PS pero devuelve la salida (para inspeccionar avisos, no solo el exit).
+function Run-PS-Out($file) {
+  return (& powershell -NoProfile -ExecutionPolicy Bypass -File $file @args 2>&1 | Out-String)
+}
+
 Write-Host "== Smoke del instalador (tools/instalar.ps1) =="
 $tmp = Join-Path $env:TEMP ("jidoka-smoke-" + [guid]::NewGuid().ToString('N').Substring(0,8))
 
@@ -111,6 +116,22 @@ try {
   $persiste = ((Get-Content $audChild -Raw) -match 'ajuste propio del hijo') -and (Test-Path "$audChild.jidoka-nuevo")
   Check 'actualizar (2a vez): la divergencia persiste, lo demas converge' $persiste "no fue idempotente"
 
+  # 5d. ESTADO-MOTOR: el aviso de divergencia (nunca bloquea; exit 0 siempre).
+  $em = Join-Path $tmp 'tools/estado-motor.ps1'
+  Check 'instala: estado-motor.ps1 queda sembrado' (Test-Path $em) "no aparecio estado-motor.ps1"
+  $emOut1 = Run-PS-Out $em
+  Check 'estado-motor: sin -Jidoka informa y no bloquea (exit 0)' ($LASTEXITCODE -eq 0) "exit $LASTEXITCODE"
+  # Contra un Jidoka FALSO mas nuevo: debe avisar que difiere.
+  $fakeJ = Join-Path $env:TEMP ("jidoka-fake-" + [guid]::NewGuid().ToString('N').Substring(0,6))
+  New-Item -ItemType Directory -Path (Join-Path $fakeJ 'tools') -Force | Out-Null
+  Set-Content -Path (Join-Path $fakeJ 'tools/version.txt') -Value '9.9.9-nuevo' -Encoding ASCII
+  $emOut2 = Run-PS-Out $em -Jidoka $fakeJ
+  Check 'estado-motor: contra un Jidoka mas nuevo, avisa que difiere' (($emOut2 -match '9\.9\.9-nuevo') -and ($emOut2 -match 'AVISO')) "no aviso divergencia"
+  # Contra el Jidoka REAL (misma version del sello): al dia.
+  $emOut3 = Run-PS-Out $em -Jidoka (Split-Path -Parent $PSScriptRoot)
+  Check 'estado-motor: contra Jidoka real (misma version), al dia' ($emOut3 -match 'al dia') "no dijo al dia"
+  Remove-Item $fakeJ -Recurse -Force -ErrorAction SilentlyContinue
+
   # 6. Segundo arquetipo: code-first siembra DISTINTO (brief, no grafo) y su gate pasa.
   $tmp2 = Join-Path $env:TEMP ("jidoka-smoke2-" + [guid]::NewGuid().ToString('N').Substring(0,8))
   try {
@@ -127,6 +148,17 @@ try {
     Pop-Location
     $gc = Run-PS (Join-Path $tmp2 'tools/probar-gate.ps1')
     Check 'code-first: el gate sembrado pasa en el destino' ($gc -eq 0) "exit $gc"
+
+    # Costura .local: verificar dot-sourcea tools/verificar.local.ps1 si existe.
+    # (repo recien commiteado y limpio: aisla el efecto de la extension del git-state)
+    $vLimpio = Run-PS (Join-Path $tmp2 'tools/verificar.ps1')
+    Check '.local: sin extension, verificar corre limpio (exit 0)' ($vLimpio -eq 0) "exit $vLimpio"
+    Set-Content -Path (Join-Path $tmp2 'tools/verificar.local.ps1') -Value 'Block "check local de prueba"' -Encoding ASCII
+    $vConLocal = Run-PS (Join-Path $tmp2 'tools/verificar.ps1')
+    Check '.local: la extension se dot-sourcea y su Block cuenta (exit 1)' ($vConLocal -eq 1) "exit $vConLocal (esperaba 1)"
+    Remove-Item (Join-Path $tmp2 'tools/verificar.local.ps1') -Force
+    $vSinLocal = Run-PS (Join-Path $tmp2 'tools/verificar.ps1')
+    Check '.local: al quitar la extension, verificar vuelve a exit 0' ($vSinLocal -eq 0) "exit $vSinLocal"
   }
   finally { Remove-Item $tmp2 -Recurse -Force -ErrorAction SilentlyContinue }
 }
