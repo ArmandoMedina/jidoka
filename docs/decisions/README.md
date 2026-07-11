@@ -17,3 +17,4 @@ Registro de las decisiones de arquitectura del proyecto. Cada ADR captura **una*
 | [0008](0008-el-instalador.md) | El instalador mínimo: PowerShell-first, siembra leyendo del árbol sin duplicar, un arquetipo (docs-as-code) | aceptado |
 | [0009](0009-arquetipos-ejecutables.md) | Los arquetipos ejecutables (matriz-como-manifiesto) y la poda a dos (docs-as-code + code-first; doc-only diferido) | aceptado (delegado · revisable) |
 | [0010](0010-roster-y-modo-desatendido.md) | El roster completo (`devops`), el modo desatendido general, y el casting neutral+persona (Homologación Etapa 1) | aceptado |
+| [0011](0011-homologacion-cosecha-sgi.md) | Cosecha de SGI: token neutral en la ley (`escribano` en minúscula) y tres maduraciones al casting (Homologación Etapa 2) | aceptado |

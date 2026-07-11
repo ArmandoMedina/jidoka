@@ -2,6 +2,14 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [0.10.0-beta] — 2026-07-11
+
+### Homologación · Etapa 2 — Cosecha de SGI (ADR 0011)
+- **Auditoría "full join" contra un repo hijo real (SGI):** la maquinaria descendió byte-idéntica (hooks, `settings.json`, comandos, esquema de la ley); el hijo, en cambio, **corrigió y maduró** dos cosas que ascienden al método.
+- **Token neutral en la ley:** `tools/blast-radius.json` baja `"rol": "Escribano"` → `"escribano"` (minúscula) en las 8 áreas, para **cumplir la propia regla** de `kanban/roles.md` (la ley usa el token genérico). Cosmético-seguro: ningún gate ramifica sobre ese literal — el único que ramifica busca `revisor-visual`; el resto solo lo interpola en el mensaje.
+- **Tres maduraciones al casting neutral** (regla 2–3, cosechadas del hijo): `arquitecto-doc` gana "criterios Gherkin derivados de tests reales; si no hay test, se declara"; `escribano` gana "propone, no commitea; el humano aprueba" (alinea con "nada irreversible sin checkpoint"); `revisor-visual` gana la nota de regresión de snapshot en CI para lo medible (lo subjetivo sigue siendo checkpoint humano).
+- Confirmado que **no hay lección de método del hijo que Jidoka desconozca**; los huecos restantes son de arquetipo *code-first* (barreras de stack, gate UX 3-capas, SSOT de versión), ya en el ROADMAP 3.C.
+
 ## [0.9.0-beta] — 2026-07-10
 
 ### Homologación · Etapa 1 — Jidoka como superset del método (ADR 0010)
