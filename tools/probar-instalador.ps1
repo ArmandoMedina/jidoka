@@ -60,6 +60,19 @@ try {
   Check 'sello: registra al menos una pieza de motor' $countOk "sembrado_hashes vacio"
   Check 'sello: cada hash casa con el archivo sembrado' $hashesOk "algun hash no coincide con lo sembrado"
 
+  # 1f. ENLACES DE METODO: ningun doc sembrado debe citar un doc de metodo ausente
+  #     (kanban/ andon/ doctrina/ docs/guias/) -- cierra los "enlaces muertos en un repo
+  #     ajeno" (bloqueante de 1.0). Se excluye docs/decisions/ (los ADR son procedencia
+  #     de Jidoka: apuntan a la fuente, no viven en el hijo).
+  $muertos = @()
+  foreach ($md in (Get-ChildItem -LiteralPath $tmp -Recurse -File -Filter *.md)) {
+    $txt = Get-Content -LiteralPath $md.FullName -Raw
+    foreach ($m in [regex]::Matches($txt, '(kanban|andon|doctrina|docs/guias)/[A-Za-z0-9_./-]+\.md')) {
+      if (-not (Test-Path -LiteralPath (Join-Path $tmp $m.Value))) { $muertos += ("{0} -> {1}" -f $md.Name, $m.Value) }
+    }
+  }
+  Check 'enlaces de metodo: ningun doc sembrado cita un doc de metodo ausente' ($muertos.Count -eq 0) (($muertos | Select-Object -Unique -First 5) -join ' | ')
+
   # 2. Commit inicial (un repo recien sembrado se commitea antes de que verificar mida).
   Push-Location $tmp
   git add -A 2>&1 | Out-Null
