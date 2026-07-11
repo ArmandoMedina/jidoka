@@ -2,6 +2,16 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [0.10.1-beta] — 2026-07-11
+
+### Vitrina — el README, aterrizado (PR #12)
+- **README reescrito con lectores en frío como evidencia** (7 lentes: técnico escéptico, vibe-coder ×2, cliente no-técnico, fact-checker hostil, dev Mac/Linux, experta DX — corridas en `qa_runs/lector-en-frio-readme-20260711/`): los dolores del usuario antes de la marca (*¿Te suena?*, 5 viñetas), *Qué hace por ti* en positivo con glosario de una línea, requisitos explícitos (Claude Code; Windows/PS 5.1 hoy + qué sirve ya en Mac/Linux), techo de gasto por suscripción (verificado contra fuentes), aviación comprimida a Airbus/Boeing, *Empezar* como router por lector.
+- **El GIF del gate mordiendo** (`docs/assets/gate-bloqueando.gif`): render fiel de una **corrida real** en SimGhostInputs — el agente toca la UI sin la guía de usuario → `[BLOQUEA] PUSH DETENIDO` → actualiza la guía → pasa. Evidencia cruda y generador en `qa_runs/gif-gate-20260711/`.
+- **SimGhostInputs, público, se nombra y linkea** como evidencia del linaje (README + `docs/casos-de-exito.md`, retitulado *De dónde viene*) — avanza la grieta 4 de la auditoría externa.
+- **El quickstart ahora bloquea de verdad** (hallazgo del fact-check, reproducido): el snippet anterior no commiteaba y el verificador no ve archivos sin commit — imprimía `Todo limpio`. El paso 3 curado se probó en clon (`[BLOQUEA]`, exit 1, limpieza incluida).
+- **Doc-drift interno curado**: versión real (`v0.10.0-beta` vs el `v0.9.0` anunciado), tabla de sprints con versiones correctas + fila de homologación, índice de `docs/sprints/` descongelado (+4 filas y el hueco de planes sin archivar, confesado), `kanban/README` y `empezar-de-cero.md` al día, ROADMAP con grietas 1–3 en su estado real. El README ya no afirma que el instalador "pregunta" el arquetipo (es parámetro; el interactivo quedó en Fase 3.C). `andon/README` documenta el nombre real del required check.
+- **Panorama al backlog**: OpenWiki (LangChain — complemento, no competidor) y GBrain (Garry Tan — "pregúntale al proyecto" para no-técnicos), con fuentes.
+
 ## [0.10.0-beta] — 2026-07-11
 
 ### Homologación · Etapa 2 — Cosecha de SGI (ADR 0011)

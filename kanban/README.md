@@ -41,4 +41,4 @@ Entre sprints viaja la **lección** (la retro Kaizen que el siguiente `/jidoka:p
 - [`auditoria.md`](auditoria.md) — el ritual de auditoría en rama: fan-out de auditores → síntesis → veredictos GO/NO-GO separados; y la corrida nocturna desatendida.
 - [`homologacion.md`](homologacion.md) — cómo el conocimiento de los proyectos asciende al método: el protocolo de 5 pasos y la regla 2–3 de maduración.
 
-*(Templates de sprint: ya sembrados en [`kit/.jidoka/templates/`](../kit/.jidoka/templates/); los comandos y skills que los ejecutan llegan en Sprint 2.)*
+*(Templates de sprint: sembrados en [`kit/.jidoka/templates/`](../kit/.jidoka/templates/); los comandos `/jidoka:*` y las skills que los ejecutan existen desde el Sprint 2 — `v0.5.0-beta`.)*

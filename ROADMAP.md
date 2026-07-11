@@ -12,7 +12,7 @@
 ## Sprint 1.5 — Vitrina + centralización del conocimiento · ✅ Mergeado (`v0.3.0-beta`)
 - Vitrina en español con bandera (badges, release, topics); el andamio documentado (`kanban/lazo|jerarquia|roles|auditoria`); los 4 ADRs de la doctrina; templates y `qa_runs/` al kit; hardening ALTO-04 + área `raiz`. Ver ADR 0004.
 
-## Sprint 2 — El ritual Kanban ejecutable · 🔜
+## Sprint 2 — El ritual Kanban ejecutable · ✅ Publicado (`v0.5.0-beta` Fase A · `v0.6.0-beta` Fase B)
 - Comandos `/jidoka:planea`, `/jidoka:gemba`, `/jidoka:cierra` (+ `/jidoka:que-sigue`, el "¿y ahora qué?"; + `/jidoka:arranca` con las reglas duras de sesión — incl. "desconfía del resumen de compactación", caso real).
 - **Skills-asiento** (escribano, validador, revisor-visual; arquitecto-doc para doc-heavy) — el conocimiento ya está en `kanban/roles.md`; aquí se vuelven ejecutables. Referencia probada en el laboratorio de campo.
 - Hooks: `gemba-stop` (no se cierra con cambio visual sin evidencia fresca en `qa_runs/` — probado en el linaje) y `review-stop` (código sin `/code-review` frena el cierre; marcador SHA con sus grietas documentadas).
@@ -24,17 +24,19 @@
 
 Enorme; se fasea. El hallazgo fundacional: el ancestro (`project-starter`) **no tenía instalador** (sembraba con "Use this template" de GitHub) — el acto de sembrar es invención de Jidoka. Lo reutilizable del starter es *qué* sembrar (13 templates, la ley ejecutable, hooks auto-desactivables) y los **3 arquetipos** (code-first · docs-as-code · doc-only), hoy prosa.
 
-### Fase 3.A — El instalador mínimo que corre · ✅ (en PR, candidato `v0.7.0-beta`) — ADR 0008
+### Fase 3.A — El instalador mínimo que corre · ✅ Publicado (`v0.7.0-beta`) — ADR 0008
 - `tools/instalar.ps1` (PowerShell, Windows-first): siembra el método en un repo destino leyendo el motor genérico del árbol de Jidoka (sin duplicar la ley), cambiando solo la ley por una **plantilla de arquetipo**. Regla dura **no-clobber**. Enciende `core.hooksPath`, crea stubs, guía la branch protection.
 - Un arquetipo (`docs-as-code`), su ley-plantilla y el manifiesto de siembra en `kit/.jidoka/`. Smoke `tools/probar-instalador.ps1` (instala en repo temporal, corre los self-tests sembrados). Área `kit` en la ley.
 
-### Fase 3.B — Los arquetipos ejecutables + los templates · ✅ (en PR, candidato `v0.8.0-beta`) — ADR 0009
+### Fase 3.B — Los arquetipos ejecutables + los templates · ✅ Publicado (`v0.8.0-beta`) — ADR 0009
 - **La matriz vive como manifiesto ejecutable** (`kit/.jidoka/instalar/manifiesto.json`): el instalador pregunta el arquetipo y siembra distinto. Es el mayor valor sobre el ancestro (allá la matriz era prosa).
 - **Podado a 2 arquetipos** (decisión delegada, revisable — ADR 0009): `docs-as-code` (probado) + `code-first` (grafo vs `PRODUCT_BRIEF`). `doc-only` diferido (method-ficción: sin consumidor real).
 - **Los 12 templates de producto** portados como librería *menú, no molde* (`kit/.jidoka/templates/producto/`) + `PRODUCT_BRIEF` con *Landscape* + HANDOFF stub con columna *Validación*.
 
 ### Fase 3.C — lo que falta (diferido a propósito, que no se olvide)
 - **El arquetipo `doc-only`/regulado** (ley `capacidad→evidencia` + gobernanza `borrador→referencia→oficial`) — se estrena cuando un repo regulado real lo pida (regla 2–3).
+- **El instalador que de verdad pregunta el arquetipo** (hallazgo del fact-check 2026-07-11): hoy `-Arquetipo` es parámetro con default silencioso `docs-as-code`; el único `Read-Host` es para crear el directorio. Preguntar interactivo cuando no se pasa `-Yes`.
+- **El quickstart del README como caso end-to-end del self-test** (hallazgo del fact-check 2026-07-11): `probar-gate.ps1` inyecta la lista de cambiados; falta un caso que ejercite el flujo real commit→verificar en un repo fixture, para que la demo copy-paste del README no pueda romperse en silencio.
 - **La matriz de piezas más fina** (qué skills/tests/UI por arquetipo, más allá de ley+semilla).
 - **benchmark** verificado en vivo — portar/formalizar.
 - **Multiplataforma**: gemelos `.sh` o unificar en `pwsh` Core (decisión abierta); despacho de hooks por SO. Hoy el motor es Windows/PS 5.1.
@@ -61,7 +63,7 @@ Trabajo de presentación surgido de la auditoría externa y de la entrada del au
 
 ### Pendiente ⏳ (en orden de valor)
 
-1. **El GIF del gate mordiendo — la pieza más valiosa de toda la vitrina.** Hoy "míralo morder" en el README es *palabra*. Guion de una toma (~20 s): (a) crear `docs/decisions/0006-prueba.md` sin listarlo en el índice; (b) `./tools/verificar.ps1` → capturar el `[BLOQUEA]` rojo; (c) listarlo en el índice, correr de nuevo → verde; (d) revertir todo. Herramienta sugerida: ScreenToGif (Windows, gratis). Destino: README, junto a "míralo morder" en la tabla de sprints. La grabación es humana; una sesión de IA puede dejar preparados los archivos del antes/después.
+1. ~~El GIF del gate mordiendo~~ **HECHO (2026-07-11):** `docs/assets/gate-bloqueando.gif`, incrustado en el README (*Velo bloquear un cambio malo*). Generado de una **corrida real** en un clon de SGI (bloqueo auténtico `PUSH DETENIDO` + desbloqueo); procedencia y regeneración en [`docs/guias/guion-gif-del-gate.md`](docs/guias/guion-gif-del-gate.md), evidencia en `qa_runs/gif-gate-20260711/`.
 2. **Social preview** (solo humano, ya estaba en la checklist): Settings → General → Social preview, imagen 1280×640 px. Es lo primero que se ve al pegar el link en Discord/foros — sin imagen el link se ve pobre. Una provisional generada por IA sirve ya; el banner definitivo es del Sprint 4.
 3. **`CODE_OF_CONDUCT.md`** — [Contributor Covenant 2.1 en español](https://www.contributor-covenant.org/es/version/2/1/code_of_conduct/). GitHub lo muestra en la pestaña de comunidad y da un mecanismo neutro de moderación *antes* de que llegue el primer conflicto con extraños.
 4. **Decisión abierta del cliente — el párrafo en inglés del README.** Distinguir dos cosas: *el método se escribe y se defiende en español* (postura de identidad, se mantiene) vs. *el visitante anglófono no entiende ni de qué va el repo* (un bounce). Propuesta sobre la mesa: un único párrafo en inglés — qué es Jidoka y por qué está en español a propósito. Solo el autor decide; si se decide que no, se registra y no se re-litiga.
@@ -71,13 +73,16 @@ Trabajo de presentación surgido de la auditoría externa y de la entrada del au
 
 Hallazgos de una auditoría de terceros sobre este repo (evidencia: corrió `probar-gate.ps1` 6/6 y leyó el motor completo). Se registran con destino para que no se pierdan entre sesiones:
 
-1. **El muro real hoy protege muy poco.** Un solo `doc_bloquea` en la ley; los `doc_avisa` salen con exit 0 y **en CI un aviso es invisible salvo que alguien lea el log** — el check `andon` puede estar verde con avisos ignorados sesión tras sesión (modo de falla #3 de `doctrina/04`: gate que nunca dice que no). → **Sprint 2**: subir los avisos a la superficie del PR (summary/comentario), y re-evaluar qué avisos maduran a bloqueo (regla 2–3).
-2. **El hook `no-memorias` no es muro según la propia ley del muro.** Solo intercepta `Write|Edit`; una escritura vía Bash (`Set-Content`) lo rodea, y no hay cobertura server-side. Es un aviso disfrazado de deny. → **Sprint 2**: ampliar el matcher a Bash o confesarlo como frontera en `andon/README.md` (hoy no está en la lista de fronteras).
-3. **El gate mide co-ocurrencia, no contenido.** Tocar el doc dueño con un cambio trivial satisface el gate — proxy gameable (Goodhart, `doctrina/04` aplicado a nosotros mismos). → Se acepta como límite conocido del diseño v0; documentarlo en las fronteras de `andon/README.md`. Cualquier verificación de contenido es decisión aparte (riesgo de over-governance).
-4. **El linaje es evidencia privada.** Los 4 repos de origen no son públicos: para un auditor externo, "nacido de cuatro repos internos" es *palabra*, en un repo que predica evidencia-no-palabra. → **Sprint 4** (presentación pública): decidir qué evidencia del linaje se puede mostrar (números anonimizados de `docs/casos-de-exito.md` ya son el primer paso) y ajustar el discurso del README a lo verificable.
+1. **El muro real hoy protege muy poco.** ✅ **CERRADA (Fase 2·B, `v0.6.0-beta`)**: los avisos suben al summary del PR. La re-evaluación de qué avisos maduran a bloqueo (regla 2–3) sigue abierta como práctica continua.
+2. **El hook `no-memorias` no es muro según la propia ley del muro.** Solo intercepta `Write|Edit`; una escritura vía Bash (`Set-Content`) lo rodea, y no hay cobertura server-side. Es un aviso disfrazado de deny. **Estado: confesada como frontera en `andon/README.md`**; ampliar el matcher a Bash sigue pendiente.
+3. **El gate mide co-ocurrencia, no contenido.** Tocar el doc dueño con un cambio trivial satisface el gate — proxy gameable (Goodhart, `doctrina/04` aplicado a nosotros mismos). → Aceptada como límite conocido del diseño v0, documentada en las fronteras de `andon/README.md`. Cualquier verificación de contenido es decisión aparte (riesgo de over-governance).
+4. **El linaje es evidencia privada.** ~~Los 4 repos de origen no son públicos~~ **Avance (2026-07-11):** el caso 1 (SimGhostInputs) **es público** y quedó nombrado y linkeado en el README y en `docs/casos-de-exito.md` — evidencia clickeable (releases, ADRs, `qa_runs/`, la maquinaria de gates en su árbol). El ancestro (`project-starter`) y el caso 2 siguen privados y se citan anónimos. → **Sprint 4**: decidir si algo más del linaje se puede mostrar; el discurso del README ya está ajustado a lo verificable.
 5. **11 de los 12 disparos son catálogo, no máquina.** Solo `anti-memoria` está cableado a un hook real; el resto vive en `kit/.jidoka/disparos/README.md` sin punto de inyección. → **Sprint 2**: cada hook/comando nuevo debe consumir sus disparos del catálogo (el `gemba-stop`, `review-stop` y `/jidoka:arranca` ya tienen los suyos esperando).
 
 ## Backlog (sin sprint asignado)
+- **Panorama — OpenWiki (LangChain, 2026-06, MIT, ~10.5k stars):** genera y mantiene un wiki del repo *para agentes* con una Action diaria que abre PRs anti-drift. **Complemento, no competidor**: su flecha va código→doc (generativa, palabra de LLM); la nuestra doc→código (normativa, gate determinista). Si algún día se integra: su wiki es capa descriptiva *fuera* de la ley — doc auto-generada dentro del blast-radius dejaría al gate satisfecho con palabra-no-evidencia. Fuentes: github.com/langchain-ai/openwiki · langchain.com/blog/introducing-openwiki. (Vecinos: DeepWiki de Cognition —visor hosted—, OpenDeepWiki — irrelevantes como competencia.)
+- **Panorama — GBrain (Garry Tan, 2026-04, MIT, ~26k stars):** grafo de conocimiento auto-enlazado sobre Markdown local git-nativo, con consulta en lenguaje llano (`gbrain think "pregunta"` → respuesta sintetizada **con citas** y detección de lagunas) y exposición vía MCP a Claude Code. Interés para Jidoka: montar la interfaz "pregúntale al proyecto" sobre las docs curadas del método (HANDOFF, ADRs, grafo `product/`) para que el cliente no-técnico consulte *"¿por qué se decidió X?"* sin navegar el repo — aquí y en cada repo donde se instale el método. Límite conocido: self-hosted, operador único (exponerlo a un cliente externo pide un frente extra). Fuentes: github.com/garrytan/gbrain · vectorize.io/articles/what-is-gbrain. (Vecino del mismo autor: `gstack`, sus 23 skills de Claude Code — para devs, no para este caso.)
+- **Doctrina — matiz de la cita Airbus** (fact-check 2026-07-11): "límites que no puedes cruzar" vale en *normal law*; en *alternate/direct law* las protecciones se degradan y el piloto sí puede exceder el envelope. Revisar `doctrina/03-aviacion.md` y el ledger de citas.
 - Publicar la doctrina suelta rebrandeada **"Poka-yoke"** (ADR 0001 lo deja abierto; solo entonces Jidoka la enlazaría como *further reading*).
 - `SECURITY.md` para colaboración externa (`CONTRIBUTING.md` ya existe — Sprint 1.5).
 - Tablero de instrumentación (leading vs lagging, las 5 series de `doctrina/05`) — no existe en ningún repo del linaje; construirlo es frontera.

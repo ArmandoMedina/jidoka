@@ -66,7 +66,7 @@ En este repo el motor son cuatro piezas en [`../tools/`](../tools/) más los hoo
 1. **Hooks locales** (una vez por clon): `git config core.hooksPath .githooks` — así el `pre-push` corre el verificador antes de cada push. Los hooks de Claude (`no-memorias`, `andon-stop`) se cablean solos vía `.claude/settings.json`.
 2. **El muro real** (paso humano, una vez): en GitHub → *Settings → Branches → Branch protection rule* de `main`, con **tres** cosas — sin las tres no hay muro:
    - **Require a pull request before merging** (si se puede pushear directo, el check nunca corre);
-   - el check **`andon`** como *required status check*;
+   - el check del workflow Andon como *required status check* (en el selector de GitHub aparece con su nombre de job: **`andon blast-radius (la ley)`**);
    - **Do not allow bypassing the above settings** (si el admin puede saltárselo, para el admin —y para el agente usando sus credenciales— sigue siendo una sugerencia).
 3. **Probarlo**: corre `./tools/probar-gate.ps1` (debe salir verde). Para verlo bloquear de verdad: agrega un ADR en `docs/decisions/` sin listarlo en el índice y corre `./tools/verificar.ps1`.
 
