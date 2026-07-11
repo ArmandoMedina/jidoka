@@ -35,24 +35,24 @@ Enorme; se fasea. El hallazgo fundacional: el ancestro (`project-starter`) **no 
 
 ### Fase 3.C — lo que falta (diferido a propósito, que no se olvide)
 - **El arquetipo `doc-only`/regulado** (ley `capacidad→evidencia` + gobernanza `borrador→referencia→oficial`) — se estrena cuando un repo regulado real lo pida (regla 2–3).
-- **El instalador que de verdad pregunta el arquetipo** (hallazgo del fact-check 2026-07-11): hoy `-Arquetipo` es parámetro con default silencioso `docs-as-code`; el único `Read-Host` es para crear el directorio. Preguntar interactivo cuando no se pasa `-Yes`.
+- ~~**El instalador que de verdad pregunta el arquetipo**~~ ✅ **HECHO (`v0.13.0-beta`, ADR 0014):** `Read-Host` interactivo cuando no se pasa `-Arquetipo` ni `-Yes`; con `-Yes` cae a `docs-as-code`.
 - **El lazo de sincronización labs↔Jidoka** — ✅ **HECHO (2026-07-11, `v0.11.0-beta`, ADR 0012).** *La lección sube, la máquina baja.* Implementado y probado (smoke 32/32):
   1. ✅ **Sello de versión sembrado** (`tools/jidoka-motor.json`: versión + SHA256 por pieza) con `tools/version.txt` como SSOT, atado al CHANGELOG por `probar-version.ps1`.
   2. ✅ **Modo `-Actualizar` con conciencia de tres vías** (estilo `dpkg conffiles`): re-siembra SOLO `clase: mecanica`; ausente→agrega, ==Jidoka→al día, ==hash-sembrado→actualiza, ≠hash-sembrado→**divergencia** (no pisa, deja `.jidoka-nuevo`). La instancia nunca se toca.
   3. ✅ **Aviso de divergencia** (`tools/estado-motor.ps1`, sembrado): aviso, no muro. *Diferido a propósito:* cablearlo dentro de `verificar.ps1` (el gate de push) se evitó para no clobbear el verificador del hijo; queda como follow-up si madura (regla 2–3).
   4. ✅ **Canal de subida** (`tools/reportar-leccion.ps1` + `docs/guias/reportar-leccion-a-jidoka.md`): el hijo reporta al issue `leccion.md` en vez de parchear local. Precedente (cosecha de SGI, ADR 0011) ahora es máquina. **SGI = primer consumidor.**
   - **Costura `.local`** añadida (`verificar.ps1` dot-sourcea `verificar.local.ps1`): la vía sostenible para que un motor divergente (el `verificar` de SGI con ruff+pytest) converja sin clobber. *Follow-through:* refactorizar el `verificar.ps1` de SGI a data-driven + `.local` (no en este sprint por sus 453 tests).
-- **El quickstart del README como caso end-to-end del self-test** (hallazgo del fact-check 2026-07-11): `probar-gate.ps1` inyecta la lista de cambiados; falta un caso que ejercite el flujo real commit→verificar en un repo fixture, para que la demo copy-paste del README no pueda romperse en silencio.
+- ~~**El quickstart del README como caso end-to-end del self-test**~~ ✅ **HECHO (`v0.13.0-beta`, ADR 0014):** `probar-gate.ps1` ejercita el flujo real commit→verificar por git en un repo fixture (paso 3 del README).
 - **La matriz de piezas más fina** (qué skills/tests/UI por arquetipo, más allá de ley+semilla).
 - **benchmark** verificado en vivo — portar/formalizar.
 - **Multiplataforma**: gemelos `.sh` o unificar en `pwsh` Core (decisión abierta); despacho de hooks por SO. Hoy el motor es Windows/PS 5.1.
 - **CLI npm `npx jidoka-method init`** (distribución cross-platform) + **SSOT de versión** (un literal, `package.json`, todo deriva — hoy la versión vive en tags/CHANGELOG/ROADMAP) + **CI de release** + **smoke del instalador en CI** (lección: *un workflow que solo corre al cortar release se pudre en silencio* → `workflow_dispatch` de rescate) + **ensayo del empaquetado** (el build se autoverifica contra el manifiesto que el runtime usa).
 - **Barreras code-first**: lint/formato/tests/cobertura/CHANGELOG-gate; **gate de UX en 3 capas**; **lint de alta señal** (set corto).
 - **Dogfood completo del ADR 0003**: mover el motor a vivir SOLO en `kit/` y que Jidoka se **auto-instale** (cero duplicación). La Fase 3.A lo evita leyendo del árbol, pero no completa la mudanza.
-- Los comandos/skills sembrados citan docs de método de Jidoka (`kanban/`, `docs/guias/`) que hoy **no** se siembran: enlaces muertos en un repo ajeno (los `@`-refs duros sí resuelven). Sembrar un set genérico o apuntar a los docs públicos es parte de esta deuda (ADR 0008 → "Qué NO resuelve").
+- ~~Los comandos/skills sembrados citan docs de método que no se siembran: enlaces muertos en un repo ajeno~~ ✅ **HECHO (`v0.13.0-beta`, ADR 0014):** el manifiesto siembra el método completo (`kanban/` + `andon/` + `doctrina/` + guía de entorno); un verificador de enlaces en `probar-instalador.ps1` lo vuelve invariante. Límite conocido: las citas a ADR de Jidoka (procedencia) apuntan a la fuente.
 
 ## Sprint 4 — Beta estable · 🔜
-- Guías completas (`docs/guias/empezar-de-cero.md` deja de ser esqueleto).
+- ~~Guías completas (`docs/guias/empezar-de-cero.md` deja de ser esqueleto)~~ ✅ **HECHO (`v0.13.0-beta`, ADR 0014):** la guía de instalación desde cero, completa y verificada contra el flujo real.
 - Presentación pública: badges, Quick Start, banner, social preview.
 - Decisión abierta: comunidad (Discussions / Discord).
 - Candidato a `v1.0` cuando el método completo corra end-to-end en un repo ajeno.
