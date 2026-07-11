@@ -73,7 +73,9 @@ $Destino = (Resolve-Path -LiteralPath $Destino).Path
 if ($Destino -eq $jidoka) { Die "el destino no puede ser el propio repo de Jidoka" }
 if (-not (Test-Path (Join-Path $Destino '.git'))) {
   Info "el destino no es un repo git; corriendo 'git init'..."
-  git init -q $Destino 2>&1 | Out-Null
+  # 2>$null (no 2>&1): bajo ErrorActionPreference=Stop, 2>&1 envolveria un aviso
+  # de git a stderr como ErrorRecord y abortaria el instalador. 2>$null lo descarta.
+  git init -q $Destino 2>$null | Out-Null
 }
 
 # 4. Copiar el motor generico segun el manifiesto.
@@ -104,7 +106,7 @@ foreach ($s in $manif.stubs) {
 
 # 7. Encender lo manual: core.hooksPath.
 if ($manif.post.hooksPath) {
-  git -C $Destino config core.hooksPath $manif.post.hooksPath 2>&1 | Out-Null
+  git -C $Destino config core.hooksPath $manif.post.hooksPath 2>$null | Out-Null
   if ($LASTEXITCODE -eq 0) { Ok "core.hooksPath = $($manif.post.hooksPath)" }
   else { Info "(no pude fijar core.hooksPath; hazlo a mano: git config core.hooksPath $($manif.post.hooksPath))" }
 }
