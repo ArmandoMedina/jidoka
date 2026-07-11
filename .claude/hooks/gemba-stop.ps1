@@ -79,7 +79,8 @@ foreach ($f in $visChanged) {
 # EXISTA EN GIT, no solo en disco (leccion de campo, cosecha del lazo: un gate que mira
 # el working tree se satisface con evidencia que git nunca vera). Solo cuentan los
 # archivos de qa_runs/ que git rastrea.
-$qaTrackedRaw = git -C $repo ls-files -- qa_runs 2>&1
+# core.quotepath=false: que git NO cite/octalice rutas no-ASCII (asi Test-Path las halla).
+$qaTrackedRaw = git -C $repo -c core.quotepath=false ls-files -- qa_runs 2>&1
 if ($LASTEXITCODE -ne 0) { Write-GitFailWarning 'git ls-files -- qa_runs' ($qaTrackedRaw -join ' '); exit 0 }
 foreach ($rel in @($qaTrackedRaw)) {
   if (-not $rel) { continue }
