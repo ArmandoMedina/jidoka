@@ -79,6 +79,38 @@ try {
   $after = Get-Content $handoff -Raw
   Check 'no-clobber: la segunda instalacion NO pisa un archivo existente' ($after -match $marca) "el archivo se sobrescribio"
 
+  # 5b. -ACTUALIZAR con conciencia de tres vias. Monto tres situaciones a la vez:
+  #   (a) probar-hooks.ps1: lo modifico Y ajusto el sello para que el hash sembrado
+  #       case con lo modificado -> el hijo "no lo toco" desde la siembra pero Jidoka
+  #       difiere -> debe ACTUALIZARse (restaurarse a la version de Jidoka).
+  #   (b) auditar.ps1: lo modifico SIN tocar el sello -> el hijo lo customizo ->
+  #       DIVERGENCIA: no se pisa, se deja el .jidoka-nuevo.
+  #   (c) HANDOFF.md (instancia, con la marca del paso 5) -> intacto siempre.
+  $hookChild = Join-Path $tmp 'tools/probar-hooks.ps1'
+  $audChild  = Join-Path $tmp 'tools/auditar.ps1'
+  Add-Content -Path $hookChild -Value '# tweak que Jidoka no tiene'
+  $selloObj = Get-Content $selloPath -Raw | ConvertFrom-Json
+  $selloObj.sembrado_hashes.'tools/probar-hooks.ps1' = (Get-FileHash -LiteralPath $hookChild -Algorithm SHA256).Hash
+  [System.IO.File]::WriteAllText($selloPath, ($selloObj | ConvertTo-Json -Depth 5), (New-Object System.Text.UTF8Encoding($false)))
+  Add-Content -Path $audChild -Value '# ajuste propio del hijo'
+
+  Run-PS $instalar -Destino $tmp -Actualizar | Out-Null
+  $hookRestaurado = -not ((Get-Content $hookChild -Raw) -match 'tweak que Jidoka no tiene')
+  Check 'actualizar: restaura una pieza NO customizada (hijo==sello, Jidoka avanzo)' $hookRestaurado "probar-hooks.ps1 no se restauro"
+  $audPreservado = ((Get-Content $audChild -Raw) -match 'ajuste propio del hijo')
+  Check 'actualizar: NO pisa una pieza divergente (hijo la customizo)' $audPreservado "auditar.ps1 se piso"
+  Check 'actualizar: deja <archivo>.jidoka-nuevo para la divergencia' (Test-Path "$audChild.jidoka-nuevo") "no aparecio el .jidoka-nuevo"
+  Check 'actualizar: la instancia (HANDOFF) queda intacta' ((Get-Content $handoff -Raw) -match $marca) "se toco HANDOFF"
+  $selloDespues = Get-Content $selloPath -Raw | ConvertFrom-Json
+  Check 'actualizar: el sello queda en la version de Jidoka' ($selloDespues.version -eq $verTxt) "version quedo $($selloDespues.version)"
+  $jidokaAudHash = (Get-FileHash -LiteralPath (Join-Path $PSScriptRoot 'auditar.ps1') -Algorithm SHA256).Hash
+  Check 'actualizar: el sello guarda el hash que Jidoka ENVIA (no el custom del hijo)' ($selloDespues.sembrado_hashes.'tools/auditar.ps1' -eq $jidokaAudHash) "el sello no guardo el hash de Jidoka"
+
+  # 5c. Segunda corrida: la divergencia persiste hasta reconciliar; lo restaurado ya esta al dia.
+  Run-PS $instalar -Destino $tmp -Actualizar | Out-Null
+  $persiste = ((Get-Content $audChild -Raw) -match 'ajuste propio del hijo') -and (Test-Path "$audChild.jidoka-nuevo")
+  Check 'actualizar (2a vez): la divergencia persiste, lo demas converge' $persiste "no fue idempotente"
+
   # 6. Segundo arquetipo: code-first siembra DISTINTO (brief, no grafo) y su gate pasa.
   $tmp2 = Join-Path $env:TEMP ("jidoka-smoke2-" + [guid]::NewGuid().ToString('N').Substring(0,8))
   try {
