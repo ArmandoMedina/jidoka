@@ -10,8 +10,10 @@
 # (lo salta y lo reporta) -- instalar sobre un repo con trabajo no borra nada.
 #
 # Uso:
-#   ./tools/instalar.ps1 -Destino C:\ruta\repo-limpio
-#   ./tools/instalar.ps1 -Destino ... -Arquetipo docs-as-code -Yes
+#   ./tools/instalar.ps1 -Destino C:\ruta\repo-limpio                 (instalar)
+#   ./tools/instalar.ps1 -Destino ... -Arquetipo docs-as-code -Yes    (instalar sin prompt)
+#   ./tools/instalar.ps1 -Destino ... -Actualizar                     (bajar la mecanica al hijo)
+#   ./tools/instalar.ps1 -Destino ... -Sellar                         (sellar un hijo que convergio a mano)
 # Nota: archivo ASCII a proposito (sin acentos) para PS 5.1.
 
 [CmdletBinding()]
@@ -19,7 +21,8 @@ param(
   [Parameter(Mandatory = $true)][string]$Destino,
   [string]$Arquetipo = '',   # vacio = no se paso: pregunta interactivo (o docs-as-code con -Yes)
   [switch]$Yes,
-  [switch]$Actualizar
+  [switch]$Actualizar,
+  [switch]$Sellar
 )
 
 $ErrorActionPreference = 'Stop'
@@ -161,6 +164,73 @@ function Invoke-Actualizar($jidoka, $manif, $Destino, $utf8) {
   Write-Host "Siguiente: revisa el diff en una rama y abrelo como PR (el diff ES la revision)." -ForegroundColor Cyan
 }
 
+# ---------------------------------------------------------------------------
+# Modo -Sellar: escribe el sello INICIAL de un hijo que ya tiene el motor pero
+# convergio a mano (sin sello), CLASIFICANDO cada pieza de mecanica:
+#   - hijo == Jidoka actual  -> PRISTINA: la registra en la semilla con el hash
+#     de Jidoka (asi el proximo -Actualizar la actualiza como al dia/actualiza).
+#   - hijo != Jidoka         -> CUSTOMIZADA: NO la registra (semilla sin ella) ->
+#     el proximo -Actualizar la vera DIVERGE (child != seed=null) y la PRESERVA.
+#   - hijo ausente           -> se omite (el -Actualizar la agregara).
+# Generaliza el arreglo manual que se hizo a mano en los labs (SGI: quitar las
+# entradas code-first; TF: semilla vacia): en vez de asumir pristina (el bug que
+# casi pisa el motor de SGI) o preservar todo (semilla vacia, que no actualiza lo
+# pristino), clasifica pieza por pieza. La instancia nunca se toca.
+function Invoke-Sellar($jidoka, $manif, $Destino, $utf8) {
+  $selloDst = Join-Path $Destino 'tools/jidoka-motor.json'
+  $versionPath = Join-Path $jidoka 'tools/version.txt'
+  $version = if (Test-Path $versionPath) { (Get-Content $versionPath -Raw).Trim() } else { 'desconocida' }
+
+  Write-Host "== Sellar motor: clasifica cada pieza pristina-vs-customizada (Jidoka $version) =="
+  if (Test-Path -LiteralPath $selloDst) { Info "(ya hay un sello; se re-clasifica y sobrescribe)" }
+
+  $seed = [ordered]@{}
+  $pristinas = 0; $divergen = @(); $ausentes = 0
+
+  foreach ($e in $manif.motor) {
+    if ($e.clase -and $e.clase -ne 'mecanica') { continue }
+    $srcRoot = Join-Path $jidoka $e.origen
+    if (-not (Test-Path -LiteralPath $srcRoot)) { continue }
+
+    $pares = @()
+    if ($e.dir) {
+      Get-ChildItem -LiteralPath $srcRoot -Recurse -File | ForEach-Object {
+        $relEnOrigen = $_.FullName.Substring($srcRoot.Length).TrimStart('\', '/').Replace('\', '/')
+        $relDst = ($e.destino.Replace('\', '/')).TrimEnd('/') + '/' + $relEnOrigen
+        $pares += [pscustomobject]@{ rel = $relDst; src = $_.FullName }
+      }
+    } else {
+      $pares += [pscustomobject]@{ rel = $e.destino.Replace('\', '/'); src = $srcRoot }
+    }
+
+    foreach ($par in $pares) {
+      $childAbs = Join-Path $Destino $par.rel
+      if (-not (Test-Path -LiteralPath $childAbs)) { $ausentes++; continue }
+      $jidokaHash = Get-MotorHash $par.src
+      $childHash = Get-MotorHash $childAbs
+      if ($childHash -eq $jidokaHash) {
+        $seed[$par.rel] = $jidokaHash                                 # pristina -> registrada
+        $pristinas++
+      } else {
+        $divergen += $par.rel                                         # customizada -> omitida (se preservara)
+      }
+    }
+  }
+
+  $selloNuevo = [ordered]@{ version = $version; sembrado_hashes = $seed }
+  $parent = Split-Path -Parent $selloDst
+  if ($parent -and -not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+  [System.IO.File]::WriteAllText($selloDst, ($selloNuevo | ConvertTo-Json -Depth 5), $utf8)
+
+  Write-Host ""
+  Write-Host "== Sello escrito: $pristinas pristina(s) registrada(s) | $($divergen.Count) divergen (se preservaran) | $ausentes ausente(s) ==" -ForegroundColor Green
+  if ($divergen.Count -gt 0) {
+    Write-Host "Piezas customizadas (NO registradas en la semilla -> -Actualizar las preservara):" -ForegroundColor Yellow
+    foreach ($d in $divergen) { Write-Host "  - $d" -ForegroundColor Yellow }
+  }
+  Write-Host "Sello: tools/jidoka-motor.json (version $version). Siguiente: -Actualizar baja lo pristino, preserva lo customizado." -ForegroundColor Cyan
+}
+
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 
 # 1. Leer el manifiesto de siembra.
@@ -174,6 +244,16 @@ if ($Actualizar) {
   $Destino = (Resolve-Path -LiteralPath $Destino).Path
   if ($Destino -eq $jidoka) { Die "el destino no puede ser el propio repo de Jidoka" }
   Invoke-Actualizar $jidoka $manif $Destino $utf8
+  exit 0
+}
+
+# Modo -Sellar: escribe el sello inicial (clasificando pristina-vs-customizada) de un
+# hijo que ya tiene el motor pero convergio a mano sin sello. Y termina.
+if ($Sellar) {
+  if (-not (Test-Path -LiteralPath $Destino)) { Die "el destino '$Destino' no existe (para -Sellar debe ser un hijo con el motor ya presente)" }
+  $Destino = (Resolve-Path -LiteralPath $Destino).Path
+  if ($Destino -eq $jidoka) { Die "el destino no puede ser el propio repo de Jidoka" }
+  Invoke-Sellar $jidoka $manif $Destino $utf8
   exit 0
 }
 

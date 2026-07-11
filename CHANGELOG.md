@@ -2,6 +2,24 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.2.0] — 2026-07-11
+
+### El lazo ve la divergencia — sello bootstrap clasificador + `estado-motor -Detallado` (ADR 0019)
+
+Ejecuta dos de las cuatro lecciones de la segunda cosecha (ADR 0015): mejoras a la mecánica del lazo, sin tocar
+los labs. Son la herramienta de la propia bajada — conviene tenerlas antes de la próxima ventana de bajada.
+
+- **`instalar.ps1 -Sellar`**: sella un hijo que convergió a mano **clasificando cada pieza** contra el Jidoka
+  actual — pristina (== Jidoka) → registrada; customizada (!= Jidoka) → omitida de la semilla, así el próximo
+  `-Actualizar` la ve DIVERGE y la **preserva**. Generaliza en la máquina el arreglo que en Sprint B se hizo a
+  mano en SGI/TF (mejor que asumir-pristina —el bug que casi pisa SGI— y que semilla-vacía —que no actualiza
+  lo pristino—).
+- **`estado-motor.ps1 -Detallado`**: compara **pieza por pieza (por hash)** contra el motor de Jidoka y lista
+  las que DIVERGEN o faltan; la versión sola era de grano grueso (decía "al día" aunque una pieza divergiera).
+  El mensaje de versión pasa a *"declara la versión X"* — más honesto.
+- Evidencia: `probar-instalador.ps1` 41/41 (6 casos nuevos). **Follow-through**: ambas son mecánica → bajan a
+  SGI y TF en la próxima ventana de bajada, y el re-sellado usará `-Sellar`.
+
 ## [1.1.1] — 2026-07-11
 
 ### Fix — el matcher Bash de `no-memorias` bloqueaba lecturas con `2>&1`/`2>/dev/null`

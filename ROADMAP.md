@@ -89,8 +89,8 @@ Hallazgos de una auditoría de terceros sobre este repo (evidencia: corrió `pro
 
 ### Segunda cosecha por el lazo — refinamientos del mecanismo (2026-07-11, ADR 0015; post-1.0)
 Cuatro lecciones que subieron al bajar el núcleo a los dos labs en Sprint B. Ninguna bloqueó la 1.0; todas con contexto para retomarse sin re-explicación.
-- **Generalizar el sello bootstrap (pristina-vs-customizada).** Al crear el sello de un lab ya-divergido, `instalar.ps1` debe clasificar cada pieza (¿genérica de alguna versión de Jidoka, o customizada?) en vez de asumir pristina — el bug que pisó por poco el motor code-first de SGI (parcheado reactivamente: SGI quitó las entradas, TF usó semilla vacía). Es la generalización de ese parche.
-- **`estado-motor.ps1 -Detallado` por-hash.** Hoy compara solo la versión declarada del sello vs `version.txt`; no *ve* la divergencia fina por-archivo. Falta la bandera que liste qué piezas divergen por-hash.
+- ~~**Generalizar el sello bootstrap (pristina-vs-customizada).**~~ ✅ **HECHO (`v1.2.0`, ADR 0019):** `instalar.ps1 -Sellar` clasifica cada pieza contra el Jidoka actual — pristina → registrada, customizada → omitida (se preserva). Generaliza el parche manual de SGI/TF.
+- ~~**`estado-motor.ps1 -Detallado` por-hash.**~~ ✅ **HECHO (`v1.2.0`, ADR 0019):** compara pieza por pieza (por hash) contra el motor de Jidoka y lista las que divergen o faltan.
 - **Drift estructural núcleo↔labs.** El motor 0.13 namespacea comandos (`jidoka/*`) + trae skills genéricos; los labs convergieron a comandos planos + skills-persona (ADR 0006 de TF). Decidir en el diseño del lazo qué estructura es canónica.
 - **Épica: reconciliación del motor code-first vía costura `.local`.** verificar/auditar/probar-gate convergen al motor genérico + `verificar.local.ps1` para lo del lenguaje (ruff/pytest en SGI, node/`-SoloDocGate` en TF), sin romper los 453 tests de SGI. La "mecánica igual" completa; subsume la vieja "convergencia profunda del gate de SGI".
 
