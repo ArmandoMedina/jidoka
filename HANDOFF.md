@@ -8,7 +8,7 @@
 
 ## Dónde estamos (2026-07-11, apertura de sesión — HANDOFF saneado contra git/GitHub)
 
-- **Todo lo construido está MERGEADO y PUBLICADO.** PRs #1–#11 en MERGED; último tag `v0.9.0-beta`; `main` limpio en `7f99ae3`. Sprints 0–2 completos, Sprint 3 Fases 3.A y 3.B en `main` (`v0.7.0`/`v0.8.0-beta`), Homologación Etapa 1 en `main` (`v0.9.0-beta`, ADR 0010).
+- **Todo lo construido está MERGEADO y PUBLICADO.** PRs #1–#11 en MERGED; último tag `v0.10.0-beta` (publicado 2026-07-11, cosecha de SGI / ADR 0011). Sprints 0–2 completos, Sprint 3 Fases 3.A y 3.B en `main` (`v0.7.0`/`v0.8.0-beta`), Homologación Etapa 1 (`v0.9.0-beta`, ADR 0010) y cosecha E2 de SGI (`v0.10.0-beta`).
 - **Homologación (una sola metodología entre Jidoka, SGI y TF) — Etapa 2 EN CURSO.**
   - **SGI: auditoría full-join hecha y cosecha mergeada** (PR #11, ADR 0011): la maquinaria descendió byte-idéntica; token neutral corregido en la ley (`"Escribano"` → `"escribano"`) y 3 maduraciones ascendidas a los asientos (`arquitecto-doc`, `escribano`, `revisor-visual`). Confirmado: no queda lección de método de SGI que Jidoka desconozca; los huecos restantes son maquinaria diferida (Fase 3.C).
   - **TF (tracker-financiero): PENDIENTE** — su adopción/auditoría full-join, en su rama, reversible, conservando su casting como personas y su config-instancia. Un lab a la vez, su propio plan. Sus pendientes viven en SU HANDOFF, no aquí.
