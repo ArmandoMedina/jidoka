@@ -19,3 +19,4 @@ Registro de las decisiones de arquitectura del proyecto. Cada ADR captura **una*
 | [0010](0010-roster-y-modo-desatendido.md) | El roster completo (`devops`), el modo desatendido general, y el casting neutral+persona (Homologación Etapa 1) | aceptado |
 | [0011](0011-homologacion-cosecha-sgi.md) | Cosecha de SGI: token neutral en la ley (`escribano` en minúscula) y tres maduraciones al casting (Homologación Etapa 2) | aceptado |
 | [0012](0012-lazo-sincronizacion-labs.md) | El lazo de sincronización labs↔Jidoka: sello de versión + `-Actualizar` (tres vías por hash) + aviso de divergencia + canal de subida | aceptado |
+| [0013](0013-primera-cosecha-por-el-lazo.md) | Primera cosecha por el lazo: tres lecciones de campo absorbidas (gemba-stop rastreado, excepción de dominio con nombre, criterio de delegación) | aceptado |

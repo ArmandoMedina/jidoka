@@ -2,6 +2,16 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [0.12.0-beta] — 2026-07-11
+
+### Primera cosecha por el lazo — tres lecciones de campo absorbidas (ADR 0013)
+
+La primera cosecha que pasa **por el canal** que el lazo (ADR 0012) abrió — la máquina en uso. SGI (primer consumidor) reportó lecciones de campo y la sesión destapó una meta-lección del cliente; tres maduraron a mejora de método.
+
+- **`gemba-stop` exige evidencia rastreada por git** (`.claude/hooks/gemba-stop.ps1`): antes validaba por *mtime del working tree* y `qa_runs/` está gitignoreado → un archivo que nunca se commitea satisfacía el gate (Goodhart). Ahora solo cuenta la evidencia que `git ls-files -- qa_runs` rastrea (`git add -f`), alineado con el disparo `evidencia-no-palabra`. Self-test nuevo: bloquea evidencia no-trackeada, pasa la forzada al índice (`probar-hooks.ps1` 11/11).
+- **Excepción de dominio con nombre para el mandato sintético** (`revisor-visual` SKILL, `gemba.md`, `verificacion.md`): "datos 100% sintéticos siempre" → **"sintético por defecto, salvo excepción de dominio cableada con nombre"** (disparo `excepciones-cableadas`) para cuando lo sintético no ejercita el artefacto (HUD/render sobre telemetría) — dato real fuera del repo, solo capturas entran, excepción nombrada.
+- **Criterio operativo de delegación** (`kanban/roles.md`): sección nueva "Qué va a subagente vs qué se queda" con tabla al vistazo + la sesión del lazo como ejemplo trabajado. Vuelve operativa una regla que era principio disperso (meta-lección del cliente).
+
 ## [0.11.0-beta] — 2026-07-11
 
 ### El lazo de sincronización labs↔Jidoka (Sprint 3 · Fase 3.C — ADR 0012)
