@@ -28,9 +28,15 @@ Enorme; se fasea. El hallazgo fundacional: el ancestro (`project-starter`) **no 
 - `tools/instalar.ps1` (PowerShell, Windows-first): siembra el método en un repo destino leyendo el motor genérico del árbol de Jidoka (sin duplicar la ley), cambiando solo la ley por una **plantilla de arquetipo**. Regla dura **no-clobber**. Enciende `core.hooksPath`, crea stubs, guía la branch protection.
 - Un arquetipo (`docs-as-code`), su ley-plantilla y el manifiesto de siembra en `kit/.jidoka/`. Smoke `tools/probar-instalador.ps1` (instala en repo temporal, corre los self-tests sembrados). Área `kit` en la ley.
 
-### Fase 3.B / 3.C — lo que falta (diferido a propósito, que no se olvide)
-- **Los otros 2 arquetipos** (code-first, doc-only) + la **matriz pieza×arquetipo como manifiesto ejecutable** (hoy prosa en el starter — convertirla es el mayor valor sobre el ancestro).
-- **Los 12 templates de producto** (capacidad, módulo, dominio, ecosistema, solución, componente, spec, modelo-de-datos, requerimiento+backlog, proceso, glosario, propuesta-gate-proceso) + **PRODUCT_BRIEF** + **benchmark** — portar del starter.
+### Fase 3.B — Los arquetipos ejecutables + los templates · ✅ (en PR, candidato `v0.8.0-beta`) — ADR 0009
+- **La matriz vive como manifiesto ejecutable** (`kit/.jidoka/instalar/manifiesto.json`): el instalador pregunta el arquetipo y siembra distinto. Es el mayor valor sobre el ancestro (allá la matriz era prosa).
+- **Podado a 2 arquetipos** (decisión delegada, revisable — ADR 0009): `docs-as-code` (probado) + `code-first` (grafo vs `PRODUCT_BRIEF`). `doc-only` diferido (method-ficción: sin consumidor real).
+- **Los 12 templates de producto** portados como librería *menú, no molde* (`kit/.jidoka/templates/producto/`) + `PRODUCT_BRIEF` con *Landscape* + HANDOFF stub con columna *Validación*.
+
+### Fase 3.C — lo que falta (diferido a propósito, que no se olvide)
+- **El arquetipo `doc-only`/regulado** (ley `capacidad→evidencia` + gobernanza `borrador→referencia→oficial`) — se estrena cuando un repo regulado real lo pida (regla 2–3).
+- **La matriz de piezas más fina** (qué skills/tests/UI por arquetipo, más allá de ley+semilla).
+- **benchmark** verificado en vivo — portar/formalizar.
 - **Multiplataforma**: gemelos `.sh` o unificar en `pwsh` Core (decisión abierta); despacho de hooks por SO. Hoy el motor es Windows/PS 5.1.
 - **CLI npm `npx jidoka-method init`** (distribución cross-platform) + **SSOT de versión** (un literal, `package.json`, todo deriva — hoy la versión vive en tags/CHANGELOG/ROADMAP) + **CI de release** + **smoke del instalador en CI** (lección: *un workflow que solo corre al cortar release se pudre en silencio* → `workflow_dispatch` de rescate) + **ensayo del empaquetado** (el build se autoverifica contra el manifiesto que el runtime usa).
 - **Barreras code-first**: lint/formato/tests/cobertura/CHANGELOG-gate; **gate de UX en 3 capas**; **lint de alta señal** (set corto).

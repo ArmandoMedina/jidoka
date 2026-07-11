@@ -11,24 +11,14 @@
   },
   {
     "nombre": "codigo",
-    "desc": "el codigo de la app (docs-as-code: codigo y docs viajan juntos)",
+    "desc": "el codigo de la app (arquetipo code-first: el metodo vive implicito en el codigo + un brief)",
     "fuente": ["src/*"],
     "doc_bloquea": [],
     "doc_avisa": ["CHANGELOG.md"],
     "product_avisa": ["product/capacidades/*"],
     "revisa": true,
-    "mensaje": "cambiaste codigo: registra que cambio en CHANGELOG.md; si la capacidad que implementa cambio de comportamiento, actualiza su nota en product/. Si fue refactor interno, este aviso no es para ti",
+    "mensaje": "cambiaste codigo: registra que cambio en CHANGELOG.md. Si documentas capacidades (opcional en code-first), actualiza la nota o el PRODUCT_BRIEF. Si fue refactor interno, este aviso no es para ti",
     "rol": "validador"
-  },
-  {
-    "nombre": "producto",
-    "desc": "el grafo del QUE: capacidades, modulos, dominios con frontmatter y wikilinks (lo audita tools/auditar.ps1)",
-    "fuente": ["product/*"],
-    "excluye": ["product/README.md"],
-    "doc_bloquea": [],
-    "doc_avisa": ["CHANGELOG.md"],
-    "mensaje": "cambiaste el grafo de producto: si una capacidad cambio de estado o criterios, registralo en CHANGELOG.md. Si fue formato o typos, este aviso no es para ti",
-    "rol": "arquitecto-doc"
   },
   {
     "nombre": "barreras",
@@ -52,10 +42,10 @@
     "nombre": "raiz",
     "desc": "tierra de nadie: un archivo suelto en la raiz casi siempre tiene lugar con dueno en otra parte",
     "fuente": ["*"],
-    "excluye": ["README.md", "CHANGELOG.md", "HANDOFF.md", "ROADMAP.md", "CONTRIBUTING.md", "LICENSE", ".gitattributes", ".editorconfig", ".gitignore"],
+    "excluye": ["README.md", "CHANGELOG.md", "HANDOFF.md", "ROADMAP.md", "CONTRIBUTING.md", "PRODUCT_BRIEF.md", "LICENSE", ".gitattributes", ".editorconfig", ".gitignore"],
     "doc_bloquea": [],
     "doc_avisa": ["HANDOFF.md"],
-    "mensaje": "aparecio un archivo suelto en la raiz. Si es contenido, tiene lugar con dueno (docs/, product/, tools/); si es temporal, no se commitea; si es un canonico nuevo decidido en un ADR, este aviso no es para ti",
+    "mensaje": "aparecio un archivo suelto en la raiz. Si es contenido, tiene lugar con dueno (src/, docs/, tools/); si es temporal, no se commitea; si es un canonico nuevo decidido en un ADR, este aviso no es para ti",
     "rol": "Escribano"
   }
 ]

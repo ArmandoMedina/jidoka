@@ -104,6 +104,20 @@ foreach ($s in $manif.stubs) {
   $script:stubs++
 }
 
+# 6b. Stubs ESPECIFICOS del arquetipo (la matriz ejecutable): la semilla del QUE
+#     (grafo de notas vs brief) y la gobernanza si el arquetipo la pide.
+$extra = @()
+if ($arq.producto -and $manif.stubs_arquetipo.($arq.producto)) { $extra += $manif.stubs_arquetipo.($arq.producto) }
+if ($arq.gobernanza -and $manif.stubs_arquetipo.gobernanza) { $extra += $manif.stubs_arquetipo.gobernanza }
+foreach ($s in $extra) {
+  $dst = Join-Path $Destino $s.ruta
+  if (Test-Path -LiteralPath $dst) { Skip $dst; $script:saltados++; continue }
+  $parent = Split-Path -Parent $dst
+  if ($parent -and -not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+  [System.IO.File]::WriteAllText($dst, $s.contenido, $utf8)
+  $script:stubs++
+}
+
 # 7. Encender lo manual: core.hooksPath.
 if ($manif.post.hooksPath) {
   git -C $Destino config core.hooksPath $manif.post.hooksPath 2>$null | Out-Null
