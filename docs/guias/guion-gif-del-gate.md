@@ -1,48 +1,25 @@
-# Guion — el GIF del gate mordiendo
+# El GIF del gate — cómo se hizo y cómo regenerarlo
 
-> La pieza más valiosa de la vitrina (`ROADMAP.md` → *Vitrina pública* ⏳1). Todo lo de abajo está listo para copy-paste: solo abre la terminal, enciende [ScreenToGif](https://www.screentogif.com/) (Windows, gratis) y graba una toma de ~20 segundos. El GIF se incrusta en el README, hasta arriba de la sección *Velo bloquear un cambio malo* (ya hay un comentario HTML marcando el lugar).
+> El GIF vive en `docs/assets/gate-bloqueando.gif` y se incrusta en el README (sección *Velo bloquear un cambio malo*). **No es una animación inventada:** cada línea de su terminal proviene de una corrida real de `tools/verificar.ps1` en un clon de [SimGhostInputs](https://github.com/ArmandoMedina/SimGhostInputs) (2026-07-11). Evidencia de la corrida: `qa_runs/gif-gate-20260711/` (las salidas capturadas + el generador).
 
-## Preparación (fuera de cámara)
+## La historia que cuenta (4 tiempos, ~21 s)
 
-```powershell
-cd C:\Repositorios\jidoka
-git status          # working tree limpio, para que el revert final sea trivial
-```
+1. Un agente cambia la UI (`fantasma/ui/ng_helpers.py`) y commitea.
+2. `verificar.ps1` corre: lint OK, formato OK, **453 tests verdes** — y el doc-gate encuentra que `docs/guia-usuario.md` quedó atrás → `[BLOQUEA]` → **PUSH DETENIDO** (exit 1).
+3. Se actualiza la guía de usuario y se commitea.
+4. El mismo verificador pasa (exit 0). Subtítulo final: el mismo check corre en CI como requerido — el muro real.
 
-## La toma (~20 s, 4 movimientos)
+## Cómo se generó
 
-**1. Crea un ADR sin listarlo en el índice** (el defecto):
+En lugar de grabar pantalla: se corrió el flujo de verdad en un clon temporal de SGI, se capturó la salida auténtica (`salida-bloqueo.txt` / `salida-verde.txt`) y un script Python+Pillow (`gen_gif.py`, en la corrida de `qa_runs/`) renderizó esa salida real cuadro a cuadro con estética de terminal (Consolas, colores del verificador, subtítulos por fase). Duraciones variables por cuadro; el GIF final pesa ~1.3 MB.
 
-```powershell
-Set-Content -Path docs\decisions\9999-demo-gate.md -Value '# ADR 9999 - demo del gate' -Encoding utf8
-```
+## Para regenerarlo (si el verificador o la historia cambian)
 
-**2. Corre el verificador → el bloqueo rojo** (el momento estelar — deja el `[BLOQUEA]` en pantalla un par de segundos):
+1. Clon temporal de SGI: `git clone --local C:\Repositorios\SimGhostInputs <tmp>`.
+2. Reproduce los 4 tiempos commiteando (el gate de SGI mide `@{u}..HEAD`) y captura ambas salidas de `./tools/verificar.ps1`.
+3. Ajusta los textos de `gen_gif.py` a las salidas capturadas (nunca al revés: el GIF sigue a la realidad) y córrelo con Python 3 + Pillow.
+4. Reemplaza `docs/assets/gate-bloqueando.gif` y actualiza la evidencia en `qa_runs/`.
 
-```powershell
-./tools/verificar.ps1
-```
+## Si algún día se prefiere una grabación de pantalla humana
 
-**3. Lístalo en el índice → verde** (la línea es lo único que cambia):
-
-```powershell
-Add-Content -Path docs\decisions\README.md -Value '- [9999 - demo del gate](9999-demo-gate.md)' -Encoding utf8
-./tools/verificar.ps1
-```
-
-**4. Corte.**
-
-## Limpieza (fuera de cámara)
-
-```powershell
-git checkout -- docs\decisions\README.md
-Remove-Item docs\decisions\9999-demo-gate.md
-git status          # limpio otra vez
-```
-
-## Al terminar
-
-- Guarda el GIF como `docs/assets/gate-mordiendo.gif` (crea la carpeta si no existe).
-- En `README.md`, reemplaza el comentario `<!-- GIF del gate bloqueando... -->` por:
-  `![El gate Andon bloqueando un ADR sin listar, y pasando a verde al listarlo](docs/assets/gate-mordiendo.gif)`
-- Marca el ⏳1 de *Vitrina pública* en `ROADMAP.md` como hecho.
+ScreenToGif (Windows, gratis) sobre la misma secuencia de comandos; el guion copy-paste original quedó en el historial de este archivo (git log).

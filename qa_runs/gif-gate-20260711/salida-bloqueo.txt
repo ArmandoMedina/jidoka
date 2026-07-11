@@ -1,0 +1,38 @@
+﻿== Verificar (modo aviso; el CI es el que bloquea) ==
+
+-- Lint (ruff check) --
+  [OK] sin hallazgos de lint
+
+-- Formato (ruff format --check) --
+  [OK] formato consistente
+
+-- Tests (pytest) --
+  [OK] tests verdes
+
+-- Cobertura de tests --
+  [AVISO] tocaste fantasma/ sin cambios en tests/. Revisa si el cambio introduce comportamiento nuevo o modifica uno existente que no este 
+cubierto aun.
+    Pistas: nueva funcion -> nuevo test; comportamiento cambiado -> test actualizado; refactor puro -> tests existentes ya cubren.
+
+-- Doc-gate (CHANGELOG) --
+  [AVISO] tocaste fantasma/ sin actualizar CHANGELOG.md - anotalo en [Unreleased].
+    Checklist: hubo decision? -> ADR (docs/decisions). cambio el plan/alcance? -> ROADMAP.md.
+
+-- Doc-gate (blast-radius seccion 8) --
+  [BLOQUEA] [ui] tocaste fantasma/ui/ng_helpers.py sin docs/guia-usuario.md (interfaz NiceGUI v2.0: ng_app.py, ng_step0-4.py, ng_helpers.py, 
+ng_state.py). Rol: revisor-visual -> pasalo al escribano.
+  [AVISO] [ui] considera actualizar docs/ux-patterns.md (interfaz NiceGUI v2.0: ng_app.py, ng_step0-4.py, ng_helpers.py, ng_state.py). Rol: 
+revisor-visual. El CI re-verifica esto.
+  [AVISO] [ui] preguntate: las capacidades/modulos de product/ siguen describiendo lo que implementaste? Candidatos: product/capacidades/UI-*, 
+product/modulos/UI*, product/dominios/Interfaz de usuario*, engineering/componentes/streamlit*, engineering/componentes/nicegui*. Escribano los 
+sincroniza si cambiaron criterios.
+
+-- Doc-gate (grafo product/engineering: auditar.ps1) --
+== Auditar grafo de docs (product/ + engineering/) ==
+
+== Grafo de docs integro. ==
+  [OK] grafo de docs integro (o solo avisos)
+
+== 1 bloqueo(s) de doc-drift. PUSH DETENIDO. ==
+   Sincroniza los docs duenos (pasalo al escribano) y reintenta, o 'git push --no-verify' a proposito.
+   (+4 aviso[s] no bloqueante[s] arriba.)

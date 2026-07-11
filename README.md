@@ -44,7 +44,9 @@ Programar con agentes de IA falla por ahí: pierden el contexto entre sesiones y
 
 ## Velo bloquear un cambio malo (hoy, en 3 pasos)
 
-<!-- GIF del gate bloqueando: guion listo en docs/guias/guion-gif-del-gate.md — se graba y se incrusta aquí, arriba del texto -->
+![El gate Andon deteniendo un push real en SimGhostInputs: el agente cambió la UI sin actualizar la guía de usuario → PUSH DETENIDO; actualiza la guía → pasa](docs/assets/gate-bloqueando.gif)
+
+*Corrida real en [SimGhostInputs](https://github.com/ArmandoMedina/SimGhostInputs) (repo público): un agente cambia la interfaz y commitea; el gate lee el diff, encuentra la guía de usuario sin actualizar y detiene el push — hasta que código y docs vuelven a decir la verdad juntos.*
 
 **Lo que necesitas hoy:** Windows + PowerShell 5.1 y git. El ritual (`/jidoka:*`, skills) corre sobre [Claude Code](https://claude.com/claude-code); los gates funcionan con cualquier flujo de PRs en GitHub. Multiplataforma y el CLI `npx` vienen en el [roadmap](ROADMAP.md).
 
@@ -69,7 +71,7 @@ El paso 3 no es un truco de demo: es el **self-test** que corre en cada PR de es
 
 ## Corriendo en un repo real
 
-El método no se prueba en un pizarrón: [**SimGhostInputs**](https://github.com/ArmandoMedina/SimGhostInputs) — una herramienta de telemetría para simracing — es un repo público construido dirigiendo agentes con este método. Puedes auditarlo tú mismo: [32 versiones publicadas](https://github.com/ArmandoMedina/SimGhostInputs/releases) con instalador generado por CI, [sus decisiones documentadas](https://github.com/ArmandoMedina/SimGhostInputs/tree/master/docs/decisions), la evidencia de demos en [`qa_runs/`](https://github.com/ArmandoMedina/SimGhostInputs/tree/master/qa_runs) y la misma maquinaria de gates (`.githooks/`, `tools/`) corriendo en sus PRs. Evidencia clickeable, no palabra. La historia completa del linaje, en [`docs/casos-de-exito.md`](docs/casos-de-exito.md).
+El método no se prueba en un pizarrón: [**SimGhostInputs**](https://github.com/ArmandoMedina/SimGhostInputs) — una herramienta de telemetría para simracing — es un repo público construido dirigiendo agentes con este método. Puedes auditarlo tú mismo: [32 versiones publicadas](https://github.com/ArmandoMedina/SimGhostInputs/releases) con instalador generado por CI, [sus decisiones documentadas](https://github.com/ArmandoMedina/SimGhostInputs/tree/master/docs/decisions), la evidencia de demos en [`qa_runs/`](https://github.com/ArmandoMedina/SimGhostInputs/tree/master/qa_runs) y la misma maquinaria de gates (`.githooks/`, `tools/`) corriendo en sus PRs — el GIF de arriba es una corrida real ahí. Nada de esto hay que creerlo: se hace clic. La historia completa del linaje, en [`docs/casos-de-exito.md`](docs/casos-de-exito.md).
 
 ## El sistema (por qué se llama Jidoka)
 
@@ -98,7 +100,7 @@ Un sprint de Jidoka es un lazo corto de cuatro tiempos. La tarjeta pasa por **Bo
 
 Tres reglas de diseño que lo atraviesan todo: **el plan ligero es el contrato** (sin ceremonia de más); **cada asiento tiene una sola responsabilidad** ([`kanban/roles.md`](kanban/roles.md)); y **la disciplina escala con el riesgo** — el instalador pregunta el arquetipo de tu repo y enciende solo la maquinaria que ese proyecto merece. Es un menú, no un molde.
 
-## Dónde va la beta (evidencia, no palabra)
+## Dónde va la beta
 
 Qué hay **hoy** y qué viene (detalle en [`ROADMAP.md`](ROADMAP.md)):
 

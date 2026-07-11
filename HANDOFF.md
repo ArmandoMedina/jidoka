@@ -23,7 +23,7 @@
 
 ## Checklist humana (el cordón es tuyo)
 
-- [ ] **Grabar el GIF del gate mordiendo** — guion paso a paso en `ROADMAP.md` → *Vitrina pública* ⏳1. La pieza más valiosa antes de compartir el repo.
+- [x] **El GIF del gate** — hecho en sesión (2026-07-11): generado de una corrida real en SGI, incrustado en el README (`docs/assets/gate-bloqueando.gif`; procedencia en `docs/guias/guion-gif-del-gate.md`).
 - [ ] **Social preview** (solo se puede desde la UI) — receta en `ROADMAP.md` → *Vitrina pública* ⏳2.
 - [ ] **Dos decisiones que solo tú puedes tomar**: el párrafo en inglés del README y el ADR de la licencia (MIT vs copyleft) — argumentos completos en `ROADMAP.md` → *Vitrina pública* ⏳4 y ⏳5.
 
