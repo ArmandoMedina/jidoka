@@ -37,6 +37,11 @@ jobs:
           .\tools\probar-hooks.ps1;    if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-auditor.ps1;  if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-disparos.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
+          # Self-tests Jidoka-only (no sembrados): corren solo si estan presentes
+          # (un hijo instalado no los tiene, y este mismo workflow se siembra).
+          foreach ($jt in 'probar-version','probar-publicar') {
+            if (Test-Path ".\tools\$jt.ps1") { & ".\tools\$jt.ps1"; if ($LASTEXITCODE -ne 0) { exit 1 } }
+          }
           exit 0
 
       - name: andon sobre el rango del PR (ley y verificador de la BASE)
