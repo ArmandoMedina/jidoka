@@ -4,10 +4,11 @@
 
 ## Asiento ≠ skill
 
-Un **asiento** es el rol que alguien ocupa (el *quién*); una **skill** es un comportamiento disparable con límites escritos (el *cómo*). Un asiento puede ocuparse **en la sesión principal** o **como subagente**. Por eso dos asientos NO son skills:
+Un **asiento** es el rol que alguien ocupa (el *quién*); una **skill** es un comportamiento disparable con límites escritos (el *cómo*). Un asiento puede ocuparse **en la sesión principal**, **como subagente** o **como agente de plataforma** (fuera del repo). Por eso tres asientos NO son skills:
 
 - El **orquestador** — es la sesión misma: decide y teje, delega lo pesado. Su antipatrón tiene nombre: *el orquestador desarrollando* — picar código en el hilo principal lo envenena.
-- El **desarrollador** — es el trabajo por defecto: escribir código.
+- El **desarrollador** — es el trabajo por defecto: escribir código. (Un repo puede *persona-ficarlo* como skill de delegación si le conviene disparar el mismo asiento con sus límites y su "Entorno" cada vez — ver *Personalizar el casting* abajo — pero por defecto no es skill.)
+- El **devops** — es el agente de **plataforma/máquina**, no del repo: VMs, SSH, sandboxes, CI, deploys, secretos, `core.hooksPath`, branch protection, config de la cuenta. No es skill porque su dominio es la máquina, no el código, y **no vive en el repo** (vive en la config de plataforma/cuenta).
 
 Convención 🎭: cuando el orquestador hace en sesión el trabajo de otro asiento, lo **anuncia** (`🎭 Asiento: <rol> (en sesión) — <por qué>`) — así se distingue la elección deliberada del olvido.
 
@@ -23,8 +24,30 @@ Menú, no molde: cada arquetipo de repo enciende solo los que merece.
 | **validador** | correr pruebas y juzgar **solo lo ambiguo** que el test no resuelve | no re-valida lo que un test ya cubre; no toca lo visual |
 | **revisor-visual** | aceptación UI/UX, evidencia en `qa_runs/` | no juzga lógica; **es checkpoint, no portero** — "¿se ve bien?" la responde el humano |
 | **arquitecto-doc** *(opcional, arquetipo doc-heavy)* | formato, jerarquía y consistencia del grafo de docs | no decide negocio; conserva, no inventa alcance |
+| **devops** *(agente de plataforma, no skill del repo)* | la máquina y el entorno: VMs, SSH, sandbox, CI, deploys, secretos, `core.hooksPath`, branch protection, config de cuenta | no toca el código de negocio ni decide producto; no vive en el repo |
 
 Los asientos como skills ejecutables llegan en el **Sprint 2** ([ROADMAP](../ROADMAP.md)). El conocimiento de qué es cada uno no espera a la máquina.
+
+## Personalizar el casting (maquinaria neutral + persona opcional)
+
+Los roles vienen **neutrales a propósito** (`escribano`, `validador`, `revisor-visual`, `arquitecto-doc`, `devops`) para que el método público sirva a cualquiera. **En tu repo real, mapéalos a personas si te sirve** — un casting con nombres los vuelve memorables y deja claro quién valida qué. Versionar `.claude/` es lo que permite que ese casting **viva en el repo**, no en la cabeza de cada quien.
+
+La regla que lo vuelve una sola metodología y no dos: **la maquinaria es neutral; el nombre es una capa cosmética encima.**
+
+- **Neutral (nunca cambia):** la ley (`tools/blast-radius.json`) usa el token de rol genérico (`rol: revisor-visual`); los hooks filtran por ese token; los marcadores y la lógica son genéricos. Ahí vive el método — uno solo.
+- **Persona (opcional, por repo):** renombras la carpeta del skill y su `name:` (`skills/revisor-visual/` → `skills/mariana/`, cuyo `SKILL.md` dice "soy Mariana, el asiento revisor-visual"). El comportamiento es idéntico; solo cambia la etiqueta.
+
+| Rol del método | Casting (ejemplo) | Vive como |
+|---|---|---|
+| orquestador | Mau | la sesión principal (no es skill) |
+| desarrollador | Ahiram | el trabajo por defecto (opcionalmente un skill de delegación) |
+| devops | Oscar | agente de plataforma (no vive en el repo) |
+| `validador` | Charbel | `skills/<nombre>/` |
+| `revisor-visual` | Mariana | `skills/<nombre>/` |
+| `arquitecto-doc` | Armando | `skills/<nombre>/` |
+| `escribano` | Escribano | `skills/<nombre>/` |
+
+**La autoridad la da la ley, no el nombre** — quién puede cambiar qué como fuente de verdad se declara en `blast-radius.json` (el campo `rol` de cada área), no en cómo llamaste al skill. Por eso dos repos con castings distintos siguen corriendo *la misma metodología*: la maquinaria que juzga es idéntica; solo difieren las etiquetas de las personas. Cero metodologías paralelas.
 
 ## Model-routing: no uses Ferrari para ir por tortillas
 
