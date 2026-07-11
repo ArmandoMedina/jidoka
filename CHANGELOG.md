@@ -2,6 +2,15 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [Sin publicar]
+
+### Homologación · Etapa 1 — Jidoka como superset del método (ADR 0010)
+- **Rumbo a una sola metodología** (no versiones paralelas entre Jidoka, SGI y TF). El diagnóstico de delta mostró que en el motor Jidoka ya es la versión más nueva; solo faltaban tres piezas de método para ser el superset y que los labs puedan adoptarlo sin regresión. Esta etapa las sube.
+- **El asiento `devops`** al roster (`kanban/roles.md`): agente de plataforma/máquina (VMs, SSH, CI, deploys, secretos, `hooksPath`, branch protection), **no skill del repo** — como el orquestador y el desarrollador. Tres asientos no-skill ahora.
+- **El modo desatendido, generalizado** (`kanban/desatendido.md` + comando **`/jidoka:desatendido`** + plantilla): las dos lanes `[agente]`/`[humano]`, prioridad declarada, click-it-down y las reglas duras (nada irreversible sin el humano; el agente **no edita sus propios gates**) — para cualquier trabajo autónomo, no solo auditar.
+- **El modelo de casting neutral+persona** (`roles.md` → *Personalizar el casting*): la maquinaria usa roles neutrales siempre (ahí vive la única metodología); el nombre propio es una capa cosmética por repo. Dos repos con castings distintos corren el mismo método — cero paralelo, cero alias en runtime.
+- Reconciliación de doctrina (anti-sobreingeniería): `devops` y `desarrollador` se documentan como **asientos, no skills** (respeta `asiento ≠ skill`); nada de maquinaria especulativa.
+
 ## [0.8.0-beta] — 2026-07-10
 
 ### Sprint 3 · Fase 3.B — Los arquetipos ejecutables + los templates de producto (ADR 0009)
