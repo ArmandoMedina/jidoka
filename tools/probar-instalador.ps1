@@ -1,0 +1,70 @@
+#Requires -Version 5
+# probar-instalador.ps1 - smoke del instalador (disparo prueba-de-humo-del-gate).
+# Instala Jidoka en un repo git TEMPORAL, commitea, y corre los self-tests SEMBRADOS
+# + verificar ahi: un instalador que siembra un motor roto se caza aqui. Verifica
+# tambien el NO-CLOBBER (una segunda corrida no pisa un archivo con trabajo).
+#
+# Uso:  ./tools/probar-instalador.ps1   (exit 0 = instalador sano; exit 1 = bug)
+# Nota: archivo ASCII a proposito, PS 5.1.
+
+$instalar = Join-Path $PSScriptRoot 'instalar.ps1'
+$script:fallos = 0
+$script:casos = 0
+
+function Check($nombre, $cond, $detalle) {
+  $script:casos++
+  if ($cond) { Write-Host "  [PASA]  $nombre" -ForegroundColor Green }
+  else { Write-Host "  [FALLA] $nombre ($detalle)" -ForegroundColor Red; $script:fallos++ }
+}
+
+function Run-PS($file) {
+  & powershell -NoProfile -ExecutionPolicy Bypass -File $file @args *> $null
+  return $LASTEXITCODE
+}
+
+Write-Host "== Smoke del instalador (tools/instalar.ps1) =="
+$tmp = Join-Path $env:TEMP ("jidoka-smoke-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+
+try {
+  # 1. Instalar en el temporal.
+  Run-PS $instalar -Destino $tmp -Arquetipo 'docs-as-code' -Yes | Out-Null
+  Check 'instala: el motor queda sembrado' (Test-Path (Join-Path $tmp 'tools/verificar.ps1')) "no aparecio tools/verificar.ps1"
+  Check 'instala: la ley del arquetipo queda sembrada' (Test-Path (Join-Path $tmp 'tools/blast-radius.json')) "no aparecio la ley"
+  Check 'instala: los comandos /jidoka:* quedan sembrados' (Test-Path (Join-Path $tmp '.claude/commands/jidoka/arranca.md')) "no aparecio arranca.md"
+  Check 'instala: core.hooksPath quedo configurado' ((git -C $tmp config core.hooksPath) -eq '.githooks') "hooksPath no quedo"
+
+  # 2. Commit inicial (un repo recien sembrado se commitea antes de que verificar mida).
+  Push-Location $tmp
+  git add -A 2>&1 | Out-Null
+  git -c user.email='smoke@jidoka.local' -c user.name='smoke' -c commit.gpgsign=false commit -q -m 'sembrado inicial' 2>&1 | Out-Null
+  Pop-Location
+
+  # 3. Los self-tests SEMBRADOS deben pasar en el destino.
+  foreach ($t in @('probar-gate', 'probar-hooks', 'probar-auditor')) {
+    $code = Run-PS (Join-Path $tmp "tools/$t.ps1")
+    Check "self-test sembrado '$t' pasa en el destino" ($code -eq 0) "exit $code"
+  }
+
+  # 4. verificar sembrado corre limpio (con HEAD ya existente).
+  $vc = Run-PS (Join-Path $tmp 'tools/verificar.ps1')
+  Check 'verificar sembrado corre limpio (exit 0)' ($vc -eq 0) "exit $vc"
+
+  # 5. NO-CLOBBER: escribo trabajo propio y re-instalo; no debe pisarse.
+  $handoff = Join-Path $tmp 'HANDOFF.md'
+  $marca = 'CONTENIDO-PROPIO-QUE-NO-SE-DEBE-PISAR'
+  Set-Content -Path $handoff -Value $marca -Encoding UTF8
+  Run-PS $instalar -Destino $tmp -Yes | Out-Null
+  $after = Get-Content $handoff -Raw
+  Check 'no-clobber: la segunda instalacion NO pisa un archivo existente' ($after -match $marca) "el archivo se sobrescribio"
+}
+finally {
+  Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
+}
+
+Write-Host ""
+if ($script:fallos -gt 0) {
+  Write-Host "== $($script:fallos) de $($script:casos) caso(s) fallidos. El instalador tiene un bug: no lo estrenes. ==" -ForegroundColor Red
+  exit 1
+}
+Write-Host "== Instalador sano: los $($script:casos) casos se comportan como se espera. ==" -ForegroundColor Green
+exit 0

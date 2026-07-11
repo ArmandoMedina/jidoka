@@ -14,3 +14,4 @@ Registro de las decisiones de arquitectura del proyecto. Cada ADR captura **una*
 | [0005](0005-exprimido-final-del-linaje.md) | El exprimido final del linaje: última cosecha, archivado de los repos de método, los casos de éxito siguen vivos | aceptado |
 | [0006](0006-plan-efimero.md) | El plan de trabajo: efímero, con hogar persistente fuera de git (`/.jidoka/plan-actual.md`) | aceptado |
 | [0007](0007-homologacion-de-los-muros.md) | La homologación de los muros: `review-stop`, `gemba-stop` y el auditor del grafo, cosechados de los casos de éxito | aceptado |
+| [0008](0008-el-instalador.md) | El instalador mínimo: PowerShell-first, siembra leyendo del árbol sin duplicar, un arquetipo (docs-as-code) | aceptado |

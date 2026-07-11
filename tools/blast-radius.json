@@ -47,6 +47,16 @@
     "rol": "Escribano"
   },
   {
+    "nombre": "kit",
+    "desc": "el kit instalable y el instalador: las leyes-plantilla por arquetipo, el manifiesto de siembra, las plantillas, y los scripts instalar/probar-instalador (Sprint 3)",
+    "fuente": ["kit/.jidoka/leyes/*", "kit/.jidoka/instalar/*", "kit/.jidoka/templates/*", "tools/instalar.ps1", "tools/probar-instalador.ps1"],
+    "doc_bloquea": [],
+    "doc_avisa": ["CHANGELOG.md"],
+    "revisa": true,
+    "mensaje": "cambiaste el instalador o el kit que siembra: registra el cambio en CHANGELOG.md y corre tools/probar-instalador.ps1 (un instalador que siembra un motor roto se caza en su smoke). Si solo corregiste typos, este aviso no es para ti",
+    "rol": "Escribano"
+  },
+  {
     "nombre": "barreras",
     "desc": "el motor Andon de este repo: la ley, el verificador, el self-test, los hooks, el pre-push y el CI. Jidoka corre sus propios gates (dogfooding)",
     "fuente": [
@@ -56,6 +66,7 @@
       ".claude/hooks/*",
       ".claude/settings.json"
     ],
+    "excluye": ["tools/instalar.ps1", "tools/probar-instalador.ps1"],
     "doc_bloquea": [],
     "doc_avisa": ["andon/README.md"],
     "product_avisa": ["product/capacidades/AND-*"],

@@ -20,14 +20,22 @@
 - Templates de sprint: ya sembrados en `kit/.jidoka/templates/` (Sprint 1.5); aquí los comandos los usan.
 - Especificación fina heredada del linaje (ADR 0005): mecánica del `gemba-stop` auto-configurado desde la ley; `recursos-del-proyecto.md` que `/jidoka:arranca` lee al abrir; la rebanada **R0 con STOP** en `/jidoka:planea`; anatomía probada de skill ("Entorno" embebido, no son `subagent_type`); regla doc-only (sin `/arranca`); **zanjar la contradicción del plan efímero** (válvula de excepción para tareas largas).
 
-## Sprint 3 — El instalador · 🔜
-- CLI **`jidoka-method`** en npm (`npx jidoka-method init`): pregunta el arquetipo (code-first · docs-as-code · doc-only) y siembra solo la maquinaria que el proyecto merece.
-- El `kit/` completo (incl. jerarquía de templates de producto); **gemelos `.sh`** del motor (multiplataforma); `setup` desatendido (`-Yes`).
-- Barreras extra del verificador para repos code-first: lint/formato/tests/cobertura/CHANGELOG-gate (probadas en el laboratorio de campo).
-- CI de release + smoke del instalador (lección pagada: *un workflow que solo corre al cortar release se pudre en silencio* — `workflow_dispatch` como rescate).
-- Decisión abierta (ADR 0003): el motor vive SOLO en `kit/` y este repo **se instala su propio kit** — cero copias duplicadas de la ley.
-- El instalador enciende lo que hoy es manual: `core.hooksPath`, y guía la branch protection.
-- Especificación fina heredada del linaje (ADR 0005): inventario exacto de los 12 templates + PRODUCT_BRIEF + HANDOFF + benchmark; la matriz pieza×arquetipo como spec funcional del instalador; SSOT de versión (un literal, todo deriva); ensayo del empaquetado contra el manifiesto que el runtime usa; gate de UX en 3 capas; lint de alta señal.
+## Sprint 3 — El instalador · 🔨 en curso (faseado)
+
+Enorme; se fasea. El hallazgo fundacional: el ancestro (`project-starter`) **no tenía instalador** (sembraba con "Use this template" de GitHub) — el acto de sembrar es invención de Jidoka. Lo reutilizable del starter es *qué* sembrar (13 templates, la ley ejecutable, hooks auto-desactivables) y los **3 arquetipos** (code-first · docs-as-code · doc-only), hoy prosa.
+
+### Fase 3.A — El instalador mínimo que corre · ✅ (en PR, candidato `v0.7.0-beta`) — ADR 0008
+- `tools/instalar.ps1` (PowerShell, Windows-first): siembra el método en un repo destino leyendo el motor genérico del árbol de Jidoka (sin duplicar la ley), cambiando solo la ley por una **plantilla de arquetipo**. Regla dura **no-clobber**. Enciende `core.hooksPath`, crea stubs, guía la branch protection.
+- Un arquetipo (`docs-as-code`), su ley-plantilla y el manifiesto de siembra en `kit/.jidoka/`. Smoke `tools/probar-instalador.ps1` (instala en repo temporal, corre los self-tests sembrados). Área `kit` en la ley.
+
+### Fase 3.B / 3.C — lo que falta (diferido a propósito, que no se olvide)
+- **Los otros 2 arquetipos** (code-first, doc-only) + la **matriz pieza×arquetipo como manifiesto ejecutable** (hoy prosa en el starter — convertirla es el mayor valor sobre el ancestro).
+- **Los 12 templates de producto** (capacidad, módulo, dominio, ecosistema, solución, componente, spec, modelo-de-datos, requerimiento+backlog, proceso, glosario, propuesta-gate-proceso) + **PRODUCT_BRIEF** + **benchmark** — portar del starter.
+- **Multiplataforma**: gemelos `.sh` o unificar en `pwsh` Core (decisión abierta); despacho de hooks por SO. Hoy el motor es Windows/PS 5.1.
+- **CLI npm `npx jidoka-method init`** (distribución cross-platform) + **SSOT de versión** (un literal, `package.json`, todo deriva — hoy la versión vive en tags/CHANGELOG/ROADMAP) + **CI de release** + **smoke del instalador en CI** (lección: *un workflow que solo corre al cortar release se pudre en silencio* → `workflow_dispatch` de rescate) + **ensayo del empaquetado** (el build se autoverifica contra el manifiesto que el runtime usa).
+- **Barreras code-first**: lint/formato/tests/cobertura/CHANGELOG-gate; **gate de UX en 3 capas**; **lint de alta señal** (set corto).
+- **Dogfood completo del ADR 0003**: mover el motor a vivir SOLO en `kit/` y que Jidoka se **auto-instale** (cero duplicación). La Fase 3.A lo evita leyendo del árbol, pero no completa la mudanza.
+- Los comandos/skills sembrados citan docs de método de Jidoka (`kanban/`, `docs/guias/`) que hoy **no** se siembran: enlaces muertos en un repo ajeno (los `@`-refs duros sí resuelven). Sembrar un set genérico o apuntar a los docs públicos es parte de esta deuda (ADR 0008 → "Qué NO resuelve").
 
 ## Sprint 4 — Beta estable · 🔜
 - Guías completas (`docs/guias/empezar-de-cero.md` deja de ser esqueleto).
