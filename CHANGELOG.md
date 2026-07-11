@@ -2,6 +2,19 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [0.11.0-beta] — 2026-07-11
+
+### El lazo de sincronización labs↔Jidoka (Sprint 3 · Fase 3.C — ADR 0012)
+
+*La lección sube, la máquina baja.* El primer canal mecanizado para que un repo hijo baje correcciones del motor sin que las versiones diverjan. Regla dura: **la mecánica converge idéntica; la estética/instancia nunca se sobrescribe; la divergencia se detecta y se preserva, no se pisa.**
+
+- **Sello de versión sembrado** (`tools/jidoka-motor.json`): el instalador escribe en cada hijo de qué versión de Jidoka viene su motor + el SHA256 de cada pieza. La fuente única es **`tools/version.txt` (SSOT)**, atada al tope del CHANGELOG por el self-test `tools/probar-version.ps1` para que el sello no mienta.
+- **Modo `-Actualizar` con conciencia de tres vías** (`tools/instalar.ps1`, estilo `dpkg conffiles`): re-siembra SOLO la mecánica (`clase: mecanica`). Por pieza — ausente→agrega; `hijo==Jidoka`→al día; `hijo==hash sembrado`→actualiza; `hijo!=hash sembrado`→**divergencia** (no pisa, deja `<archivo>.jidoka-nuevo` y reporta). La instancia (ley, `product/`, HANDOFF, ADRs) nunca se toca.
+- **Aviso de divergencia** (`tools/estado-motor.ps1`, sembrado): compara el sello contra un Jidoka alcanzable (`-Jidoka`/`$env:JIDOKA_HOME`) y avisa "al día / atrás". Aviso, no muro (exit 0).
+- **Canal de subida** (`tools/reportar-leccion.ps1` + `docs/guias/reportar-leccion-a-jidoka.md`): el hijo reporta la lección al issue `leccion.md` de Jidoka en vez de parchear su motor local.
+- **Costura `.local`**: `verificar.ps1` dot-sourcea `tools/verificar.local.ps1` si existe — el hijo extiende la mecánica (ruff/pytest) sin bifurcar el genérico; la vía para converger sin clobber.
+- **Manifiesto**: cada pieza de motor marcada `clase: mecanica`. **Smoke `tools/probar-instalador.ps1`: 32/32** (siembra + sello + tres vías + aviso + `.local` + canal). SGI queda como primer consumidor del lazo.
+
 ## [0.10.1-beta] — 2026-07-11
 
 ### Vitrina — el README, aterrizado (PR #12)
