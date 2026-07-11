@@ -1,10 +1,15 @@
-# Casos de éxito del linaje
+# De dónde viene: el linaje
 
-> Jidoka no nació en un pizarrón: se cosechó de repos reales ([homologación](../kanban/homologacion.md), ADRs [0004](decisions/0004-centralizacion-del-conocimiento.md) y [0005](decisions/0005-exprimido-final-del-linaje.md)). Estos son los dos casos de campo, citados con la frontera de confidencialidad del método (sin nombres, datos ni entornos personales — `doctrina/decisiones/0004`). Ambos proyectos **siguen vivos** — son casos de éxito en curso, no piezas de museo. Evidencia-no-palabra: cada número de aquí existe en el récord del repo de origen.
+> Jidoka no nació en un pizarrón: se cosechó de repos reales ([homologación](../kanban/homologacion.md), ADRs [0004](decisions/0004-centralizacion-del-conocimiento.md) y [0005](decisions/0005-exprimido-final-del-linaje.md)). Estos son los dos casos de campo. Ambos proyectos **siguen vivos** — casos en curso, no piezas de museo. Uno es **público y puedes auditarlo tú mismo**; el otro se cita anónimo por la frontera de confidencialidad del método (sin datos ni entornos personales).
 
-## Caso 1 — El laboratorio de campo: 4 semanas, 32 versiones, 34 decisiones
+## Caso 1 — SimGhostInputs: 32 versiones, el método a la vista
 
-Una herramienta open-source de análisis de telemetría para simulación de carreras (Python, Windows): un solo humano dirigiendo agentes de IA con el ritual completo. En **4 semanas de calendario**: 239 commits, **32 versiones publicadas** (0.1.0 → 2.4.0) con instalador Windows generado por CI, **34 ADRs**, y una suite que creció de 0 a **453 tests**. El QUÉ vive en una jerarquía navegable (22 capacidades, 14 módulos, 9 dominios) gateada por un auditor determinista.
+**Repo público: [github.com/ArmandoMedina/SimGhostInputs](https://github.com/ArmandoMedina/SimGhostInputs)** — una herramienta open-source de análisis de telemetría para simulación de carreras (Python, Windows): un solo humano dirigiendo agentes de IA con el ritual completo. La evidencia no es este párrafo; es su récord, clickeable:
+
+- **[Sus versiones publicadas](https://github.com/ArmandoMedina/SimGhostInputs/releases)** con instalador Windows generado por CI — 32 versiones en las primeras 4 semanas de calendario (0.1.0 → 2.4.0); hoy va en `v2.5.0` y sigue.
+- **[Sus decisiones documentadas](https://github.com/ArmandoMedina/SimGhostInputs/tree/master/docs/decisions)** — más de 35 ADRs con "el camino que NO se toma".
+- **[La evidencia de demos en `qa_runs/`](https://github.com/ArmandoMedina/SimGhostInputs/tree/master/qa_runs)** y una suite que creció de 0 a más de 450 tests, corriendo en su CI.
+- **La misma maquinaria de gates que este repo** (`.githooks/`, `tools/`, `HANDOFF.md`, `product/`) — es el repo hijo donde el método corre en producción, y del que Jidoka cosecha de vuelta (ADR [0011](decisions/0011-homologacion-cosecha-sgi.md)).
 
 Antes de la 2.0 se corrió el [ritual de auditoría en rama](../kanban/auditoria.md): **21 auditores en fan-out** produjeron ~190 hallazgos brutos que la síntesis deduplicó a ~65 (7 críticos), con veredictos separados — **GO condicionado** al merge, **NO-GO** al tag hasta cerrar la remediación. El release salió con los críticos cerrados y con una UI entera retirada de un golpe para eliminar la *fuente* de la familia de drift #1.
 
@@ -17,6 +22,8 @@ Lo que este caso le dejó al método:
 5. **El contrato con terceros se verifica contra su código fuente, no contra su documentación** — trazar el fuente real corrigió 3 supuestos falsos y confirmó un crash alcanzable antes de que llegara a producción.
 
 ## Caso 2 — Una PWA de finanzas personales: 6 sprints del ritual, cliente que no lee código
+
+*(Este repo es privado — maneja documentos financieros reales de su autor — así que se cita sin nombre ni datos: es la parte del linaje que se cuenta, no se enseña.)*
 
 Una app local-first que lee documentos financieros en el navegador —nada sale del dispositivo— y responde dos preguntas en lenguaje llano: *"¿me alcanza?"* y *"¿cuánto aguanto?"*. El cliente no lee código: **todo lo que aceptó, lo aceptó corriendo un demo** (Gemba).
 
