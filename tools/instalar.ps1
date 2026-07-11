@@ -97,6 +97,10 @@ function Invoke-Actualizar($jidoka, $manif, $Destino, $utf8) {
   $nuevoSeed = [ordered]@{}
   $alDia = 0; $agregados = 0; $actualizados = 0; $divergen = @()
 
+  # Limite conocido (estilo dpkg): -Actualizar re-siembra el motor ACTUAL de Jidoka.
+  # NO borra piezas que una version futura de Jidoka haya retirado -- un archivo viejo
+  # sigue en el hijo y cae del sello sin aviso. Removerlas es decision aparte (arriesga
+  # pisar algo que el hijo aun usa); por ahora se prefiere no borrar.
   foreach ($e in $manif.motor) {
     if ($e.clase -and $e.clase -ne 'mecanica') { continue }        # solo la mecanica converge
     $srcRoot = Join-Path $jidoka $e.origen
@@ -105,7 +109,6 @@ function Invoke-Actualizar($jidoka, $manif, $Destino, $utf8) {
     # Aplana la entrada a pares (rel, origen-abs) usando el arbol de Jidoka como verdad.
     $pares = @()
     if ($e.dir) {
-      $baseRoot = $Destino
       Get-ChildItem -LiteralPath $srcRoot -Recurse -File | ForEach-Object {
         $relEnOrigen = $_.FullName.Substring($srcRoot.Length).TrimStart('\', '/').Replace('\', '/')
         $relDst = ($e.destino.Replace('\', '/')).TrimEnd('/') + '/' + $relEnOrigen
