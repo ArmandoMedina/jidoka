@@ -32,9 +32,9 @@ function Caso($nombre, $exitEsperado, $debeContener, $noDebeContener, $gateArgs)
 
 Write-Host "== Prueba de humo del Andon (tools/verificar.ps1) =="
 
-# Casos contra la LEY REAL (tools/blast-radius.json):
-Caso 'avisa: doctrina tocada sin su disparo (ley real)' 0 '[AVISO]' '' `
-  @{ Cambiados = @('doctrina/00-tesis.md') }
+# Casos contra la LEY REAL (tools/blast-radius.json). Se eligen casos que valen en
+# CUALQUIER arquetipo (el area universal 'decisiones' y 'ritual'), no piezas propias
+# de Jidoka -- asi este self-test se siembra y pasa en un repo instalado.
 Caso 'limpio: cambio fuera de las areas cubiertas (ley real)' 0 'al dia' '[AVISO]' `
   @{ Cambiados = @('README.md') }
 Caso 'bloquea: ADR nuevo sin listar en el indice (ley real)' 1 '[BLOQUEA]' '' `

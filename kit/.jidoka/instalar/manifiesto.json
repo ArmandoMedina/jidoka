@@ -1,0 +1,50 @@
+{
+  "descripcion": "Manifiesto de siembra del instalador (tools/instalar.ps1). 'motor' lista los archivos genericos que se copian del arbol de Jidoka al destino (origen relativo a la raiz de Jidoka; destino relativo al -Destino). 'ley' mapea arquetipo -> plantilla de ley, que se siembra en 'ley_destino'. 'stubs' se crean solo si faltan (no clobber).",
+  "arquetipos": {
+    "docs-as-code": {
+      "disponible": true,
+      "ley": "kit/.jidoka/leyes/blast-radius.docs-as-code.json"
+    },
+    "code-first": {
+      "disponible": false,
+      "nota": "en camino (Sprint 3, fase siguiente; ver ROADMAP)"
+    },
+    "doc-only": {
+      "disponible": false,
+      "nota": "en camino (Sprint 3, fase siguiente; ver ROADMAP)"
+    }
+  },
+  "ley_destino": "tools/blast-radius.json",
+  "motor": [
+    { "origen": "tools/verificar.ps1", "destino": "tools/verificar.ps1" },
+    { "origen": "tools/auditar.ps1", "destino": "tools/auditar.ps1" },
+    { "origen": "tools/probar-gate.ps1", "destino": "tools/probar-gate.ps1" },
+    { "origen": "tools/probar-hooks.ps1", "destino": "tools/probar-hooks.ps1" },
+    { "origen": "tools/probar-auditor.ps1", "destino": "tools/probar-auditor.ps1" },
+    { "origen": ".claude/settings.json", "destino": ".claude/settings.json" },
+    { "origen": ".claude/hooks", "destino": ".claude/hooks", "dir": true },
+    { "origen": ".claude/commands", "destino": ".claude/commands", "dir": true },
+    { "origen": ".claude/skills", "destino": ".claude/skills", "dir": true },
+    { "origen": ".githooks/pre-push", "destino": ".githooks/pre-push" },
+    { "origen": ".github/workflows/andon.yml", "destino": ".github/workflows/andon.yml" },
+    { "origen": "kit/.jidoka/templates", "destino": "kit/.jidoka/templates", "dir": true },
+    { "origen": "kit/.jidoka/disparos", "destino": "kit/.jidoka/disparos", "dir": true },
+    { "origen": "kit/.jidoka/qa_runs", "destino": "kit/.jidoka/qa_runs", "dir": true }
+  ],
+  "stubs": [
+    { "ruta": "HANDOFF.md", "contenido": "# HANDOFF - relevo entre sesiones\n\n> Estado en vuelo y pendientes. Se llena al cerrar, se lee y se limpia al abrir. Nada de memorias de la IA: todo va aqui.\n\n## En una frase\n\n[Que es este proyecto, en una frase.]\n\n## Donde estamos\n\n- [Sembrado con Jidoka (npx jidoka-method / instalar.ps1). Corre /jidoka:arranca para empezar.]\n" },
+    { "ruta": "ROADMAP.md", "contenido": "# Roadmap\n\n> Hacia donde va el proyecto. Cada sprint entrega un incremento demostrable (Gemba).\n\n## Sprint 1 - [nombre] - proximo\n- [Que capacidad gana el usuario.]\n" },
+    { "ruta": "CHANGELOG.md", "contenido": "# Changelog\n\nFormato: Keep a Changelog. Versionado: SemVer.\n\n## [Sin publicar]\n\n### Sembrado\n- Metodo Jidoka instalado (ritual + motor Andon, arquetipo docs-as-code).\n" },
+    { "ruta": "docs/decisions/README.md", "contenido": "# Decisiones (ADRs)\n\nRegistro de las decisiones de arquitectura. Cada ADR captura UNA decision y su porque.\n\n> Este indice es un doc dueno con bloqueo real: agregar un ADR sin listarlo aqui detiene el push.\n\n| # | Titulo | Estado |\n|---|---|---|\n| 0000 | Plantilla | plantilla |\n" },
+    { "ruta": ".gitignore", "contenido": "# Evidencia de Gemba (el bulto no se versiona; lo citado se commitea con git add -f)\nqa_runs/*/\n\n# Marcadores de revision de los Stop hooks\n.claude/.review-marker\n.claude/.gemba-marker\n\n# Plan de trabajo del dia (efimero, persistente fuera de git)\n/.jidoka/\n\n# SO / editor\n.DS_Store\nThumbs.db\n*.swp\n" }
+  ],
+  "post": {
+    "hooksPath": ".githooks",
+    "siguientes_pasos": [
+      "Corre ./tools/probar-gate.ps1 para confirmar que el motor quedo sano.",
+      "Corre /jidoka:arranca en una sesion de Claude Code para activar el ritual.",
+      "Enciende el muro server-side (paso humano): branch protection en main con el check 'andon' requerido y sin bypass.",
+      "Copia una plantilla de kit/.jidoka/templates/ para tu primer plan o ADR."
+    ]
+  }
+}

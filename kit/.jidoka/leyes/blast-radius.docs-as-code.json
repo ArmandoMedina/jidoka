@@ -1,0 +1,50 @@
+[
+  {
+    "nombre": "decisiones",
+    "desc": "un ADR que no esta en el indice es una decision invisible: decision perdida",
+    "fuente": ["docs/decisions/*.md"],
+    "excluye": ["docs/decisions/README.md"],
+    "doc_bloquea": ["docs/decisions/README.md"],
+    "doc_avisa": [],
+    "mensaje": "agregaste o cambiaste un ADR: listalo en el indice docs/decisions/README.md en el mismo cambio. Este es el UNICO bloqueo real (alto valor, baja fatiga)",
+    "rol": "Escribano"
+  },
+  {
+    "nombre": "producto",
+    "desc": "el grafo del QUE: capacidades, modulos, dominios con frontmatter y wikilinks (lo audita tools/auditar.ps1)",
+    "fuente": ["product/*"],
+    "excluye": ["product/README.md"],
+    "doc_bloquea": [],
+    "doc_avisa": ["CHANGELOG.md"],
+    "mensaje": "cambiaste el grafo de producto: si una capacidad cambio de estado o criterios, registralo en CHANGELOG.md. Si fue formato o typos, este aviso no es para ti",
+    "rol": "arquitecto-doc"
+  },
+  {
+    "nombre": "barreras",
+    "desc": "el motor Andon: la ley, el verificador, el auditor, los hooks, el pre-push y el CI",
+    "fuente": ["tools/*", ".githooks/*", ".github/workflows/*", ".claude/hooks/*", ".claude/settings.json"],
+    "doc_bloquea": [],
+    "doc_avisa": ["CHANGELOG.md"],
+    "revisa": true,
+    "mensaje": "cambiaste un gate: registralo en CHANGELOG.md y corre tools/probar-gate.ps1 (un gate nuevo no se estrena sin correrlo contra el artefacto real)",
+    "rol": "Escribano"
+  },
+  {
+    "nombre": "ritual",
+    "desc": "el ritual ejecutable: los comandos /jidoka:* y las skills-asiento",
+    "fuente": [".claude/commands/*", ".claude/skills/*"],
+    "doc_bloquea": [],
+    "doc_avisa": ["CHANGELOG.md"],
+    "rol": "Escribano"
+  },
+  {
+    "nombre": "raiz",
+    "desc": "tierra de nadie: un archivo suelto en la raiz casi siempre tiene lugar con dueno en otra parte",
+    "fuente": ["*"],
+    "excluye": ["README.md", "CHANGELOG.md", "HANDOFF.md", "ROADMAP.md", "CONTRIBUTING.md", "LICENSE", ".gitattributes", ".editorconfig", ".gitignore"],
+    "doc_bloquea": [],
+    "doc_avisa": ["HANDOFF.md"],
+    "mensaje": "aparecio un archivo suelto en la raiz. Si es contenido, tiene lugar con dueno (docs/, product/, tools/); si es temporal, no se commitea; si es un canonico nuevo decidido en un ADR, este aviso no es para ti",
+    "rol": "Escribano"
+  }
+]
