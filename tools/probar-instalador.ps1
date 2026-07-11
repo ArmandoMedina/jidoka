@@ -33,6 +33,28 @@ try {
   Check 'instala: los comandos /jidoka:* quedan sembrados' (Test-Path (Join-Path $tmp '.claude/commands/jidoka/arranca.md')) "no aparecio arranca.md"
   Check 'instala: core.hooksPath quedo configurado' ((git -C $tmp config core.hooksPath) -eq '.githooks') "hooksPath no quedo"
 
+  # 1b. SELLO de version: el hijo sabe de que Jidoka viene su motor, con hashes que casan.
+  $selloPath = Join-Path $tmp 'tools/jidoka-motor.json'
+  Check 'sello: tools/jidoka-motor.json queda sembrado' (Test-Path $selloPath) "no aparecio el sello"
+  $verTxt = (Get-Content (Join-Path $PSScriptRoot 'version.txt') -Raw).Trim()
+  $selloVerOk = $false; $hashesOk = $false; $countOk = $false
+  if (Test-Path $selloPath) {
+    try {
+      $sello = Get-Content $selloPath -Raw | ConvertFrom-Json
+      $selloVerOk = ($sello.version -eq $verTxt)
+      $props = @($sello.sembrado_hashes.PSObject.Properties)
+      $countOk = ($props.Count -gt 0)
+      $hashesOk = $true
+      foreach ($p in $props) {
+        $abs = Join-Path $tmp $p.Name
+        if (-not (Test-Path -LiteralPath $abs) -or ((Get-FileHash -LiteralPath $abs -Algorithm SHA256).Hash -ne $p.Value)) { $hashesOk = $false; break }
+      }
+    } catch {}
+  }
+  Check 'sello: version == tools/version.txt' $selloVerOk "sello.version != $verTxt"
+  Check 'sello: registra al menos una pieza de motor' $countOk "sembrado_hashes vacio"
+  Check 'sello: cada hash casa con el archivo sembrado' $hashesOk "algun hash no coincide con lo sembrado"
+
   # 2. Commit inicial (un repo recien sembrado se commitea antes de que verificar mida).
   Push-Location $tmp
   git add -A 2>&1 | Out-Null

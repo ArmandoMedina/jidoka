@@ -49,6 +49,23 @@ function Copy-DirSafe($srcDir, $dstDir) {
   }
 }
 
+# SHA256 de un archivo (hash del sello / deteccion de divergencia).
+function Get-MotorHash($path) { return (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash }
+
+# Enumera los archivos que una entrada de motor cubre en $root (aplana dirs).
+# Devuelve objetos { rel = ruta relativa con '/'; abs = ruta absoluta }.
+function Get-MotorFiles($entry, $root) {
+  $dst = Join-Path $root $entry.destino
+  if (-not (Test-Path -LiteralPath $dst)) { return @() }
+  if ($entry.dir) {
+    return Get-ChildItem -LiteralPath $dst -Recurse -File | ForEach-Object {
+      $rel = $_.FullName.Substring($root.Length).TrimStart('\', '/').Replace('\', '/')
+      [pscustomobject]@{ rel = $rel; abs = $_.FullName }
+    }
+  }
+  return ,([pscustomobject]@{ rel = ($entry.destino.Replace('\', '/')); abs = $dst })
+}
+
 Write-Host "== Instalador de Jidoka (arquetipo: $Arquetipo) =="
 
 # 1. Leer el manifiesto de siembra.
@@ -116,6 +133,25 @@ foreach ($s in $extra) {
   if ($parent -and -not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
   [System.IO.File]::WriteAllText($dst, $s.contenido, $utf8)
   $script:stubs++
+}
+
+# 6c. Sellar la version del motor sembrado. El hijo sabe de que Jidoka viene su
+#     maquinaria (version + hash de cada pieza de motor). Es la linea base para el
+#     modo -Actualizar (conciencia de tres vias) y el aviso de divergencia. No-clobber:
+#     si el sello ya existe (re-instalacion), no se toca -- lo actualiza -Actualizar.
+$versionPath = Join-Path $jidoka 'tools/version.txt'
+$version = if (Test-Path $versionPath) { (Get-Content $versionPath -Raw).Trim() } else { 'desconocida' }
+$selloDst = Join-Path $Destino 'tools/jidoka-motor.json'
+if (Test-Path -LiteralPath $selloDst) { Skip $selloDst; $script:saltados++ }
+else {
+  $hashes = [ordered]@{}
+  foreach ($e in $manif.motor) {
+    if ($e.clase -and $e.clase -ne 'mecanica') { continue }
+    foreach ($f in (Get-MotorFiles $e $Destino)) { $hashes[$f.rel] = (Get-MotorHash $f.abs) }
+  }
+  $sello = [ordered]@{ version = $version; sembrado_hashes = $hashes }
+  [System.IO.File]::WriteAllText($selloDst, ($sello | ConvertTo-Json -Depth 5), $utf8)
+  Ok "sello de version: tools/jidoka-motor.json (Jidoka $version, $($hashes.Count) pieza(s) de motor)"
 }
 
 # 7. Encender lo manual: core.hooksPath.
