@@ -26,3 +26,4 @@ Registro de las decisiones de arquitectura del proyecto. Cada ADR captura **una*
 | [0017](0017-jidoka-1.0.md) | Jidoka 1.0.0: el criterio de "corre en un repo ajeno", cumplido con evidencia (2 labs, 2 lenguajes, CI verde server-side) | aceptado |
 | [0018](0018-muro-grietas-2-5.md) | El muro cumple lo que promete: grietas 2 (`no-memorias` cubre Bash) y 5 (registro de disparos cableados, testeable) cerradas con invariantes | aceptado |
 | [0019](0019-lazo-ve-la-divergencia.md) | El lazo ve la divergencia: `instalar.ps1 -Sellar` (sello bootstrap clasificador pristina-vs-customizada) + `estado-motor -Detallado` (divergencia por-hash) | aceptado |
+| [0020](0020-release-derivado-del-ssot.md) | El release se deriva del SSOT: `publicar.ps1` corta el tag+notas desde `version.txt`+CHANGELOG y corre la suite antes de publicar (Jidoka-only) | aceptado |

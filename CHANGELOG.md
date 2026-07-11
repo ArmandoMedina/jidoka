@@ -2,6 +2,23 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.3.0] — 2026-07-11
+
+### El release se deriva del SSOT — `publicar.ps1` (ADR 0020)
+
+Quita el tipeo manual de versión del ritual de release: la versión se escribe UNA vez en `tools/version.txt`
+(el SSOT) y el tag, el título y las notas del release **derivan** de ahí + del CHANGELOG.
+
+- **`tools/publicar.ps1`** (Jidoka-only): lee la versión del SSOT, extrae su sección del CHANGELOG (leída como
+  UTF-8, para no corromper acentos/flechas en las notas), corre **la suite completa** de self-tests
+  (evidencia-no-palabra: no publica un motor roto), y crea el tag + release. `-DryRun` muestra todo sin crear
+  nada.
+- **`tools/probar-publicar.ps1`** (Jidoka-only, 4 casos): prueba de vida del `-DryRun` (deriva el tag del SSOT,
+  no crea tags). Junto con `probar-version` quedan CI-gateados en Jidoka vía una guarda `Test-Path` en
+  `andon.yml` (se saltan en un hijo que no los tiene).
+- **Dogfood**: este `v1.3.0` se cortó con `publicar.ps1` — su primera corrida real es su prueba de vida.
+- Primer peldaño del CLI npm (cuando se retome): la versión ya está centralizada y derivable.
+
 ## [1.2.0] — 2026-07-11
 
 ### El lazo ve la divergencia — sello bootstrap clasificador + `estado-motor -Detallado` (ADR 0019)

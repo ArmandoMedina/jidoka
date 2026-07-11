@@ -14,6 +14,7 @@
 - **`v1.1.0` — "El muro cumple lo que promete"** (ADR 0018): grietas 2 y 5 cerradas con invariantes. `no-memorias` cubre Bash; registro de disparos cableados (`probar-disparos.ps1`).
 - **`v1.1.1` — hotfix** (dogfood): el matcher Bash de `no-memorias` bloqueaba en falso lecturas con `2>&1`/`2>/dev/null` (el `>` casaba con la redirección de stderr). Cazado en vivo minutos después de publicar `v1.1.0`. `probar-hooks` 17/17.
 - **`v1.2.0` — "El lazo ve la divergencia"** (ADR 0019): `instalar.ps1 -Sellar` (sello bootstrap clasificador pristina-vs-customizada) + `estado-motor -Detallado` (divergencia por-hash). `probar-instalador` 41/41.
+- **`v1.3.0` — "El release se deriva del SSOT"** (ADR 0020): `tools/publicar.ps1` corta el tag+notas desde `version.txt`+CHANGELOG y corre la suite antes de publicar (Jidoka-only, dogfoodeado en su propio corte). `probar-publicar` 4/4.
 
 **La ventana de bajada (cuando el batch esté maduro):** re-sellar SGI y TF con `-Sellar`, `-Actualizar` a la versión acumulada (baja hook mejorado + `probar-disparos` + los refinamientos), y hacer **ahí** la épica `.local` code-first y el drift estructural (tocan los labs). Una sola pasada.
 
@@ -30,8 +31,8 @@
 ### Qué sigue (post-1.0, modo batch — avanzar Jidoka, bajar una vez)
 
 **Jidoka-interno (avanza sin tocar labs, acumulando releases):**
-1. **CLI npm `npx jidoka-method init` + SSOT de versión** (hoy vive en `version.txt`/CHANGELOG/tags) y **multiplataforma**. El mayor desbloqueo de adopción.
-2. **Dogfood ADR 0003** (motor solo en `kit/`, auto-instalación); arquetipo `doc-only` según encaje.
+1. **CLI npm `npx jidoka-method init` + multiplataforma** — el mayor desbloqueo de adopción, pero **BLOQUEADO por verificación**: son cross-platform y esta máquina es Windows-only; declararlos aquí afirmaría que corren en Mac/Linux sin evidencia (`evidencia-no-palabra`). Necesitan un entorno no-Windows para probarse, o el cliente diciendo "shippéalo sin probar cross-platform". `npm publish` además necesita la cuenta del cliente. *(La parte SSOT/release-derivation ya se hizo en `v1.3.0`, ADR 0020.)*
+2. **Dogfood ADR 0003** (motor solo en `kit/`, auto-instalación) — Windows-verificable pero **big-bet** (reubica el motor del que dependen todos los gates; alto blast-radius). Arquetipo `doc-only` sigue diferido (regla 2-3: sin consumidor real).
 3. **Presentación pública** (Sprint 4): social preview, párrafo en inglés, `CODE_OF_CONDUCT`, badges — tiene piezas gatilladas por el cliente.
 
 **En la ventana de bajada (necesitan labs, se hace UNA vez):**
