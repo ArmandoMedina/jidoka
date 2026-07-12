@@ -213,6 +213,24 @@ try {
   $selloTrasExc = Get-Content $selloPath -Raw | ConvertFrom-Json
   Check 'excluir: el sello preserva la lista de exclusion' (@($selloTrasExc.excluir) -contains 'tools/probar-gate.ps1') "se perdio la lista de exclusion"
 
+  # 5h. BROWNFIELD (jidoka#36): instalar sobre un repo con una pieza de mecanica YA
+  # customizada (preservada por no-clobber) NO debe registrar el hash del HIJO como
+  # semilla -- si lo hiciera, un -Actualizar posterior veria hijo==semilla y PISARIA
+  # la customizacion (perdida de datos). El sello de la instalacion limpia debe
+  # CLASIFICAR igual que -Sellar: omitir la customizada, registrar la pristina.
+  $tmpBf = Join-Path $env:TEMP ("jidoka-brownfield-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+  try {
+    New-Item -ItemType Directory -Path (Join-Path $tmpBf 'tools') -Force | Out-Null
+    $bfVerif = Join-Path $tmpBf 'tools/verificar.ps1'
+    Set-Content -Path $bfVerif -Value '# verificar CUSTOMIZADO del hijo (brownfield)' -Encoding ASCII
+    Run-PS $instalar -Destino $tmpBf -Arquetipo 'docs-as-code' -Yes | Out-Null
+    Check 'brownfield: no-clobber preserva la pieza customizada' ((Get-Content $bfVerif -Raw) -match 'CUSTOMIZADO del hijo') "se piso la pieza customizada"
+    $selloBf = Get-Content (Join-Path $tmpBf 'tools/jidoka-motor.json') -Raw | ConvertFrom-Json
+    Check 'brownfield: el sello NO registra la pieza customizada (asi -Actualizar no la pisa)' (-not $selloBf.sembrado_hashes.'tools/verificar.ps1') "registro el hash del hijo como semilla"
+    Check 'brownfield: el sello SI registra una pieza pristina recien sembrada' ([bool]$selloBf.sembrado_hashes.'tools/auditar.ps1') "no registro una pieza pristina"
+  }
+  finally { Remove-Item $tmpBf -Recurse -Force -ErrorAction SilentlyContinue }
+
   # 6. Segundo arquetipo: code-first siembra DISTINTO (brief, no grafo) y su gate pasa.
   $tmp2 = Join-Path $env:TEMP ("jidoka-smoke2-" + [guid]::NewGuid().ToString('N').Substring(0,8))
   try {
@@ -223,12 +241,20 @@ try {
     $leyOk = $false
     try { Get-Content (Join-Path $tmp2 'tools/blast-radius.json') -Raw | ConvertFrom-Json | Out-Null; $leyOk = $true } catch {}
     Check 'code-first: su ley parsea' $leyOk "la ley code-first no parsea"
+    # jidoka#38: code-first EXCLUYE probar-gate.ps1 y andon.yml (su verificar customizado
+    # code-first no los pasa). NO se siembran, y el sello los anota en 'excluir' para que
+    # un -Actualizar posterior no los re-agregue.
+    Check 'code-first: NO siembra tools/probar-gate.ps1 (excluida por el arquetipo)' (-not (Test-Path (Join-Path $tmp2 'tools/probar-gate.ps1'))) "se sembro una pieza excluida"
+    Check 'code-first: NO siembra .github/workflows/andon.yml (excluida por el arquetipo)' (-not (Test-Path (Join-Path $tmp2 '.github/workflows/andon.yml'))) "se sembro una pieza excluida"
+    $selloCf = Get-Content (Join-Path $tmp2 'tools/jidoka-motor.json') -Raw | ConvertFrom-Json
+    $excCf = @($selloCf.excluir)
+    Check 'code-first: el sello anota AMBAS exclusiones en excluir' (($excCf -contains 'tools/probar-gate.ps1') -and ($excCf -contains '.github/workflows/andon.yml')) "excluir = $($excCf -join ', ')"
+    Check 'code-first: el sello NO registra una pieza excluida en sembrado_hashes' (-not $selloCf.sembrado_hashes.'tools/probar-gate.ps1') "registro una excluida como semilla"
+
     Push-Location $tmp2
     git add -A 2>&1 | Out-Null
     git -c user.email='smoke@jidoka.local' -c user.name='smoke' -c commit.gpgsign=false commit -q -m 'sembrado' 2>&1 | Out-Null
     Pop-Location
-    $gc = Run-PS (Join-Path $tmp2 'tools/probar-gate.ps1')
-    Check 'code-first: el gate sembrado pasa en el destino' ($gc -eq 0) "exit $gc"
 
     # Costura .local: verificar dot-sourcea tools/verificar.local.ps1 si existe.
     # (repo recien commiteado y limpio: aisla el efecto de la extension del git-state)

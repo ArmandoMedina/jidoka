@@ -2,6 +2,40 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.9.0] — 2026-07-12
+
+### Cosecha brownfield: cinco arreglos al bajar el método a repos reales (ADR 0026)
+
+Al bajar el método a repos reales —SGI (experimento) y **TequiOBD** (adopción brownfield)— el propio método hizo
+aparecer **cinco defectos** del instalador con una raíz común: no era consciente de la **instancia** ni del
+**arquetipo** del hijo. Los cinco quedan cerrados (issues #34–#38).
+
+- **[#36] El sello del install fresco clasifica pristina-vs-customizada** (como `-Sellar`). Antes, en un hijo
+  brownfield con piezas customizadas (saltadas por no-clobber), registraba la versión **customizada** como semilla
+  → el próximo `-Actualizar` la **pisaba** (pérdida de datos). Ahora compara destino vs origen y **omite** las
+  customizadas. Helper compartido `Get-SelloClasificado` (install y `-Sellar`, una sola lógica).
+- **[#38] El arquetipo declara `excluir_motor`**: `code-first` excluye `tools/probar-gate.ps1` y
+  `.github/workflows/andon.yml` (prueban el contrato canónico de `verificar`, que code-first customiza). Mata la
+  fricción recurrente que SGI y TequiOBD resolvían a mano por separado.
+- **[#37] Aviso de cableado inerte**: si un `.claude/settings.json` preexistente no cablea los hooks del motor
+  actual (`review/andon/gemba-stop`) o su `PreToolUse` no cubre `Bash`, el install **avisa** en vez de callar.
+- **[#35] Guía aclarada** (`mantener-el-motor-al-dia.md`): al **conservar** la versión local, se borra el
+  `.jidoka-nuevo` antes de commitear; el diff del PR lleva la decisión aplicada, no el sidecar.
+- **[#34] El wrapper npx no fuerza `-ExecutionPolicy Bypass`** (los guardrails de agentes IA lo bloquean):
+  pre-chequea la política y solo lo agrega si de verdad bloquearía (`Restricted`/`AllSigned`).
+
+Cobertura nueva en `probar-instalador.ps1` (caso brownfield + caso code-first). Los arreglos son **mecánica**:
+bajarán a los labs (SGI, TF, TequiOBD) por `-Actualizar`.
+
+### El substrato es git porque es el idioma nativo del agente (ADR 0025)
+
+Cierra el *por qué git* que le faltaba al [ADR 0008]. Ante la hipótesis *"¿y si dejamos git por una API más potente
+y flexible?"*: git **no está forzado** — es el **idioma nativo del agente**; una API es fuera-de-distribución y se
+**degrada con el agente**, git no. La tesis del método es que el substrato aguante *cuando el agente se degrada*.
+**Evidencia archivada**: 3 agentes frescos, ciegos, sin contexto (2 arrancando dentro del hijo) operaron el lazo
+(`-Actualizar`) desde los artefactos solos y preservaron la instancia — **3/3**, calzando exacto con la referencia.
+Sincronizar = lógica de registry, **interfaz de git**. Incluye predicción falsable (prueba de vida).
+
 ## [1.8.1] — 2026-07-11
 
 ### El motor se lee del árbol — cierra la decisión abierta del ADR 0003 (ADR 0024)
