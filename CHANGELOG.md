@@ -2,6 +2,21 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.7.0] — 2026-07-11
+
+### La estructura canónica — comandos namespaced, rol neutral el mecanismo (ADR 0023)
+
+Cierra la **segunda mitad** del drift estructural (ADR 0015 #3): faltaba declarar cuál FORMA es canónica entre
+Jidoka y los labs (que divergían, con cruft — SGI tenía los mismos comandos y skills duplicados).
+
+- **Comandos namespaced** (`.claude/commands/jidoka/*`, `/jidoka:*`) = canónico: un método instalado no debe
+  colisionar con los comandos propios del proyecto anfitrión.
+- **El rol neutral es el mecanismo** (la ley referencia roles); el **nombre del skill es sabor de instancia** —
+  neutral (Jidoka) o persona (labs, si declaran su asiento neutral; ADR 0035). La autoridad la da la ley, no el
+  nombre.
+- **Los labs convergen la forma, conservan el sabor** — usando la exclusión (ADR 0022) para su familia de
+  skills. Jidoka ya es namespaced+neutral: no cambia; el trabajo es reconciliar los labs.
+
 ## [1.6.0] — 2026-07-11
 
 ### Guía — "Mantener el motor al día" (el canal de bajada, documentado)
