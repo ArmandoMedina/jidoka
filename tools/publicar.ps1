@@ -35,7 +35,11 @@ foreach ($ln in (Get-Content -LiteralPath $changelogPath -Encoding UTF8)) {
     if ($matches[1].Trim() -eq $version) { $dentro = $true; continue }
   }
   if ($dentro) {
-    if (-not $descTitulo -and $ln -match '^\#\#\#\s+(.*\S)') { $descTitulo = $matches[1].Trim() }
+    # El titulo del release NO lleva comillas dobles: PS 5.1 rompe el paso de un
+    # argumento con '"' embebido a un exe nativo (gh) -- parte el string y gh ve tokens
+    # sueltos. Se quitan del titulo derivado (las notas, que van por --notes-file, si las
+    # conservan). Bug cazado al cortar v1.6.0 (titulo con comillas).
+    if (-not $descTitulo -and $ln -match '^\#\#\#\s+(.*\S)') { $descTitulo = ($matches[1].Trim() -replace '"', '') }
     $notas += $ln
   }
 }
