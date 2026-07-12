@@ -4,11 +4,22 @@
 
 ## En una frase
 
-**Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Instalador `npx jidoka-method init` en camino (Sprint 3, ver `ROADMAP.md`). Se construye por sprints, usando su propio ritual (dogfooding).
+**Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-11, `v1.5.0` — post-bajada, nueva acumulación)
+## Dónde estamos (2026-07-11 — SESIÓN CERRADA · Jidoka `v1.8.1`)
 
-**`v1.5.0` — "La lista de exclusión del hijo"** (ADR 0022): el sello declara `excluir: [rutas]` y el lazo no las re-agrega — mata el back-out recurrente que la ventana de bajada hizo evidente (mitad del drift estructural, ADR 0015 #3). `probar-instalador` 45/45. **NO bajado aún** (arranca la próxima acumulación). **Follow-up barato pendiente:** añadir el `excluir` al sello de cada lab una vez (SGI: `probar-gate.ps1`, `andon.yml`; TF: `probar-auditor.ps1`, `andon.yml`, comandos namespaced, skills genéricos) → su próxima bajada no pedirá back-outs.
+**Sesión enorme, toda cerrada y liberada; los tres repos limpios.** Jidoka `v1.0.0`→`v1.8.1`; labs **SGI `v2.6.0`→`v2.8.0`**, **TF `v0.2.0`→`v0.4.0`**.
+
+**Post-1.0 (`v1.1.0`→`v1.8.1`):** muro endurecido (grietas 2/5, ADR 0018) · hotfix hook Bash (`v1.1.1`) · el lazo ve la divergencia (`-Sellar`/`estado-motor -Detallado`, ADR 0019) · release desde el SSOT (`publicar.ps1`, ADR 0020) · lazo **EOL-agnóstico** (ADR 0021) · **lista de exclusión** del hijo (ADR 0022) · guía "mantener el motor al día" · `CODE_OF_CONDUCT.md` · párrafo en inglés · **CLI `npx jidoka-method` construido** (`package.json`+`bin/`) · **estructura canónica** (comandos namespaced, ADR 0023) · **el motor se lee del árbol** (ADR 0024, cierra el dogfood del ADR 0003 como *"no se migra"*).
+
+**Bajado a ambos labs** (ventana de bajada + estructura canónica): SGI/TF corren el núcleo actual, comandos namespaced re-personalizados con su sabor, `excluir` declarado. **Drift estructural cerrado de raíz** (ADR 0021/0022/0023).
+
+### Lo único pendiente — todo gatillado por el cliente (nada que la IA pueda hacer sola)
+1. **`npm publish`** del CLI `jidoka-method` — necesita tu cuenta npm. Mientras tanto se usa con `node bin/jidoka-method.js init <ruta>`.
+2. **Verificar el CLI/motor en Mac/Linux** (pwsh Core) — necesita un entorno no-Windows; no se declara cross-platform sin evidencia (`evidencia-no-palabra`).
+3. **Social preview** del repo — imagen 1280×640 desde la UI de GitHub.
+
+**Cuatro bugs de herramienta cazados por uso real** este arco (hook Bash, hash EOL, `publicar` ×2), más `probar-disparos` cazando su propio slug — todos ahora invariantes con test. El método sobre sí mismo.
 
 ### Antes (2026-07-11, `v1.4.0` — batch post-1.0 BAJADO a ambos labs)
 
