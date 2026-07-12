@@ -6,20 +6,23 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Instalador `npx jidoka-method init` en camino (Sprint 3, ver `ROADMAP.md`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-11, `v1.2.0` — post-1.0: batch en Jidoka, sin bajar aún)
+## Dónde estamos (2026-07-11, `v1.4.0` — batch post-1.0 BAJADO a ambos labs)
 
 **Modo de operación (decisión del cliente):** *avanzar Jidoka lo máximo posible acumulando releases y hacer UNA sola bajada a los labs al final* — la bajada (2 repos × PR/tests/merge) es la parte cara, no el release de Jidoka. Además, **el cliente elige el tamaño y la dirección del sprint; no preguntar** (yo decido por capacidad/esfuerzo, él frena si algo no cuadra).
 
-**Releases post-1.0 (acumulados, aún NO bajados a los labs):**
+**Releases post-1.0 (todos BAJADOS a los labs en la ventana de bajada):**
 - **`v1.1.0` — "El muro cumple lo que promete"** (ADR 0018): grietas 2 y 5 cerradas con invariantes. `no-memorias` cubre Bash; registro de disparos cableados (`probar-disparos.ps1`).
 - **`v1.1.1` — hotfix** (dogfood): el matcher Bash de `no-memorias` bloqueaba en falso lecturas con `2>&1`/`2>/dev/null` (el `>` casaba con la redirección de stderr). Cazado en vivo minutos después de publicar `v1.1.0`. `probar-hooks` 17/17.
 - **`v1.2.0` — "El lazo ve la divergencia"** (ADR 0019): `instalar.ps1 -Sellar` (sello bootstrap clasificador pristina-vs-customizada) + `estado-motor -Detallado` (divergencia por-hash). `probar-instalador` 41/41.
 - **`v1.3.0` — "El release se deriva del SSOT"** (ADR 0020): `tools/publicar.ps1` corta el tag+notas desde `version.txt`+CHANGELOG y corre la suite antes de publicar (Jidoka-only, dogfoodeado en su propio corte). `probar-publicar` 4/4.
 - **`v1.4.0` — "El lazo es agnóstico al EOL"** (ADR 0021): `Get-MotorHash` normaliza a LF. Bug estructural cazado al bajar a TF (un hijo `eol=lf` divergía en todo). `probar-instalador` 42/42 (caso LF nuevo).
 
-**⏳ BAJADA EN CURSO (autorizada: "ritual merch y versión").** El batch `v1.1.0→v1.4.0` baja a los labs. SGI (CRLF) bajó verde con el subagente (`v2.7.0` listo en rama `jidoka/actualizar-1.3`), PERO se **rehace** con el instalador `v1.4.0` (sello re-normalizado). TF (LF) se **detuvo** por el bug EOL —ahora arreglado— y se rehace. Siguiente paso concreto: re-`-Actualizar` ambos labs con Jidoka `v1.4.0`, verde, y ritual (PR→merge→release) SGI `v2.7.0` + TF `v0.3.0`.
+**✅ BAJADA CERRADA (2026-07-11).** El batch `v1.1.0→v1.4.0` bajó a ambos labs, verde server-side: **SGI `v2.7.0`** (PR #59, 7/7) y **TF `v0.3.0`** (PR #8, 5/5). Ambos corren el núcleo `1.4.0` con la mecánica genérica idéntica; code-first preservado (verificar/auditar/probar-gate/pre-push/escribano). Lecciones de la ventana (el uso real cazó lo que la revisión no):
+- **Dos defectos estructurales del lazo** cazados y arreglados: `v1.1.1` (falso-positivo del matcher Bash con `2>&1`) y `v1.4.0` (hash sensible al EOL → un lab `eol=lf` divergía en todo).
+- **La línea code-first-vs-genérico no estaba bien trazada:** hooks/tests genéricos (`gemba-stop`, `probar-hooks`) se estaban preservando como si fueran del lab. El operador la adivinó cada bajada. → **el drift estructural (ADR 0015 #3) necesita una LISTA DECLARADA de piezas code-first** por lab (o por convención de nombres), para que `-Actualizar` distinga "genérico atrasado" (adopta) de "customizado" (preserva) sin adivinar.
+- Los gates de doc-sync de los propios labs (`barreras` → `docs/flujo-de-trabajo.md`) mordieron server-side y se sincronizaron.
 
-**La ventana de bajada (cuando el batch esté maduro):** re-sellar SGI y TF con `-Sellar`, `-Actualizar` a la versión acumulada (baja hook mejorado + `probar-disparos` + los refinamientos), y hacer **ahí** la épica `.local` code-first y el drift estructural (tocan los labs). Una sola pasada.
+**Pendiente en la ventana de bajada (NO se hizo, sigue abierto):** la **épica `.local` code-first** (converger verificar/auditar al motor genérico + costura `.local`, sin romper los 453 tests de SGI) y el **drift estructural** (lista declarada de code-first). Ambos siguen registrados (ADR 0015).
 
 ### Antes — PROGRAMA HACIA 1.0 (COMPLETO · `v1.0.0`)
 
