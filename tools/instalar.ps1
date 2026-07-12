@@ -67,18 +67,57 @@ function Get-MotorHash($path) {
   return ([System.BitConverter]::ToString($h) -replace '-', '')
 }
 
-# Enumera los archivos que una entrada de motor cubre en $root (aplana dirs).
-# Devuelve objetos { rel = ruta relativa con '/'; abs = ruta absoluta }.
-function Get-MotorFiles($entry, $root) {
-  $dst = Join-Path $root $entry.destino
-  if (-not (Test-Path -LiteralPath $dst)) { return @() }
+# Aplana una entrada de motor a pares { rel = ruta relativa con '/'; src = ruta
+# absoluta en el arbol de ORIGEN ($root) }. No filtra por existencia en destino:
+# es la lista de piezas que la entrada cubre, con la FUENTE como verdad.
+function Get-MotorPares($entry, $root) {
+  $srcRoot = Join-Path $root $entry.origen
+  $pares = @()
+  if (-not (Test-Path -LiteralPath $srcRoot)) { return $pares }
   if ($entry.dir) {
-    return Get-ChildItem -LiteralPath $dst -Recurse -File | ForEach-Object {
-      $rel = $_.FullName.Substring($root.Length).TrimStart('\', '/').Replace('\', '/')
-      [pscustomobject]@{ rel = $rel; abs = $_.FullName }
+    Get-ChildItem -LiteralPath $srcRoot -Recurse -File | ForEach-Object {
+      $relEnOrigen = $_.FullName.Substring($srcRoot.Length).TrimStart('\', '/').Replace('\', '/')
+      $relDst = ($entry.destino.Replace('\', '/')).TrimEnd('/') + '/' + $relEnOrigen
+      $pares += [pscustomobject]@{ rel = $relDst; src = $_.FullName }
+    }
+  } else {
+    $pares += [pscustomobject]@{ rel = $entry.destino.Replace('\', '/'); src = $srcRoot }
+  }
+  return $pares
+}
+
+# Clasifica cada pieza de mecanica del manifiesto comparando el archivo del hijo
+# (en $Destino) contra la FUENTE de Jidoka, con el mismo hasheo agnostico-al-EOL:
+#   - hijo == Jidoka  -> PRISTINA:    entra en la semilla con el hash de Jidoka.
+#   - hijo != Jidoka  -> CUSTOMIZADA: se OMITE (el -Actualizar la vera DIVERGE y la preserva).
+#   - hijo ausente    -> se omite (el -Actualizar la agregara).
+#   - rel en $excluir -> se salta (ni se sella ni se clasifica).
+# Logica COMPARTIDA por -Sellar y por el sello de la instalacion limpia: ambos deben
+# clasificar identico. Un brownfield con piezas customizadas (saltadas por no-clobber)
+# NO debe registrar el hash del HIJO como semilla -- eso haria que un -Actualizar
+# posterior viera hijo==semilla y PISARA la customizacion (perdida de datos; jidoka#36).
+# Devuelve { seed = [ordered]; divergen = [] ; pristinas = int; ausentes = int }.
+function Get-SelloClasificado($jidoka, $manif, $Destino, $excluir) {
+  if (-not $excluir) { $excluir = @() }
+  $seed = [ordered]@{}
+  $divergen = @(); $pristinas = 0; $ausentes = 0
+  foreach ($e in $manif.motor) {
+    if ($e.clase -and $e.clase -ne 'mecanica') { continue }
+    foreach ($par in (Get-MotorPares $e $jidoka)) {
+      if ($excluir -contains $par.rel) { continue }
+      $childAbs = Join-Path $Destino $par.rel
+      if (-not (Test-Path -LiteralPath $childAbs)) { $ausentes++; continue }
+      $jidokaHash = Get-MotorHash $par.src
+      $childHash = Get-MotorHash $childAbs
+      if ($childHash -eq $jidokaHash) {
+        $seed[$par.rel] = $jidokaHash                                # pristina -> registrada
+        $pristinas++
+      } else {
+        $divergen += $par.rel                                        # customizada -> omitida (se preservara)
+      }
     }
   }
-  return ,([pscustomobject]@{ rel = ($entry.destino.Replace('\', '/')); abs = $dst })
+  return [pscustomobject]@{ seed = $seed; divergen = $divergen; pristinas = $pristinas; ausentes = $ausentes }
 }
 
 # ---------------------------------------------------------------------------
@@ -215,39 +254,11 @@ function Invoke-Sellar($jidoka, $manif, $Destino, $utf8) {
     if ($selloViejo.excluir) { $excluir = @($selloViejo.excluir) }
   }
 
-  $seed = [ordered]@{}
-  $pristinas = 0; $divergen = @(); $ausentes = 0
-
-  foreach ($e in $manif.motor) {
-    if ($e.clase -and $e.clase -ne 'mecanica') { continue }
-    $srcRoot = Join-Path $jidoka $e.origen
-    if (-not (Test-Path -LiteralPath $srcRoot)) { continue }
-
-    $pares = @()
-    if ($e.dir) {
-      Get-ChildItem -LiteralPath $srcRoot -Recurse -File | ForEach-Object {
-        $relEnOrigen = $_.FullName.Substring($srcRoot.Length).TrimStart('\', '/').Replace('\', '/')
-        $relDst = ($e.destino.Replace('\', '/')).TrimEnd('/') + '/' + $relEnOrigen
-        $pares += [pscustomobject]@{ rel = $relDst; src = $_.FullName }
-      }
-    } else {
-      $pares += [pscustomobject]@{ rel = $e.destino.Replace('\', '/'); src = $srcRoot }
-    }
-
-    foreach ($par in $pares) {
-      if ($excluir -contains $par.rel) { continue }                    # excluida por el hijo: no se sella
-      $childAbs = Join-Path $Destino $par.rel
-      if (-not (Test-Path -LiteralPath $childAbs)) { $ausentes++; continue }
-      $jidokaHash = Get-MotorHash $par.src
-      $childHash = Get-MotorHash $childAbs
-      if ($childHash -eq $jidokaHash) {
-        $seed[$par.rel] = $jidokaHash                                 # pristina -> registrada
-        $pristinas++
-      } else {
-        $divergen += $par.rel                                         # customizada -> omitida (se preservara)
-      }
-    }
-  }
+  # Clasifica pieza por pieza con la logica compartida (misma que usa el sello de la
+  # instalacion limpia): pristina -> semilla; customizada -> omitida (se preservara).
+  $clasif = Get-SelloClasificado $jidoka $manif $Destino $excluir
+  $seed = $clasif.seed
+  $pristinas = $clasif.pristinas; $divergen = $clasif.divergen; $ausentes = $clasif.ausentes
 
   $selloNuevo = [ordered]@{ version = $version; sembrado_hashes = $seed }
   if ($excluir.Count) { $selloNuevo.excluir = $excluir }
@@ -317,6 +328,12 @@ $arq = $manif.arquetipos.$Arquetipo
 if (-not $arq) { Die "arquetipo desconocido: '$Arquetipo'. Opciones: $($manif.arquetipos.PSObject.Properties.Name -join ', ')" }
 if (-not $arq.disponible) { Die "el arquetipo '$Arquetipo' aun no esta disponible: $($arq.nota)" }
 
+# Piezas de motor que el arquetipo EXCLUYE (p.ej. code-first no quiere el probar-gate
+# generico ni el andon.yml: su verificar code-first customizado no los pasa; jidoka#38).
+# No se siembran, y se anotan en el sello 'excluir' para que -Actualizar no las re-agregue.
+$excluirMotor = @()
+if ($arq.excluir_motor) { $excluirMotor = @($arq.excluir_motor) }
+
 # 3. Preparar el destino (git init si hace falta).
 if (-not (Test-Path -LiteralPath $Destino)) {
   if (-not $Yes) {
@@ -334,13 +351,40 @@ if (-not (Test-Path (Join-Path $Destino '.git'))) {
   git init -q $Destino 2>$null | Out-Null
 }
 
+# Brownfield: recuerda si .claude/settings.json YA existia antes de sembrar. Si es
+# asi, el no-clobber lo preservara y puede quedar sin cablear los hooks recien
+# sembrados -- se avisa mas abajo (jidoka#37).
+$settingsRel = '.claude/settings.json'
+$settingsDst = Join-Path $Destino $settingsRel
+$settingsPreexistia = Test-Path -LiteralPath $settingsDst
+
 # 4. Copiar el motor generico segun el manifiesto.
 Info "Sembrando el motor generico..."
 foreach ($e in $manif.motor) {
+  if ($excluirMotor -contains $e.destino) { Info "(excluida por el arquetipo '$Arquetipo', se omite: $($e.destino))"; continue }
   $src = Join-Path $jidoka $e.origen
   $dst = Join-Path $Destino $e.destino
   if (-not (Test-Path -LiteralPath $src)) { Info "(origen ausente, se omite: $($e.origen))"; continue }
   if ($e.dir) { Copy-DirSafe $src $dst } else { Copy-Safe $src $dst }
+}
+
+# 4b. AVISO brownfield (jidoka#37): si .claude/settings.json ya existia, el no-clobber
+#     lo preservo -- pero puede no cablear los Stop hooks recien sembrados ni cubrir
+#     Bash en el matcher PreToolUse. No falla la instalacion: es aviso para reconciliar.
+if ($settingsPreexistia) {
+  $txt = Get-Content -LiteralPath $settingsDst -Raw
+  $faltan = @()
+  foreach ($h in @('review-stop.ps1', 'andon-stop.ps1', 'gemba-stop.ps1')) {
+    if ($txt -notmatch [regex]::Escape($h)) { $faltan += $h }
+  }
+  # Cobertura de Bash en el PreToolUse (deteccion simple por substring del matcher).
+  $bashCubierto = ($txt -match '"matcher"\s*:\s*"[^"]*Bash[^"]*"')
+  if ($faltan.Count -gt 0 -or -not $bashCubierto) {
+    Write-Host "  [AVISO] tu .claude/settings.json se preservo (no-clobber), pero puede dejar hooks recien sembrados sin cablear:" -ForegroundColor Yellow
+    if ($faltan.Count -gt 0) { Write-Host "          - no referencia estos Stop hooks del motor: $($faltan -join ', ')" -ForegroundColor Yellow }
+    if (-not $bashCubierto)  { Write-Host "          - su matcher PreToolUse no cubre 'Bash' (el hook no-memorias no corre en comandos Bash)" -ForegroundColor Yellow }
+    Write-Host "          Reconcilialo contra el .claude/settings.json del motor sembrado (compara y adopta lo que falte)." -ForegroundColor Yellow
+  }
 }
 
 # 5. Sembrar la ley del arquetipo -> ley_destino.
@@ -382,14 +426,19 @@ $version = if (Test-Path $versionPath) { (Get-Content $versionPath -Raw).Trim() 
 $selloDst = Join-Path $Destino 'tools/jidoka-motor.json'
 if (Test-Path -LiteralPath $selloDst) { Skip $selloDst; $script:saltados++ }
 else {
-  $hashes = [ordered]@{}
-  foreach ($e in $manif.motor) {
-    if ($e.clase -and $e.clase -ne 'mecanica') { continue }
-    foreach ($f in (Get-MotorFiles $e $Destino)) { $hashes[$f.rel] = (Get-MotorHash $f.abs) }
-  }
-  $sello = [ordered]@{ version = $version; sembrado_hashes = $hashes }
+  # CLASIFICA cada pieza (misma logica que -Sellar): compara el archivo del destino
+  # contra la FUENTE de Jidoka. Pristina (recien sembrada, o ya identica) -> a la
+  # semilla; customizada (brownfield preservado por no-clobber) -> OMITIDA, para que
+  # un -Actualizar posterior la vea DIVERGE y la preserve (jidoka#36). Las excluidas
+  # por el arquetipo se anotan en 'excluir' para que no se re-agreguen (jidoka#38).
+  $clasif = Get-SelloClasificado $jidoka $manif $Destino $excluirMotor
+  $sello = [ordered]@{ version = $version; sembrado_hashes = $clasif.seed }
+  if ($excluirMotor.Count) { $sello.excluir = @($excluirMotor) }
   [System.IO.File]::WriteAllText($selloDst, ($sello | ConvertTo-Json -Depth 5), $utf8)
-  Ok "sello de version: tools/jidoka-motor.json (Jidoka $version, $($hashes.Count) pieza(s) de motor)"
+  $extra = ""
+  if ($clasif.divergen.Count) { $extra = ", $($clasif.divergen.Count) customizada(s) preservada(s)" }
+  if ($excluirMotor.Count) { $extra += ", $($excluirMotor.Count) excluida(s) por arquetipo" }
+  Ok "sello de version: tools/jidoka-motor.json (Jidoka $version, $($clasif.seed.Count) pieza(s) de motor$extra)"
 }
 
 # 7. Encender lo manual: core.hooksPath.

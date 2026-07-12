@@ -13,7 +13,8 @@
       "desc": "el metodo vive implicito en el codigo + un brief (herramienta o libreria personal)",
       "ley": "kit/.jidoka/leyes/blast-radius.code-first.json",
       "producto": "brief",
-      "gobernanza": false
+      "gobernanza": false,
+      "excluir_motor": ["tools/probar-gate.ps1", ".github/workflows/andon.yml"]
     },
     "doc-only": {
       "disponible": false,

@@ -27,6 +27,25 @@ function findPwsh() {
   return null;
 }
 
+// Decide si hace falta -ExecutionPolicy Bypass para correr un .ps1 local sin firmar.
+// Por que NO pasarlo siempre: los clasificadores de seguridad de agentes de IA
+// DENIEGAN '-ExecutionPolicy Bypass' (parece evasion de defensas), y ahi es justo
+// donde 'npx jidoka-method' se corre. La mayoria de las maquinas de desarrollo estan
+// en RemoteSigned/Unrestricted y corren scripts locales sin problema SIN el flag.
+// Solo Restricted/AllSigned bloquearian un script local sin firmar -> ahi si lo agregamos.
+// Si el chequeo falla por lo que sea, caemos al comportamiento previo (agregar Bypass)
+// para no romper a un humano en una maquina bloqueada.
+function needsBypass(pwsh) {
+  try {
+    const r = spawnSync(pwsh, ['-NoProfile', '-Command', 'Get-ExecutionPolicy'], { encoding: 'utf8' });
+    if (r.status !== 0 || typeof r.stdout !== 'string') return true;   // no se pudo medir -> fallback seguro
+    const policy = r.stdout.trim().toLowerCase();
+    return policy === 'restricted' || policy === 'allsigned';
+  } catch (_) {
+    return true;   // el chequeo mismo fallo -> fallback al comportamiento previo (Bypass)
+  }
+}
+
 const HELP = `
 jidoka-method -- siembra el metodo Jidoka (doctrina + ritual + motor Andon) en un repo.
 
@@ -63,7 +82,12 @@ function main() {
   const destino = rest[0];
   if (!destino) { console.error('[error] falta la ruta destino. Uso: npx jidoka-method ' + cmd + ' <ruta>'); process.exit(1); }
 
-  const psArgs = ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', instalar, '-Destino', path.resolve(destino)];
+  // Solo forzamos -ExecutionPolicy Bypass si la politica efectiva bloquearia un
+  // script local sin firmar (ver needsBypass): asi no disparamos los guardrails de
+  // agentes de IA en las maquinas comunes (RemoteSigned/Unrestricted).
+  const psArgs = ['-NoProfile'];
+  if (needsBypass(pwsh)) psArgs.push('-ExecutionPolicy', 'Bypass');
+  psArgs.push('-File', instalar, '-Destino', path.resolve(destino));
   if (cmd === 'actualizar') psArgs.push('-Actualizar');
   else if (cmd === 'sellar') psArgs.push('-Sellar');
   for (let i = 1; i < rest.length; i++) {
