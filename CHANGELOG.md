@@ -13,6 +13,9 @@ cuándo y cómo `-Actualizar`, leer la salida (`[ACTUALIZA]`/`[NUEVO]`/`[DIVERGE
 divergencias (`.jidoka-nuevo` / costura `.local`), declarar `excluir`, ver la divergencia fina con `-Detallado`,
 y sellar con `-Sellar` (con su límite: no para repos atrasados). Más una sección para el mantenedor de Jidoka
 (`publicar.ps1`). `probar-instalador.ps1` 45/45 (siembra + verificador de enlaces).
+- **Fix `publicar.ps1`** (dogfood, cazado al cortar este release): el título derivado del CHANGELOG llevaba
+  comillas dobles y PS 5.1 rompe el paso de un argumento con `"` embebido a `gh`. Se **sanea** el título (las
+  notas, que van por `--notes-file`, las conservan). Caso nuevo en `probar-publicar.ps1`.
 
 ## [1.5.1] — 2026-07-11
 

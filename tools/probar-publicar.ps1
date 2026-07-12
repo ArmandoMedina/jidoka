@@ -25,6 +25,10 @@ Check 'dry-run: exit 0' ($code -eq 0) "exit $code"
 Check "dry-run: deriva el tag del SSOT (v$version)" ($out -match ('Publicar v' + [regex]::Escape($version))) "no derivo v$version de: $out"
 Check 'dry-run: anuncia DRY RUN (no publica)' ($out -match 'DRY RUN') 'no dijo DRY RUN'
 Check 'dry-run: NO crea ningun tag (sin efectos)' ($tagsAntes.Count -eq $tagsDespues.Count) "creo un tag: antes $($tagsAntes.Count), despues $($tagsDespues.Count)"
+# El titulo del release no debe llevar comillas dobles: PS 5.1 rompe el paso de un arg
+# con '"' a gh (bug cazado al cortar v1.6.0). Las notas si las conservan (van por archivo).
+$lineaTitulo = @($out -split "`r?`n" | Where-Object { $_ -match 'titulo:' }) -join ' '
+Check 'dry-run: el titulo derivado no lleva comillas dobles (no rompe gh en PS 5.1)' (-not ($lineaTitulo -match '"')) "el titulo tiene comillas: $lineaTitulo"
 
 Write-Host ""
 if ($script:fallos -gt 0) {
