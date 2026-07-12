@@ -2,6 +2,21 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.5.0] — 2026-07-11
+
+### La lista de exclusión del hijo — el lazo no re-agrega lo que el hijo no quiere (ADR 0022)
+
+Cierra la mitad "re-agregado" del drift estructural (ADR 0015 #3), lección de la ventana de bajada: en cada
+`-Actualizar` los labs rehacían los mismos back-outs (`probar-gate`, `andon.yml`, comandos namespaced, skills
+genéricos) porque el lazo los re-agregaba como piezas nuevas.
+
+- **El sello gana `excluir: [rutas]`**: las piezas de mecánica que el hijo declara que **no quiere**.
+  `-Actualizar` no las re-agrega, no las toca (reporta `[EXCLUIDA]`); `-Sellar` las salta; ambos **preservan**
+  la lista entre bajadas. Sin `excluir` (sellos viejos): comportamiento idéntico (retro-compatible).
+- **Seguro**: solo omite, nunca borra ni pisa. El hijo declara una vez y el lazo lo honra siempre.
+- Evidencia: `probar-instalador.ps1` 45/45 (3 casos nuevos). **Siguiente**: los labs añaden su `excluir` una vez
+  → su próxima bajada no pedirá back-outs.
+
 ## [1.4.0] — 2026-07-11
 
 ### El lazo es agnóstico al fin de línea — `Get-MotorHash` normaliza a LF (ADR 0021)

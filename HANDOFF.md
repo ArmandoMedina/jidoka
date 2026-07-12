@@ -6,7 +6,11 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Instalador `npx jidoka-method init` en camino (Sprint 3, ver `ROADMAP.md`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-11, `v1.4.0` — batch post-1.0 BAJADO a ambos labs)
+## Dónde estamos (2026-07-11, `v1.5.0` — post-bajada, nueva acumulación)
+
+**`v1.5.0` — "La lista de exclusión del hijo"** (ADR 0022): el sello declara `excluir: [rutas]` y el lazo no las re-agrega — mata el back-out recurrente que la ventana de bajada hizo evidente (mitad del drift estructural, ADR 0015 #3). `probar-instalador` 45/45. **NO bajado aún** (arranca la próxima acumulación). **Follow-up barato pendiente:** añadir el `excluir` al sello de cada lab una vez (SGI: `probar-gate.ps1`, `andon.yml`; TF: `probar-auditor.ps1`, `andon.yml`, comandos namespaced, skills genéricos) → su próxima bajada no pedirá back-outs.
+
+### Antes (2026-07-11, `v1.4.0` — batch post-1.0 BAJADO a ambos labs)
 
 **Modo de operación (decisión del cliente):** *avanzar Jidoka lo máximo posible acumulando releases y hacer UNA sola bajada a los labs al final* — la bajada (2 repos × PR/tests/merge) es la parte cara, no el release de Jidoka. Además, **el cliente elige el tamaño y la dirección del sprint; no preguntar** (yo decido por capacidad/esfuerzo, él frena si algo no cuadra).
 
