@@ -2,6 +2,16 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.5.1] — 2026-07-11
+
+### Doctrina — matiz de la cita Airbus (fact-check)
+
+`doctrina/03-aviacion.md`: los límites duros del envelope Airbus (la analogía del `deny`) valen en **Normal
+Law**; bajo fallas el avión degrada a **Alternate/Direct Law** y las protecciones se pierden — el piloto sí
+puede exceder el envelope. La 'dureza' del `deny` es condicional al modo. Con la lección para el gate: **hasta
+un `deny` duro tiene modo degradado; confiésalo** (como las *fronteras del muro*). Registrado como cita #9 en
+`doctrina/citas-verificadas.md`. Doc-only.
+
 ## [1.5.0] — 2026-07-11
 
 ### La lista de exclusión del hijo — el lazo no re-agrega lo que el hijo no quiere (ADR 0022)
