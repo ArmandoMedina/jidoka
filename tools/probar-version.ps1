@@ -33,6 +33,15 @@ foreach ($line in Get-Content $changelogPath) {
 Check 'CHANGELOG tiene un encabezado de version' ($topVersion -ne '') 'no encontre ## [x.y.z]'
 Check "version.txt ($version) coincide con el tope de CHANGELOG ($topVersion)" ($version -eq $topVersion) 'divergen: actualiza tools/version.txt o el CHANGELOG'
 
+# SSOT extendido: si existe package.json (el CLI npm), su version deriva de version.txt.
+# Un paquete npm que declara otra version que el metodo miente sobre lo que instala.
+$pkgPath = Join-Path $raiz 'package.json'
+if (Test-Path $pkgPath) {
+  $pkgVer = ''
+  try { $pkgVer = (Get-Content $pkgPath -Raw | ConvertFrom-Json).version } catch {}
+  Check "package.json ($pkgVer) coincide con version.txt ($version)" ($pkgVer -eq $version) 'el CLI npm quedaria desincronizado del SSOT'
+}
+
 Write-Host ""
 if ($script:fallos -gt 0) {
   Write-Host "== $($script:fallos) inconsistencia(s) de version. El sello mentiria: no siembres ni publiques asi. ==" -ForegroundColor Red

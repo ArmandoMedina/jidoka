@@ -2,6 +2,22 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.8.0] — 2026-07-11
+
+### El CLI `npx jidoka-method` (construido, listo para publicar) + párrafo en inglés
+
+Dos piezas de distribución/presentación.
+
+- **CLI npm** (`package.json` + `bin/jidoka-method.js`): un **wrapper Node** que reusa `tools/instalar.ps1` vía
+  PowerShell (`pwsh` en Mac/Linux, `powershell` en Windows) en vez de duplicar el instalador. Subcomandos
+  `init` / `actualizar` / `sellar`. **Probado en Windows** (siembra 76 archivos vía el wrapper); la ruta
+  Mac/Linux (pwsh Core) **debería** funcionar pero **NO está verificada** — no afirmamos cross-platform sin
+  evidencia. **`npm publish` pendiente** (necesita la cuenta npm del mantenedor); hasta entonces, usable en el
+  repo con `node bin/jidoka-method.js init <ruta>`. **SSOT extendido**: `probar-version.ps1` ahora exige
+  `package.json.version == version.txt` (el CLI no puede mentir sobre qué versión instala).
+- **Párrafo en inglés** en el README (decisión del autor): un solo párrafo para el visitante anglófono —
+  qué es Jidoka y por qué está en español a propósito. La maquinaria es language-agnostic.
+
 ## [1.7.1] — 2026-07-11
 
 ### Comunidad — `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1 ES)
