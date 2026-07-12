@@ -38,6 +38,7 @@
     { "origen": ".github/workflows/andon.yml", "destino": ".github/workflows/andon.yml", "clase": "mecanica" },
     { "origen": "docs/guias/reportar-leccion-a-jidoka.md", "destino": "docs/guias/reportar-leccion-a-jidoka.md", "clase": "mecanica" },
     { "origen": "docs/guias/entorno-windows-powershell51.md", "destino": "docs/guias/entorno-windows-powershell51.md", "clase": "mecanica" },
+    { "origen": "docs/guias/mantener-el-motor-al-dia.md", "destino": "docs/guias/mantener-el-motor-al-dia.md", "clase": "mecanica" },
     { "origen": "kanban", "destino": "kanban", "dir": true, "clase": "mecanica" },
     { "origen": "andon", "destino": "andon", "dir": true, "clase": "mecanica" },
     { "origen": "doctrina", "destino": "doctrina", "dir": true, "clase": "mecanica" },

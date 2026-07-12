@@ -2,6 +2,18 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.6.0] — 2026-07-11
+
+### Guía — "Mantener el motor al día" (el canal de bajada, documentado)
+
+Cierra un hueco de doc: los mecanismos del lazo shippeados post-1.0 (`-Sellar`, `estado-motor -Detallado`,
+`excluir`, el EOL-agnóstico, y `publicar.ps1`) no estaban en ninguna guía. `docs/guias/mantener-el-motor-al-dia.md`
+(nueva, `estado: vigente`, **sembrada** a los labs) es la guía operativa para quien mantiene un repo instalado:
+cuándo y cómo `-Actualizar`, leer la salida (`[ACTUALIZA]`/`[NUEVO]`/`[DIVERGE]`/`[EXCLUIDA]`), manejar
+divergencias (`.jidoka-nuevo` / costura `.local`), declarar `excluir`, ver la divergencia fina con `-Detallado`,
+y sellar con `-Sellar` (con su límite: no para repos atrasados). Más una sección para el mantenedor de Jidoka
+(`publicar.ps1`). `probar-instalador.ps1` 45/45 (siembra + verificador de enlaces).
+
 ## [1.5.1] — 2026-07-11
 
 ### Doctrina — matiz de la cita Airbus (fact-check)
