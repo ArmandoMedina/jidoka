@@ -199,6 +199,20 @@ try {
   }
   finally { Remove-Item $tmpLF -Recurse -Force -ErrorAction SilentlyContinue }
 
+  # 5g. LISTA DE EXCLUSION (ADR 0022): el hijo declara piezas que NO quiere; el lazo no
+  # las re-agrega. Simula el back-out recurrente de los labs. Agrego 'excluir' al sello,
+  # borro la pieza, y -Actualizar NO debe re-agregarla (ni tocarla) + preserva la lista.
+  $gateChild = Join-Path $tmp 'tools/probar-gate.ps1'
+  $selloExc = Get-Content $selloPath -Raw | ConvertFrom-Json
+  $selloExc | Add-Member -NotePropertyName excluir -NotePropertyValue @('tools/probar-gate.ps1') -Force
+  [System.IO.File]::WriteAllText($selloPath, ($selloExc | ConvertTo-Json -Depth 5), (New-Object System.Text.UTF8Encoding($false)))
+  Remove-Item $gateChild -Force
+  $outExc = Run-PS-Out $instalar -Destino $tmp -Actualizar
+  Check 'excluir: la pieza excluida NO se re-agrega' (-not (Test-Path $gateChild)) "se re-agrego una pieza excluida"
+  Check 'excluir: -Actualizar la reporta como EXCLUIDA' ($outExc -match 'EXCLUIDA') "no reporto la exclusion"
+  $selloTrasExc = Get-Content $selloPath -Raw | ConvertFrom-Json
+  Check 'excluir: el sello preserva la lista de exclusion' (@($selloTrasExc.excluir) -contains 'tools/probar-gate.ps1') "se perdio la lista de exclusion"
+
   # 6. Segundo arquetipo: code-first siembra DISTINTO (brief, no grafo) y su gate pasa.
   $tmp2 = Join-Path $env:TEMP ("jidoka-smoke2-" + [guid]::NewGuid().ToString('N').Substring(0,8))
   try {

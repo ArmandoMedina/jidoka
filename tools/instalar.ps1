@@ -102,6 +102,12 @@ function Invoke-Actualizar($jidoka, $manif, $Destino, $utf8) {
   if ($sello.sembrado_hashes) {
     foreach ($p in $sello.sembrado_hashes.PSObject.Properties) { $seed[$p.Name] = $p.Value }
   }
+  # Lista de EXCLUSION del hijo: piezas de mecanica que el hijo declara que NO quiere
+  # (p.ej. un lab que hace back-out de probar-gate/andon.yml por incompatibles). El lazo
+  # las respeta: no las re-agrega ni las toca. Cierra la friccion recurrente del drift
+  # estructural (el hijo repetia el mismo back-out en cada bajada; ADR 0022).
+  $excluir = @()
+  if ($sello.excluir) { $excluir = @($sello.excluir) }
   $versionPath = Join-Path $jidoka 'tools/version.txt'
   $versionNueva = if (Test-Path $versionPath) { (Get-Content $versionPath -Raw).Trim() } else { 'desconocida' }
 
@@ -109,7 +115,7 @@ function Invoke-Actualizar($jidoka, $manif, $Destino, $utf8) {
   if ($sello.version -eq $versionNueva) { Info "(el sello ya declara $versionNueva; re-checando piezas por si cambiaron)" }
 
   $nuevoSeed = [ordered]@{}
-  $alDia = 0; $agregados = 0; $actualizados = 0; $divergen = @()
+  $alDia = 0; $agregados = 0; $actualizados = 0; $divergen = @(); $excluidas = 0
 
   # Limite conocido (estilo dpkg): -Actualizar re-siembra el motor ACTUAL de Jidoka.
   # NO borra piezas que una version futura de Jidoka haya retirado -- un archivo viejo
@@ -133,6 +139,10 @@ function Invoke-Actualizar($jidoka, $manif, $Destino, $utf8) {
     }
 
     foreach ($par in $pares) {
+      if ($excluir -contains $par.rel) {                           # 0. el hijo la excluyo -> ni se re-agrega ni se toca
+        Write-Host "  [EXCLUIDA] $($par.rel) (el hijo la excluyo del motor)" -ForegroundColor DarkGray; $excluidas++
+        continue
+      }
       $jidokaHash = Get-MotorHash $par.src
       $childAbs = Join-Path $Destino $par.rel
       $nuevoSeed[$par.rel] = $jidokaHash                            # el sello guarda lo que Jidoka ENVIA ahora
@@ -160,12 +170,16 @@ function Invoke-Actualizar($jidoka, $manif, $Destino, $utf8) {
     }
   }
 
-  # Actualiza el sello: version nueva + los hashes que Jidoka envia ahora.
+  # Actualiza el sello: version nueva + los hashes que Jidoka envia ahora. Preserva la
+  # lista de exclusion del hijo (no se pierde entre bajadas).
   $selloNuevo = [ordered]@{ version = $versionNueva; sembrado_hashes = $nuevoSeed }
+  if ($excluir.Count) { $selloNuevo.excluir = $excluir }
   [System.IO.File]::WriteAllText($selloDst, ($selloNuevo | ConvertTo-Json -Depth 5), $utf8)
 
   Write-Host ""
-  Write-Host "== Motor: $alDia al dia | $actualizados actualizado(s) | $agregados nuevo(s) | $($divergen.Count) divergen ==" -ForegroundColor Green
+  $resumen = "== Motor: $alDia al dia | $actualizados actualizado(s) | $agregados nuevo(s) | $($divergen.Count) divergen"
+  if ($excluidas) { $resumen += " | $excluidas excluida(s)" }
+  Write-Host "$resumen ==" -ForegroundColor Green
   if ($divergen.Count -gt 0) {
     Write-Host "Divergencias (el hijo customizo estas piezas de mecanica; se preservaron):" -ForegroundColor Yellow
     foreach ($d in $divergen) { Write-Host "  - $d  (compara con $d.jidoka-nuevo)" -ForegroundColor Yellow }
@@ -193,7 +207,13 @@ function Invoke-Sellar($jidoka, $manif, $Destino, $utf8) {
   $version = if (Test-Path $versionPath) { (Get-Content $versionPath -Raw).Trim() } else { 'desconocida' }
 
   Write-Host "== Sellar motor: clasifica cada pieza pristina-vs-customizada (Jidoka $version) =="
-  if (Test-Path -LiteralPath $selloDst) { Info "(ya hay un sello; se re-clasifica y sobrescribe)" }
+  # Preserva la lista de exclusion del hijo si ya existia (re-sellar no la pierde).
+  $excluir = @()
+  if (Test-Path -LiteralPath $selloDst) {
+    Info "(ya hay un sello; se re-clasifica y sobrescribe)"
+    $selloViejo = Get-Content $selloDst -Raw | ConvertFrom-Json
+    if ($selloViejo.excluir) { $excluir = @($selloViejo.excluir) }
+  }
 
   $seed = [ordered]@{}
   $pristinas = 0; $divergen = @(); $ausentes = 0
@@ -215,6 +235,7 @@ function Invoke-Sellar($jidoka, $manif, $Destino, $utf8) {
     }
 
     foreach ($par in $pares) {
+      if ($excluir -contains $par.rel) { continue }                    # excluida por el hijo: no se sella
       $childAbs = Join-Path $Destino $par.rel
       if (-not (Test-Path -LiteralPath $childAbs)) { $ausentes++; continue }
       $jidokaHash = Get-MotorHash $par.src
@@ -229,6 +250,7 @@ function Invoke-Sellar($jidoka, $manif, $Destino, $utf8) {
   }
 
   $selloNuevo = [ordered]@{ version = $version; sembrado_hashes = $seed }
+  if ($excluir.Count) { $selloNuevo.excluir = $excluir }
   $parent = Split-Path -Parent $selloDst
   if ($parent -and -not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
   [System.IO.File]::WriteAllText($selloDst, ($selloNuevo | ConvertTo-Json -Depth 5), $utf8)
