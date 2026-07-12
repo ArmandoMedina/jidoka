@@ -17,9 +17,11 @@ Una auditoría independiente del Sprint 1 (motor + procedimiento + superficies p
 5. **Los commits públicos no llevan trailer de sesión** (`Claude-Session: ...`): es un identificador privado del operador en un repo público. Regla de método.
 6. **Line endings gobernados por `.gitattributes`**, no por convención: `.githooks/*` siempre LF (los ejecuta `sh`), `*.ps1` CRLF. El `.editorconfig` guía al editor; git no lo lee en checkout.
 
-## Decisión abierta (para Sprint 3)
+## Decisión abierta (para Sprint 3) — ✅ RESUELTA en [ADR 0024](0024-el-motor-se-lee-del-arbol.md)
 
 Hoy `tools/` es la **copia maestra provisional** del motor y `kit/` solo trae los disparos. Dos copias de una ley driftean: en Sprint 3 el motor debe vivir **solo en `kit/`** y este repo **instalarse su propio kit** (`npx jidoka-method init` corrido sobre Jidoka mismo). El dogfood completo: el repo de la metodología como primera instalación de su propio instalador.
+
+> **Resuelto (2026-07-11, ADR 0024): NO se migra.** Al analizarla contra el artefacto real, la premisa no se sostiene: hoy no hay dos copias (el motor se lee del árbol raíz, `kit/` solo trae plantillas de instancia); migrar a `kit/` + auto-install **crearía** la duplicación que buscaba evitar, y el dogfood ya lo cubre `probar-instalador`. Se mantiene leer-del-árbol como decisión deliberada.
 
 ## Consecuencias
 
