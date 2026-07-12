@@ -18,6 +18,8 @@ Es el Sistema de Producción Toyota, aplicado al trabajo con agentes.</p>
 
 <p align="center"><strong>En español, a propósito.</strong></p>
 
+> **English?** Jidoka is the Toyota Production System, adapted for AI coding agents — doctrine + method + sprint ritual, enforced by **deterministic gates** (the "Andon" wall) that catch mistakes at the source, *outside* the LLM, instead of trusting the agent to behave. It's written and defended in Spanish on purpose: the prose is part of its identity. An English translation isn't planned — but the machinery speaks for itself, and it's language-agnostic: read the [PRs](https://github.com/ArmandoMedina/jidoka/pulls), the [checks](https://github.com/ArmandoMedina/jidoka/actions), and the [releases](https://github.com/ArmandoMedina/jidoka/releases).
+
 ---
 
 ## ¿Te suena?

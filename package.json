@@ -1,0 +1,48 @@
+{
+  "name": "jidoka-method",
+  "version": "1.8.0",
+  "description": "El Sistema de Produccion Toyota para agentes de IA: doctrina + metodo + ritual de sprint, con gates deterministas (Andon). Instalador del metodo.",
+  "bin": {
+    "jidoka-method": "bin/jidoka-method.js"
+  },
+  "files": [
+    "bin/",
+    "tools/",
+    "kit/",
+    ".claude/",
+    "doctrina/",
+    "kanban/",
+    "andon/",
+    "docs/guias/",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=14"
+  },
+  "os": [
+    "win32",
+    "darwin",
+    "linux"
+  ],
+  "license": "MIT",
+  "author": "Armando Medina",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArmandoMedina/jidoka.git"
+  },
+  "homepage": "https://github.com/ArmandoMedina/jidoka#readme",
+  "bugs": {
+    "url": "https://github.com/ArmandoMedina/jidoka/issues"
+  },
+  "keywords": [
+    "jidoka",
+    "tps",
+    "toyota-production-system",
+    "ai-agents",
+    "claude-code",
+    "gates",
+    "poka-yoke",
+    "andon"
+  ]
+}
