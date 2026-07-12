@@ -2,6 +2,15 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.7.1] — 2026-07-11
+
+### Comunidad — `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1 ES)
+
+Archivo de salud de comunidad para el repo público (GitHub lo muestra en la pestaña de comunidad y da un
+mecanismo neutro de moderación antes del primer conflicto con extraños). Contacto vía el perfil de GitHub del
+mantenedor / issue del repo — **no publica un correo personal** (esa elección queda del autor; cambiable a
+email si lo prefiere). No se siembra (cada repo tiene su propia política).
+
 ## [1.7.0] — 2026-07-11
 
 ### La estructura canónica — comandos namespaced, rol neutral el mecanismo (ADR 0023)
