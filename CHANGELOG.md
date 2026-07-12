@@ -2,6 +2,17 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.8.1] — 2026-07-11
+
+### El motor se lee del árbol — cierra la decisión abierta del ADR 0003 (ADR 0024)
+
+Resuelve el último pendiente de la Fase 3.C (el "dogfood completo": mover el motor a `kit/` y que Jidoka se
+auto-instale). Al analizarlo contra el artefacto: la premisa **ya no se sostiene** — hoy no hay dos copias (el
+motor se lee del árbol raíz; `kit/` solo trae plantillas de instancia). Migrar **crearía** la duplicación que
+buscaba evitar, para los docs es imposible sin duplicar (son contenido + semilla), y el dogfood ya lo cubre
+`probar-instalador` (instala en temp + corre los self-tests sembrados). **Decisión: se mantiene leer-del-árbol**
+como diseño deliberado, no provisional. Sin cambio de código; lo que cambia es que ahora está decidido.
+
 ## [1.8.0] — 2026-07-11
 
 ### El CLI `npx jidoka-method` (construido, listo para publicar) + párrafo en inglés
