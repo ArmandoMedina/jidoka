@@ -86,6 +86,28 @@ $r = Run $g
 Check 'modula: capacidad en_definicion sin criterios no bloquea' ($r.code -eq 0 -and -not $r.out.Contains('[BLOQUEA]')) "code=$($r.code) out=$($r.out)"
 Remove-Item $g -Recurse -Force -ErrorAction SilentlyContinue
 
+# 6. jidoka#42: un wikilink de product/ hacia una capa PROPIA del repo (engineering/),
+#    fuera del set generico. SIN scanDirsExtra el destino no se indexa -> cuenta como
+#    wikilink roto -> BLOQUEA. Este es el sintoma del issue (y la guarda de regresion:
+#    el comportamiento por default no cambia).
+$g = New-Graph
+Write-Note $g 'engineering/runbook.md' "# Runbook propio del repo"
+Write-Note $g 'product/capacidades/CAP-5.md' "---`ntipo: capacidad`nestado: en_definicion`nclave: CAP-5`nmodulo: MOD-1`ndominio: X`n---`n# C5`n`nver el [[runbook]]"
+$r = Run $g
+Check 'jidoka#42: sin scanDirsExtra, un wikilink a engineering/ cuenta como roto (regresion)' ($r.code -eq 1 -and $r.out.Contains('wikilink roto')) "code=$($r.code) out=$($r.out)"
+Remove-Item $g -Recurse -Force -ErrorAction SilentlyContinue
+
+# 7. jidoka#42: con la instancia declarando scanDirsExtra=["engineering"] en la ley
+#    (tools/blast-radius.json), el destino se indexa y el MISMO wikilink RESUELVE -> no
+#    bloquea, sin tocar el motor. Es el fix del issue.
+$g = New-Graph
+Write-Note $g 'engineering/runbook.md' "# Runbook propio del repo"
+Write-Note $g 'product/capacidades/CAP-5.md' "---`ntipo: capacidad`nestado: en_definicion`nclave: CAP-5`nmodulo: MOD-1`ndominio: X`n---`n# C5`n`nver el [[runbook]]"
+Write-Note $g 'tools/blast-radius.json' '[ { "nombre": "auditor", "scanDirsExtra": ["engineering"] } ]'
+$r = Run $g
+Check 'jidoka#42: con scanDirsExtra, el wikilink a engineering/ resuelve (no bloquea)' ($r.code -eq 0 -and -not $r.out.Contains('[BLOQUEA]')) "code=$($r.code) out=$($r.out)"
+Remove-Item $g -Recurse -Force -ErrorAction SilentlyContinue
+
 Write-Host ""
 if ($script:fallos -gt 0) {
   Write-Host "== $($script:fallos) de $($script:casos) caso(s) fallidos. El auditor tiene un bug: no lo estrenes. ==" -ForegroundColor Red

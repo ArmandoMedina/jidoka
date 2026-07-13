@@ -13,5 +13,6 @@
 | 3·B — Arquetipos ejecutables | Manifiesto ejecutable, 2 arquetipos (ADR 0009), 12 templates de producto | Publicado (`v0.8.0-beta`) |
 | Homologación E1 — Jidoka superset | Asiento `devops`, modo desatendido, casting neutral+persona (ADR 0010) | Publicado (`v0.9.0-beta`) |
 | Homologación E2 — Cosecha de SGI | Token neutral en la ley + 3 maduraciones a los asientos (ADR 0011) | Publicado (`v0.10.0-beta`) |
+| [Brownfield II — fallback anti-AV + auditor configurable](sprint-brownfield-2-plan.md) | `sembrar-manual.ps1` (siembra sin instalador), `estado-motor` degrada con gracia, `scanDirs` del auditor configurables; cosecha #41/#44/#45/#46 (issues #40–#46) | Planeado |
 
 *(Hueco confesado: 2·B, 3·A y 3·B corrieron con plan efímero (ADR 0006) que no se archivó al cierre — sus récords son los PRs #7–#9 y los ADRs. Desde aquí, archivar el plan vuelve a ser paso del cierre.)*

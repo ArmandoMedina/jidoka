@@ -1,0 +1,100 @@
+=== DEMO Gemba: fallback anti-AV + auditor configurable (v1.10.0, ADR 0027) ===
+Fecha: 2026-07-13 | Jidoka: C:/Repositorios/jidoka
+
+### Paso 1: siembra con el fallback (sin instalar.ps1), destino limpio
+$ ./tools/sembrar-manual.ps1 -Destino <tmp> -Jidoka <jidoka>
+      el destino no es un repo git; corriendo 'git init'...
+    == Sembrar manual: siembra fresca (arquetipo: docs-as-code) | Jidoka 1.10.0 ==
+      Fuente: C:\Repositorios\jidoka
+      [SIEMBRA] tools/verificar.ps1
+      [SIEMBRA] tools/auditar.ps1
+      [SIEMBRA] tools/probar-gate.ps1
+      [SIEMBRA] tools/probar-hooks.ps1
+      [SIEMBRA] tools/probar-auditor.ps1
+      [SIEMBRA] tools/probar-disparos.ps1
+      [SIEMBRA] tools/estado-motor.ps1
+      [SIEMBRA] tools/sembrar-manual.ps1
+      [SIEMBRA] tools/reportar-leccion.ps1
+      [SIEMBRA] .claude/settings.json
+      [SIEMBRA] .claude/hooks/andon-stop.ps1
+      [SIEMBRA] .claude/hooks/gemba-stop.ps1
+      [SIEMBRA] .claude/hooks/no-memorias-pretooluse.ps1
+      [SIEMBRA] .claude/hooks/review-stop.ps1
+      [SIEMBRA] .claude/commands/jidoka/arranca.md
+      [SIEMBRA] .claude/commands/jidoka/cierra.md
+      [SIEMBRA] .claude/commands/jidoka/desatendido.md
+      [SIEMBRA] .claude/commands/jidoka/gemba.md
+      [SIEMBRA] .claude/commands/jidoka/planea.md
+      [SIEMBRA] .claude/commands/jidoka/que-sigue.md
+      [SIEMBRA] .claude/skills/arquitecto-doc/SKILL.md
+      [SIEMBRA] .claude/skills/escribano/SKILL.md
+      [SIEMBRA] .claude/skills/revisor-visual/SKILL.md
+      [SIEMBRA] .claude/skills/validador/SKILL.md
+      [SIEMBRA] .githooks/pre-push
+      [SIEMBRA] .github/workflows/andon.yml
+      [SIEMBRA] docs/guias/reportar-leccion-a-jidoka.md
+      [SIEMBRA] docs/guias/entorno-windows-powershell51.md
+      [SIEMBRA] docs/guias/mantener-el-motor-al-dia.md
+      [SIEMBRA] kanban/auditoria.md
+      [SIEMBRA] kanban/desatendido.md
+      [SIEMBRA] kanban/estados.md
+      [SIEMBRA] kanban/homologacion.md
+      [SIEMBRA] kanban/jerarquia.md
+      [SIEMBRA] kanban/lazo.md
+      [SIEMBRA] kanban/README.md
+      [SIEMBRA] kanban/roles.md
+      [SIEMBRA] kanban/verificacion.md
+      [SIEMBRA] andon/README.md
+      [SIEMBRA] doctrina/00-tesis.md
+      [SIEMBRA] doctrina/01-linaje-manufactura.md
+      [SIEMBRA] doctrina/02-linaje-software.md
+      [SIEMBRA] doctrina/03-aviacion.md
+      [SIEMBRA] doctrina/04-como-se-pudre.md
+      [SIEMBRA] doctrina/05-instrumentacion.md
+      [SIEMBRA] doctrina/06-fronteras.md
+      [SIEMBRA] doctrina/07-receta-de-traslado.md
+      [SIEMBRA] doctrina/citas-verificadas.md
+      [SIEMBRA] doctrina/README.md
+      [SIEMBRA] doctrina/decisiones/0001-repo-propio-separado.md
+      [SIEMBRA] doctrina/decisiones/0002-sin-api-propia-como-gobierno.md
+      [SIEMBRA] doctrina/decisiones/0003-doctrina-se-consume-via-disparos.md
+      [SIEMBRA] doctrina/decisiones/0004-anonimizacion-de-fuentes.md
+      [SIEMBRA] doctrina/decisiones/README.md
+      [SIEMBRA] kit/.jidoka/templates/adr.md
+      [SIEMBRA] kit/.jidoka/templates/desatendido.md
+      [SIEMBRA] kit/.jidoka/templates/plan-de-trabajo.md
+      [SIEMBRA] kit/.jidoka/templates/PRODUCT_BRIEF.md
+      [SIEMBRA] kit/.jidoka/templates/README.md
+      [SIEMBRA] kit/.jidoka/templates/recursos-del-proyecto.md
+      [SIEMBRA] kit/.jidoka/templates/sprint-entrega.md
+      [SIEMBRA] kit/.jidoka/templates/sprint-plan.md
+      [SIEMBRA] kit/.jidoka/templates/producto/capacidad.md
+      [SIEMBRA] kit/.jidoka/templates/producto/componente.md
+      [SIEMBRA] kit/.jidoka/templates/producto/dominio.md
+      [SIEMBRA] kit/.jidoka/templates/producto/ecosistema.md
+      [SIEMBRA] kit/.jidoka/templates/producto/especificacion-tecnica.md
+      [SIEMBRA] kit/.jidoka/templates/producto/glosario.md
+      [SIEMBRA] kit/.jidoka/templates/producto/modelo-de-datos.md
+      [SIEMBRA] kit/.jidoka/templates/producto/modulo.md
+      [SIEMBRA] kit/.jidoka/templates/producto/proceso.md
+      [SIEMBRA] kit/.jidoka/templates/producto/propuesta-gate-proceso.md
+      [SIEMBRA] kit/.jidoka/templates/producto/requerimiento.md
+      [SIEMBRA] kit/.jidoka/templates/producto/solucion.md
+      [SIEMBRA] kit/.jidoka/disparos/README.md
+      [SIEMBRA] kit/.jidoka/qa_runs/README.md
+      [OK] ley del arquetipo sembrada: tools/blast-radius.json
+      [OK] core.hooksPath = .githooks
+    
+    == Sembrado: 76 pieza(s) | 0 ya al dia | 0 preservada(s) (customizadas) ==
+      [OK] sello escrito: tools/jidoka-motor.json (Jidoka 1.10.0, 76 pieza(s))
+    Instancia (ley, product/, HANDOFF, ADRs) intacta salvo la ley sembrada si faltaba.
+    Nota: este fallback siembra la MECANICA + la ley + el sello (lo que desbloquea el gate).
+          Los stubs de instancia (HANDOFF, ROADMAP, product/) se crean con instalar.ps1 cuando el AV lo permita, o a mano desde kit/.jidoka/templates/.
+    Verifica: ./tools/estado-motor.ps1 -Jidoka 'C:\Repositorios\jidoka'  (debe decir [OK] al dia).
+
+### Paso 2: estado-motor contra el Jidoka real -> debe decir [OK] al dia
+$ ./tools/estado-motor.ps1 -Jidoka <jidoka>   (desde el destino sembrado)
+    == Estado del motor Jidoka ==
+      Tu motor: Jidoka 1.10.0
+      Jidoka actual: 1.10.0
+      [OK] Tu maquinaria declara la version de Jidoka 1.10.0.

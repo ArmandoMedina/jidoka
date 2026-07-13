@@ -16,5 +16,7 @@ Del módulo [[MOD-instalador]], dominio [[Metodo]]. *La lección sube, la máqui
 - Dado que el hijo customizó una pieza de mecánica, cuando corro `-Actualizar`, entonces NO se pisa: se deja `<archivo>.jidoka-nuevo` y se reporta la divergencia.
 - Dado que toco un archivo de instancia (ley, HANDOFF, `product/`), cuando corro `-Actualizar`, entonces queda intacto.
 - Dado que el sello del hijo difiere de la versión de Jidoka, cuando corro `estado-motor.ps1 -Jidoka <ruta>`, entonces avisa que está atrás (exit 0 — aviso, no muro).
+- Dado que `instalar.ps1` no es legible/ejecutable (p.ej. cuarentena de AV en Windows endurecido), cuando corro `tools/sembrar-manual.ps1 -Destino <hijo> -Jidoka <ruta>`, entonces el motor + la ley + el sello quedan sembrados **igual que con `instalar.ps1`** (mismo estado, sin `-ExecutionPolicy Bypass`) — la ruta de actualización no cuelga de un solo artefacto (ADR 0027).
+- Dado que `instalar.ps1` no es legible y el hijo está atrás, cuando corro `estado-motor.ps1`, entonces **apunta al fallback `sembrar-manual.ps1`** en vez de recomendar un script que no va a correr.
 
-Verificado por `tools/probar-instalador.ps1` (32/32: siembra + sello + tres vías + aviso + `.local` + canal) y `tools/probar-version.ps1` (SSOT). Entregado desde `v0.11.0-beta`.
+Verificado por `tools/probar-instalador.ps1` (siembra + sello + tres vías + aviso + `.local` + canal + brownfield + exclusión), `tools/probar-sembrar.ps1` (24: el fallback deja el mismo estado que el instalador + degradación con gracia) y `tools/probar-version.ps1` (SSOT). Entregado desde `v0.11.0-beta`; fallback anti-AV desde `v1.10.0` (ADR 0027).

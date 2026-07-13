@@ -65,6 +65,30 @@ Write-Host "== Auditar grafo de docs (product/) =="
 
 # --- 1. Indice global de notas (stem -> ruta) para resolver wikilinks ----------
 $scanDirs = @('product', 'docs', 'kanban', 'doctrina', 'kit/.jidoka/templates')
+# Capas de docs PROPIAS del repo (fuera del set generico) se declaran en la INSTANCIA:
+# tools/blast-radius.json -> "auditor": { "scanDirsExtra": ["engineering", ...] }. Asi un
+# repo con product/ narrativo puede enlazar [[notas]] hacia su capa propia (p.ej. un
+# engineering/ de runbooks) sin que el auditor las cuente como wikilink roto y bloquee el
+# CI (jidoka#42). Sin el campo, el comportamiento es IDENTICO al de antes (default fijo).
+# auditar.ps1 es mecanica que converge por el lazo; el campo es instancia (viaja en la ley,
+# -Actualizar no la pisa). El directorio extra solo AMPLIA el indice para resolver wikilinks;
+# lo AUDITADO sigue siendo product/ (paso 2).
+$leyPath = 'tools/blast-radius.json'
+if (Test-Path $leyPath) {
+  try {
+    $ley = Get-Content $leyPath -Raw | ConvertFrom-Json
+    # La ley es un ARRAY de reglas; el config del auditor viaja como un entry con
+    # "scanDirsExtra" (sin "fuente", inofensivo para verificar.ps1). Se itera y se
+    # recogen los dirs extra de cualquier entry que los declare.
+    foreach ($regla in @($ley)) {
+      if ($regla.scanDirsExtra) {
+        foreach ($d in @($regla.scanDirsExtra)) {
+          if ($d -and ($scanDirs -notcontains $d)) { $scanDirs += $d }
+        }
+      }
+    }
+  } catch {}
+}
 $allNotes = @()
 foreach ($d in $scanDirs) {
   if (Test-Path $d) { $allNotes += Get-ChildItem -Path $d -Recurse -Filter *.md -File }

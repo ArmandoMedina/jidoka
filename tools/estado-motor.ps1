@@ -25,6 +25,21 @@ function Get-MotorHash($path) {
   return ([System.BitConverter]::ToString($h) -replace '-', '')
 }
 
+# Camino de actualizacion RECOMENDADO. Normalmente instalar.ps1 -Actualizar; pero ese
+# script es iman de heuristica de AV (nombre "instalar" + core.hooksPath + hooks + Bypass)
+# y en Windows endurecido el SO puede negar leerlo/ejecutarlo (jidoka#40/#43). Si detecto
+# que instalar.ps1 no se puede leer, apunto al fallback sembrar-manual.ps1 -- que NO
+# depende de instalar.ps1 -- en vez de recomendar un script que no va a correr (ADR 0027).
+function Test-Legible($path) {
+  if (-not (Test-Path -LiteralPath $path)) { return $false }
+  try { [System.IO.File]::ReadAllBytes($path) | Out-Null; return $true } catch { return $false }
+}
+function Get-CmdActualizar($jidokaRuta, $destino) {
+  $inst = Join-Path $jidokaRuta 'tools/instalar.ps1'
+  if (Test-Legible $inst) { return "./tools/instalar.ps1 -Destino '$destino' -Actualizar" }
+  return "./tools/sembrar-manual.ps1 -Destino '$destino' -Jidoka '$jidokaRuta' -Actualizar   (instalar.ps1 no es legible -- AV? -- se usa el fallback)"
+}
+
 Write-Host "== Estado del motor Jidoka =="
 if (-not (Test-Path $selloPath)) {
   Write-Host "  [AVISO] no hay sello (tools/jidoka-motor.json): no se de que version viene tu maquinaria." -ForegroundColor Yellow
@@ -54,7 +69,7 @@ if ($mia -eq $suya) {
 else {
   Write-Host "  [AVISO] Tu sello ($mia) difiere de Jidoka ($suya): probablemente estas atras." -ForegroundColor Yellow
   Write-Host "          Baja la mecanica (desde el repo Jidoka, apuntando aca):"
-  Write-Host "            ./tools/instalar.ps1 -Destino '$raiz' -Actualizar"
+  Write-Host "            $(Get-CmdActualizar $Jidoka $raiz)"
   Write-Host "          Corre en una rama -> revisa el diff -> PR (el diff ES la revision)."
 }
 
