@@ -6,9 +6,9 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-13 — EN VUELO · Jidoka `v1.10.0` construido, en rama, pendiente de PR/merge)
+## Dónde estamos (2026-07-13 — CERRADO Y LIBERADO · Jidoka `v1.10.0`)
 
-**Sesión abierta para atender la cosecha de issues del lazo (#40–#46).** Rama `brownfield-2-av-fallback` (sacada de `main`). Plan-contrato archivado: `docs/sprints/sprint-brownfield-2-plan.md`. **Todo verde local, NADA mergeado aún.**
+**Sesión que atendió la cosecha de issues del lazo (#40–#46). Todo mergeado y liberado; `main` limpio.** PR #48 mergeado (836b14d), [release `v1.10.0`](https://github.com/ArmandoMedina/jidoka/releases/tag/v1.10.0) publicado (suite verde en el preflight). Plan-contrato: `docs/sprints/sprint-brownfield-2-plan.md`. Los 7 issues **acusados uno por uno** (el 3er paso del lazo); #40/#42/#43 cerrados con el release, #41/#44/#45/#46 abiertos con `regla-2-3`.
 
 **Construido (`v1.9.0`→`v1.10.0`, ADR 0027 — tercera cosecha por el lazo):**
 - **R1 (#40/#43) — la ruta de actualización deja de colgar del instalador.** `tools/sembrar-manual.ps1`: fallback de siembra/actualización **independiente de `instalar.ps1`** (sin `-ExecutionPolicy Bypass`, sin el nombre "instalar"), para Windows endurecido donde el AV pone `instalar.ps1` en cuarentena. Copia la mecánica del manifiesto + `core.hooksPath` + sello; no-clobber + tres vías. Registrado como pieza de motor (baja por el lazo). `estado-motor.ps1` **degrada con gracia** (apunta al fallback si `instalar.ps1` no es legible). Guía: `mantener-el-motor-al-dia.md`.
@@ -17,11 +17,12 @@
 
 **Evidencia (verde, esta máquina 2026-07-13):** `probar-sembrar` 24/24 · `probar-auditor` 7/7 (con casos #42) · `probar-instalador` 51/51 (regresión) · `probar-gate` 10/10 · `probar-hooks` 17/17 · `probar-disparos` 4/4 · `probar-version` 1.10.0 · verificar sin bloqueo. Demo Gemba en `qa_runs/brownfield-2-20260713/`.
 
-### Lo que falta en esta sesión (gatillado por el cliente)
-1. **Commit + PR + merge** de la rama `brownfield-2-av-fallback` a `main` (merge = orden nombrada del cliente).
-2. **Cortar release `v1.10.0`** (`tools/publicar.ps1`) tras el merge — publicar ya está autorizado.
-3. **Cerrar issues #40/#42/#43** al mergear (los resueltos); #41/#44/#45/#46 quedan abiertos con marca regla 2-3.
-4. **Bajar el batch a los labs** con `-Actualizar` (en la próxima ventana de bajada; `sembrar-manual` + auditor configurable son mecánica).
+### Modo actual: dejar que se acumulen más issues (batch, no goteo)
+Decisión del cliente (2026-07-13): **cerrar aquí y esperar a que se junten más lecciones** antes de la próxima cosecha. Los follow-ups están **en el backlog del ROADMAP** (*Follow-ups sueltos*), no requieren acción ya:
+1. `publicar.ps1` no incluye `probar-sembrar` en su preflight (arreglo de una línea).
+2. **[#47](https://github.com/ArmandoMedina/jidoka/issues/47)** sin triar (etiquetado `leccion`) + los abiertos `regla-2-3` (#41/#44/#45/#46) → material de la próxima cosecha.
+3. **Bajar el batch a los labs** con `-Actualizar` (próxima ventana; `sembrar-manual` + auditor configurable + acuse son mecánica).
+4. **Épica `.local` code-first + drift estructural** (ADR 0015): abierta de arcos anteriores.
 
 ## Antes (2026-07-11 — SESIÓN CERRADA · Jidoka `v1.8.1`)
 
