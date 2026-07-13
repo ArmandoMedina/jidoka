@@ -2,6 +2,36 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.10.0] — 2026-07-13
+
+### La ruta de actualización deja de colgar del instalador (ADR 0027) + el auditor configurable
+
+Tercera cosecha por el lazo: siete issues (#40–#46) de dos despliegues reales (un repo regulado **PLD/CNBV** y
+un proceso de **operación**). Se atendieron los dos con daño activo; los otros cinco se registran en el ROADMAP
+con marca **regla 2-3** (esperan su 2º/3er uso real, no se construyen por método-ficción).
+
+- **[#40/#43] Fallback anti-AV `tools/sembrar-manual.ps1`.** En Windows endurecido con AV de terceros,
+  `instalar.ps1` cae en cuarentena heurística (nombre "instalar" + `core.hooksPath` + hooks + `-ExecutionPolicy
+  Bypass`) y el SO niega leerlo/ejecutarlo, **mudo**: el hijo queda sin ruta de siembra/actualización. El fallback
+  es el **segundo camino, independiente** de `instalar.ps1` (no usa `Bypass`, no se llama "instalar"): copia la
+  `mecanica` del manifiesto, fija `core.hooksPath` y escribe el sello — mismo estado final, no-clobber y tres vías
+  incluidas. Se siembra como motor (baja a los hijos por el lazo). Sus helpers puros están **duplicados a propósito**
+  (debe correr aunque `instalar.ps1` sea ilegible).
+- **[#40/#43] `estado-motor.ps1` degrada con gracia**: al avisar que estás atrás, detecta si `instalar.ps1` es
+  legible; si el AV lo bloqueó, apunta directo a `sembrar-manual.ps1 -Actualizar` en vez de recomendar un script
+  que no va a correr.
+- **[#42] `scanDirs` del auditor configurables desde la instancia**: campo `scanDirsExtra` en la ley
+  (`tools/blast-radius.json`) amplía el índice de wikilinks del auditor a capas de docs propias del repo (p.ej.
+  `engineering/`), para que un `[[wikilink]]` de `product/` hacia ellas no cuente como roto y bloquee el CI. Sin el
+  campo, comportamiento **idéntico** al anterior.
+- **Cobertura nueva**: `tools/probar-sembrar.ps1` (24 casos: siembra, paridad del sello con `instalar.ps1`,
+  no-clobber, tres vías, degradación con gracia) + 2 casos en `probar-auditor.ps1` (#42, con y sin config).
+- **Cosechados al ROADMAP (regla 2-3, no construidos)**: `doc-only` (#41, primer uso real), arquetipo `operacion`
+  (#44), gobernanza compuesta (#45), prueba de vida ≠ tests verdes (#46), y reducir la superficie de AV del
+  instalador original (renombrar/firmar/`npx`).
+
+El fallback y el auditor configurable son **mecánica**: bajan a los labs por `-Actualizar`.
+
 ## [1.9.0] — 2026-07-12
 
 ### Cosecha brownfield: cinco arreglos al bajar el método a repos reales (ADR 0026)

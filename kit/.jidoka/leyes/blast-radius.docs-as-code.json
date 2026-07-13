@@ -57,5 +57,10 @@
     "doc_avisa": ["HANDOFF.md"],
     "mensaje": "aparecio un archivo suelto en la raiz. Si es contenido, tiene lugar con dueno (docs/, product/, tools/); si es temporal, no se commitea; si es un canonico nuevo decidido en un ADR, este aviso no es para ti",
     "rol": "Escribano"
+  },
+  {
+    "nombre": "auditor",
+    "desc": "config del auditor del grafo (NO es una regla de blast-radius: sin 'fuente', inerte para verificar.ps1). scanDirsExtra = capas de docs PROPIAS del repo (fuera de product/ docs/ kanban/ doctrina/) que tools/auditar.ps1 debe indexar para resolver wikilinks de product/ hacia ellas sin marcarlos rotos y bloquear el CI (jidoka#42). Vacio = comportamiento generico. Ejemplo: [\"engineering\"].",
+    "scanDirsExtra": []
   }
 ]

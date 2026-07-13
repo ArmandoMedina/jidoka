@@ -6,7 +6,24 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-11 — SESIÓN CERRADA · Jidoka `v1.8.1`)
+## Dónde estamos (2026-07-13 — EN VUELO · Jidoka `v1.10.0` construido, en rama, pendiente de PR/merge)
+
+**Sesión abierta para atender la cosecha de issues del lazo (#40–#46).** Rama `brownfield-2-av-fallback` (sacada de `main`). Plan-contrato archivado: `docs/sprints/sprint-brownfield-2-plan.md`. **Todo verde local, NADA mergeado aún.**
+
+**Construido (`v1.9.0`→`v1.10.0`, ADR 0027 — tercera cosecha por el lazo):**
+- **R1 (#40/#43) — la ruta de actualización deja de colgar del instalador.** `tools/sembrar-manual.ps1`: fallback de siembra/actualización **independiente de `instalar.ps1`** (sin `-ExecutionPolicy Bypass`, sin el nombre "instalar"), para Windows endurecido donde el AV pone `instalar.ps1` en cuarentena. Copia la mecánica del manifiesto + `core.hooksPath` + sello; no-clobber + tres vías. Registrado como pieza de motor (baja por el lazo). `estado-motor.ps1` **degrada con gracia** (apunta al fallback si `instalar.ps1` no es legible). Guía: `mantener-el-motor-al-dia.md`.
+- **R2 (#42) — auditor configurable.** `auditar.ps1` lee `scanDirsExtra` de la ley (`tools/blast-radius.json`): amplía el índice de wikilinks a capas propias (`engineering/`) sin tocar el motor. Sin el campo, idéntico. Campo documentado en ambas plantillas de ley.
+- **R3 — cosecha (regla 2-3, NO construida):** #41 (`doc-only`, 1er uso real), #44 (arquetipo `operacion`), #45 (gobernanza compuesta), #46 (prueba de vida ≠ tests verdes), y reducir superficie AV del instalador (renombrar/firmar/`npx`) → en `ROADMAP.md` → *Tercera cosecha por el lazo*. Los 7 issues etiquetados (`bug`/`leccion`/`regla-2-3`).
+
+**Evidencia (verde, esta máquina 2026-07-13):** `probar-sembrar` 24/24 · `probar-auditor` 7/7 (con casos #42) · `probar-instalador` 51/51 (regresión) · `probar-gate` 10/10 · `probar-hooks` 17/17 · `probar-disparos` 4/4 · `probar-version` 1.10.0 · verificar sin bloqueo. Demo Gemba en `qa_runs/brownfield-2-20260713/`.
+
+### Lo que falta en esta sesión (gatillado por el cliente)
+1. **Commit + PR + merge** de la rama `brownfield-2-av-fallback` a `main` (merge = orden nombrada del cliente).
+2. **Cortar release `v1.10.0`** (`tools/publicar.ps1`) tras el merge — publicar ya está autorizado.
+3. **Cerrar issues #40/#42/#43** al mergear (los resueltos); #41/#44/#45/#46 quedan abiertos con marca regla 2-3.
+4. **Bajar el batch a los labs** con `-Actualizar` (en la próxima ventana de bajada; `sembrar-manual` + auditor configurable son mecánica).
+
+## Antes (2026-07-11 — SESIÓN CERRADA · Jidoka `v1.8.1`)
 
 **Sesión enorme, toda cerrada y liberada; los tres repos limpios.** Jidoka `v1.0.0`→`v1.8.1`; labs **SGI `v2.6.0`→`v2.8.0`**, **TF `v0.2.0`→`v0.4.0`**.
 

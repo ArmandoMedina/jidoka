@@ -62,6 +62,42 @@ Cada `[DIVERGE]` deja un sidecar `<pieza>.jidoka-nuevo` con la versión de Jidok
 **Corre siempre en una rama, revisa el diff, ábrelo como PR** — el diff ES la revisión. Y **corre tu suite de
 tests antes de mergear** (el motor bajado no vale hasta que corre verde en tu repo).
 
+## Si `instalar.ps1` no corre (antivirus): el fallback `sembrar-manual.ps1`
+
+En Windows endurecido con un AV de terceros, `instalar.ps1` puede caer en cuarentena heurística —por
+nombre ("instalar") y comportamiento (`core.hooksPath` + copia de hooks + `-ExecutionPolicy Bypass`)— y
+el SO **niega leerlo o ejecutarlo**, a veces de forma intermitente y **muda** (no siembra, no da error).
+Es el filo de los repos regulados, justo los que más valoran el método (jidoka#40/#43; ADR 0027).
+
+Para eso existe **`tools/sembrar-manual.ps1`**: el **segundo camino**, que **no depende de que
+`instalar.ps1` sea legible**. No usa `-ExecutionPolicy Bypass` ni el nombre "instalar" (menor superficie
+de sospecha), y hace lo mismo que el fallback manual del reporte: copia la `mecanica` del manifiesto, fija
+`core.hooksPath` y escribe el sello.
+
+```powershell
+# Siembra fresca (cuando instalar.ps1 nunca llegó a sembrar):
+./tools/sembrar-manual.ps1 -Destino C:\ruta\a\tu-repo -Jidoka C:\ruta\a\jidoka
+
+# Actualizar un hijo ya sembrado (mismo -Actualizar de tres vías, sin instalar.ps1):
+./tools/sembrar-manual.ps1 -Destino C:\ruta\a\tu-repo -Jidoka C:\ruta\a\jidoka -Actualizar
+```
+
+- Corrido **desde el checkout de Jidoka** (`./tools/sembrar-manual.ps1`), toma el motor de ahí solo; desde
+  un hijo, apunta a Jidoka con `-Jidoka <ruta>` o `$env:JIDOKA_HOME`.
+- Respeta **no-clobber** y las **tres vías** igual que `instalar.ps1`: tu instancia y tus customizaciones
+  no se pisan; deja `<pieza>.jidoka-nuevo` para lo divergente.
+- Siembra la **mecánica + la ley + el sello** (lo que desbloquea el gate). Los stubs de instancia (HANDOFF,
+  ROADMAP, `product/`) se crean con `instalar.ps1` cuando el AV lo permita, o a mano desde
+  `kit/.jidoka/templates/`.
+- Verifica al final: `./tools/estado-motor.ps1 -Jidoka <ruta>` debe decir **`[OK]` al día**.
+
+> **`estado-motor.ps1` te lleva de la mano:** cuando avisa que estás atrás, detecta si `instalar.ps1` es
+> legible. Si lo es, recomienda `instalar.ps1 -Actualizar`; si el AV lo bloqueó, apunta directo a
+> `sembrar-manual.ps1 -Actualizar` en vez de recomendarte un script que no va a correr.
+
+Y si prefieres AGREGAR `instalar.ps1` a la lista blanca de tu AV, esa es la otra salida — pero el fallback
+existe para que el método baje **aunque no puedas tocar la política del AV**.
+
 ## Rechazar piezas que no quieres: `excluir`
 
 Si una pieza del núcleo no encaja en tu repo (p.ej. un `probar-gate.ps1` genérico incompatible con tu
