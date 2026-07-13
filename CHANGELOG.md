@@ -26,6 +26,9 @@ con marca **regla 2-3** (esperan su 2º/3er uso real, no se construyen por méto
   campo, comportamiento **idéntico** al anterior.
 - **Cobertura nueva**: `tools/probar-sembrar.ps1` (24 casos: siembra, paridad del sello con `instalar.ps1`,
   no-clobber, tres vías, degradación con gracia) + 2 casos en `probar-auditor.ps1` (#42, con y sin config).
+- **El acuse del lazo, escrito**: `docs/guias/reportar-leccion-a-jidoka.md` gana la sección *"Cómo se acusa una
+  lección"* (el 3er paso, antes tácito): todo reporte recibe respuesta, con dos plantillas (construida / diferida
+  por regla 2-3) para que lo diferido no se lea como rechazo y el issue abierto sea el marcador del contador 2-3.
 - **Cosechados al ROADMAP (regla 2-3, no construidos)**: `doc-only` (#41, primer uso real), arquetipo `operacion`
   (#44), gobernanza compuesta (#45), prueba de vida ≠ tests verdes (#46), y reducir la superficie de AV del
   instalador original (renombrar/firmar/`npx`).
