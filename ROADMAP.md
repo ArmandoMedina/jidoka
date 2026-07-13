@@ -100,6 +100,11 @@ Siete issues (#40–#46) de dos despliegues reales: un repo de conocimiento **re
 - **[#45] Gobernanza compuesta** — la presencia de una **línea de operación** (un gate ante lo irreversible) debería **encender** la gobernanza aunque el arquetipo de *documentación* base la traiga apagada; separar el eje gobernanza-on/off del arquetipo de docs (o que `operacion` la traiga encendida y se **componga** con cualquier arquetipo). **Regla 2-3: 2º apunte del patrón** (reformula la "desviación deliberada" anotada al sembrar). Esperando el 3º.
 - **[#46] Prueba de vida ≠ tests verdes** — un gate puede estar **verde y muerto** (pasa self-tests pero lleva semanas sin rechazar nada real). Añadir a la doctrina un **patrón/disparo de "prueba de vida"** para barreras de operación: *leading indicators* (intercepciones reales, desacuerdos del revisor, tiempo de revisión) y dictaminar **podrido** cuando el gate deja de rechazar. El self-test prueba la **mecánica**; la prueba de vida prueba la **vigencia**. **Regla 2-3: 1er uso real** (Caso F). Esperando el 2º.
 
+### Follow-ups sueltos — a la espera de que se acumulen más issues (2026-07-13)
+Modo deliberado: **dejar que se junten más lecciones antes de la próxima cosecha** (batch, no goteo). Registrados para no perderlos:
+- **`publicar.ps1` no incluye `probar-sembrar` en su preflight** — el próximo release no auto-probaría el fallback anti-AV. Arreglo de una línea (agregarlo a la suite); cazado al cortar `v1.10.0`. Bajo riesgo (el test corre a mano verde), pero el gate de release debería ejercerlo.
+- **[#47] El pre-push del motor gatea el contenido pero no protege la rama default** — lección nueva, etiquetada `leccion`, **sin triar** (¿construir o regla 2-3?). Se decide en la próxima cosecha.
+
 ### Segunda cosecha por el lazo — refinamientos del mecanismo (2026-07-11, ADR 0015; post-1.0)
 Cuatro lecciones que subieron al bajar el núcleo a los dos labs en Sprint B. Ninguna bloqueó la 1.0; todas con contexto para retomarse sin re-explicación.
 - ~~**Generalizar el sello bootstrap (pristina-vs-customizada).**~~ ✅ **HECHO (`v1.2.0`, ADR 0019):** `instalar.ps1 -Sellar` clasifica cada pieza contra el Jidoka actual — pristina → registrada, customizada → omitida (se preserva). Generaliza el parche manual de SGI/TF.
