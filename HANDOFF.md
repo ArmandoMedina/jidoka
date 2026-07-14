@@ -6,7 +6,19 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-13 — CERRADO Y LIBERADO · Jidoka `v1.10.0`)
+## Dónde estamos (2026-07-14 — CERRADO Y LIBERADO · Jidoka `v1.11.0`)
+
+**Cosecha #4 del lazo (#50–#53), nacida de auditar un despliegue real** (repo de reconstrucción / ingeniería inversa) donde un sprint cerró con un *"validado al centavo"* en prosa **sin que ningún gate lo atrapara** — el deliverable era una spec numérica, un tipo que la ley no vigilaba. Todo mergeado y liberado; `main` limpio. [release `v1.11.0`](https://github.com/ArmandoMedina/jidoka/releases/tag/v1.11.0) (suite verde en preflight).
+
+- **#50 (fix, cerrado) — los 3 Stop hooks fallaban-abierto en dirs recién-nacidos.** `git status --porcelain` sin `--untracked-files=all` colapsa un dir sin archivos trackeados en `dir/` → el glob específico de una `fuente` no casa → el gate salía limpio justo en el deliverable nuevo. Arreglado en la semilla (`.claude/hooks/*`) + prueba de vida que distingue el bug (ROJO→VERDE). PR #54.
+- **#52 (feat, cerrado — ADR 0028) — `validador-stop`, el 3er gate de evidencia.** Validación por medición para datos/spec: un área `rol: validador` enciende un Stop hook que frena si la spec cambia sin evidencia rastreada por git de una corrida de motor determinista en `qa_runs/validador-*`. Incluye la **variante local** para fixtures confidenciales (PII). Nace **dormido** en Jidoka. Template en `kit/.jidoka/templates/validar-dominio.ps1`. PR #55.
+- **#51 y #53 (abiertos — próxima cosecha).** #51: los gates de evidencia pueden quedar TODOS dormidos a la vez → **lint de arquetipo**. #53: la capa de **conciencia** — el `arranca` canónico sub-informa al orquestador sobre los asientos (se pudo "correr a arrancar" y auto-certificar). Nota de diseño: el fix es **lean** (arranca que haga leer `roles.md` / cue que fuerce nombrar el asiento), **NO** portar un docote de flujo de trabajo.
+
+**Evidencia (verde, esta máquina 2026-07-14):** `probar-hooks` **23/23** (5 casos nuevos del validador) · `probar-version` 1.11.0 · `probar-disparos` 4/4 · `probar-gate` 10/10 · `probar-instalador` + `auditar` verdes (preflight del release). Andon sin bloqueo.
+
+---
+
+## Dónde estuvimos (2026-07-13 — Jidoka `v1.10.0`)
 
 **Sesión que atendió la cosecha de issues del lazo (#40–#46). Todo mergeado y liberado; `main` limpio.** PR #48 mergeado (836b14d), [release `v1.10.0`](https://github.com/ArmandoMedina/jidoka/releases/tag/v1.10.0) publicado (suite verde en el preflight). Plan-contrato: `docs/sprints/sprint-brownfield-2-plan.md`. Los 7 issues **acusados uno por uno** (el 3er paso del lazo); #40/#42/#43 cerrados con el release, #41/#44/#45/#46 abiertos con `regla-2-3`.
 
