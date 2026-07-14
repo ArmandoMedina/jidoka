@@ -72,7 +72,7 @@ $outBashErr2 = Invoke-Hook $noMem '{"tool_name":"Bash","tool_input":{"command":"
 Check 'no-memorias: DEJA LISTAR memoria con 2>/dev/null (no es escritura)' (-not $outBashErr2.Contains('deny')) "falso positivo 2>/dev/null: $outBashErr2"
 
 # --- stop_hook_active: los Stop-hooks no re-bloquean ---
-foreach ($h in @('review-stop.ps1','gemba-stop.ps1','andon-stop.ps1')) {
+foreach ($h in @('review-stop.ps1','gemba-stop.ps1','andon-stop.ps1','validador-stop.ps1')) {
   $o = Invoke-Hook (Join-Path $hooksDir $h) '{"stop_hook_active":true}' $null
   Check "${h}: respeta stop_hook_active (no re-bloquea)" (-not $o.Contains('"decision":"block"')) "bloqueo en re-entrada: $o"
 }
@@ -145,6 +145,43 @@ Set-Content (Join-Path $r3 'ui/app.js') "// v2" -Encoding Ascii
 $oDorm = Invoke-Hook (Join-Path $hooksDir 'gemba-stop.ps1') '{}' $r3
 Check 'gemba-stop: DORMIDO si no hay area revisor-visual' (-not $oDorm.Contains('"decision":"block"')) "bloqueo estando dormido: $oDorm"
 Remove-Item $r3 -Recurse -Force -ErrorAction SilentlyContinue
+
+# --- validador-stop en repo temporal (validacion por medicion, #52) ---
+$v1 = New-TempRepo
+New-Item -ItemType Directory -Path (Join-Path $v1 'spec') -Force | Out-Null
+Set-Manifest $v1 '[{"nombre":"spec","desc":"x","fuente":["spec/*.md"],"doc_bloquea":[],"doc_avisa":[],"rol":"validador"}]'
+Set-Content (Join-Path $v1 'spec/formula.md') "# formula v1" -Encoding Ascii
+Push-Location $v1; git add -A 2>&1 | Out-Null; git commit -q -m init 2>&1 | Out-Null; Pop-Location
+# Caso BLOQUEA: la spec cambio sin evidencia de corrida en qa_runs/validador-*.
+Set-Content (Join-Path $v1 'spec/formula.md') "# formula v2 cambiada" -Encoding Ascii
+$oValBlock = Invoke-Hook (Join-Path $hooksDir 'validador-stop.ps1') '{}' $v1
+Check 'validador-stop: BLOQUEA spec cambiada sin evidencia de corrida' ($oValBlock.Contains('"decision":"block"') -and $oValBlock.Contains('qa_runs/validador')) "no bloqueo: $oValBlock"
+# Caso BLOQUEA (Goodhart): evidencia fresca por mtime pero NO rastreada por git.
+Set-Content (Join-Path $v1 '.gitignore') "qa_runs/" -Encoding Ascii
+$vqa = Join-Path $v1 'qa_runs/validador-prueba'
+New-Item -ItemType Directory -Path $vqa -Force | Out-Null
+$vlog = Join-Path $vqa 'tabla.md'
+Set-Content $vlog "entrada|obtenido|esperado" -Encoding Ascii
+(Get-Item $vlog).LastWriteTime = (Get-Date).AddMinutes(5)   # fresca por mtime, pero sin trackear
+$oValUntracked = Invoke-Hook (Join-Path $hooksDir 'validador-stop.ps1') '{}' $v1
+Check 'validador-stop: BLOQUEA evidencia fresca pero NO rastreada por git (Goodhart)' ($oValUntracked.Contains('"decision":"block"')) "no bloqueo evidencia no-commiteada: $oValUntracked"
+# Caso PASA: la misma evidencia, ahora forzada al indice con git add -f.
+Push-Location $v1; git add -f qa_runs/validador-prueba/tabla.md 2>&1 | Out-Null; Pop-Location
+(Get-Item $vlog).LastWriteTime = (Get-Date).AddMinutes(5)   # re-garantiza mtime posterior al cambio
+$oValPass = Invoke-Hook (Join-Path $hooksDir 'validador-stop.ps1') '{}' $v1
+Check 'validador-stop: DEJA cerrar con evidencia de corrida rastreada y fresca (git add -f)' (-not $oValPass.Contains('"decision":"block"')) "bloqueo indebido: $oValPass"
+Remove-Item $v1 -Recurse -Force -ErrorAction SilentlyContinue
+
+# --- validador-stop DORMIDO: sin area rol validador, no dispara ---
+$v2 = New-TempRepo
+New-Item -ItemType Directory -Path (Join-Path $v2 'spec') -Force | Out-Null
+Set-Manifest $v2 '[{"nombre":"spec","desc":"x","fuente":["spec/*.md"],"doc_bloquea":[],"doc_avisa":[],"rol":"Escribano"}]'
+Set-Content (Join-Path $v2 'spec/formula.md') "# v1" -Encoding Ascii
+Push-Location $v2; git add -A 2>&1 | Out-Null; git commit -q -m init 2>&1 | Out-Null; Pop-Location
+Set-Content (Join-Path $v2 'spec/formula.md') "# v2" -Encoding Ascii
+$oValDorm = Invoke-Hook (Join-Path $hooksDir 'validador-stop.ps1') '{}' $v2
+Check 'validador-stop: DORMIDO si no hay area rol validador' (-not $oValDorm.Contains('"decision":"block"')) "bloqueo estando dormido: $oValDorm"
+Remove-Item $v2 -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
 if ($script:fallos -gt 0) {
