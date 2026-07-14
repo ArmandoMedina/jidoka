@@ -2,6 +2,16 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.11.0] — 2026-07-14
+
+### El tercer gate de evidencia (`validador-stop`) + el fallo-abierto de los Stop hooks (ADR 0028)
+
+Cuarta cosecha por el lazo: tres issues (#50–#52) de un despliegue real en un repo de **reconstrucción / ingeniería inversa**, donde el entregable central no era código ni UI sino una **especificación numérica** verificada contra golden-masters. Un sprint la cerró con un *"validado al centavo"* en prosa y **ningún gate lo atrapó** — el tipo de deliverable caía fuera de lo que la ley vigilaba.
+
+- **`fix` — los Stop hooks fallaban-abierto en directorios recién-nacidos (#50).** `git status --porcelain` (sin `--untracked-files=all`) **colapsa** un dir sin ningún archivo trackeado en una sola entrada `dir/`, y el glob específico de una `fuente` no casa → el gate salía limpio **justo en el deliverable nuevo que existe para atrapar**. Arreglado en los 3 Stop hooks (fuente = semilla del kit) + su caso de prueba de vida que distingue el bug (ROJO→VERDE).
+- **`feat` — el gate de validación por medición, `validador-stop` (#52, ADR 0028).** Tercer gate de evidencia, simétrico a `review-stop` (código) y `gemba-stop` (visual) pero para **números**: un área `rol: validador` en la ley enciende un Stop hook que **frena el cierre** si la spec/datos cambia sin evidencia **fresca y rastreada por git** de una corrida de motor determinista en `qa_runs/validador-*`. El motor emite la tabla `entrada → obtenido → esperado` (**el cálculo lo hace el motor, nunca el LLM**). Incluye la **variante local** para fixtures confidenciales (PII gitignored): el gate corre en `Stop`, no en CI, y exige la evidencia commiteada saneada. Nace **dormido** en Jidoka (sin deliverable de datos propio); cinco casos nuevos de prueba de vida.
+- **Registrado como lección de método:** #51 (los gates de evidencia pueden quedar todos dormidos a la vez) y #53 (la capa de *conciencia*: el `arranca` canónico sub-informa al orquestador sobre los asientos) quedan abiertos en el ROADMAP/issues para la siguiente cosecha.
+
 ## [1.10.0] — 2026-07-13
 
 ### La ruta de actualización deja de colgar del instalador (ADR 0027) + el auditor configurable
