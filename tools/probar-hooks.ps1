@@ -183,6 +183,43 @@ $oValDorm = Invoke-Hook (Join-Path $hooksDir 'validador-stop.ps1') '{}' $v2
 Check 'validador-stop: DORMIDO si no hay area rol validador' (-not $oValDorm.Contains('"decision":"block"')) "bloqueo estando dormido: $oValDorm"
 Remove-Item $v2 -Recurse -Force -ErrorAction SilentlyContinue
 
+# --- rutear.ps1: el router determinista (vivo/dormido leido de la ley) ---
+# rutear no bloquea nada -- reporta -- pero su logica vivo/dormido ES la que estado-motor
+# y arranca muestran, asi que se prueba de vida igual: leyes sinteticas de resultado
+# conocido + el fallo cerrado sin ley. Vive en tools/ (hermano de este self-test).
+$rutear = Join-Path $PSScriptRoot 'rutear.ps1'
+$estadoMotor = Join-Path $PSScriptRoot 'estado-motor.ps1'
+function Invoke-Ps($scriptPath, $argsArr) {
+  $out = (& powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath @argsArr 2>&1 | Out-String)
+  return [pscustomobject]@{ out = $out; code = $LASTEXITCODE }
+}
+$tmpLeyes = Join-Path $env:TEMP ("jidoka-rutear-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+New-Item -ItemType Directory -Path $tmpLeyes -Force | Out-Null
+try {
+  # Ley sintetica SIN rol revisor-visual ni validador: ambos deben salir DORMIDOS.
+  $leyDormido = Join-Path $tmpLeyes 'ley-dormido.json'
+  Set-Content $leyDormido '[{"nombre":"docs","desc":"x","fuente":["docs/*"],"doc_avisa":["CHANGELOG.md"],"rol":"escribano"}]' -Encoding Ascii
+  $rD = Invoke-Ps $rutear @('-Ley', $leyDormido, '-Gates')
+  $gembaLine = ($rD.out -split "`r?`n" | Where-Object { $_ -match 'gemba-stop' }) -join ''
+  Check 'rutear: gemba-stop DORMIDO cuando la ley no tiene rol revisor-visual' ($gembaLine -match 'DORMIDO') "no reporto dormido: $($rD.out)"
+
+  # Ley sintetica CON un area rol validador: validador-stop debe salir VIVO.
+  $leyValida = Join-Path $tmpLeyes 'ley-valida.json'
+  Set-Content $leyValida '[{"nombre":"spec","desc":"x","fuente":["spec/*.md"],"doc_bloquea":[],"doc_avisa":[],"rol":"validador"}]' -Encoding Ascii
+  $rV = Invoke-Ps $rutear @('-Ley', $leyValida, '-Gates')
+  $valLine = ($rV.out -split "`r?`n" | Where-Object { $_ -match 'validador-stop' }) -join ''
+  Check 'rutear: validador-stop VIVO con area rol validador' ($valLine -match 'VIVO' -and $valLine -notmatch 'DORMIDO') "no reporto vivo: $($rV.out)"
+
+  # Falla CERRADO: sin ley legible, exit 1 (un router mudo que aprueba a ciegas es peor).
+  $rF = Invoke-Ps $rutear @('-Ley', (Join-Path $tmpLeyes 'no-existe.json'))
+  Check 'rutear: falla cerrado (exit 1) sin ley' ($rF.code -eq 1) "no fallo cerrado (code=$($rF.code)): $($rF.out)"
+
+  # estado-motor imprime la seccion Gates SIEMPRE (aun sin sello: la dormancia es visible).
+  $rE = Invoke-Ps $estadoMotor @()
+  Check 'estado-motor: imprime la seccion Gates (dormancia visible antes del sello)' ($rE.out -match 'Gates \(Stop hooks\)') "no imprimio la seccion Gates: $($rE.out)"
+}
+finally { Remove-Item $tmpLeyes -Recurse -Force -ErrorAction SilentlyContinue }
+
 Write-Host ""
 if ($script:fallos -gt 0) {
   Write-Host "== $($script:fallos) de $($script:casos) caso(s) fallidos. Un hook tiene un bug: no lo estrenes. ==" -ForegroundColor Red

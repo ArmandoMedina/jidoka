@@ -41,6 +41,20 @@ function Get-CmdActualizar($jidokaRuta, $destino) {
 }
 
 Write-Host "== Estado del motor Jidoka =="
+
+# Seccion Gates: SIEMPRE se imprime, ANTES del sello (que puede hacer exit temprano).
+# La dormancia de un Stop hook era invisible -- un gate dormido sale limpio y en silencio,
+# y nadie sabe que la ley no lo enciende (leccion #51). Aqui se hace visible leyendo la ley
+# via rutear.ps1 (fuente unica de la logica vivo/dormido). Si rutear no esta sembrado, avisa.
+$rutearPath = Join-Path $PSScriptRoot 'rutear.ps1'
+if (Test-Path -LiteralPath $rutearPath) {
+  & $rutearPath -Gates
+}
+else {
+  Write-Host "  (no hay tools/rutear.ps1: actualiza el motor para ver que gates estan vivos/dormidos.)" -ForegroundColor Yellow
+}
+Write-Host ""
+
 if (-not (Test-Path $selloPath)) {
   Write-Host "  [AVISO] no hay sello (tools/jidoka-motor.json): no se de que version viene tu maquinaria." -ForegroundColor Yellow
   Write-Host "          Si convergiste el motor a mano, sellalo (desde Jidoka): ./tools/instalar.ps1 -Destino '$raiz' -Sellar"

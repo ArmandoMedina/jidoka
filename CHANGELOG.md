@@ -2,6 +2,15 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.12.0] — 2026-07-14
+
+### Cosecha #5: instalar = funcionar — la conciencia se instala (ADRs 0029/0030 — cierra #53/#51)
+
+Quinta cosecha por el lazo. Una instalación fresca entregaba la capa **máquina** (hooks, CI, gates) y funcionaba, pero la capa de **conciencia** —quién se sienta, qué cambio se rutea a qué asiento, qué gate está vivo o dormido— viajaba como prosa que nada obligaba a usar. En campo eso costó: la calidad de la evidencia se degradaba dentro del mismo día (un `LOG.md` rico → un `veredicto.txt` pelón) y en otro lab la brecha la tapaba el usuario a mano, con un párrafo de apertura escrito cada sesión. El principio de la cosecha: **nada de conciencia puede depender de la iniciativa del agente** — se instala como maquinaria determinista o no está instalada.
+
+- **`feat` — el `arranca` sienta y rutea (ADR 0029, cierra #53).** Nuevo `tools/rutear.ps1` (mecánica, se siembra): fuente única de la lógica router + vivo/dormido; lee la ley y reporta, por área, qué asiento la ocupa y qué gate la vigila, y por Stop hook si está **VIVO o DORMIDO** con la **razón** de cada dormido. **Falla cerrado** (exit 1) sin ley legible. `/jidoka:arranca` gana una sección que **adopta el casting** de `recursos-del-proyecto.md` (que ahora se siembra con la sección **## El casting**) y **lee el router** al abrir (regla *"adopta, no resumas"*). Cuatro casos de prueba de vida nuevos.
+- **`feat` — la dormancia se hace visible (cierra #51).** `estado-motor.ps1` imprime la sección Gates (vía `rutear -Gates`) **siempre**, antes del sello: un Stop hook dormido ya no sale limpio y en silencio — se lista como DORMIDO con su razón.
+
 ## [1.11.0] — 2026-07-14
 
 ### El tercer gate de evidencia (`validador-stop`) + el fallo-abierto de los Stop hooks (ADR 0028)
