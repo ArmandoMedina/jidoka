@@ -12,7 +12,7 @@ Del módulo [[MOD-ritual]], dominio [[Metodo]]. La sesión gana el ritual como c
 ## Criterios de aceptación
 
 - Dado que abro una sesión, cuando corro `/jidoka:arranca`, entonces lee el estado real (HANDOFF + recursos), **sienta la sesión en su asiento** (adopta el casting) y **lee el router** (`tools/rutear.ps1`: qué área se rutea a qué gate, cuáles vivos/dormidos), y enuncia las reglas duras antes de tocar nada (ADR 0029).
-- Dado que voy a construir un sprint, cuando corro `/jidoka:planea`, entonces exige el QUÉ aprobado por el cliente (R0 con STOP) antes de la primera línea de código.
+- Dado que voy a construir un sprint, cuando corro `/jidoka:planea`, entonces exige el QUÉ aprobado por el cliente (R0 con STOP) antes de la primera línea de código, y su Verificación debe poder demostrarse **sin código ni terminal** (disparo `demo-que-corre-el-cliente`); `/jidoka:cierra` no la da por cumplida si solo corre por terminal (ADR 0030).
 - Dado que digo una frase natural del rol, cuando aplica, entonces se autoinvoca la skill-asiento con sus límites ("lo que NO hace") visibles.
 - Dado que trabajo sin humano presente, cuando corro `/jidoka:desatendido`, entonces el trabajo se reparte en las dos lanes `[agente]`/`[humano]` y nada irreversible se decide solo (ver `kanban/desatendido.md`).
 

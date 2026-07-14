@@ -51,7 +51,15 @@ robot.
 
 Por qué es vital: **en prosa no existe el test verde.** Los validadores deterministas (Vale,
 JSON Schema, linters) gatean forma, consistencia y completitud estructural — jamás verdad.
-El único gate de correctitud en trabajo no-código es el humano. Si el pájaro 2 deskilla al humano
+El único gate de correctitud en trabajo no-código es el humano.
+
+> **Corolario de diseño (el listón de evidencia y el demo que corre el cliente).** De aquí sale
+> cómo se parten los gates de evidencia: el gate determinista mide lo cuadrable —que **exista** el
+> `LOG.md` de la corrida, que sea **fresco** y esté **rastreado por git**— y nunca pretende juzgar
+> si el contenido es bueno; esa verdad la pone el humano en el Gemba. Y el criterio de que una
+> rebanada esté terminada es que **el cliente pueda correr el demo sin código ni terminal**: si solo
+> corre por terminal, el único que puede verla es el actor gobernado, no el portador de juicio.
+> (Disparos `evidencia-no-palabra` y `demo-que-corre-el-cliente`.) Si el pájaro 2 deskilla al humano
 hasta el sello de goma, el sistema entero se queda sin árbitro (ver `03-aviacion.md`: es el guion
 de AF447). Diseño correcto: la IA le **sube** el juicio al humano (muestra el porqué, lo obliga a
 decidir con contexto, ancla la capacitación en el artefacto versionado, no en su memoria de

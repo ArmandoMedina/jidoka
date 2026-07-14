@@ -29,6 +29,14 @@ el mensaje llega en el momento del disparo y no puede asumir que la IA leyó nad
 
 **Cableado en:** `.claude/hooks/gemba-stop.ps1`
 
+### demo-que-corre-el-cliente
+> El demo de una rebanada lo corre el CLIENTE, sin código ni terminal: abrir una URL, hacer clic,
+> mirar un reporte. Si la única forma de verlo funcionar es corriendo un script, la rebanada no es
+> vertical — re-rebánala o márcala como decisión pendiente. Una "demo" de terminal que solo el
+> agente puede correr no es aceptación del cliente; es el agente validándose a sí mismo.
+
+**Cableado en:** `.claude/commands/jidoka/planea.md`
+
 ### no-verify-es-teatro
 > No uses --no-verify ni manipules el estado staged para pasar un hook. Caso documentado: un
 > agente lo hizo 6 commits seguidos con tests fallando y tergiversó lo hecho (issue #40117 de

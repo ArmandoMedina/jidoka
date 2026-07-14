@@ -15,7 +15,7 @@ Cada cosa a su doc dueño (`kanban/lazo.md`):
 - **`HANDOFF.md`** (efímero) — se **llena** al cerrar con el estado en vuelo y los pendientes; **se limpia** de lo ya atendido (una nota vieja que ya no es verdad es peor que no tenerla). Las decisiones de juicio del cliente van a su cola propia (`[PENDIENTE]` / `[DECIDIDA-REVISABLE]`).
 - **`CHANGELOG.md`** — qué cambió, versión a versión. Si tocaste el ritual o los gates, aquí se registra (lo pide la ley: áreas `metodo` y `ritual`).
 - **Un ADR** (`docs/decisions/`) por cada decisión no obvia — y **listada en su índice en el mismo commit** (único bloqueo duro). Si una regla gobierna decisiones futuras, asciende a un ADR: no la dejes enterrada en un checkbox.
-- Si hubo sprint: llena la entrega con `@kit/.jidoka/templates/sprint-entrega.md` en `docs/sprints/` — su Kaizen (1-5 lecciones) es lo único que el siguiente `planea` lee completo.
+- Si hubo sprint: llena la entrega con `@kit/.jidoka/templates/sprint-entrega.md` en `docs/sprints/` — su Kaizen (1-5 lecciones) es lo único que el siguiente `planea` lee completo. La sección **Verificación (el demo que corre el cliente)** se cierra solo si el cliente pudo correr el demo **sin código ni terminal**; si solo corre por terminal, la rebanada no quedó vertical: dilo en "Pendiente que dejó", no la des por cumplida.
 
 ## 2. Poda (la otra mitad de registrar)
 
