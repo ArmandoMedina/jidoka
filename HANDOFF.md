@@ -6,9 +6,9 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-14 — Cosecha #5 EN VUELO · Jidoka `v1.12.0`, pendiente merge+release)
+## Dónde estamos (2026-07-14 — CERRADO Y LIBERADO · Jidoka `v1.12.0`)
 
-**Cosecha #5 — "instalar = funcionar": la conciencia se instala** (cierra #53/#51, ADRs 0029/0030). Nace de contrastar dos despliegues reales: en uno la calidad de la evidencia se degradó dentro del mismo día (un `LOG.md` rico → un `veredicto.txt` pelón); en otro la brecha la tapaba el usuario **a mano**, con un párrafo de apertura escrito cada sesión. Principio de la cosecha: **nada de conciencia depende de la iniciativa del agente** — se instala como maquinaria determinista o no está instalada. Implementada en **3 PRs apilados** (pendientes de merge + release):
+**Cosecha #5 — "instalar = funcionar": la conciencia se instala** (cerró #53/#51, ADRs 0029/0030). Todo mergeado y liberado; `main` limpio. [release `v1.12.0`](https://github.com/ArmandoMedina/jidoka/releases/tag/v1.12.0) (suite verde en preflight). PRs #57 (conciencia), #60 (liston; reemplazó a #58, cerrado al borrarse su rama base al mergear apilado) y #59 (registro). Nace de contrastar dos despliegues reales: en uno la calidad de la evidencia se degradó dentro del mismo día (un `LOG.md` rico → un `veredicto.txt` pelón); en otro la brecha la tapaba el usuario **a mano**, con un párrafo de apertura escrito cada sesión. Principio de la cosecha: **nada de conciencia depende de la iniciativa del agente** — se instala como maquinaria determinista o no está instalada. Tres piezas:
 
 - **PR `cosecha5-conciencia` (ADR 0029) — el arranca sienta y rutea.** `tools/rutear.ps1` (mecánica, sembrada): fuente única de la lógica router + vivo/dormido; **falla cerrado** (exit 1) sin ley. `/jidoka:arranca` adopta el casting (sembrado en el template `recursos-del-proyecto.md` → sección `## El casting`) y lee el router. `estado-motor` imprime la sección Gates **siempre** → la dormancia deja de ser invisible (#51).
 - **PR `cosecha5-liston` (ADR 0030) — el `LOG.md` como listón + el demo que corre el cliente.** `gemba-stop`/`validador-stop` solo cuentan `qa_runs/<corrida>/LOG.md`, no cualquier archivo (cierra el Goodhart del `veredicto.txt` pelón). Template `qa-log.md`. Disparo `demo-que-corre-el-cliente` (13.º): la Verificación se demuestra **sin código ni terminal** o la rebanada no es vertical.
@@ -16,7 +16,7 @@
 
 **Evidencia (verde, esta máquina 2026-07-14):** `probar-hooks` **29/29** (+2 listón +4 rutear) · `probar-disparos` 4/4 (**13** disparos) · `probar-gate` 10/10 · `probar-instalador` 51/51 · `probar-sembrar` 24/24 · `probar-version` 1.12.0 · `auditar` + `verificar` sin bloqueo (avisos no aplicables, acusados en los PRs). `rutear` manual contra la ley real: gemba/validador DORMIDO, review/andon VIVO.
 
-**Pendiente (humano):** mergear los 3 PRs en orden (**conciencia → liston → registro**) y liberar `v1.12.0` (`./tools/publicar.ps1 -SoloVerificar` → `./tools/publicar.ps1`; correr también `./tools/probar-sembrar.ps1` a mano — el preflight de publicar lo omite, follow-up conocido). Luego bajar a los labs: **el lab de reconstrucción** (SOLO cuando cierre la sesión del otro agente que trabaja ahí — no pisarlo; declarar su casting con nombres al sembrar) y **SGI** (esperar DIVERGE en sus comandos personalizados → mergear a mano la sección del router).
+**Pendiente (humano) — la bajada a los labs (nada urgente):** sembrar `v1.12.0` en los labs con `-Actualizar` — **el lab de reconstrucción** (SOLO cuando cierre la sesión del otro agente que trabaja ahí — no pisarlo; declarar su casting con nombres al sembrar) y **SGI** (esperar DIVERGE en sus comandos personalizados → mergear a mano la sección del router en su `arranca`). Follow-up conocido del motor: `publicar.ps1` no corre `probar-sembrar` en su preflight (se corre a mano; arreglo de una línea).
 
 ---
 
