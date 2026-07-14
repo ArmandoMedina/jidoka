@@ -41,8 +41,11 @@ function Test-Pattern($path, $pattern) {
   return ($path -like $pattern)
 }
 
-# Codigo sin commitear que caiga en un area de revision.
-$statusRaw = git status --porcelain 2>&1
+# Codigo sin commitear que caiga en un area de revision. -uall (--untracked-files=all):
+# sin esto git COLAPSA un directorio recien-nacido y sin trackear en una sola entrada
+# 'dir/', y el glob de 'fuente' no casa -> el gate falla-ABIERTO justo en el deliverable
+# nuevo que existe para atrapar (issue #50). Con -uall lista archivo por archivo.
+$statusRaw = git status --porcelain --untracked-files=all 2>&1
 if ($LASTEXITCODE -ne 0) { Write-GitFailWarning 'git status --porcelain' ($statusRaw -join ' '); exit 0 }
 $changed = @($statusRaw) | ForEach-Object { $s = "$_"; if ($s.Length -gt 3) { $s.Substring(3).Trim() } }
 $codChanged = @()

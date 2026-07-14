@@ -120,6 +120,21 @@ $oVPass = Invoke-Hook (Join-Path $hooksDir 'gemba-stop.ps1') '{}' $r2
 Check 'gemba-stop: DEJA cerrar con evidencia rastreada y fresca (git add -f)' (-not $oVPass.Contains('"decision":"block"')) "bloqueo indebido: $oVPass"
 Remove-Item $r2 -Recurse -Force -ErrorAction SilentlyContinue
 
+# --- gemba-stop: deliverable NUEVO en dir recien-nacido sin trackear (fix issue #50) ---
+# git status --porcelain (sin -uall) COLAPSA un dir sin ningun archivo trackeado en una
+# sola entrada 'entregas/', y el glob especifico 'entregas/*-entrega.md' no casa -> el gate
+# fallaba-ABIERTO justo en el deliverable nuevo que existe para atrapar. Con -uall git lista
+# el archivo y el gate vuelve a bloquear. Este caso ROJO->VERDE guarda contra la regresion.
+$r4 = New-TempRepo
+Set-Manifest $r4 '[{"nombre":"entregas","desc":"x","fuente":["entregas/*-entrega.md"],"doc_bloquea":[],"doc_avisa":[],"rol":"revisor-visual"}]'
+Push-Location $r4; git add -A 2>&1 | Out-Null; git commit -q -m init 2>&1 | Out-Null; Pop-Location
+# El dir 'entregas/' NACE ahora, sin ningun archivo trackeado dentro (el caso exacto del bug).
+New-Item -ItemType Directory -Path (Join-Path $r4 'entregas') -Force | Out-Null
+Set-Content (Join-Path $r4 'entregas/sprint-1-entrega.md') "# entrega" -Encoding Ascii
+$oNew = Invoke-Hook (Join-Path $hooksDir 'gemba-stop.ps1') '{}' $r4
+Check 'gemba-stop: BLOQUEA deliverable nuevo en dir recien-nacido sin trackear (fix #50)' ($oNew.Contains('"decision":"block"')) "fallo-abierto por dir colapsado: $oNew"
+Remove-Item $r4 -Recurse -Force -ErrorAction SilentlyContinue
+
 # --- gemba-stop DORMIDO: sin area rol revisor-visual, no dispara ---
 $r3 = New-TempRepo
 New-Item -ItemType Directory -Path (Join-Path $r3 'ui') -Force | Out-Null

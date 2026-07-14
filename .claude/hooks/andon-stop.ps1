@@ -38,7 +38,10 @@ if ($env:CLAUDE_PROJECT_DIR) { Set-Location $env:CLAUDE_PROJECT_DIR }
 $repoRaw = git rev-parse --show-toplevel 2>&1
 if ($LASTEXITCODE -ne 0) { Avisa-SinVeredicto "git rev-parse fallo o no hay repo ($("$repoRaw".Trim() -split "`n" | Select-Object -First 1))" }
 $repo = "$repoRaw".Trim()
-$statusRaw = git status --porcelain 2>&1
+# -uall (--untracked-files=all): sin esto git COLAPSA un directorio recien-nacido y sin
+# trackear en una sola entrada 'dir/', y el glob de 'fuente' no casa -> el gate falla-
+# ABIERTO justo en el deliverable nuevo que existe para atrapar (issue #50).
+$statusRaw = git status --porcelain --untracked-files=all 2>&1
 if ($LASTEXITCODE -ne 0) { Avisa-SinVeredicto "git status fallo ($("$statusRaw".Trim() -split "`n" | Select-Object -First 1))" }
 $changed = @($statusRaw) | ForEach-Object { $s = "$_"; if ($s.Length -gt 3) { $s.Substring(3).Trim() } }
 if (-not $changed) { exit 0 }
