@@ -4,6 +4,19 @@
 >
 > **Regla dura: punteros, nunca secretos.** Aquí van *dónde* está algo y *cómo se llama*, jamás el contenido sensible. Nada de tokens, contraseñas, llaves ni claves de API — esos viven en el gestor de secretos / variables de entorno, y aquí solo se nombra cuál. Este archivo puede o no versionarse según el arquetipo; si versiona, un secreto filtrado aquí es un secreto en el historial de git para siempre (afín al disparo `frontera-nda`).
 
+## El casting
+
+> **Quién ocupa cada asiento del método, por nombre.** `/jidoka:arranca` lee esta sección para **sentar la sesión** en su rol y anunciarlo. El *rol* es el mecanismo (lo neutral que la ley y los hooks entienden; ver `kanban/roles.md`); el *nombre* es sabor de instancia — mapearlo a una persona lo vuelve memorable y deja claro quién responde por qué (ADR 0023). Sin esta sección, la sesión cae a los roles neutrales.
+
+| Asiento (rol del método) | Nombre | Quién lo ocupa / cuándo |
+|---|---|---|
+| orquestador | [nombre] | El hilo principal: decide y teje, delega lo pesado. |
+| escribano | [nombre] | Sincroniza los docs dueños según la ley; cierra el drift. |
+| revisor-visual | [nombre] | Gemba: corre el demo con datos reales y deja evidencia en `qa_runs/`. |
+| validador | [nombre] | Validación por medición: corre el motor determinista contra golden-masters. |
+
+> Enciende solo los asientos que este repo merece (menú, no molde). Para personalizar el casting —incluido volver un asiento un skill con nombre propio— ve `kanban/roles.md` → **"Personalizar el casting"**.
+
 ## Material de referencia
 
 [Docs, specs, diseños, tickets que la sesión debe conocer. Puntero + una línea de qué es. Ej: "El brief de producto vive en `product/PRODUCT_BRIEF.md`". "El diseño de la API está en Figma, proyecto X (link en el ticket JIRA-123)."]
