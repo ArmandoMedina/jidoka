@@ -2,6 +2,16 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.12.1] — 2026-07-14
+
+### La nave nodriza respeta su propia doctrina (dogfooding al día)
+
+Pase de dogfooding tras auditar el propio repo contra lo que su método exige a los hijos: dos huecos duros y un drift blando, todos cerrados aquí; lo que no era hueco quedó con su razón registrada (el "no hay sello" propio es correcto por ADR 0024; sin `CLAUDE.md` es doctrina anti-memoria).
+
+- **`fix` — `publicar.ps1` corre `probar-sembrar` en su preflight.** El follow-up conocido de v1.10.0: el smoke del fallback anti-AV (`sembrar-manual`, 24 casos) existía pero el release se cortaba sin correrlo. Además, `probar-publicar.ps1` gana un caso invariante (ROJO→VERDE) que cierra la clase entera: **todo `probar-*.ps1` del motor debe estar en el preflight** — el próximo self-test que nazca fuera de la lista rompe el meta-test, no un release.
+- **`docs` — el propio repo siembra su `## El casting`** en `product/recursos-del-proyecto.md` (la sección que v1.12.0 prescribe y la nave nodriza no tenía: su `arranca` caía al fallback neutral). Con nombres neutrales a propósito — decisión del cliente: seguir la ruta del usuario recién sembrado, sin sesgo — y los asientos dormidos (revisor-visual/validador) anotados como lo que son: áreas que la ley aún no declara.
+- **`docs` — el listón `LOG.md` (ADR 0030) se adopta en casa.** Las corridas de `qa_runs/` anteriores predatan la convención y se conservan tal cual (no se fabrica evidencia retroactiva); `qa_runs/README.md` lo acusa. La corrida de evidencia de este mismo cambio (`qa_runs/dogfood-20260714/`) es el **primer uso propio** de la plantilla `qa-log.md`.
+
 ## [1.12.0] — 2026-07-14
 
 ### Cosecha #5: instalar = funcionar — la conciencia se instala (ADRs 0029/0030 — cierra #53/#51)

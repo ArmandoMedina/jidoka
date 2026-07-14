@@ -30,6 +30,16 @@ Check 'dry-run: NO crea ningun tag (sin efectos)' ($tagsAntes.Count -eq $tagsDes
 $lineaTitulo = @($out -split "`r?`n" | Where-Object { $_ -match 'titulo:' }) -join ' '
 Check 'dry-run: el titulo derivado no lleva comillas dobles (no rompe gh en PS 5.1)' (-not ($lineaTitulo -match '"')) "el titulo tiene comillas: $lineaTitulo"
 
+# El preflight debe incluir TODOS los self-tests probar-*.ps1 del motor (hueco cazado en
+# v1.12.0: probar-sembrar existia pero el release se cortaba sin correrlo). Se excluye
+# probar-publicar: es este meta-test (quien valida al publicador no corre dentro de el).
+$publicarSrc = Get-Content (Join-Path $PSScriptRoot 'publicar.ps1') -Raw
+$selfTests = Get-ChildItem (Join-Path $PSScriptRoot 'probar-*.ps1') |
+  Where-Object { $_.Name -ne 'probar-publicar.ps1' } |
+  ForEach-Object { $_.BaseName }
+$fuera = @($selfTests | Where-Object { $publicarSrc -notmatch ("'" + [regex]::Escape($_) + "'") })
+Check 'preflight: incluye todos los self-tests probar-*.ps1 del motor' ($fuera.Count -eq 0) "fuera del preflight: $($fuera -join ', ')"
+
 Write-Host ""
 if ($script:fallos -gt 0) {
   Write-Host "== $($script:fallos) de $($script:casos) fallidos. publicar.ps1 tiene un bug. ==" -ForegroundColor Red

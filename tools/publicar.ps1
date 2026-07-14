@@ -76,7 +76,7 @@ if (-not $SoloVerificar) {
 # (2>&1, p.ej. "LF -> CRLF") dentro de un test no debe volverse error fatal (como andon.yml).
 $ErrorActionPreference = 'Continue'
 Write-Host "== Suite de self-tests (evidencia-no-palabra antes de publicar) =="
-foreach ($t in @('probar-version','probar-gate','probar-hooks','probar-auditor','probar-disparos','probar-instalador')) {
+foreach ($t in @('probar-version','probar-gate','probar-hooks','probar-auditor','probar-disparos','probar-instalador','probar-sembrar')) {
   & (Join-Path $PSScriptRoot "$t.ps1") *> $null
   if ($LASTEXITCODE -ne 0) { Die "$t.ps1 fallo (exit $LASTEXITCODE): no se publica." }
   Write-Host "  [OK] $t" -ForegroundColor Green

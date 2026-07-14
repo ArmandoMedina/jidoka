@@ -6,6 +6,19 @@ estado: vigente
 
 > **Lo que la sesión no debe preguntar al abrir.** Punteros, nunca secretos (ver la plantilla en `kit/.jidoka/templates/recursos-del-proyecto.md`). `/jidoka:arranca` lo lee.
 
+## El casting
+
+> **Quién ocupa cada asiento del método, por nombre.** `/jidoka:arranca` lee esta sección para **sentar la sesión** en su rol y anunciarlo. En este repo el casting usa los **nombres neutrales** del método a propósito (decisión del cliente, 2026-07-14): la nave nodriza sigue la misma ruta que un usuario recién sembrado, para no sesgarse. La autoridad la da la ley (`tools/blast-radius.json`), no el nombre (`kanban/roles.md`).
+
+| Asiento (rol del método) | Nombre | Quién lo ocupa / cuándo |
+|---|---|---|
+| orquestador | orquestador | El hilo principal: decide y teje, delega lo pesado. |
+| escribano | escribano | Sincroniza los docs dueños según la ley; cierra el drift. Las 8 áreas de la ley rutean aquí. |
+| revisor-visual | *(dormido)* | Sin área `rol: revisor-visual` en la ley — este repo no tiene deliverable visual. Se sienta al declararla. |
+| validador | *(dormido)* | Sin área `rol: validador` en la ley — sin spec numérica propia. Se sienta al declararla. |
+
+> Menú, no molde: solo se sientan los asientos que este repo merece. Un asiento *(dormido)* no es permiso — es un área que la ley aún no declara.
+
 ## Material de referencia
 
 - **El estado en vuelo** vive en `HANDOFF.md` (se lee y se limpia al abrir).
