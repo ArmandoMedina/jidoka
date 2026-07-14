@@ -120,6 +120,27 @@ $oVPass = Invoke-Hook (Join-Path $hooksDir 'gemba-stop.ps1') '{}' $r2
 Check 'gemba-stop: DEJA cerrar con evidencia rastreada y fresca (git add -f)' (-not $oVPass.Contains('"decision":"block"')) "bloqueo indebido: $oVPass"
 Remove-Item $r2 -Recurse -Force -ErrorAction SilentlyContinue
 
+# --- gemba-stop: LISTON DE EVIDENCIA -- un archivo suelto que NO es LOG.md no vale (ROJO->VERDE) ---
+# Antes, CUALQUIER archivo rastreado y fresco bajo qa_runs/ pasaba: un 'veredicto.txt' pelon
+# satisfacia el gate (Goodhart -- la evidencia rica se degrado a una tabla pelona en campo).
+# Ahora solo cuenta el LOG.md de la corrida (plantilla kit/.jidoka/templates/qa-log.md).
+$r5 = New-TempRepo
+New-Item -ItemType Directory -Path (Join-Path $r5 'ui') -Force | Out-Null
+Set-Manifest $r5 '[{"nombre":"ui","desc":"x","fuente":["ui/*"],"doc_bloquea":[],"doc_avisa":[],"rol":"revisor-visual"}]'
+Set-Content (Join-Path $r5 'ui/app.js') "// v1" -Encoding Ascii
+Set-Content (Join-Path $r5 '.gitignore') "qa_runs/" -Encoding Ascii
+Push-Location $r5; git add -A 2>&1 | Out-Null; git commit -q -m init 2>&1 | Out-Null; Pop-Location
+Set-Content (Join-Path $r5 'ui/app.js') "// v2 cambio visual" -Encoding Ascii
+$qa5 = Join-Path $r5 'qa_runs/gemba-veredicto'
+New-Item -ItemType Directory -Path $qa5 -Force | Out-Null
+$vd5 = Join-Path $qa5 'veredicto.txt'
+Set-Content $vd5 "PASA - se ve bien" -Encoding Ascii
+Push-Location $r5; git add -f qa_runs/gemba-veredicto/veredicto.txt 2>&1 | Out-Null; Pop-Location
+(Get-Item $vd5).LastWriteTime = (Get-Date).AddMinutes(5)   # rastreado y fresco, pero NO es LOG.md
+$oVListn = Invoke-Hook (Join-Path $hooksDir 'gemba-stop.ps1') '{}' $r5
+Check 'gemba-stop: BLOQUEA veredicto suelto rastreado y fresco que NO es LOG.md (liston de evidencia)' ($oVListn.Contains('"decision":"block"')) "no bloqueo el archivo suelto que no es LOG.md: $oVListn"
+Remove-Item $r5 -Recurse -Force -ErrorAction SilentlyContinue
+
 # --- gemba-stop: deliverable NUEVO en dir recien-nacido sin trackear (fix issue #50) ---
 # git status --porcelain (sin -uall) COLAPSA un dir sin ningun archivo trackeado en una
 # sola entrada 'entregas/', y el glob especifico 'entregas/*-entrega.md' no casa -> el gate
@@ -160,17 +181,37 @@ Check 'validador-stop: BLOQUEA spec cambiada sin evidencia de corrida' ($oValBlo
 Set-Content (Join-Path $v1 '.gitignore') "qa_runs/" -Encoding Ascii
 $vqa = Join-Path $v1 'qa_runs/validador-prueba'
 New-Item -ItemType Directory -Path $vqa -Force | Out-Null
-$vlog = Join-Path $vqa 'tabla.md'
+$vlog = Join-Path $vqa 'LOG.md'
 Set-Content $vlog "entrada|obtenido|esperado" -Encoding Ascii
 (Get-Item $vlog).LastWriteTime = (Get-Date).AddMinutes(5)   # fresca por mtime, pero sin trackear
 $oValUntracked = Invoke-Hook (Join-Path $hooksDir 'validador-stop.ps1') '{}' $v1
 Check 'validador-stop: BLOQUEA evidencia fresca pero NO rastreada por git (Goodhart)' ($oValUntracked.Contains('"decision":"block"')) "no bloqueo evidencia no-commiteada: $oValUntracked"
 # Caso PASA: la misma evidencia, ahora forzada al indice con git add -f.
-Push-Location $v1; git add -f qa_runs/validador-prueba/tabla.md 2>&1 | Out-Null; Pop-Location
+Push-Location $v1; git add -f qa_runs/validador-prueba/LOG.md 2>&1 | Out-Null; Pop-Location
 (Get-Item $vlog).LastWriteTime = (Get-Date).AddMinutes(5)   # re-garantiza mtime posterior al cambio
 $oValPass = Invoke-Hook (Join-Path $hooksDir 'validador-stop.ps1') '{}' $v1
 Check 'validador-stop: DEJA cerrar con evidencia de corrida rastreada y fresca (git add -f)' (-not $oValPass.Contains('"decision":"block"')) "bloqueo indebido: $oValPass"
 Remove-Item $v1 -Recurse -Force -ErrorAction SilentlyContinue
+
+# --- validador-stop: LISTON DE EVIDENCIA -- una tabla suelta que NO es LOG.md no vale (ROJO->VERDE) ---
+# Simetrico a gemba: antes cualquier archivo qa_runs/validador-* rastreado y fresco pasaba; ahora
+# solo cuenta el LOG.md de la corrida (la salida del motor determinista, plantilla qa-log.md).
+$v3 = New-TempRepo
+New-Item -ItemType Directory -Path (Join-Path $v3 'spec') -Force | Out-Null
+Set-Manifest $v3 '[{"nombre":"spec","desc":"x","fuente":["spec/*.md"],"doc_bloquea":[],"doc_avisa":[],"rol":"validador"}]'
+Set-Content (Join-Path $v3 'spec/formula.md') "# formula v1" -Encoding Ascii
+Set-Content (Join-Path $v3 '.gitignore') "qa_runs/" -Encoding Ascii
+Push-Location $v3; git add -A 2>&1 | Out-Null; git commit -q -m init 2>&1 | Out-Null; Pop-Location
+Set-Content (Join-Path $v3 'spec/formula.md') "# formula v2 cambiada" -Encoding Ascii
+$vqa3 = Join-Path $v3 'qa_runs/validador-veredicto'
+New-Item -ItemType Directory -Path $vqa3 -Force | Out-Null
+$vd3 = Join-Path $vqa3 'veredicto.txt'
+Set-Content $vd3 "validado al centavo" -Encoding Ascii
+Push-Location $v3; git add -f qa_runs/validador-veredicto/veredicto.txt 2>&1 | Out-Null; Pop-Location
+(Get-Item $vd3).LastWriteTime = (Get-Date).AddMinutes(5)   # rastreado y fresco, pero NO es LOG.md
+$oValListn = Invoke-Hook (Join-Path $hooksDir 'validador-stop.ps1') '{}' $v3
+Check 'validador-stop: BLOQUEA tabla suelta rastreada y fresca que NO es LOG.md (liston de evidencia)' ($oValListn.Contains('"decision":"block"')) "no bloqueo el archivo suelto que no es LOG.md: $oValListn"
+Remove-Item $v3 -Recurse -Force -ErrorAction SilentlyContinue
 
 # --- validador-stop DORMIDO: sin area rol validador, no dispara ---
 $v2 = New-TempRepo

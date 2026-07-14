@@ -26,7 +26,9 @@
 
 ## Verificación (el demo que corre el cliente) — `owner: cliente`
 
-[Los pasos exactos, sin asumir nada, con los que el CLIENTE verá el incremento funcionando con sus propios ojos. Nace aquí y se cierra idéntico en la entrega: es el criterio de aceptación del sprint.]
+**Cómo lo corre (sin código ni terminal):** [los pasos exactos, sin asumir nada, con los que el CLIENTE verá el incremento funcionando con sus propios ojos — abrir una URL, hacer clic, mirar un reporte. **No** "corre este script" ni "ejecuta este comando".]
+
+> **Regla del demo tangible:** si el cliente no puede correr el demo **sin código ni terminal**, la rebanada **no es vertical** — re-rebánala hasta que entregue algo que él pueda tocar, o márcala como decisión pendiente del cliente (no la cierres con una demo de terminal que solo tú puedes correr). Nace aquí y se cierra idéntico en la entrega: es el criterio de aceptación del sprint.
 
 ## Lo que NO entra (siguientes)
 

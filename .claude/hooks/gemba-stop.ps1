@@ -9,8 +9,9 @@
 # rol 'revisor-visual'. Si ninguna area lo es, el hook esta DORMIDO (exit limpio;
 # su dormancia se declara en andon/README.md, no se re-anuncia cada turno).
 #
-# EVIDENCIA FRESCA = algun archivo bajo qa_runs/ mas reciente que el ultimo cambio
-# visual (mtime; corre local en Stop, donde el mtime es fiable). Respaldo anti-bucle:
+# EVIDENCIA FRESCA = el LOG.md de una corrida (qa_runs/<corrida>/LOG.md) mas reciente que
+# el ultimo cambio visual (mtime; corre local en Stop, donde el mtime es fiable). Un archivo
+# suelto que no sea LOG.md no cuenta -- el liston (ADR 0030). Respaldo anti-bucle:
 # marcador .claude/.gemba-marker (gitignored) con el SHA1 del diff ya aprobado por
 # el cliente -- valvula HUMANA para el caso raro de aprobar sin artefacto, NO
 # auto-firma del agente. Archivo ASCII a proposito.
@@ -87,9 +88,15 @@ $qaTrackedRaw = git -C $repo -c core.quotepath=false ls-files -- qa_runs 2>&1
 if ($LASTEXITCODE -ne 0) { Write-GitFailWarning 'git ls-files -- qa_runs' ($qaTrackedRaw -join ' '); exit 0 }
 foreach ($rel in @($qaTrackedRaw)) {
   if (-not $rel) { continue }
+  # LISTON DE EVIDENCIA: solo cuenta el LOG.md de la corrida (qa_runs/<corrida>/LOG.md,
+  # plantilla kit/.jidoka/templates/qa-log.md). Un archivo suelto (un 'veredicto.txt' pelon)
+  # satisfacia frescura+tracking pero no es evidencia -- la calidad se degradaba a una tabla
+  # pelona en campo (ADR 0030). El gate mide presencia+frescura+tracking del LOG; su CONTENIDO
+  # lo juzga el humano en el Gemba.
+  if ($rel -notlike 'qa_runs/*/LOG.md') { continue }
   $abs = Join-Path $repo $rel
   if ((Test-Path -LiteralPath $abs) -and ((Get-Item -LiteralPath $abs).LastWriteTime -gt $lastVis)) {
-    exit 0   # artefacto de QA rastreado por git y posterior al cambio: evidencia valida
+    exit 0   # LOG.md de la corrida rastreado por git y posterior al cambio: evidencia valida
   }
 }
 
@@ -107,7 +114,7 @@ $fecha = Get-Date -Format 'yyyyMMdd-HHmmss'
 $ctx = "Gemba (revisor-visual): tocaste areas visuales (" + (($visChanged | Select-Object -First 5) -join ', ') + ") " +
        "y NO hay evidencia en qa_runs/ posterior al cambio. Un veredicto de QA sin artefacto no vale (evidencia-no-palabra). " +
        "QUE HACER: [1] corre la UI o el render DE VERDAD con casos de uso reales (datos sinteticos), no 'renderiza sin excepcion'; " +
-       "[2] guarda la evidencia (capturas, logs de la corrida) en qa_runs/gemba-$fecha/ y FORZALA al indice con 'git add -f qa_runs/gemba-$fecha/...' -- qa_runs/ esta gitignoreado, y solo cuenta la evidencia que git rastrea (no basta dejarla en disco); " +
+       "[2] escribe el LOG.md de la corrida en qa_runs/gemba-$fecha/LOG.md (plantilla kit/.jidoka/templates/qa-log.md: metodo reproducible + tabla de casos + capturas/logs) y FORZALO al indice con 'git add -f qa_runs/gemba-$fecha/LOG.md' -- qa_runs/ esta gitignoreado, y SOLO cuenta el LOG.md de la corrida (un veredicto suelto no vale); " +
        "[3] presenta las capturas al cliente -- Gemba es checkpoint que vuelve al cliente, no juzga solo. " +
        "Caso raro (el cliente aprueba sin artefacto): Set-Content -Encoding ASCII '.claude/.gemba-marker' '$sha'"
 $out = @{

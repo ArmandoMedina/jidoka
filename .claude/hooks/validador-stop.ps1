@@ -17,8 +17,9 @@
 # gate es LOCAL (corre en Stop), como Gemba, y exige la evidencia COMMITEADA (la salida
 # saneada del motor, sin datos sensibles), no la corrida en el servidor.
 #
-# EVIDENCIA VALIDA = archivo bajo qa_runs/validador-* RASTREADO POR GIT (git add -f; qa_runs/
-# suele estar gitignoreado) con mtime posterior al ultimo cambio de la spec. Lo primero cierra
+# EVIDENCIA VALIDA = el LOG.md de la corrida bajo qa_runs/validador-*/LOG.md RASTREADO POR GIT
+# (git add -f; qa_runs/ suele estar gitignoreado) con mtime posterior al ultimo cambio de la
+# spec -- un archivo suelto que no sea LOG.md no cuenta (el liston, ADR 0030). Lo primero cierra
 # un Goodhart (un archivo fresco pero nunca commiteado satisface el mtime y git no lo ve);
 # lo segundo pide Stop local (un git checkout/clone reescribe mtimes). Respaldo anti-bucle:
 # marcador .claude/.validador-marker (gitignored) con el SHA1 del diff ya aprobado por el
@@ -90,7 +91,11 @@ $qaTrackedRaw = git -C $repo -c core.quotepath=false ls-files -- qa_runs 2>&1
 if ($LASTEXITCODE -ne 0) { Write-GitFailWarning 'git ls-files -- qa_runs' ($qaTrackedRaw -join ' '); exit 0 }
 foreach ($rel in @($qaTrackedRaw)) {
   if (-not $rel) { continue }
-  if ($rel -notlike 'qa_runs/validador*') { continue }   # solo evidencia de validacion por medicion
+  # LISTON DE EVIDENCIA: solo cuenta el LOG.md de la corrida (qa_runs/validador-<corrida>/LOG.md,
+  # plantilla kit/.jidoka/templates/qa-log.md). Un archivo suelto satisfacia frescura+tracking
+  # pero no es la salida del motor -- el liston (ADR 0030). El gate mide presencia+frescura+
+  # tracking del LOG; su CONTENIDO (la tabla entrada->obtenido->esperado) lo juzga el humano.
+  if ($rel -notlike 'qa_runs/validador*/LOG.md') { continue }   # solo el LOG.md de la corrida de validacion
   $abs = Join-Path $repo $rel
   if ((Test-Path -LiteralPath $abs) -and ((Get-Item -LiteralPath $abs).LastWriteTime -gt $lastVal)) {
     exit 0   # artefacto de corrida rastreado por git y posterior al cambio: evidencia valida
@@ -112,7 +117,7 @@ $ctx = "Validador (validacion por medicion): tocaste spec/datos (" + (($valChang
        "y NO hay evidencia en qa_runs/validador-* posterior al cambio. Un 'validado al centavo' en prosa no vale (evidencia-no-palabra). " +
        "QUE HACER: [1] corre el MOTOR DETERMINISTA (tools/validar-<dominio>.ps1) que recalcula el artefacto contra los golden-masters " +
        "y emite la tabla entrada->obtenido->esperado + exit 0/1 -- el calculo lo hace el motor, NUNCA el LLM; " +
-       "[2] guarda su salida en qa_runs/validador-$fecha/ y FORZALA al indice con 'git add -f qa_runs/validador-$fecha/...' " +
+       "[2] guarda su salida como el LOG.md de la corrida en qa_runs/validador-$fecha/LOG.md (plantilla kit/.jidoka/templates/qa-log.md) y FORZALO al indice con 'git add -f qa_runs/validador-$fecha/LOG.md' -- SOLO cuenta el LOG.md (un veredicto suelto no vale) " +
        "(qa_runs/ esta gitignoreado; solo cuenta la evidencia que git rastrea); si los fixtures son confidenciales, commitea la salida SANEADA (sin PII), no los datos; " +
        "[3] cita la corrida desde el HANDOFF/entrega. " +
        "Caso raro (el cliente aprueba sin artefacto): Set-Content -Encoding ASCII '.claude/.validador-marker' '$sha'"

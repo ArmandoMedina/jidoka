@@ -5,7 +5,8 @@
 ## La convención
 
 - **Un directorio por corrida:** `<rol|propósito>-<YYYYMMDD[-HHMMSS]>/` (ej. `revisor-visual-20260710-170512/`).
-- **Adentro van artefactos reales:** capturas, snapshots renderizados, logs, tablas entrada→salida-obtenida→esperada. Con un `LOG.md` que declare: fecha, rama, **método reproducible**, y los resultados como tabla `# | Caso | Check | Resultado (N/N)`.
+- **Adentro van artefactos reales:** capturas, snapshots renderizados, logs, tablas entrada→salida-obtenida→esperada. Con un `LOG.md` que declare: fecha, rama, **método reproducible**, y los resultados como tabla `# | Caso | Check | Resultado (N/N)` — copia la plantilla `kit/.jidoka/templates/qa-log.md`.
+- **Los gates exigen específicamente el `LOG.md` de la corrida** (`qa_runs/<corrida>/LOG.md`), no cualquier archivo suelto: `gemba-stop` y `validador-stop` solo cuentan el `LOG.md` rastreado y fresco (el listón de evidencia, ADR 0030). Un `veredicto.txt` pelón satisface frescura pero no es evidencia — miden presencia+frescura+tracking del LOG; su contenido lo juzga el humano.
 - **Datos 100 % sintéticos, siempre** — incluso en repos privados. Ninguna captura carga datos reales (perfil ficticio, montos inventados).
 - **El veredicto NO vive aquí.** Va a `HANDOFF.md` o `CHANGELOG.md` **citando** el directorio de la corrida. Artefacto y veredicto se separan a propósito.
 

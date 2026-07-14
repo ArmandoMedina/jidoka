@@ -24,7 +24,7 @@
 
 ## Verificación (el demo que corre el cliente) — `owner: cliente`
 
-[Los mismos pasos del plan, cerrados. Esta sección la valida el CLIENTE corriendo el demo — los agentes no la marcan como cumplida.]
+[Los mismos pasos del plan, cerrados. Esta sección la valida el CLIENTE corriendo el demo **sin código ni terminal** — los agentes no la marcan como cumplida. Si al cerrar el demo solo corre por terminal, la rebanada no quedó vertical: dilo de frente en "Pendiente que dejó", no la des por cumplida.]
 
 ## Pendiente que dejó
 
