@@ -47,8 +47,11 @@ function Test-Pattern($path, $pattern) {
   return ($path -like $pattern)
 }
 
-# Cambios visuales sin commitear.
-$statusRaw = git status --porcelain 2>&1
+# Cambios visuales sin commitear. -uall (--untracked-files=all): sin esto git COLAPSA
+# un directorio recien-nacido y sin trackear en una sola entrada 'dir/', y el glob de
+# 'fuente' (p.ej. 'qa_runs/*') no casa -> el gate falla-ABIERTO justo en el deliverable
+# nuevo que existe para atrapar (issue #50). Con -uall lista archivo por archivo.
+$statusRaw = git status --porcelain --untracked-files=all 2>&1
 if ($LASTEXITCODE -ne 0) { Write-GitFailWarning 'git status --porcelain' ($statusRaw -join ' '); exit 0 }
 $changed = @($statusRaw) | ForEach-Object { $s = "$_"; if ($s.Length -gt 3) { $s.Substring(3).Trim() } }
 $visChanged = @()
