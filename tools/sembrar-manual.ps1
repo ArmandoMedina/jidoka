@@ -1,14 +1,17 @@
 #Requires -Version 5
-# sembrar-manual.ps1 - Fallback de siembra/actualizacion del motor, INDEPENDIENTE de
-# instalar.ps1. Existe porque instalar.ps1 -- por nombre ("instalar") y comportamiento
-# (core.hooksPath + copia de hooks + -ExecutionPolicy Bypass) -- es iman de heuristica
-# de AV: en Windows endurecido (justo los repos regulados que Jidoka apunta) el SO puede
-# negar leerlo/ejecutarlo, y el hijo se queda SIN ruta de siembra ni actualizacion, en
-# silencio (jidoka#40/#43). La leccion (ADR 0027): la ruta de actualizacion NO debe ser a
-# la vez unico punto de falla y el artefacto mas sospechoso del kit. Este script es el
-# segundo camino: mismo destino, menor superficie de sospecha (sin Bypass, sin el nombre
-# "instalar"). Reproduce el fallback manual del reporte (copiar 'motor' del manifiesto +
-# core.hooksPath + escribir el sello), pero guiado y testeado.
+# sembrar-manual.ps1 - Camino de siembra/actualizacion del motor AV-SEGURO, INDEPENDIENTE
+# de instalar.ps1. instalar.ps1 y probar-instalador.ps1 caen en cuarentena heuristica de AV
+# (Bitdefender: CMD:Heur...Boxter, familia ransomware): NO por el nombre ("instalar") ni por
+# una linea suelta, sino por DENSIDAD acumulada de comportamiento tipo dropper (spawn de
+# powershell, core.hooksPath, copia masiva, Remove-Item -Recurse, leer/escribir bytes). En
+# Windows endurecido (los repos regulados que Jidoka apunta) el SO niega leerlos/ejecutarlos
+# en el barrido, y el hijo se queda sin ruta de siembra, en silencio (jidoka#40/#43).
+# Verificado en campo 2026-07-15 (ADR 0027, enmienda): quitar el flag Bypass, el spawn o el
+# loop de bytes NO baja del umbral; el nombre es irrelevante. Este script sobrevive por ser
+# MAGRO (subconjunto bajo-umbral): la magrez es una RESTRICCION, no una casualidad -- re-probar
+# contra el AV tras cada cambio. La cura robusta de fondo es FIRMAR (Authenticode, recurso del
+# cliente). Sin cert, este es el instalador AV-seguro completo: siembra la mecanica + la ley
+# del arquetipo + los stubs de instancia + el sello (lo mismo que instalar.ps1, sin su densidad).
 #
 # Uso:
 #   ./tools/sembrar-manual.ps1 -Destino <repo>                       (siembra fresca, docs-as-code)
@@ -179,6 +182,28 @@ if (-not $Actualizar) {
   }
 }
 
+# --- 5b. Sembrar los stubs de instancia (solo siembra fresca, no-clobber) --------
+# La INSTANCIA (HANDOFF, ROADMAP, CHANGELOG, indice de ADRs, .gitignore) + la semilla del
+# QUE segun arquetipo (grafo product/README o brief). El contenido vive INLINE en el
+# manifiesto (stubs + stubs_arquetipo). Nunca se actualiza; solo se crea si falta. Sin esto
+# el hijo queda a medias en una maquina donde instalar.ps1 no puede correr (el caso AV).
+$stubsCreados = 0
+if (-not $Actualizar) {
+  $stubs = @($manif.stubs)
+  if ($arq.producto -and $manif.stubs_arquetipo.($arq.producto)) { $stubs += $manif.stubs_arquetipo.($arq.producto) }
+  if ($arq.gobernanza -and $manif.stubs_arquetipo.gobernanza) { $stubs += $manif.stubs_arquetipo.gobernanza }
+  foreach ($s in $stubs) {
+    $dst = Join-Path $Destino $s.ruta
+    if (Test-Path -LiteralPath $dst) { continue }
+    $parent = Split-Path -Parent $dst
+    if ($parent -and -not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+    [System.IO.File]::WriteAllText($dst, $s.contenido, $utf8)
+    $stubsCreados++
+    Write-Host "  [STUB] $($s.ruta)" -ForegroundColor Green
+  }
+  if ($stubsCreados) { Ok "$stubsCreados stub(s) de instancia sembrado(s)" }
+}
+
 # --- 6. Escribir el sello (tools/jidoka-motor.json) -----------------------------
 # version + hash de cada pieza pristina/enviada. En -Actualizar preserva la lista de
 # exclusion; en siembra fresca la anota si el arquetipo excluyo piezas.
@@ -200,7 +225,7 @@ Write-Host ""
 $resumen = if ($Actualizar) {
   "== Motor: $alDia al dia | $actualizados actualizado(s) | $copiados nuevo(s) | $($divergen.Count) divergen"
 } else {
-  "== Sembrado: $copiados pieza(s) | $alDia ya al dia | $($divergen.Count) preservada(s) (customizadas)"
+  "== Sembrado: $copiados pieza(s) | $stubsCreados stub(s) | $alDia ya al dia | $($divergen.Count) preservada(s) (customizadas)"
 }
 if ($excluidas) { $resumen += " | $excluidas excluida(s)" }
 Write-Host "$resumen ==" -ForegroundColor Green
@@ -209,10 +234,10 @@ if ($divergen.Count -gt 0 -and $Actualizar) {
   Write-Host "Divergencias (el hijo las customizo; se preservaron, compara los .jidoka-nuevo):" -ForegroundColor Yellow
   foreach ($d in $divergen) { Write-Host "  - $d" -ForegroundColor Yellow }
 }
-Write-Host "Instancia (ley, product/, HANDOFF, ADRs) intacta salvo la ley sembrada si faltaba." -ForegroundColor Cyan
+Write-Host "Instancia sembrada solo si faltaba (no-clobber): ley + stubs. Nunca se pisa lo que ya existe." -ForegroundColor Cyan
 if (-not $Actualizar) {
-  Write-Host "Nota: este fallback siembra la MECANICA + la ley + el sello (lo que desbloquea el gate)." -ForegroundColor Cyan
-  Write-Host "      Los stubs de instancia (HANDOFF, ROADMAP, product/) se crean con instalar.ps1 cuando el AV lo permita, o a mano desde kit/.jidoka/templates/." -ForegroundColor Cyan
+  Write-Host "Nota: siembra completa AV-segura: MECANICA + ley del arquetipo + stubs de instancia + sello." -ForegroundColor Cyan
+  Write-Host "      Es el instalador para maquinas endurecidas donde instalar.ps1 cae en cuarentena de AV." -ForegroundColor Cyan
 }
 Write-Host "Verifica: ./tools/estado-motor.ps1 -Jidoka '$jidoka'  (debe decir [OK] al dia)." -ForegroundColor Cyan
 exit 0
