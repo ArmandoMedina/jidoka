@@ -2,6 +2,18 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.13.0] — 2026-07-14
+
+### La capa de consultoría: `/jidoka:descubre` — sacar la sopa cuando el QUÉ está borroso (ADR 0031)
+
+Nace de contrastar tres despliegues reales: donde el cliente trae el QUÉ claro el ritual vuela; donde no, patina — y el método solo sabía *marcar* la niebla ("pendiente del cliente"), no disolverla. Los diagnósticos de campo midieron el porqué: **el QUÉ vive en ejemplos concretos, no en documentos** (el aparato metodológico era idéntico en los tres repos); **STOP no es comprensión** (checkpoints atravesados con *"autorizo a tu criterio"* costaron sprints de retrabajo); y a veces la autoridad del dominio es **un tercero que no opera la IA** (*"no conozco el producto y el experto no está"*).
+
+- **`feat` — el comando `/jidoka:descubre`.** Entrevista de descubrimiento mecánica: diagnóstico de UNA pregunta cerrada (3 nieblas: no sé ni el problema / sé la idea pero no el alcance / sé el síntoma operativo — más ¿quién es el juez de verdad?), rondas de preguntas fijas por ruta (cronología de hechos estilo JTBD; apetito + caso ancla narrado; evidencia de primera mano + porqués confirmados), **filtro Mom Test como lista negra escrita** (prohibido "¿te gustaría…?"; obligatorio "cuéntame la última vez que…"), cero jerga sin traducir, y cierre poblando el brief. La lectura se **inyecta** (@-include del brief al abrir), no se encarga.
+- **`feat` — el brief gana los campos del descubrimiento** (`PRODUCT_BRIEF.md`): caso concreto citable · métrica con número · autoridad del dominio (quién juzga, disponibilidad, formato de validación) · criterio de "hecho" · apetito · no-metas · aprobación del QUÉ.
+- **`feat` — la autoridad tercera** (plantilla `kit-entrevista.md`): kit de entrevista portátil (3–7 preguntas en el lenguaje del experto, formato mensajeable por WhatsApp) para el experto que es **autoridad, no usuario**; sus respuestas regresan como evidencia rastreada (`docs/gemba/`), y su formato de validación se define desde el descubrimiento.
+- **`feat` — disparo 14.º `aprobacion-nombrada`** (cableado en `descubre`, nombrado en `planea`): lo que se aprueba se nombra — "dale"/"a tu criterio" no cierran un QUÉ. `probar-disparos` sube a 14 (ROJO→VERDE).
+- **`feat` — el ruteo mecánico:** `planea` R0 ya no solo marca la ambigüedad: **manda a `/jidoka:descubre` primero**.
+
 ## [1.12.1] — 2026-07-14
 
 ### La nave nodriza respeta su propia doctrina (dogfooding al día)

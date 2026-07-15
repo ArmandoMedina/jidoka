@@ -6,7 +6,24 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-14 — CERRADO Y LIBERADO · Jidoka `v1.12.0`)
+## Dónde estamos (2026-07-14 — Sprint Descubre CONSTRUIDO · pendiente merge + release `v1.13.0` + demo de campo)
+
+**Sesión del 14-jul (tarde): dos entregas.**
+
+1. **`v1.12.1` — dogfooding al día (CERRADO Y LIBERADO).** La nave nodriza respeta su doctrina: `## El casting` sembrado en `product/recursos-del-proyecto.md` (nombres neutrales a propósito — decisión del cliente: la ruta del usuario recién sembrado), `probar-sembrar` en el preflight de `publicar.ps1` (+ caso invariante en `probar-publicar`: todo `probar-*.ps1` debe estar en el preflight), listón `LOG.md` adoptado en casa (`qa_runs/dogfood-20260714/LOG.md`, primer uso propio). PR #62 mergeado, [release v1.12.1](https://github.com/ArmandoMedina/jidoka/releases/tag/v1.12.1). Issues registrados: [#63](https://github.com/ArmandoMedina/jidoka/issues/63) (lección: la regla de tiers de modelo depende de la iniciativa del agente, `leccion`+`regla-2-3`) y [#64](https://github.com/ArmandoMedina/jidoka/issues/64) (aviso "no hay sello" en la nave nodriza, cosmético, `regla-2-3`).
+2. **Sprint Descubre — la capa de consultoría (`v1.13.0`, ADR 0031) — CONSTRUIDO en rama `sprint-descubre`, PENDIENTE: merge (orden nombrada) → release → demo de campo.** Nace de 3 diagnósticos sobre chats reales (2 despliegues con QUÉ borroso que patinaron vs. el caso de éxito) + investigación de metodologías: el QUÉ vive en **ejemplos**, no en docs; **STOP no es comprensión**; a veces la autoridad es **un tercero sin IA**. Piezas: comando `/jidoka:descubre` (3 nieblas + juez de verdad, rondas fijas, filtro Mom Test escrito, @-include del brief — la lectura se inyecta), campos del descubrimiento en `PRODUCT_BRIEF.md` (caso citable · métrica con número · autoridad · criterio de "hecho" · apetito · no-metas · aprobación), plantilla `kit-entrevista.md` (kit portátil para el experto tipo Marcelo: autoridad, no usuario), disparo 14.º `aprobacion-nombrada` ("dale"/"a tu criterio" no cierran un QUÉ), ruteo desde `planea` R0. Plan-contrato: `docs/sprints/sprint-descubre-plan.md`.
+
+**Evidencia (verde, esta máquina 2026-07-14):** `probar-disparos` 4/4 (**14** disparos, ROJO→VERDE) · preflight `-SoloVerificar` 8/8 · SSOT 1.13.0. LOGs: `qa_runs/dogfood-20260714/` y `qa_runs/descubre-20260714/`.
+
+**Pendiente inmediato (gatillado por el cliente):**
+1. **Merge del PR del sprint** (orden nombrada) → **release `v1.13.0`** (`publicar.ps1`, orden nombrada del release).
+2. **El demo de campo** — criterio real de cierre (owner: cliente): correr `/jidoka:descubre` en un proyecto con niebla real; ver el brief sin huecos + el kit portátil; probar que un "dale" no cierra.
+3. **Issues por registrar al cierre**: gate anti-placeholders del brief (regla 2-3) y **telemetría de lecturas del método** (pedido del cliente: contar qué docs lee la IA — post-hoc desde los transcripts JSONL o hook PreToolUse; regla 2-3).
+4. La bajada de `v1.12.x`/`v1.13.0` a los labs (ventana aparte; el lab de reconstrucción SOLO cuando cierre la sesión del otro agente).
+
+---
+
+## Dónde estuvimos (2026-07-14 — CERRADO Y LIBERADO · Jidoka `v1.12.0`)
 
 **Cosecha #5 — "instalar = funcionar": la conciencia se instala** (cerró #53/#51, ADRs 0029/0030). Todo mergeado y liberado; `main` limpio. [release `v1.12.0`](https://github.com/ArmandoMedina/jidoka/releases/tag/v1.12.0) (suite verde en preflight). PRs #57 (conciencia), #60 (liston; reemplazó a #58, cerrado al borrarse su rama base al mergear apilado) y #59 (registro). Nace de contrastar dos despliegues reales: en uno la calidad de la evidencia se degradó dentro del mismo día (un `LOG.md` rico → un `veredicto.txt` pelón); en otro la brecha la tapaba el usuario **a mano**, con un párrafo de apertura escrito cada sesión. Principio de la cosecha: **nada de conciencia depende de la iniciativa del agente** — se instala como maquinaria determinista o no está instalada. Tres piezas:
 
