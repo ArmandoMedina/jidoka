@@ -30,6 +30,7 @@ estado: vigente
 ## Identidades por servicio
 
 - **GitHub**: se pushea al remoto `origin` (repo `ArmandoMedina/…`). `main` está protegido (require PR + check `andon` required, sin bypass). Merges de PR **requieren orden nombrada del cliente cada vez**; publicar tag+release ya está autorizado (ver HANDOFF).
+- **Cuentas gh en esta máquina (2026-07-15):** hay dos (`gh auth status`): **`ArmandoMedina`** (dueño del repo — la única con permiso de merge y release) y `Armandomedina9705` (solo lectura aquí; suele ser la activa). Para mergear o liberar: `gh auth switch --user ArmandoMedina` y restaurar la otra al terminar.
 
 ## Máquinas y ambientes
 
