@@ -39,7 +39,11 @@ jobs:
           .\tools\probar-disparos.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           # Self-tests Jidoka-only (no sembrados): corren solo si estan presentes
           # (un hijo instalado no los tiene, y este mismo workflow se siembra).
-          foreach ($jt in 'probar-version','probar-publicar') {
+          # probar-instalador corre AQUI a proposito: en Windows endurecido con AV
+          # (Bitdefender CMD:Heur, familia ransomware) instalar.ps1 y probar-instalador.ps1
+          # caen en cuarentena y el preflight local no puede correrlos; el CI no tiene ese
+          # AV, asi que es el lugar donde el smoke del instalador si corre (ADR 0027 enmienda).
+          foreach ($jt in 'probar-instalador','probar-version','probar-publicar') {
             if (Test-Path ".\tools\$jt.ps1") { & ".\tools\$jt.ps1"; if ($LASTEXITCODE -ne 0) { exit 1 } }
           }
           exit 0
