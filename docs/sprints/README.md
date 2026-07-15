@@ -14,6 +14,6 @@
 | Homologación E1 — Jidoka superset | Asiento `devops`, modo desatendido, casting neutral+persona (ADR 0010) | Publicado (`v0.9.0-beta`) |
 | Homologación E2 — Cosecha de SGI | Token neutral en la ley + 3 maduraciones a los asientos (ADR 0011) | Publicado (`v0.10.0-beta`) |
 | [Brownfield II — fallback anti-AV + auditor configurable](sprint-brownfield-2-plan.md) | `sembrar-manual.ps1` (siembra sin instalador), `estado-motor` degrada con gracia, `scanDirs` del auditor configurables; cosecha #41/#44/#45/#46 (issues #40–#46) | Planeado |
-| [Descubre — la capa de consultoría](sprint-descubre-plan.md) | `/jidoka:descubre` (entrevista de 3 nieblas, filtro Mom Test), campos del descubrimiento en el brief, kit portátil para la autoridad tercera, disparo `aprobacion-nombrada`, ruteo desde `planea` (ADR 0031) | Construido (`v1.13.0`) |
+| [Descubre — la capa de consultoría](sprint-descubre-plan.md) | `/jidoka:descubre` (entrevista de 3 nieblas, filtro Mom Test), campos del descubrimiento en el brief, kit portátil para la autoridad tercera, disparo `aprobacion-nombrada`, ruteo desde `planea` (ADR 0031) · [entrega](sprint-descubre-entrega.md) | Publicado (`v1.13.0`) · demo de campo pendiente |
 
 *(Hueco confesado: 2·B, 3·A y 3·B corrieron con plan efímero (ADR 0006) que no se archivó al cierre — sus récords son los PRs #7–#9 y los ADRs. Desde aquí, archivar el plan vuelve a ser paso del cierre.)*
