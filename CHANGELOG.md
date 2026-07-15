@@ -2,7 +2,7 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
-## [Sin publicar]
+## [1.14.0] — 2026-07-15
 
 ### El instalador AV-seguro se vuelve completo — `sembrar-manual.ps1` siembra la instancia entera (ADR 0027, enmienda)
 
