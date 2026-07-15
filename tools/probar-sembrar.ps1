@@ -41,6 +41,11 @@ try {
   Check 'siembra: la ley del arquetipo queda sembrada' (Test-Path (Join-Path $tmp 'tools/blast-radius.json')) "no aparecio la ley"
   Check 'siembra: los comandos /jidoka:* quedan sembrados' (Test-Path (Join-Path $tmp '.claude/commands/jidoka/arranca.md')) "no aparecio arranca.md"
   Check 'siembra: core.hooksPath quedo configurado' ((git -C $tmp config core.hooksPath) -eq '.githooks') "hooksPath no quedo"
+  # Stubs de instancia: el fallback ahora siembra la instancia completa (no-clobber), no solo
+  # la mecanica -- para que un hijo en maquina donde instalar.ps1 cae en cuarentena no quede
+  # a medias (jidoka#40/#43, ADR 0027 enmienda). docs-as-code -> producto 'grafo' -> product/.
+  Check 'siembra: los stubs de instancia comunes quedan sembrados (HANDOFF)' (Test-Path (Join-Path $tmp 'HANDOFF.md')) "no aparecio HANDOFF.md"
+  Check 'siembra: la semilla del QUE del arquetipo queda sembrada (grafo -> product/README)' (Test-Path (Join-Path $tmp 'product/README.md')) "no aparecio product/README.md"
 
   # 1b. SELLO identico al que deja instalar.ps1: version + cada hash casa con lo sembrado.
   $selloPath = Join-Path $tmp 'tools/jidoka-motor.json'

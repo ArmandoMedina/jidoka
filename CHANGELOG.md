@@ -2,6 +2,18 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [Sin publicar]
+
+### El instalador AV-seguro se vuelve completo — `sembrar-manual.ps1` siembra la instancia entera (ADR 0027, enmienda)
+
+Nace del **segundo entorno endurecido** (regla 2-3), esta vez en la máquina del autor: Bitdefender Endpoint Security Tools puso en cuarentena `instalar.ps1` **y** `probar-instalador.ps1` (`CMD:Heur.…Boxter`, familia ransomware). La investigación **contra el AV real** (evidencia en `qa_runs/av-sembrar-20260715/`) tumbó la hipótesis del "nombre-imán" del ADR 0027: **el trigger es densidad de comportamiento acumulada, no el nombre ni una línea suelta** — cayó el test (`probar-instalador`, que no instala) y sobrevive `sembrar-manual` (que sí siembra); quitar el flag Bypass, el spawn o el loop de bytes no baja del umbral; partir el archivo sí. Re-clonar no cura (el scan re-detecta el contenido).
+
+- **`feat` — `sembrar-manual.ps1` completa la siembra de instancia.** Deja de sembrar solo mecánica + ley + sello: ahora también los **stubs de instancia** (HANDOFF, ROADMAP, CHANGELOG, índice de ADRs, `.gitignore` + la semilla del QUÉ del arquetipo), enrutados por el mismo loop no-clobber para no subir su densidad heurística. Un cliente en máquina endurecida obtiene un repo **entero**, sin depender de su AV ni de un certificado de firma.
+- **`test` — `probar-sembrar.ps1` sube a 26 casos** (2 nuevos: stubs comunes + semilla del arquetipo).
+- **`docs` — ADR 0027 enmendado + `mantener-el-motor-al-dia.md` reposicionado:** `sembrar-manual` pasa de *fallback* a *camino AV-seguro primario*; se corrige la causa (densidad, no nombre); la firma (Authenticode) queda como la cura robusta de fondo, diferida por falta de cert.
+
+**Evidencia (verde, esta máquina 2026-07-15, contra Bitdefender EST):** `probar-sembrar` 26/26 · oráculo de AV (el archivo editado queda legible como el sobreviviente, no en cuarentena) · demo de siembra fresca con instancia completa. LOG: `qa_runs/av-sembrar-20260715/`.
+
 ## [1.13.0] — 2026-07-14
 
 ### La capa de consultoría: `/jidoka:descubre` — sacar la sopa cuando el QUÉ está borroso (ADR 0031)

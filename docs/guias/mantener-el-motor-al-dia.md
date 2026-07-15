@@ -62,17 +62,24 @@ Cada `[DIVERGE]` deja un sidecar `<pieza>.jidoka-nuevo` con la versión de Jidok
 **Corre siempre en una rama, revisa el diff, ábrelo como PR** — el diff ES la revisión. Y **corre tu suite de
 tests antes de mergear** (el motor bajado no vale hasta que corre verde en tu repo).
 
-## Si `instalar.ps1` no corre (antivirus): el fallback `sembrar-manual.ps1`
+## En Windows endurecido (antivirus): usa `sembrar-manual.ps1`
 
-En Windows endurecido con un AV de terceros, `instalar.ps1` puede caer en cuarentena heurística —por
-nombre ("instalar") y comportamiento (`core.hooksPath` + copia de hooks + `-ExecutionPolicy Bypass`)— y
-el SO **niega leerlo o ejecutarlo**, a veces de forma intermitente y **muda** (no siembra, no da error).
-Es el filo de los repos regulados, justo los que más valoran el método (jidoka#40/#43; ADR 0027).
+En Windows endurecido con un AV de terceros, `instalar.ps1` (y su test `probar-instalador.ps1`) puede caer
+en **cuarentena heurística** —p. ej. Bitdefender `CMD:Heur.…Boxter`, familia ransomware— y el SO **niega
+leerlo o ejecutarlo**, a veces de forma intermitente y **muda** (no siembra, no da error). Es el filo de los
+repos regulados, justo los que más valoran el método (jidoka#40/#43; ADR 0027 + su enmienda 2026-07-15).
 
-Para eso existe **`tools/sembrar-manual.ps1`**: el **segundo camino**, que **no depende de que
-`instalar.ps1` sea legible**. No usa `-ExecutionPolicy Bypass` ni el nombre "instalar" (menor superficie
-de sospecha), y hace lo mismo que el fallback manual del reporte: copia la `mecanica` del manifiesto, fija
-`core.hooksPath` y escribe el sello.
+> **Ojo — el disparador NO es el nombre ni una línea suelta** (verificado en campo, ADR 0027 enmienda):
+> es la **densidad acumulada** de comportamiento tipo *dropper* que tiene cualquier instalador (spawn de
+> powershell + `core.hooksPath` + copia masiva + leer/escribir bytes). Por eso **renombrar no ayuda** y
+> **re-clonar tampoco** (el scan re-detecta el mismo contenido). La cura robusta de fondo es **firmar** los
+> scripts (Authenticode) — la controla el desarrollador, no el AV; pendiente de un certificado.
+
+Para eso existe **`tools/sembrar-manual.ps1`**: un **camino AV-seguro completo, independiente de que
+`instalar.ps1` sea legible**. Es un script **magro** (subconjunto bajo el umbral heurístico) que hace lo
+mismo que `instalar.ps1` sin su densidad: copia la `mecanica` del manifiesto, siembra la **ley** del
+arquetipo y los **stubs de instancia**, fija `core.hooksPath` y escribe el sello. La magrez es una
+**restricción**: si lo editas, vuelve a probarlo contra el AV.
 
 ```powershell
 # Siembra fresca (cuando instalar.ps1 nunca llegó a sembrar):
@@ -86,9 +93,9 @@ de sospecha), y hace lo mismo que el fallback manual del reporte: copia la `meca
   un hijo, apunta a Jidoka con `-Jidoka <ruta>` o `$env:JIDOKA_HOME`.
 - Respeta **no-clobber** y las **tres vías** igual que `instalar.ps1`: tu instancia y tus customizaciones
   no se pisan; deja `<pieza>.jidoka-nuevo` para lo divergente.
-- Siembra la **mecánica + la ley + el sello** (lo que desbloquea el gate). Los stubs de instancia (HANDOFF,
-  ROADMAP, `product/`) se crean con `instalar.ps1` cuando el AV lo permita, o a mano desde
-  `kit/.jidoka/templates/`.
+- Siembra la **instancia completa** (no-clobber): mecánica + la ley del arquetipo + los **stubs de instancia**
+  (HANDOFF, ROADMAP, CHANGELOG, índice de ADRs, `.gitignore` + la semilla del QUÉ del arquetipo) + el sello.
+  Ya no hace falta `instalar.ps1` para dejar el repo entero en una máquina donde el AV lo bloquea.
 - Verifica al final: `./tools/estado-motor.ps1 -Jidoka <ruta>` debe decir **`[OK]` al día**.
 
 > **`estado-motor.ps1` te lleva de la mano:** cuando avisa que estás atrás, detecta si `instalar.ps1` es
