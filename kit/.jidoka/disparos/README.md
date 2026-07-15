@@ -101,6 +101,15 @@ el mensaje llega en el momento del disparo y no puede asumir que la IA leyó nad
 
 **Cableado en:** `.github/ISSUE_TEMPLATE/leccion.md`
 
+### aprobacion-nombrada
+> Lo que se aprueba se nombra. Un "dale", un "a tu criterio" o un "apruebo" a secas NO cierran
+> un QUÉ: pide que la aprobación nombre lo aprobado en lenguaje llano ("apruebo X con la métrica
+> Y y que el sprint ataque Z") y déjala escrita con fecha. Caso de campo: checkpoints atravesados
+> con "autorizo a tu criterio" de madrugada costaron sprints enteros de retrabajo — el STOP
+> existía, pero vacío de contenido es un sello de goma.
+
+**Cableado en:** `.claude/commands/jidoka/descubre.md`
+
 ### capacita-desde-el-artefacto
 > Cuando expliques o capacites al humano, ancla la lección al artefacto versionado (señala el
 > doc/runbook/ADR), no a tu memoria de modelo. La capacitación improvisada es output de IA:
