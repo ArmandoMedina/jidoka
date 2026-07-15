@@ -10,6 +10,7 @@ Nace del **segundo entorno endurecido** (regla 2-3), esta vez en la máquina del
 
 - **`feat` — `sembrar-manual.ps1` completa la siembra de instancia.** Deja de sembrar solo mecánica + ley + sello: ahora también los **stubs de instancia** (HANDOFF, ROADMAP, CHANGELOG, índice de ADRs, `.gitignore` + la semilla del QUÉ del arquetipo), enrutados por el mismo loop no-clobber para no subir su densidad heurística. Un cliente en máquina endurecida obtiene un repo **entero**, sin depender de su AV ni de un certificado de firma.
 - **`test` — `probar-sembrar.ps1` sube a 26 casos** (2 nuevos: stubs comunes + semilla del arquetipo).
+- **`ci` — `probar-instalador` y `probar-sembrar` corren en el CI** (`andon.yml`), donde no hay Bitdefender. El preflight del instalador deja de depender de la máquina del autor (que los tiene en cuarentena); el CI ejercita el código nuevo server-side (`probar-instalador` 51/51, `probar-sembrar` 26/26).
 - **`docs` — ADR 0027 enmendado + `mantener-el-motor-al-dia.md` reposicionado:** `sembrar-manual` pasa de *fallback* a *camino AV-seguro primario*; se corrige la causa (densidad, no nombre); la firma (Authenticode) queda como la cura robusta de fondo, diferida por falta de cert.
 
 **Evidencia (verde, esta máquina 2026-07-15, contra Bitdefender EST):** `probar-sembrar` 26/26 · oráculo de AV (el archivo editado queda legible como el sobreviviente, no en cuarentena) · demo de siembra fresca con instancia completa. LOG: `qa_runs/av-sembrar-20260715/`.
