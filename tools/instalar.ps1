@@ -209,22 +209,48 @@ function Invoke-Actualizar($jidoka, $manif, $Destino, $utf8) {
     }
   }
 
+  # Cosecha #7 (issue #86): -Actualizar es consciente de migraciones. La mecanica que
+  # baja puede asumir piezas de instancia nuevas (el arranca 1.16+ inyecta
+  # product/PRODUCT_BRIEF.md, product/infra.md y CONTRIBUTING.md): los stubs del
+  # manifiesto que el hijo NO tiene se siembran en la misma pasada (no-clobber estricto:
+  # lo existente jamas se toca). Lo condicionado a arquetipo solo se decide si el sello
+  # lo registra (sellos 1.17+); con sello viejo se avisa y se revisa a mano.
+  $migrados = 0
+  $stubsMigra = @($manif.stubs | Where-Object { $_ })
+  if ($sello.producto -and $manif.stubs_arquetipo.($sello.producto)) { $stubsMigra += $manif.stubs_arquetipo.($sello.producto) }
+  if ($sello.gobernanza -and $manif.stubs_arquetipo.gobernanza) { $stubsMigra += $manif.stubs_arquetipo.gobernanza }
+  foreach ($s in $stubsMigra) {
+    $dst = Join-Path $Destino $s.ruta
+    if (Test-Path -LiteralPath $dst) { continue }
+    $parent = Split-Path -Parent $dst
+    if ($parent -and -not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+    [System.IO.File]::WriteAllText($dst, $s.contenido, $utf8)
+    Write-Host "  [MIGRA] $($s.ruta) sembrado: el motor nuevo lo asume y el hijo no lo tenia" -ForegroundColor Green
+    $migrados++
+  }
+  if (-not $sello.producto -and @($manif.stubs_arquetipo.PSObject.Properties).Count) {
+    Write-Host "  [MIGRA] el sello no registra el arquetipo (pre-1.17): los stubs por-arquetipo no se auto-siembran; si te falta la semilla del QUE, revisa stubs_arquetipo del manifiesto a mano" -ForegroundColor Yellow
+  }
+
   # Actualiza el sello: version nueva + los hashes que Jidoka envia ahora. Preserva la
-  # lista de exclusion del hijo (no se pierde entre bajadas).
+  # lista de exclusion del hijo y el arquetipo registrado (no se pierden entre bajadas).
   $selloNuevo = [ordered]@{ version = $versionNueva; sembrado_hashes = $nuevoSeed }
+  if ($sello.producto) { $selloNuevo.producto = $sello.producto }
+  if ($sello.gobernanza) { $selloNuevo.gobernanza = $true }
   if ($excluir.Count) { $selloNuevo.excluir = $excluir }
   [System.IO.File]::WriteAllText($selloDst, ($selloNuevo | ConvertTo-Json -Depth 5), $utf8)
 
   Write-Host ""
   $resumen = "== Motor: $alDia al dia | $actualizados actualizado(s) | $agregados nuevo(s) | $($divergen.Count) divergen"
   if ($excluidas) { $resumen += " | $excluidas excluida(s)" }
+  if ($migrados) { $resumen += " | $migrados stub(s) migrado(s)" }
   Write-Host "$resumen ==" -ForegroundColor Green
   if ($divergen.Count -gt 0) {
     Write-Host "Divergencias (el hijo customizo estas piezas de mecanica; se preservaron):" -ForegroundColor Yellow
     foreach ($d in $divergen) { Write-Host "  - $d  (compara con $d.jidoka-nuevo)" -ForegroundColor Yellow }
     Write-Host "  Reconcilia a mano: adopta el .jidoka-nuevo o mueve tu ajuste a la costura .local." -ForegroundColor Yellow
   }
-  Write-Host "Instancia (ley, product/, HANDOFF, ADRs) intacta: -Actualizar solo toca la mecanica." -ForegroundColor Cyan
+  Write-Host "Instancia (ley, product/, HANDOFF, ADRs) intacta: lo existente no se toca; solo se sembro lo que el motor nuevo asume y faltaba ([MIGRA])." -ForegroundColor Cyan
   Write-Host "Siguiente: revisa el diff en una rama y abrelo como PR (el diff ES la revision)." -ForegroundColor Cyan
 }
 
@@ -432,7 +458,11 @@ else {
   # un -Actualizar posterior la vea DIVERGE y la preserve (jidoka#36). Las excluidas
   # por el arquetipo se anotan en 'excluir' para que no se re-agreguen (jidoka#38).
   $clasif = Get-SelloClasificado $jidoka $manif $Destino $excluirMotor
+  # Cosecha #7: el sello registra el arquetipo elegido (producto/gobernanza) para que
+  # un -Actualizar futuro pueda decidir stubs condicionados a arquetipo sin adivinar.
   $sello = [ordered]@{ version = $version; sembrado_hashes = $clasif.seed }
+  if ($arq.producto) { $sello.producto = $arq.producto }
+  if ($arq.gobernanza) { $sello.gobernanza = $true }
   if ($excluirMotor.Count) { $sello.excluir = @($excluirMotor) }
   [System.IO.File]::WriteAllText($selloDst, ($sello | ConvertTo-Json -Depth 5), $utf8)
   $extra = ""

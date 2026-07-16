@@ -156,6 +156,30 @@ try {
   $persiste = ((Get-Content $audChild -Raw) -match 'ajuste propio del hijo') -and (Test-Path "$audChild.jidoka-nuevo")
   Check 'actualizar (2a vez): la divergencia persiste, lo demas converge' $persiste "no fue idempotente"
 
+  # 5c2. MIGRACION (cosecha #7, issue #86): un hijo "pre-1.17" -- sin los stubs que el
+  # arranca nuevo inyecta y con sello sin arquetipo -- recibe en -Actualizar los stubs
+  # comunes que le faltan ([MIGRA]) sin tocar la instancia existente; lo condicionado a
+  # arquetipo NO se adivina (avisa). Con sello 1.17+ (producto registrado) SI se decide.
+  Remove-Item (Join-Path $tmp 'product/PRODUCT_BRIEF.md') -Force
+  Remove-Item (Join-Path $tmp 'product/infra.md') -Force
+  Remove-Item (Join-Path $tmp 'CONTRIBUTING.md') -Force
+  Remove-Item (Join-Path $tmp 'product/README.md') -Force
+  $selloMig = Get-Content $selloPath -Raw | ConvertFrom-Json
+  $selloMig.PSObject.Properties.Remove('producto')
+  [System.IO.File]::WriteAllText($selloPath, ($selloMig | ConvertTo-Json -Depth 5), (New-Object System.Text.UTF8Encoding($false)))
+  $outMig = Run-PS-Out $instalar -Destino $tmp -Actualizar
+  $stubsMigraron = (Test-Path (Join-Path $tmp 'product/PRODUCT_BRIEF.md')) -and (Test-Path (Join-Path $tmp 'product/infra.md')) -and (Test-Path (Join-Path $tmp 'CONTRIBUTING.md'))
+  Check 'migra: -Actualizar siembra los stubs comunes que el hijo no tenia ([MIGRA])' ($stubsMigraron -and ($outMig -match 'MIGRA')) "faltan stubs (brief/infra/CONTRIBUTING) o no reporto MIGRA"
+  Check 'migra: la instancia existente NO se toca (HANDOFF con marca)' ((Get-Content $handoff -Raw) -match $marca) "se toco HANDOFF"
+  Check 'migra: sello pre-1.17 (sin producto) NO adivina el stub del arquetipo y avisa' ((-not (Test-Path (Join-Path $tmp 'product/README.md'))) -and ($outMig -match 'pre-1\.17')) "sembro el stub de arquetipo sin sello, o no aviso"
+  $selloMig2 = Get-Content $selloPath -Raw | ConvertFrom-Json
+  $selloMig2 | Add-Member -NotePropertyName producto -NotePropertyValue 'grafo' -Force
+  [System.IO.File]::WriteAllText($selloPath, ($selloMig2 | ConvertTo-Json -Depth 5), (New-Object System.Text.UTF8Encoding($false)))
+  Run-PS $instalar -Destino $tmp -Actualizar | Out-Null
+  Check 'migra: con sello 1.17+ (producto=grafo) siembra la semilla del QUE faltante' (Test-Path (Join-Path $tmp 'product/README.md')) "no sembro product/README.md"
+  $selloTrasMigra = Get-Content $selloPath -Raw | ConvertFrom-Json
+  Check 'migra: -Actualizar preserva el producto registrado en el sello' ($selloTrasMigra.producto -eq 'grafo') "el sello perdio producto (quedo '$($selloTrasMigra.producto)')"
+
   # 5d. ESTADO-MOTOR: el aviso de divergencia (nunca bloquea; exit 0 siempre).
   $em = Join-Path $tmp 'tools/estado-motor.ps1'
   Check 'instala: estado-motor.ps1 queda sembrado' (Test-Path $em) "no aparecio estado-motor.ps1"
