@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_10_Arranca" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_10_Arranca" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
   <bpmn:collaboration id="Collaboration_10_Arranca">
     <bpmn:participant id="Participant_Usuario" name="Usuario"/>
     <bpmn:participant id="Participant_Proyecto" name="Proyecto gobernado con Jidoka" processRef="Process_Arranca"/>
@@ -9,7 +9,7 @@
     <bpmn:messageFlow id="MF_Orient" sourceRef="Send_Orientar" targetRef="Participant_Usuario" name="Orientación" messageRef="Message_Orientacion"/>
   </bpmn:collaboration>
   <bpmn:process id="Process_Arranca" name="/jidoka:arranca — abrir y orientar la sesión" isExecutable="false">
-    <bpmn:documentation>AS-IS estructurado con subprocesos embebidos. Fuente: .claude/commands/jidoka/arranca.md</bpmn:documentation>
+    <bpmn:documentation>Fuente: .claude/commands/jidoka/arranca.md. Subprocesos EXPANDIDOS en el lienzo (sin drill-down): el detalle se ve aquí mismo.</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_10_Arranca">
       <bpmn:lane id="Lane_Agente" name="Agente orquestador">
         <bpmn:flowNodeRef>Start_Arranque</bpmn:flowNodeRef>
@@ -160,133 +160,241 @@
     <bpmn:sequenceFlow id="F_Next_Orient" sourceRef="Sub_DeterminarSiguiente" targetRef="Send_Orientar"/>
     <bpmn:sequenceFlow id="F_Orient_End" sourceRef="Send_Orientar" targetRef="End_Orientada"/>
     <bpmn:textAnnotation id="Annotation_Legend">
-      <bpmn:text>+ en la actividad = subproceso embebido. Haz clic y usa el drill-down de bpmn.io para ver su detalle.</bpmn:text>
+      <bpmn:text>Subprocesos EXPANDIDOS: el detalle se ve aquí mismo, sin drill-down.</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:association id="Association_Annotation_Legend" sourceRef="Annotation_Legend" targetRef="Sub_RecuperarContexto"/>
-    <bpmn:textAnnotation id="Ctx_Ann">
-      <bpmn:text>No recorrer todo el repositorio. Este subproceso recupera solamente el estado necesario para orientarse.</bpmn:text>
-    </bpmn:textAnnotation>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_10_Arranca">
     <bpmndi:BPMNPlane id="Plane_Diagram_10_Arranca" bpmnElement="Collaboration_10_Arranca">
       <bpmndi:BPMNShape id="Shape_Participant_Usuario" bpmnElement="Participant_Usuario" isHorizontal="true">
-        <dc:Bounds x="100" y="40" width="2600" height="90"/>
+        <dc:Bounds x="200" y="80" width="3500" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Participant_Proyecto" bpmnElement="Participant_Proyecto" isHorizontal="true">
-        <dc:Bounds x="100" y="170" width="2600" height="520"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Start_Arranque" bpmnElement="Start_Arranque">
-        <dc:Bounds x="180" y="300" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Sub_RecuperarContexto" bpmnElement="Sub_RecuperarContexto" isExpanded="false">
-        <dc:Bounds x="300" y="277" width="190" height="82"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Task_Inspeccionar" bpmnElement="Task_Inspeccionar">
-        <dc:Bounds x="560" y="430" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Task_Rutear" bpmnElement="Task_Rutear">
-        <dc:Bounds x="790" y="430" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Task_Delimitar" bpmnElement="Task_Delimitar">
-        <dc:Bounds x="1030" y="277" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Gateway_Contexto" bpmnElement="Gateway_Contexto" isMarkerVisible="true">
-        <dc:Bounds x="1260" y="292" width="50" height="50"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Send_Aclarar" bpmnElement="Send_Aclarar">
-        <dc:Bounds x="1370" y="190" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Catch_Respuesta" bpmnElement="Catch_Respuesta">
-        <dc:Bounds x="1610" y="212" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Sub_DeterminarSiguiente" bpmnElement="Sub_DeterminarSiguiente" isExpanded="false">
-        <dc:Bounds x="1410" y="337" width="190" height="82"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Send_Orientar" bpmnElement="Send_Orientar">
-        <dc:Bounds x="1670" y="337" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_End_Orientada" bpmnElement="End_Orientada">
-        <dc:Bounds x="1930" y="360" width="36" height="36"/>
+        <dc:Bounds x="200" y="170" width="3500" height="470"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Lane_Agente" bpmnElement="Lane_Agente" isHorizontal="true">
-        <dc:Bounds x="130" y="170" width="2570" height="260"/>
+        <dc:Bounds x="230" y="170" width="3470" height="330"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Lane_Motor" bpmnElement="Lane_Motor" isHorizontal="true">
-        <dc:Bounds x="130" y="430" width="2570" height="260"/>
+        <dc:Bounds x="230" y="500" width="3470" height="140"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Start_Arranque" bpmnElement="Start_Arranque">
+        <dc:Bounds x="250" y="320" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Sub_RecuperarContexto" bpmnElement="Sub_RecuperarContexto" isExpanded="true">
+        <dc:Bounds x="320" y="210" width="800" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_Start" bpmnElement="Ctx_Start">
+        <dc:Bounds x="345" y="315" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_HANDOFF" bpmnElement="Ctx_HANDOFF">
+        <dc:Bounds x="395" y="303" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_Recursos" bpmnElement="Ctx_Recursos">
+        <dc:Bounds x="555" y="303" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_Activo" bpmnElement="Ctx_Activo" isMarkerVisible="true">
+        <dc:Bounds x="715" y="310" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_Plan" bpmnElement="Ctx_Plan">
+        <dc:Bounds x="785" y="240" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_Join" bpmnElement="Ctx_Join" isMarkerVisible="true">
+        <dc:Bounds x="965" y="310" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_End" bpmnElement="Ctx_End">
+        <dc:Bounds x="1035" y="315" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F1" bpmnElement="Ctx_F1">
+        <di:waypoint x="375" y="330"/>
+        <di:waypoint x="395" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F2" bpmnElement="Ctx_F2">
+        <di:waypoint x="535" y="330"/>
+        <di:waypoint x="555" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F3" bpmnElement="Ctx_F3">
+        <di:waypoint x="695" y="330"/>
+        <di:waypoint x="715" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F_Si" bpmnElement="Ctx_F_Si">
+        <di:waypoint x="735" y="310"/>
+        <di:waypoint x="735" y="267"/>
+        <di:waypoint x="785" y="267"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F_Plan" bpmnElement="Ctx_F_Plan">
+        <di:waypoint x="925" y="267"/>
+        <di:waypoint x="985" y="267"/>
+        <di:waypoint x="985" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F_No" bpmnElement="Ctx_F_No">
+        <di:waypoint x="755" y="330"/>
+        <di:waypoint x="965" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F_End" bpmnElement="Ctx_F_End">
+        <di:waypoint x="1005" y="330"/>
+        <di:waypoint x="1035" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Inspeccionar" bpmnElement="Task_Inspeccionar">
+        <dc:Bounds x="1180" y="540" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Rutear" bpmnElement="Task_Rutear">
+        <dc:Bounds x="1380" y="540" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Delimitar" bpmnElement="Task_Delimitar">
+        <dc:Bounds x="1580" y="308" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Contexto" bpmnElement="Gateway_Contexto" isMarkerVisible="true">
+        <dc:Bounds x="1780" y="318" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Send_Aclarar" bpmnElement="Send_Aclarar">
+        <dc:Bounds x="1880" y="220" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Catch_Respuesta" bpmnElement="Catch_Respuesta">
+        <dc:Bounds x="2090" y="238" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Sub_DeterminarSiguiente" bpmnElement="Sub_DeterminarSiguiente" isExpanded="true">
+        <dc:Bounds x="2200" y="215" width="920" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Start" bpmnElement="Next_Start">
+        <dc:Bounds x="2225" y="320" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Docs" bpmnElement="Next_Docs">
+        <dc:Bounds x="2275" y="308" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Eval" bpmnElement="Next_Eval">
+        <dc:Bounds x="2435" y="308" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Plan" bpmnElement="Next_Plan" isMarkerVisible="true">
+        <dc:Bounds x="2595" y="315" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Recomendar" bpmnElement="Next_Recomendar">
+        <dc:Bounds x="2665" y="245" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Accion" bpmnElement="Next_Accion">
+        <dc:Bounds x="2665" y="390" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Join" bpmnElement="Next_Join" isMarkerVisible="true">
+        <dc:Bounds x="2860" y="315" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_End" bpmnElement="Next_End">
+        <dc:Bounds x="2935" y="320" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Next_F1" bpmnElement="Next_F1">
+        <di:waypoint x="2255" y="335"/>
+        <di:waypoint x="2275" y="335"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_F2" bpmnElement="Next_F2">
+        <di:waypoint x="2415" y="335"/>
+        <di:waypoint x="2435" y="335"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_F3" bpmnElement="Next_F3">
+        <di:waypoint x="2575" y="335"/>
+        <di:waypoint x="2595" y="335"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_Si" bpmnElement="Next_Si">
+        <di:waypoint x="2615" y="315"/>
+        <di:waypoint x="2615" y="272"/>
+        <di:waypoint x="2665" y="272"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_No" bpmnElement="Next_No">
+        <di:waypoint x="2615" y="355"/>
+        <di:waypoint x="2615" y="417"/>
+        <di:waypoint x="2665" y="417"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_Rec_Join" bpmnElement="Next_Rec_Join">
+        <di:waypoint x="2805" y="272"/>
+        <di:waypoint x="2880" y="272"/>
+        <di:waypoint x="2880" y="315"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_Acc_Join" bpmnElement="Next_Acc_Join">
+        <di:waypoint x="2805" y="417"/>
+        <di:waypoint x="2880" y="417"/>
+        <di:waypoint x="2880" y="355"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_Join_End" bpmnElement="Next_Join_End">
+        <di:waypoint x="2900" y="335"/>
+        <di:waypoint x="2935" y="335"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Send_Orientar" bpmnElement="Send_Orientar">
+        <dc:Bounds x="3200" y="308" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_Orientada" bpmnElement="End_Orientada">
+        <dc:Bounds x="3400" y="320" width="30" height="30"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_F_Start_Ctx" bpmnElement="F_Start_Ctx">
-        <di:waypoint x="216" y="318"/>
-        <di:waypoint x="300" y="318"/>
+        <di:waypoint x="280" y="335"/>
+        <di:waypoint x="320" y="335"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Ctx_Inspect" bpmnElement="F_Ctx_Inspect">
-        <di:waypoint x="490" y="318"/>
-        <di:waypoint x="520" y="318"/>
-        <di:waypoint x="520" y="470"/>
-        <di:waypoint x="560" y="470"/>
+        <di:waypoint x="1120" y="400"/>
+        <di:waypoint x="1150" y="400"/>
+        <di:waypoint x="1150" y="570"/>
+        <di:waypoint x="1180" y="570"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Inspect_Router" bpmnElement="F_Inspect_Router">
-        <di:waypoint x="730" y="470"/>
-        <di:waypoint x="790" y="470"/>
+        <di:waypoint x="1330" y="570"/>
+        <di:waypoint x="1380" y="570"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Router_Delim" bpmnElement="F_Router_Delim">
-        <di:waypoint x="960" y="470"/>
-        <di:waypoint x="990" y="470"/>
-        <di:waypoint x="990" y="317"/>
-        <di:waypoint x="1030" y="317"/>
+        <di:waypoint x="1530" y="570"/>
+        <di:waypoint x="1555" y="570"/>
+        <di:waypoint x="1555" y="338"/>
+        <di:waypoint x="1580" y="338"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Delim_G" bpmnElement="F_Delim_G">
-        <di:waypoint x="1200" y="317"/>
-        <di:waypoint x="1260" y="317"/>
+        <di:waypoint x="1730" y="338"/>
+        <di:waypoint x="1780" y="338"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_G_Si" bpmnElement="F_G_Si">
-        <di:waypoint x="1285" y="292"/>
-        <di:waypoint x="1285" y="230"/>
-        <di:waypoint x="1370" y="230"/>
+        <di:waypoint x="1800" y="318"/>
+        <di:waypoint x="1800" y="250"/>
+        <di:waypoint x="1880" y="250"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Aclarar_Resp" bpmnElement="F_Aclarar_Resp">
-        <di:waypoint x="1540" y="230"/>
-        <di:waypoint x="1610" y="230"/>
+        <di:waypoint x="2030" y="250"/>
+        <di:waypoint x="2090" y="253"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Resp_Delim" bpmnElement="F_Resp_Delim">
-        <di:waypoint x="1628" y="248"/>
-        <di:waypoint x="1628" y="160"/>
-        <di:waypoint x="1115" y="160"/>
-        <di:waypoint x="1115" y="277"/>
+        <di:waypoint x="2105" y="268"/>
+        <di:waypoint x="2105" y="190"/>
+        <di:waypoint x="1655" y="190"/>
+        <di:waypoint x="1655" y="308"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_G_No" bpmnElement="F_G_No">
-        <di:waypoint x="1310" y="317"/>
-        <di:waypoint x="1410" y="378"/>
+        <di:waypoint x="1820" y="338"/>
+        <di:waypoint x="2200" y="340"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Next_Orient" bpmnElement="F_Next_Orient">
-        <di:waypoint x="1600" y="378"/>
-        <di:waypoint x="1670" y="378"/>
+        <di:waypoint x="3120" y="340"/>
+        <di:waypoint x="3200" y="338"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Orient_End" bpmnElement="F_Orient_End">
-        <di:waypoint x="1840" y="378"/>
-        <di:waypoint x="1930" y="378"/>
+        <di:waypoint x="3350" y="338"/>
+        <di:waypoint x="3400" y="335"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_MF_Start" bpmnElement="MF_Start">
-        <di:waypoint x="230" y="130"/>
-        <di:waypoint x="198" y="300"/>
+        <di:waypoint x="265" y="140"/>
+        <di:waypoint x="265" y="320"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_MF_Aclarar" bpmnElement="MF_Aclarar">
-        <di:waypoint x="1455" y="190"/>
-        <di:waypoint x="1455" y="130"/>
+        <di:waypoint x="1955" y="220"/>
+        <di:waypoint x="1955" y="140"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_MF_Respuesta" bpmnElement="MF_Respuesta">
-        <di:waypoint x="1628" y="130"/>
-        <di:waypoint x="1628" y="212"/>
+        <di:waypoint x="2105" y="140"/>
+        <di:waypoint x="2105" y="238"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_MF_Orient" bpmnElement="MF_Orient">
-        <di:waypoint x="1755" y="337"/>
-        <di:waypoint x="1755" y="130"/>
+        <di:waypoint x="3275" y="308"/>
+        <di:waypoint x="3275" y="140"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Annotation_Legend" bpmnElement="Annotation_Legend">
-        <dc:Bounds x="2080" y="210" width="420" height="70"/>
+        <dc:Bounds x="360" y="150" width="420" height="45"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_Association_Annotation_Legend" bpmnElement="Association_Annotation_Legend">
-        <di:waypoint x="2290.0" y="210"/>
-        <di:waypoint x="2290.0" y="200"/>
+        <di:waypoint x="570" y="195"/>
+        <di:waypoint x="600" y="210"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
@@ -294,126 +402,4 @@
   <bpmn:message id="Message_Aclaracion" name="Solicitud de aclaración"/>
   <bpmn:message id="Message_Respuesta" name="Respuesta del usuario"/>
   <bpmn:message id="Message_Orientacion" name="Orientación de sesión"/>
-  <bpmndi:BPMNDiagram id="Diagram_Sub_RecuperarContexto">
-    <bpmndi:BPMNPlane id="Plane_Diagram_Sub_RecuperarContexto" bpmnElement="Sub_RecuperarContexto">
-      <bpmndi:BPMNShape id="Shape_Ctx_Start" bpmnElement="Ctx_Start">
-        <dc:Bounds x="100" y="180" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Ctx_HANDOFF" bpmnElement="Ctx_HANDOFF">
-        <dc:Bounds x="200" y="158" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Ctx_Recursos" bpmnElement="Ctx_Recursos">
-        <dc:Bounds x="410" y="158" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Ctx_Activo" bpmnElement="Ctx_Activo" isMarkerVisible="true">
-        <dc:Bounds x="630" y="173" width="50" height="50"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Ctx_Plan" bpmnElement="Ctx_Plan">
-        <dc:Bounds x="750" y="80" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Ctx_Join" bpmnElement="Ctx_Join" isMarkerVisible="true">
-        <dc:Bounds x="980" y="173" width="50" height="50"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Ctx_End" bpmnElement="Ctx_End">
-        <dc:Bounds x="1090" y="180" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Ctx_F1" bpmnElement="Ctx_F1">
-        <di:waypoint x="136" y="198"/>
-        <di:waypoint x="200" y="198"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Ctx_F2" bpmnElement="Ctx_F2">
-        <di:waypoint x="370" y="198"/>
-        <di:waypoint x="410" y="198"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Ctx_F3" bpmnElement="Ctx_F3">
-        <di:waypoint x="580" y="198"/>
-        <di:waypoint x="630" y="198"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Ctx_F_Si" bpmnElement="Ctx_F_Si">
-        <di:waypoint x="655" y="173"/>
-        <di:waypoint x="655" y="120"/>
-        <di:waypoint x="750" y="120"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Ctx_F_Plan" bpmnElement="Ctx_F_Plan">
-        <di:waypoint x="920" y="120"/>
-        <di:waypoint x="1005" y="120"/>
-        <di:waypoint x="1005" y="173"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Ctx_F_No" bpmnElement="Ctx_F_No">
-        <di:waypoint x="680" y="198"/>
-        <di:waypoint x="980" y="198"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Ctx_F_End" bpmnElement="Ctx_F_End">
-        <di:waypoint x="1030" y="198"/>
-        <di:waypoint x="1090" y="198"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Ctx_Ann" bpmnElement="Ctx_Ann">
-        <dc:Bounds x="410" y="300" width="430" height="60"/>
-      </bpmndi:BPMNShape>
-    </bpmndi:BPMNPlane>
-  </bpmndi:BPMNDiagram>
-  <bpmndi:BPMNDiagram id="Diagram_Sub_DeterminarSiguiente">
-    <bpmndi:BPMNPlane id="Plane_Diagram_Sub_DeterminarSiguiente" bpmnElement="Sub_DeterminarSiguiente">
-      <bpmndi:BPMNShape id="Shape_Next_Start" bpmnElement="Next_Start">
-        <dc:Bounds x="100" y="180" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Next_Docs" bpmnElement="Next_Docs">
-        <dc:Bounds x="200" y="158" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Next_Eval" bpmnElement="Next_Eval">
-        <dc:Bounds x="420" y="158" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Next_Plan" bpmnElement="Next_Plan" isMarkerVisible="true">
-        <dc:Bounds x="650" y="173" width="50" height="50"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Next_Recomendar" bpmnElement="Next_Recomendar">
-        <dc:Bounds x="770" y="80" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Next_Accion" bpmnElement="Next_Accion">
-        <dc:Bounds x="770" y="250" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Next_Join" bpmnElement="Next_Join" isMarkerVisible="true">
-        <dc:Bounds x="1010" y="173" width="50" height="50"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Next_End" bpmnElement="Next_End">
-        <dc:Bounds x="1120" y="180" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Next_F1" bpmnElement="Next_F1">
-        <di:waypoint x="136" y="198"/>
-        <di:waypoint x="200" y="198"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Next_F2" bpmnElement="Next_F2">
-        <di:waypoint x="370" y="198"/>
-        <di:waypoint x="420" y="198"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Next_F3" bpmnElement="Next_F3">
-        <di:waypoint x="590" y="198"/>
-        <di:waypoint x="650" y="198"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Next_Si" bpmnElement="Next_Si">
-        <di:waypoint x="675" y="173"/>
-        <di:waypoint x="675" y="120"/>
-        <di:waypoint x="770" y="120"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Next_No" bpmnElement="Next_No">
-        <di:waypoint x="675" y="223"/>
-        <di:waypoint x="675" y="290"/>
-        <di:waypoint x="770" y="290"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Next_Rec_Join" bpmnElement="Next_Rec_Join">
-        <di:waypoint x="940" y="120"/>
-        <di:waypoint x="1035" y="120"/>
-        <di:waypoint x="1035" y="173"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Next_Acc_Join" bpmnElement="Next_Acc_Join">
-        <di:waypoint x="940" y="290"/>
-        <di:waypoint x="1035" y="290"/>
-        <di:waypoint x="1035" y="223"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Next_Join_End" bpmnElement="Next_Join_End">
-        <di:waypoint x="1060" y="198"/>
-        <di:waypoint x="1120" y="198"/>
-      </bpmndi:BPMNEdge>
-    </bpmndi:BPMNPlane>
-  </bpmndi:BPMNDiagram>
 </bpmn:definitions>

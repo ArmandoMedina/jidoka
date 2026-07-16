@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_00_Arquitectura" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_00_Arquitectura" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.24.0">
   <bpmn:process id="Process_SeleccionarFamilia" name="Arquitectura de procesos de Jidoka" isExecutable="false">
     <bpmn:documentation>Mapa de navegación. No implica que las cuatro familias se ejecuten en secuencia.</bpmn:documentation>
     <bpmn:startEvent id="Start_Necesidad" name="Necesidad de actuar con Jidoka">
@@ -129,66 +129,6 @@ Tarea normal = paso atómico en este nivel.</bpmn:text>
           <dc:Bounds x="941" y="589" width="65" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_OperarSesion" bpmnElement="Association_Annotation_Call_OperarSesion">
-        <di:waypoint x="765" y="178" />
-        <di:waypoint x="765" y="168" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_InstalarMantener" bpmnElement="Association_Annotation_Call_InstalarMantener">
-        <di:waypoint x="765" y="328" />
-        <di:waypoint x="765" y="318" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_AuditarHomologar" bpmnElement="Association_Annotation_Call_AuditarHomologar">
-        <di:waypoint x="765" y="478" />
-        <di:waypoint x="765" y="468" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Publicar" bpmnElement="Association_Annotation_Call_Publicar">
-        <di:waypoint x="765" y="628" />
-        <di:waypoint x="765" y="618" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_Gateway_1" bpmnElement="Flow_Gateway_1">
-        <di:waypoint x="490" y="318" />
-        <di:waypoint x="530" y="318" />
-        <di:waypoint x="530" y="121" />
-        <di:waypoint x="655" y="121" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="539" y="133" width="81" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_Gateway_2" bpmnElement="Flow_Gateway_2">
-        <di:waypoint x="490" y="318" />
-        <di:waypoint x="530" y="318" />
-        <di:waypoint x="530" y="271" />
-        <di:waypoint x="655" y="271" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="538" y="283" width="84" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_Gateway_3" bpmnElement="Flow_Gateway_3">
-        <di:waypoint x="490" y="318" />
-        <di:waypoint x="530" y="318" />
-        <di:waypoint x="530" y="421" />
-        <di:waypoint x="655" y="421" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="541" y="386" width="57" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_Gateway_4" bpmnElement="Flow_Gateway_4">
-        <di:waypoint x="490" y="318" />
-        <di:waypoint x="530" y="318" />
-        <di:waypoint x="530" y="571" />
-        <di:waypoint x="655" y="571" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="539" y="553" width="41" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_Start_Identificar" bpmnElement="Flow_Start_Identificar">
-        <di:waypoint x="156" y="318" />
-        <di:waypoint x="210" y="318" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Flow_Identificar_Gateway" bpmnElement="Flow_Identificar_Gateway">
-        <di:waypoint x="380" y="318" />
-        <di:waypoint x="440" y="318" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Annotation_Call_OperarSesion" bpmnElement="Annotation_Call_OperarSesion">
         <dc:Bounds x="655" y="178" width="220" height="40" />
       </bpmndi:BPMNShape>
@@ -204,21 +144,81 @@ Tarea normal = paso atómico en este nivel.</bpmn:text>
       <bpmndi:BPMNShape id="Shape_Annotation_Leyenda" bpmnElement="Annotation_Leyenda">
         <dc:Bounds x="1115" y="220" width="330" height="140" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_Gateway_1" bpmnElement="Flow_Gateway_1">
+        <di:waypoint x="490" y="318" />
+        <di:waypoint x="530" y="318" />
+        <di:waypoint x="530" y="121" />
+        <di:waypoint x="655" y="121" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="539" y="133" width="81" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_Call_OperarSesion_End" bpmnElement="Flow_Call_OperarSesion_End">
         <di:waypoint x="845" y="121" />
         <di:waypoint x="955" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Gateway_2" bpmnElement="Flow_Gateway_2">
+        <di:waypoint x="490" y="318" />
+        <di:waypoint x="530" y="318" />
+        <di:waypoint x="530" y="271" />
+        <di:waypoint x="655" y="271" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="538" y="283" width="84" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_Call_InstalarMantener_End" bpmnElement="Flow_Call_InstalarMantener_End">
         <di:waypoint x="845" y="271" />
         <di:waypoint x="955" y="271" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Gateway_3" bpmnElement="Flow_Gateway_3">
+        <di:waypoint x="490" y="318" />
+        <di:waypoint x="530" y="318" />
+        <di:waypoint x="530" y="421" />
+        <di:waypoint x="655" y="421" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="541" y="386" width="57" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_Call_AuditarHomologar_End" bpmnElement="Flow_Call_AuditarHomologar_End">
         <di:waypoint x="845" y="421" />
         <di:waypoint x="955" y="421" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Gateway_4" bpmnElement="Flow_Gateway_4">
+        <di:waypoint x="490" y="318" />
+        <di:waypoint x="530" y="318" />
+        <di:waypoint x="530" y="571" />
+        <di:waypoint x="655" y="571" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="539" y="553" width="41" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_Call_Publicar_End" bpmnElement="Flow_Call_Publicar_End">
         <di:waypoint x="845" y="571" />
         <di:waypoint x="955" y="571" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Start_Identificar" bpmnElement="Flow_Start_Identificar">
+        <di:waypoint x="156" y="318" />
+        <di:waypoint x="210" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Identificar_Gateway" bpmnElement="Flow_Identificar_Gateway">
+        <di:waypoint x="380" y="318" />
+        <di:waypoint x="440" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_OperarSesion" bpmnElement="Association_Annotation_Call_OperarSesion">
+        <di:waypoint x="765" y="178" />
+        <di:waypoint x="765" y="168" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_InstalarMantener" bpmnElement="Association_Annotation_Call_InstalarMantener">
+        <di:waypoint x="765" y="328" />
+        <di:waypoint x="765" y="318" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_AuditarHomologar" bpmnElement="Association_Annotation_Call_AuditarHomologar">
+        <di:waypoint x="765" y="478" />
+        <di:waypoint x="765" y="468" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Publicar" bpmnElement="Association_Annotation_Call_Publicar">
+        <di:waypoint x="765" y="628" />
+        <di:waypoint x="765" y="618" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -1,5 +1,5 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_01_OperarSesion" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_01_OperarSesion" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
   <bpmn:process id="Process_OperarSesion" name="Operar una sesión y entregar un incremento" isExecutable="false">
     <bpmn:documentation>Nivel 1. Las actividades con borde grueso llaman procesos definidos en archivos separados.</bpmn:documentation>
     <bpmn:startEvent id="Start_Sesion" name="Necesidad de trabajar en el proyecto">
@@ -10,10 +10,6 @@
       <bpmn:incoming>F_Start_Arranca</bpmn:incoming>
       <bpmn:outgoing>F_Arranca_Obj</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:textAnnotation id="Annotation_Call_Arranca">
-      <bpmn:text>Archivo: 10-ritual/10-arranca-con-subprocesos.bpmn</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_Annotation_Call_Arranca" sourceRef="Annotation_Call_Arranca" targetRef="Call_Arranca"/>
     <bpmn:exclusiveGateway id="Gateway_Objetivo" name="¿Hay un trabajo definido?">
       <bpmn:incoming>F_Arranca_Obj</bpmn:incoming>
       <bpmn:outgoing>F_Obj_No</bpmn:outgoing>
@@ -24,10 +20,6 @@
       <bpmn:incoming>F_Obj_No</bpmn:incoming>
       <bpmn:outgoing>F_QueSigue_Cont</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:textAnnotation id="Annotation_Call_QueSigue">
-      <bpmn:text>Archivo: 10-ritual/17-que-sigue-as-is.bpmn</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_Annotation_Call_QueSigue" sourceRef="Annotation_Call_QueSigue" targetRef="Call_QueSigue"/>
     <bpmn:exclusiveGateway id="Gateway_Continuar" name="¿El usuario decide continuar?">
       <bpmn:incoming>F_QueSigue_Cont</bpmn:incoming>
       <bpmn:outgoing>F_Cont_No</bpmn:outgoing>
@@ -47,10 +39,6 @@
       <bpmn:incoming>F_Claro_No</bpmn:incoming>
       <bpmn:outgoing>F_Desc_Aprob</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:textAnnotation id="Annotation_Call_Descubre">
-      <bpmn:text>Archivo: 10-ritual/11-descubre-as-is.bpmn</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_Annotation_Call_Descubre" sourceRef="Annotation_Call_Descubre" targetRef="Call_Descubre"/>
     <bpmn:exclusiveGateway id="Gateway_QueAprobado" name="¿QUÉ aprobado?">
       <bpmn:incoming>F_Desc_Aprob</bpmn:incoming>
       <bpmn:outgoing>F_Aprob_No</bpmn:outgoing>
@@ -70,10 +58,6 @@
       <bpmn:incoming>F_Plan_Si</bpmn:incoming>
       <bpmn:outgoing>F_Planea_Hum</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:textAnnotation id="Annotation_Call_Planea">
-      <bpmn:text>Archivo: 10-ritual/12-planea-as-is.bpmn</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_Annotation_Call_Planea" sourceRef="Annotation_Call_Planea" targetRef="Call_Planea"/>
     <bpmn:exclusiveGateway id="Gateway_Humano" name="¿Humano presente?">
       <bpmn:incoming>F_Planea_Hum</bpmn:incoming>
       <bpmn:incoming>F_Plan_No</bpmn:incoming>
@@ -83,22 +67,14 @@
     <bpmn:callActivity id="Call_Construye" name="[13] Construir rebanada" calledElement="Process_Construye">
       <bpmn:documentation>Proceso externo: Process_Construye | Archivo: 10-ritual/13-construye-rebanada-as-is.bpmn</bpmn:documentation>
       <bpmn:incoming>F_Hum_Si</bpmn:incoming>
-      <bpmn:outgoing>F_Const_Join</bpmn:outgoing>
       <bpmn:incoming>F_Acept_No</bpmn:incoming>
+      <bpmn:outgoing>F_Const_Join</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:textAnnotation id="Annotation_Call_Construye">
-      <bpmn:text>Archivo: 10-ritual/13-construye-rebanada-as-is.bpmn</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_Annotation_Call_Construye" sourceRef="Annotation_Call_Construye" targetRef="Call_Construye"/>
     <bpmn:callActivity id="Call_Desatendido" name="[18] Ejecutar pase desatendido" calledElement="Process_Desatendido">
       <bpmn:documentation>Proceso externo: Process_Desatendido | Archivo: 10-ritual/18-desatendido-as-is.bpmn</bpmn:documentation>
       <bpmn:incoming>F_Hum_No</bpmn:incoming>
       <bpmn:outgoing>F_Des_Join</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:textAnnotation id="Annotation_Call_Desatendido">
-      <bpmn:text>Archivo: 10-ritual/18-desatendido-as-is.bpmn</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_Annotation_Call_Desatendido" sourceRef="Annotation_Call_Desatendido" targetRef="Call_Desatendido"/>
     <bpmn:exclusiveGateway id="Gateway_UnirConstruccion">
       <bpmn:incoming>F_Const_Join</bpmn:incoming>
       <bpmn:incoming>F_Des_Join</bpmn:incoming>
@@ -109,19 +85,11 @@
       <bpmn:incoming>F_Join_Review</bpmn:incoming>
       <bpmn:outgoing>F_Review_Gemba</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:textAnnotation id="Annotation_Call_Revisar">
-      <bpmn:text>Archivo: 10-ritual/14-revision-as-is.bpmn</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_Annotation_Call_Revisar" sourceRef="Annotation_Call_Revisar" targetRef="Call_Revisar"/>
     <bpmn:callActivity id="Call_Gemba" name="[15] Ejecutar Gemba" calledElement="Process_Gemba">
       <bpmn:documentation>Proceso externo: Process_Gemba | Archivo: 10-ritual/15-gemba-as-is.bpmn</bpmn:documentation>
       <bpmn:incoming>F_Review_Gemba</bpmn:incoming>
       <bpmn:outgoing>F_Gemba_Acept</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:textAnnotation id="Annotation_Call_Gemba">
-      <bpmn:text>Archivo: 10-ritual/15-gemba-as-is.bpmn</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_Annotation_Call_Gemba" sourceRef="Annotation_Call_Gemba" targetRef="Call_Gemba"/>
     <bpmn:exclusiveGateway id="Gateway_Aceptado" name="¿Incremento aceptado?">
       <bpmn:incoming>F_Gemba_Acept</bpmn:incoming>
       <bpmn:outgoing>F_Acept_No</bpmn:outgoing>
@@ -132,42 +100,74 @@
       <bpmn:incoming>F_Acept_Si</bpmn:incoming>
       <bpmn:outgoing>F_Cierra_End</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:textAnnotation id="Annotation_Call_Cierra">
-      <bpmn:text>Archivo: 10-ritual/16-cierra-as-is.bpmn</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_Annotation_Call_Cierra" sourceRef="Annotation_Call_Cierra" targetRef="Call_Cierra"/>
     <bpmn:endEvent id="End_Registrado" name="Incremento registrado; sesión cerrada">
       <bpmn:incoming>F_Cierra_End</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="F_Start_Arranca" sourceRef="Start_Sesion" targetRef="Call_Arranca"/>
-    <bpmn:sequenceFlow id="F_Arranca_Obj" sourceRef="Call_Arranca" targetRef="Gateway_Objetivo"/>
-    <bpmn:sequenceFlow id="F_Obj_No" sourceRef="Gateway_Objetivo" targetRef="Call_QueSigue" name="No"/>
-    <bpmn:sequenceFlow id="F_QueSigue_Cont" sourceRef="Call_QueSigue" targetRef="Gateway_Continuar"/>
-    <bpmn:sequenceFlow id="F_Cont_No" sourceRef="Gateway_Continuar" targetRef="End_SoloOrientada" name="No"/>
-    <bpmn:sequenceFlow id="F_Cont_Si" sourceRef="Gateway_Continuar" targetRef="Gateway_QueClaro" name="Sí"/>
-    <bpmn:sequenceFlow id="F_Obj_Si" sourceRef="Gateway_Objetivo" targetRef="Gateway_QueClaro" name="Sí"/>
-    <bpmn:sequenceFlow id="F_Claro_No" sourceRef="Gateway_QueClaro" targetRef="Call_Descubre" name="No"/>
-    <bpmn:sequenceFlow id="F_Desc_Aprob" sourceRef="Call_Descubre" targetRef="Gateway_QueAprobado"/>
-    <bpmn:sequenceFlow id="F_Aprob_No" sourceRef="Gateway_QueAprobado" targetRef="End_DefinicionPendiente" name="No"/>
-    <bpmn:sequenceFlow id="F_Aprob_Si" sourceRef="Gateway_QueAprobado" targetRef="Gateway_Plan" name="Sí"/>
-    <bpmn:sequenceFlow id="F_Claro_Si" sourceRef="Gateway_QueClaro" targetRef="Gateway_Plan" name="Sí"/>
-    <bpmn:sequenceFlow id="F_Plan_Si" sourceRef="Gateway_Plan" targetRef="Call_Planea" name="Sí"/>
-    <bpmn:sequenceFlow id="F_Planea_Hum" sourceRef="Call_Planea" targetRef="Gateway_Humano"/>
-    <bpmn:sequenceFlow id="F_Plan_No" sourceRef="Gateway_Plan" targetRef="Gateway_Humano" name="No"/>
-    <bpmn:sequenceFlow id="F_Hum_Si" sourceRef="Gateway_Humano" targetRef="Call_Construye" name="Sí"/>
-    <bpmn:sequenceFlow id="F_Hum_No" sourceRef="Gateway_Humano" targetRef="Call_Desatendido" name="No"/>
-    <bpmn:sequenceFlow id="F_Const_Join" sourceRef="Call_Construye" targetRef="Gateway_UnirConstruccion"/>
-    <bpmn:sequenceFlow id="F_Des_Join" sourceRef="Call_Desatendido" targetRef="Gateway_UnirConstruccion"/>
-    <bpmn:sequenceFlow id="F_Join_Review" sourceRef="Gateway_UnirConstruccion" targetRef="Call_Revisar"/>
-    <bpmn:sequenceFlow id="F_Review_Gemba" sourceRef="Call_Revisar" targetRef="Call_Gemba"/>
-    <bpmn:sequenceFlow id="F_Gemba_Acept" sourceRef="Call_Gemba" targetRef="Gateway_Aceptado"/>
-    <bpmn:sequenceFlow id="F_Acept_No" sourceRef="Gateway_Aceptado" targetRef="Call_Construye" name="No"/>
-    <bpmn:sequenceFlow id="F_Acept_Si" sourceRef="Gateway_Aceptado" targetRef="Call_Cierra" name="Sí"/>
-    <bpmn:sequenceFlow id="F_Cierra_End" sourceRef="Call_Cierra" targetRef="End_Registrado"/>
+    <bpmn:sequenceFlow id="F_Start_Arranca" sourceRef="Start_Sesion" targetRef="Call_Arranca" />
+    <bpmn:sequenceFlow id="F_Arranca_Obj" sourceRef="Call_Arranca" targetRef="Gateway_Objetivo" />
+    <bpmn:sequenceFlow id="F_Obj_No" name="No" sourceRef="Gateway_Objetivo" targetRef="Call_QueSigue" />
+    <bpmn:sequenceFlow id="F_QueSigue_Cont" sourceRef="Call_QueSigue" targetRef="Gateway_Continuar" />
+    <bpmn:sequenceFlow id="F_Cont_No" name="No" sourceRef="Gateway_Continuar" targetRef="End_SoloOrientada" />
+    <bpmn:sequenceFlow id="F_Cont_Si" name="Sí" sourceRef="Gateway_Continuar" targetRef="Gateway_QueClaro" />
+    <bpmn:sequenceFlow id="F_Obj_Si" name="Sí" sourceRef="Gateway_Objetivo" targetRef="Gateway_QueClaro" />
+    <bpmn:sequenceFlow id="F_Claro_No" name="No" sourceRef="Gateway_QueClaro" targetRef="Call_Descubre" />
+    <bpmn:sequenceFlow id="F_Desc_Aprob" sourceRef="Call_Descubre" targetRef="Gateway_QueAprobado" />
+    <bpmn:sequenceFlow id="F_Aprob_No" name="No" sourceRef="Gateway_QueAprobado" targetRef="End_DefinicionPendiente" />
+    <bpmn:sequenceFlow id="F_Aprob_Si" name="Sí" sourceRef="Gateway_QueAprobado" targetRef="Gateway_Plan" />
+    <bpmn:sequenceFlow id="F_Claro_Si" name="Sí" sourceRef="Gateway_QueClaro" targetRef="Gateway_Plan" />
+    <bpmn:sequenceFlow id="F_Plan_Si" name="Sí" sourceRef="Gateway_Plan" targetRef="Call_Planea" />
+    <bpmn:sequenceFlow id="F_Planea_Hum" sourceRef="Call_Planea" targetRef="Gateway_Humano" />
+    <bpmn:sequenceFlow id="F_Plan_No" name="No" sourceRef="Gateway_Plan" targetRef="Gateway_Humano" />
+    <bpmn:sequenceFlow id="F_Hum_Si" name="Sí" sourceRef="Gateway_Humano" targetRef="Call_Construye" />
+    <bpmn:sequenceFlow id="F_Hum_No" name="No" sourceRef="Gateway_Humano" targetRef="Call_Desatendido" />
+    <bpmn:sequenceFlow id="F_Const_Join" sourceRef="Call_Construye" targetRef="Gateway_UnirConstruccion" />
+    <bpmn:sequenceFlow id="F_Des_Join" sourceRef="Call_Desatendido" targetRef="Gateway_UnirConstruccion" />
+    <bpmn:sequenceFlow id="F_Join_Review" sourceRef="Gateway_UnirConstruccion" targetRef="Call_Revisar" />
+    <bpmn:sequenceFlow id="F_Review_Gemba" sourceRef="Call_Revisar" targetRef="Call_Gemba" />
+    <bpmn:sequenceFlow id="F_Gemba_Acept" sourceRef="Call_Gemba" targetRef="Gateway_Aceptado" />
+    <bpmn:sequenceFlow id="F_Acept_No" name="No" sourceRef="Gateway_Aceptado" targetRef="Call_Construye" />
+    <bpmn:sequenceFlow id="F_Acept_Si" name="Sí" sourceRef="Gateway_Aceptado" targetRef="Call_Cierra" />
+    <bpmn:sequenceFlow id="F_Cierra_End" sourceRef="Call_Cierra" targetRef="End_Registrado" />
+    <bpmn:textAnnotation id="Annotation_Call_Arranca">
+      <bpmn:text>Archivo: 10-ritual/10-arranca-con-subprocesos.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Arranca" sourceRef="Annotation_Call_Arranca" targetRef="Call_Arranca" />
+    <bpmn:textAnnotation id="Annotation_Call_QueSigue">
+      <bpmn:text>Archivo: 10-ritual/17-que-sigue-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_QueSigue" sourceRef="Annotation_Call_QueSigue" targetRef="Call_QueSigue" />
+    <bpmn:textAnnotation id="Annotation_Call_Descubre">
+      <bpmn:text>Archivo: 10-ritual/11-descubre-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Descubre" sourceRef="Annotation_Call_Descubre" targetRef="Call_Descubre" />
+    <bpmn:textAnnotation id="Annotation_Call_Planea">
+      <bpmn:text>Archivo: 10-ritual/12-planea-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Planea" sourceRef="Annotation_Call_Planea" targetRef="Call_Planea" />
+    <bpmn:textAnnotation id="Annotation_Call_Construye">
+      <bpmn:text>Archivo: 10-ritual/13-construye-rebanada-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Construye" sourceRef="Annotation_Call_Construye" targetRef="Call_Construye" />
+    <bpmn:textAnnotation id="Annotation_Call_Desatendido">
+      <bpmn:text>Archivo: 10-ritual/18-desatendido-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Desatendido" sourceRef="Annotation_Call_Desatendido" targetRef="Call_Desatendido" />
+    <bpmn:textAnnotation id="Annotation_Call_Revisar">
+      <bpmn:text>Archivo: 10-ritual/14-revision-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Revisar" sourceRef="Annotation_Call_Revisar" targetRef="Call_Revisar" />
+    <bpmn:textAnnotation id="Annotation_Call_Gemba">
+      <bpmn:text>Archivo: 10-ritual/15-gemba-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Gemba" sourceRef="Annotation_Call_Gemba" targetRef="Call_Gemba" />
+    <bpmn:textAnnotation id="Annotation_Call_Cierra">
+      <bpmn:text>Archivo: 10-ritual/16-cierra-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Cierra" sourceRef="Annotation_Call_Cierra" targetRef="Call_Cierra" />
     <bpmn:textAnnotation id="Annotation_Desatendido">
       <bpmn:text>[18] es una variante para ejecutar lo reversible sin humano. Las decisiones irreversibles quedan pendientes para el usuario.</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="Association_Annotation_Desatendido" sourceRef="Annotation_Desatendido" targetRef="Call_Desatendido"/>
+    <bpmn:association id="Association_Annotation_Desatendido" sourceRef="Annotation_Desatendido" targetRef="Call_Desatendido" />
     <bpmn:textAnnotation id="Annotation_Leyenda">
       <bpmn:text>NAVEGACIÓN
 Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automáticamente archivos externos: usa el nombre visible y la tabla RELACIONES.csv.</bpmn:text>
@@ -176,256 +176,262 @@ Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automát
   <bpmndi:BPMNDiagram id="Diagram_01_OperarSesion">
     <bpmndi:BPMNPlane id="Plane_Diagram_01_OperarSesion" bpmnElement="Process_OperarSesion">
       <bpmndi:BPMNShape id="Shape_Start_Sesion" bpmnElement="Start_Sesion">
-        <dc:Bounds x="80" y="250" width="36" height="36"/>
+        <dc:Bounds x="80" y="250" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Call_Arranca" bpmnElement="Call_Arranca">
-        <dc:Bounds x="160" y="228" width="190" height="82"/>
+        <dc:Bounds x="160" y="228" width="190" height="82" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Annotation_Call_Arranca" bpmnElement="Annotation_Call_Arranca">
-        <dc:Bounds x="160" y="326" width="220" height="40"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Arranca" bpmnElement="Association_Annotation_Call_Arranca">
-        <di:waypoint x="270.0" y="326"/>
-        <di:waypoint x="270.0" y="316"/>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Gateway_Objetivo" bpmnElement="Gateway_Objetivo" isMarkerVisible="true">
-        <dc:Bounds x="400" y="243" width="50" height="50"/>
+        <dc:Bounds x="400" y="243" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Call_QueSigue" bpmnElement="Call_QueSigue">
-        <dc:Bounds x="510" y="70" width="190" height="82"/>
+        <dc:Bounds x="510" y="70" width="190" height="82" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Annotation_Call_QueSigue" bpmnElement="Annotation_Call_QueSigue">
-        <dc:Bounds x="510" y="168" width="220" height="40"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_QueSigue" bpmnElement="Association_Annotation_Call_QueSigue">
-        <di:waypoint x="620.0" y="168"/>
-        <di:waypoint x="620.0" y="158"/>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Gateway_Continuar" bpmnElement="Gateway_Continuar" isMarkerVisible="true">
-        <dc:Bounds x="760" y="85" width="50" height="50"/>
+        <dc:Bounds x="760" y="85" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_End_SoloOrientada" bpmnElement="End_SoloOrientada">
-        <dc:Bounds x="930" y="35" width="36" height="36"/>
+        <dc:Bounds x="930" y="35" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Gateway_QueClaro" bpmnElement="Gateway_QueClaro" isMarkerVisible="true">
-        <dc:Bounds x="510" y="243" width="50" height="50"/>
+        <dc:Bounds x="510" y="243" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Call_Descubre" bpmnElement="Call_Descubre">
-        <dc:Bounds x="680" y="380" width="190" height="82"/>
+        <dc:Bounds x="680" y="380" width="190" height="82" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Annotation_Call_Descubre" bpmnElement="Annotation_Call_Descubre">
-        <dc:Bounds x="680" y="478" width="220" height="40"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Descubre" bpmnElement="Association_Annotation_Call_Descubre">
-        <di:waypoint x="790.0" y="478"/>
-        <di:waypoint x="790.0" y="468"/>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Gateway_QueAprobado" bpmnElement="Gateway_QueAprobado" isMarkerVisible="true">
-        <dc:Bounds x="930" y="395" width="50" height="50"/>
+        <dc:Bounds x="930" y="395" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_End_DefinicionPendiente" bpmnElement="End_DefinicionPendiente">
-        <dc:Bounds x="1090" y="470" width="36" height="36"/>
+        <dc:Bounds x="1090" y="470" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Gateway_Plan" bpmnElement="Gateway_Plan" isMarkerVisible="true">
-        <dc:Bounds x="680" y="243" width="50" height="50"/>
+        <dc:Bounds x="680" y="243" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Call_Planea" bpmnElement="Call_Planea">
-        <dc:Bounds x="850" y="180" width="190" height="82"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Annotation_Call_Planea" bpmnElement="Annotation_Call_Planea">
-        <dc:Bounds x="850" y="278" width="220" height="40"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Planea" bpmnElement="Association_Annotation_Call_Planea">
-        <di:waypoint x="960.0" y="278"/>
-        <di:waypoint x="960.0" y="268"/>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Gateway_Humano" bpmnElement="Gateway_Humano" isMarkerVisible="true">
-        <dc:Bounds x="1080" y="243" width="50" height="50"/>
+        <dc:Bounds x="1080" y="243" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1139.5" y="254" width="49" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Call_Construye" bpmnElement="Call_Construye">
-        <dc:Bounds x="1240" y="180" width="190" height="82"/>
+        <dc:Bounds x="1240" y="180" width="190" height="82" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Annotation_Call_Construye" bpmnElement="Annotation_Call_Construye">
-        <dc:Bounds x="1240" y="278" width="220" height="40"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Construye" bpmnElement="Association_Annotation_Call_Construye">
-        <di:waypoint x="1350.0" y="278"/>
-        <di:waypoint x="1350.0" y="268"/>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Call_Desatendido" bpmnElement="Call_Desatendido">
-        <dc:Bounds x="1240" y="330" width="190" height="82"/>
+        <dc:Bounds x="1240" y="330" width="190" height="82" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Annotation_Call_Desatendido" bpmnElement="Annotation_Call_Desatendido">
-        <dc:Bounds x="1240" y="428" width="220" height="40"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Desatendido" bpmnElement="Association_Annotation_Call_Desatendido">
-        <di:waypoint x="1350.0" y="428"/>
-        <di:waypoint x="1350.0" y="418"/>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Gateway_UnirConstruccion" bpmnElement="Gateway_UnirConstruccion" isMarkerVisible="true">
-        <dc:Bounds x="1490" y="258" width="50" height="50"/>
+        <dc:Bounds x="1490" y="258" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Call_Revisar" bpmnElement="Call_Revisar">
-        <dc:Bounds x="1580" y="228" width="190" height="82"/>
+        <dc:Bounds x="1580" y="228" width="190" height="82" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Annotation_Call_Revisar" bpmnElement="Annotation_Call_Revisar">
-        <dc:Bounds x="1580" y="326" width="220" height="40"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Revisar" bpmnElement="Association_Annotation_Call_Revisar">
-        <di:waypoint x="1690.0" y="326"/>
-        <di:waypoint x="1690.0" y="316"/>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Call_Gemba" bpmnElement="Call_Gemba">
-        <dc:Bounds x="1820" y="228" width="190" height="82"/>
+        <dc:Bounds x="1820" y="228" width="190" height="82" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Annotation_Call_Gemba" bpmnElement="Annotation_Call_Gemba">
-        <dc:Bounds x="1820" y="326" width="220" height="40"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Gemba" bpmnElement="Association_Annotation_Call_Gemba">
-        <di:waypoint x="1930.0" y="326"/>
-        <di:waypoint x="1930.0" y="316"/>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Gateway_Aceptado" bpmnElement="Gateway_Aceptado" isMarkerVisible="true">
-        <dc:Bounds x="2060" y="243" width="50" height="50"/>
+        <dc:Bounds x="2060" y="243" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Call_Cierra" bpmnElement="Call_Cierra">
-        <dc:Bounds x="2200" y="228" width="190" height="82"/>
+        <dc:Bounds x="2200" y="228" width="190" height="82" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_Registrado" bpmnElement="End_Registrado">
+        <dc:Bounds x="2450" y="251" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Call_Planea" bpmnElement="Call_Planea">
+        <dc:Bounds x="853" y="149" width="190" height="82" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_QueSigue" bpmnElement="Association_Annotation_Call_QueSigue">
+        <di:waypoint x="620" y="50" />
+        <di:waypoint x="620" y="70" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Planea" bpmnElement="Association_Annotation_Call_Planea">
+        <di:waypoint x="961" y="278" />
+        <di:waypoint x="962" y="231" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Arranca" bpmnElement="Annotation_Call_Arranca">
+        <dc:Bounds x="160" y="326" width="220" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Descubre" bpmnElement="Annotation_Call_Descubre">
+        <dc:Bounds x="680" y="478" width="220" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Planea" bpmnElement="Annotation_Call_Planea">
+        <dc:Bounds x="850" y="278" width="220" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Construye" bpmnElement="Annotation_Call_Construye">
+        <dc:Bounds x="1240" y="278" width="220" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Desatendido" bpmnElement="Annotation_Call_Desatendido">
+        <dc:Bounds x="1240" y="428" width="220" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Revisar" bpmnElement="Annotation_Call_Revisar">
+        <dc:Bounds x="1580" y="326" width="220" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Gemba" bpmnElement="Annotation_Call_Gemba">
+        <dc:Bounds x="1820" y="326" width="220" height="40" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Annotation_Call_Cierra" bpmnElement="Annotation_Call_Cierra">
-        <dc:Bounds x="2200" y="326" width="220" height="40"/>
+        <dc:Bounds x="2200" y="326" width="220" height="40" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Cierra" bpmnElement="Association_Annotation_Call_Cierra">
-        <di:waypoint x="2310.0" y="326"/>
-        <di:waypoint x="2310.0" y="316"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_End_Registrado" bpmnElement="End_Registrado">
-        <dc:Bounds x="2450" y="251" width="36" height="36"/>
+      <bpmndi:BPMNShape id="Shape_Annotation_Desatendido" bpmnElement="Annotation_Desatendido">
+        <dc:Bounds x="1200" y="460" width="330" height="70" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Leyenda" bpmnElement="Annotation_Leyenda">
+        <dc:Bounds x="1680" y="50" width="390" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_F_Start_Arranca" bpmnElement="F_Start_Arranca">
-        <di:waypoint x="116" y="268"/>
-        <di:waypoint x="160" y="268"/>
+        <di:waypoint x="116" y="268" />
+        <di:waypoint x="160" y="268" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Arranca_Obj" bpmnElement="F_Arranca_Obj">
-        <di:waypoint x="350" y="269"/>
-        <di:waypoint x="400" y="268"/>
+        <di:waypoint x="350" y="269" />
+        <di:waypoint x="400" y="268" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Obj_No" bpmnElement="F_Obj_No">
-        <di:waypoint x="425" y="243"/>
-        <di:waypoint x="425" y="111"/>
-        <di:waypoint x="510" y="111"/>
+        <di:waypoint x="425" y="243" />
+        <di:waypoint x="425" y="111" />
+        <di:waypoint x="510" y="111" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_QueSigue_Cont" bpmnElement="F_QueSigue_Cont">
-        <di:waypoint x="700" y="111"/>
-        <di:waypoint x="760" y="110"/>
+        <di:waypoint x="700" y="111" />
+        <di:waypoint x="760" y="110" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Cont_No" bpmnElement="F_Cont_No">
-        <di:waypoint x="785" y="85"/>
-        <di:waypoint x="785" y="53"/>
-        <di:waypoint x="930" y="53"/>
+        <di:waypoint x="785" y="85" />
+        <di:waypoint x="785" y="53" />
+        <di:waypoint x="930" y="53" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Cont_Si" bpmnElement="F_Cont_Si">
-        <di:waypoint x="785" y="135"/>
-        <di:waypoint x="785" y="160"/>
-        <di:waypoint x="535" y="160"/>
-        <di:waypoint x="535" y="243"/>
+        <di:waypoint x="785" y="135" />
+        <di:waypoint x="785" y="160" />
+        <di:waypoint x="535" y="160" />
+        <di:waypoint x="535" y="243" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Obj_Si" bpmnElement="F_Obj_Si">
-        <di:waypoint x="450" y="268"/>
-        <di:waypoint x="510" y="268"/>
+        <di:waypoint x="450" y="268" />
+        <di:waypoint x="510" y="268" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Claro_No" bpmnElement="F_Claro_No">
-        <di:waypoint x="535" y="293"/>
-        <di:waypoint x="535" y="421"/>
-        <di:waypoint x="680" y="421"/>
+        <di:waypoint x="535" y="293" />
+        <di:waypoint x="535" y="421" />
+        <di:waypoint x="680" y="421" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Desc_Aprob" bpmnElement="F_Desc_Aprob">
-        <di:waypoint x="870" y="421"/>
-        <di:waypoint x="930" y="420"/>
+        <di:waypoint x="870" y="421" />
+        <di:waypoint x="930" y="420" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Aprob_No" bpmnElement="F_Aprob_No">
-        <di:waypoint x="955" y="445"/>
-        <di:waypoint x="955" y="488"/>
-        <di:waypoint x="1090" y="488"/>
+        <di:waypoint x="955" y="445" />
+        <di:waypoint x="955" y="488" />
+        <di:waypoint x="1090" y="488" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Aprob_Si" bpmnElement="F_Aprob_Si">
-        <di:waypoint x="955" y="395"/>
-        <di:waypoint x="955" y="340"/>
-        <di:waypoint x="705" y="340"/>
-        <di:waypoint x="705" y="293"/>
+        <di:waypoint x="955" y="395" />
+        <di:waypoint x="955" y="340" />
+        <di:waypoint x="705" y="340" />
+        <di:waypoint x="705" y="293" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Claro_Si" bpmnElement="F_Claro_Si">
-        <di:waypoint x="560" y="268"/>
-        <di:waypoint x="680" y="268"/>
+        <di:waypoint x="560" y="268" />
+        <di:waypoint x="680" y="268" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Plan_Si" bpmnElement="F_Plan_Si">
-        <di:waypoint x="705" y="243"/>
-        <di:waypoint x="705" y="221"/>
-        <di:waypoint x="850" y="221"/>
+        <di:waypoint x="705" y="243" />
+        <di:waypoint x="705" y="190" />
+        <di:waypoint x="853" y="190" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="715" y="191" width="11" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Planea_Hum" bpmnElement="F_Planea_Hum">
-        <di:waypoint x="1040" y="221"/>
-        <di:waypoint x="1105" y="221"/>
-        <di:waypoint x="1105" y="243"/>
+        <di:waypoint x="1043" y="190" />
+        <di:waypoint x="1105" y="190" />
+        <di:waypoint x="1105" y="243" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Plan_No" bpmnElement="F_Plan_No">
-        <di:waypoint x="730" y="268"/>
-        <di:waypoint x="1080" y="268"/>
+        <di:waypoint x="730" y="268" />
+        <di:waypoint x="1080" y="268" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Hum_Si" bpmnElement="F_Hum_Si">
-        <di:waypoint x="1130" y="243"/>
-        <di:waypoint x="1130" y="221"/>
-        <di:waypoint x="1240" y="221"/>
+        <di:waypoint x="1130" y="243" />
+        <di:waypoint x="1130" y="221" />
+        <di:waypoint x="1240" y="221" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Hum_No" bpmnElement="F_Hum_No">
-        <di:waypoint x="1105" y="293"/>
-        <di:waypoint x="1105" y="371"/>
-        <di:waypoint x="1240" y="371"/>
+        <di:waypoint x="1105" y="293" />
+        <di:waypoint x="1105" y="371" />
+        <di:waypoint x="1240" y="371" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Const_Join" bpmnElement="F_Const_Join">
-        <di:waypoint x="1430" y="221"/>
-        <di:waypoint x="1515" y="221"/>
-        <di:waypoint x="1515" y="258"/>
+        <di:waypoint x="1430" y="221" />
+        <di:waypoint x="1515" y="221" />
+        <di:waypoint x="1515" y="258" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Des_Join" bpmnElement="F_Des_Join">
-        <di:waypoint x="1430" y="371"/>
-        <di:waypoint x="1515" y="371"/>
-        <di:waypoint x="1515" y="308"/>
+        <di:waypoint x="1430" y="371" />
+        <di:waypoint x="1515" y="371" />
+        <di:waypoint x="1515" y="308" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Join_Review" bpmnElement="F_Join_Review">
-        <di:waypoint x="1540" y="283"/>
-        <di:waypoint x="1580" y="269"/>
+        <di:waypoint x="1540" y="283" />
+        <di:waypoint x="1580" y="269" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Review_Gemba" bpmnElement="F_Review_Gemba">
-        <di:waypoint x="1770" y="269"/>
-        <di:waypoint x="1820" y="269"/>
+        <di:waypoint x="1770" y="269" />
+        <di:waypoint x="1820" y="269" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Gemba_Acept" bpmnElement="F_Gemba_Acept">
-        <di:waypoint x="2010" y="269"/>
-        <di:waypoint x="2060" y="268"/>
+        <di:waypoint x="2010" y="269" />
+        <di:waypoint x="2060" y="268" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Acept_No" bpmnElement="F_Acept_No">
-        <di:waypoint x="2085" y="293"/>
-        <di:waypoint x="2085" y="550"/>
-        <di:waypoint x="1335" y="550"/>
-        <di:waypoint x="1335" y="262"/>
+        <di:waypoint x="2085" y="293" />
+        <di:waypoint x="2085" y="550" />
+        <di:waypoint x="1335" y="550" />
+        <di:waypoint x="1335" y="262" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Acept_Si" bpmnElement="F_Acept_Si">
-        <di:waypoint x="2110" y="268"/>
-        <di:waypoint x="2200" y="269"/>
+        <di:waypoint x="2110" y="268" />
+        <di:waypoint x="2200" y="269" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Cierra_End" bpmnElement="F_Cierra_End">
-        <di:waypoint x="2390" y="269"/>
-        <di:waypoint x="2450" y="269"/>
+        <di:waypoint x="2390" y="269" />
+        <di:waypoint x="2450" y="269" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Annotation_Desatendido" bpmnElement="Annotation_Desatendido">
-        <dc:Bounds x="1200" y="460" width="330" height="70"/>
-      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Arranca" bpmnElement="Association_Annotation_Call_Arranca">
+        <di:waypoint x="270" y="326" />
+        <di:waypoint x="270" y="316" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Descubre" bpmnElement="Association_Annotation_Call_Descubre">
+        <di:waypoint x="790" y="478" />
+        <di:waypoint x="790" y="468" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Construye" bpmnElement="Association_Annotation_Call_Construye">
+        <di:waypoint x="1350" y="278" />
+        <di:waypoint x="1350" y="268" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Desatendido" bpmnElement="Association_Annotation_Call_Desatendido">
+        <di:waypoint x="1350" y="428" />
+        <di:waypoint x="1350" y="418" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Revisar" bpmnElement="Association_Annotation_Call_Revisar">
+        <di:waypoint x="1690" y="326" />
+        <di:waypoint x="1690" y="316" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Gemba" bpmnElement="Association_Annotation_Call_Gemba">
+        <di:waypoint x="1930" y="326" />
+        <di:waypoint x="1930" y="316" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Cierra" bpmnElement="Association_Annotation_Call_Cierra">
+        <di:waypoint x="2310" y="326" />
+        <di:waypoint x="2310" y="316" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Association_Annotation_Desatendido" bpmnElement="Association_Annotation_Desatendido">
-        <di:waypoint x="1365.0" y="460"/>
-        <di:waypoint x="1365.0" y="450"/>
+        <di:waypoint x="1365" y="460" />
+        <di:waypoint x="1365" y="450" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Annotation_Leyenda" bpmnElement="Annotation_Leyenda">
-        <dc:Bounds x="1680" y="50" width="390" height="90"/>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_QueSigue" bpmnElement="Annotation_Call_QueSigue">
+        <dc:Bounds x="510" y="10" width="220" height="40" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

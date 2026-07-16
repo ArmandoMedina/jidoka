@@ -14,6 +14,15 @@ El método se documenta como diagrama de proceso navegable, versionado en `docs/
 - **`chore` — recomendación de editor** (`.vscode/extensions.json`: Miragon BPMN Modeler) con excepción en `.gitignore` para que viaje con el repo.
 - **`docs` — ADR 0032** (aceptado) y guía de colaboración en `docs/atlas/README.md` (convención BPMN-formal / Mermaid-borrador).
 
+### El atlas se acopla al flujo (aviso comando→diagrama) y se homologa a WYSIWYG (ADR 0033)
+
+Decidido el acoplamiento **asimétrico**: el proceso (el `.md` del comando) es la fuente; prosa y diagrama son dos vistas; el código es implementación. Se descarta el acoplamiento simétrico de tres vías (fatiga, choca con el un-solo-bloqueo del manifiesto).
+
+- **`feat` — área `atlas` en `tools/blast-radius.json`:** tocar un comando `/jidoka:*` **avisa** (no bloquea) revisar su diagrama en `docs/atlas/` (que lo declara como `Fuente`). El bloqueo no se cablea (regla 2-3: se gana con drift real). `probar-gate` sigue 10/10; `andon/README.md` actualizado (9 áreas).
+- **`feat` — `atlas:sellar`** (`docs/atlas/tools/sellar-plataforma.mjs`): escribe `modeler:executionPlatform` (Camunda 7) en los `.bpmn`/`.dmn` para que el editor visual los abra directo, sin preguntar la plataforma en cada archivo.
+- **`refactor` — `10-arranca` homologado a WYSIWYG:** los dos subprocesos embebidos ahora se muestran **expandidos** en el lienzo (sin drill-down), consistente con el resto del atlas. Se elimina el único diagrama que exigía doble clic para ver su detalle.
+- **`chore` — `jidoka.code-workspace`** en la raíz: abre el repo con la extensión y la asociación de `.bpmn` al editor visual listas.
+
 ## [1.14.0] — 2026-07-15
 
 ### El instalador AV-seguro se vuelve completo — `sembrar-manual.ps1` siembra la instancia entera (ADR 0027, enmienda)

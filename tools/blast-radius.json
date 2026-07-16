@@ -47,6 +47,15 @@
     "rol": "escribano"
   },
   {
+    "nombre": "atlas",
+    "desc": "el atlas de procesos (docs/atlas/): la vista visual del metodo; un diagrama que no refleja su comando es doc-drift visual (ADR 0033)",
+    "fuente": [".claude/commands/jidoka/*"],
+    "doc_bloquea": [],
+    "doc_avisa": ["docs/atlas/*"],
+    "mensaje": "cambiaste un comando /jidoka:*: si cambiaste el PROCESO (pasos, decisiones, quien hace que), su diagrama en docs/atlas/ que lo declara como Fuente quedo atras. Actualizalo y re-renderiza (npm run atlas:render). Si fue redaccion, formato o un detalle que no cambia el flujo, este aviso no es para ti",
+    "rol": "escribano"
+  },
+  {
     "nombre": "kit",
     "desc": "el kit instalable y el instalador: las leyes-plantilla por arquetipo, el manifiesto de siembra, las plantillas, y los scripts instalar/probar-instalador (Sprint 3)",
     "fuente": ["kit/.jidoka/leyes/*", "kit/.jidoka/instalar/*", "kit/.jidoka/templates/*", "tools/instalar.ps1", "tools/probar-instalador.ps1"],
