@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_17_QueSigue" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2">
+  <bpmn:process id="Process_QueSigue" name="/jidoka:que-sigue — priorizar el siguiente paso" isExecutable="false">
+    <bpmn:documentation>Fuente: .claude/commands/jidoka/que-sigue.md</bpmn:documentation>
+    <bpmn:startEvent id="Start" name="Inicio">
+      <bpmn:outgoing>F_Start_Task_Handoff</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_Handoff" name="Leer HANDOFF y decisiones pendientes">
+      <bpmn:incoming>F_Start_Task_Handoff</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Handoff_Task_Roadmap</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="F_Start_Task_Handoff" sourceRef="Start" targetRef="Task_Handoff"/>
+    <bpmn:task id="Task_Roadmap" name="Leer ROADMAP">
+      <bpmn:incoming>F_Task_Handoff_Task_Roadmap</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Roadmap_Task_Git</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="F_Task_Handoff_Task_Roadmap" sourceRef="Task_Handoff" targetRef="Task_Roadmap"/>
+    <bpmn:serviceTask id="Task_Git" name="Revisar estado de Git">
+      <bpmn:incoming>F_Task_Roadmap_Task_Git</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Git_Task_Separar</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="F_Task_Roadmap_Task_Git" sourceRef="Task_Roadmap" targetRef="Task_Git"/>
+    <bpmn:task id="Task_Separar" name="Separar decisiones humanas de trabajo ejecutable">
+      <bpmn:incoming>F_Task_Git_Task_Separar</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Separar_Task_Ordenar</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="F_Task_Git_Task_Separar" sourceRef="Task_Git" targetRef="Task_Separar"/>
+    <bpmn:task id="Task_Ordenar" name="Ordenar opciones por valor">
+      <bpmn:incoming>F_Task_Separar_Task_Ordenar</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Ordenar_Task_Proponer</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="F_Task_Separar_Task_Ordenar" sourceRef="Task_Separar" targetRef="Task_Ordenar"/>
+    <bpmn:userTask id="Task_Proponer" name="Presentar recomendación y esperar">
+      <bpmn:incoming>F_Task_Ordenar_Task_Proponer</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Proponer_End</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="F_Task_Ordenar_Task_Proponer" sourceRef="Task_Ordenar" targetRef="Task_Proponer"/>
+    <bpmn:endEvent id="End" name="Siguiente paso recomendado">
+      <bpmn:incoming>F_Task_Proponer_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_Task_Proponer_End" sourceRef="Task_Proponer" targetRef="End"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_17_QueSigue">
+    <bpmndi:BPMNPlane id="Plane_Diagram_17_QueSigue" bpmnElement="Process_QueSigue">
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="Start">
+        <dc:Bounds x="80" y="220" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Handoff" bpmnElement="Task_Handoff">
+        <dc:Bounds x="180" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Start_Task_Handoff" bpmnElement="F_Start_Task_Handoff">
+        <di:waypoint x="116" y="238"/>
+        <di:waypoint x="180" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Roadmap" bpmnElement="Task_Roadmap">
+        <dc:Bounds x="410" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Handoff_Task_Roadmap" bpmnElement="F_Task_Handoff_Task_Roadmap">
+        <di:waypoint x="350" y="238"/>
+        <di:waypoint x="410" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Git" bpmnElement="Task_Git">
+        <dc:Bounds x="640" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Roadmap_Task_Git" bpmnElement="F_Task_Roadmap_Task_Git">
+        <di:waypoint x="580" y="238"/>
+        <di:waypoint x="640" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Separar" bpmnElement="Task_Separar">
+        <dc:Bounds x="870" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Git_Task_Separar" bpmnElement="F_Task_Git_Task_Separar">
+        <di:waypoint x="810" y="238"/>
+        <di:waypoint x="870" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Ordenar" bpmnElement="Task_Ordenar">
+        <dc:Bounds x="1100" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Separar_Task_Ordenar" bpmnElement="F_Task_Separar_Task_Ordenar">
+        <di:waypoint x="1040" y="238"/>
+        <di:waypoint x="1100" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Proponer" bpmnElement="Task_Proponer">
+        <dc:Bounds x="1330" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Ordenar_Task_Proponer" bpmnElement="F_Task_Ordenar_Task_Proponer">
+        <di:waypoint x="1270" y="238"/>
+        <di:waypoint x="1330" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End" bpmnElement="End">
+        <dc:Bounds x="1560" y="220" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Proponer_End" bpmnElement="F_Task_Proponer_End">
+        <di:waypoint x="1500" y="238"/>
+        <di:waypoint x="1560" y="238"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

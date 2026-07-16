@@ -2,6 +2,18 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [Sin publicar]
+
+### El atlas de procesos del método vive en el repo, en BPMN (ADR 0032)
+
+El método se documenta como diagrama de proceso navegable, versionado en `docs/atlas/`. BPMN ganó un bake-off de 3 formatos (BPMN vs Mermaid vs D2) por fidelidad de swimlanes: es el único que dibuja los carriles agente/humano como bandas reales — y ese reparto es el corazón de Jidoka.
+
+- **`docs` — atlas importado a `docs/atlas/`** (25 BPMN + 1 DMN + índice `RELACIONES.csv`), limpio de la copia duplicada anidada con que llegó. Interno: no entra a `docs/guias/`, no se publica a npm.
+- **`feat` — toolchain del atlas** (`docs/atlas/tools/`): `atlas:validate` (sin dependencias; verifica que todo `calledElement` resuelva y toda Call Activity esté en el CSV), `atlas:render` (SVG por `npx bpmn-to-image`, on-demand para no bajar Chromium en cada `npm install`), `atlas:layout` (`bpmn-auto-layout`, geometría automática). Scripts en `package.json`; `bpmn-auto-layout` como única `devDependency`.
+- **`feat` — `16-cierra` re-modelado como patrón:** pool con carriles Agente/Humano, tareas de servicio (agente) y de usuario (`OK del dueño`), gateways `¿motor sano y sin drift?` (con lazo de corrección sin `--no-verify`) y `¿entrega versión?`. Los otros 19 diagramas siguen happy-path (siguiente lote).
+- **`chore` — recomendación de editor** (`.vscode/extensions.json`: Miragon BPMN Modeler) con excepción en `.gitignore` para que viaje con el repo.
+- **`docs` — ADR 0032** (aceptado) y guía de colaboración en `docs/atlas/README.md` (convención BPMN-formal / Mermaid-borrador).
+
 ## [1.14.0] — 2026-07-15
 
 ### El instalador AV-seguro se vuelve completo — `sembrar-manual.ps1` siembra la instancia entera (ADR 0027, enmienda)

@@ -5,6 +5,14 @@
   "bin": {
     "jidoka-method": "bin/jidoka-method.js"
   },
+  "scripts": {
+    "atlas:validate": "node docs/atlas/tools/validar.mjs",
+    "atlas:render": "node docs/atlas/tools/render.mjs",
+    "atlas:layout": "node docs/atlas/tools/layout.mjs"
+  },
+  "devDependencies": {
+    "bpmn-auto-layout": "^1.3.0"
+  },
   "files": [
     "bin/",
     "tools/",

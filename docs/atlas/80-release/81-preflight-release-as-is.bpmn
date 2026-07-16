@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_81_Preflight" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2">
+  <bpmn:process id="Process_PreflightRelease" name="Ejecutar preflight de release" isExecutable="false">
+    <bpmn:documentation>Fuente: tools/publicar.ps1 -SoloVerificar</bpmn:documentation>
+    <bpmn:startEvent id="Start" name="Inicio">
+      <bpmn:outgoing>F_Start_Task_Version</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Task_Version" name="Validar SSOT de versión">
+      <bpmn:incoming>F_Start_Task_Version</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Version_Task_Gate</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="F_Start_Task_Version" sourceRef="Start" targetRef="Task_Version"/>
+    <bpmn:serviceTask id="Task_Gate" name="Probar gate">
+      <bpmn:incoming>F_Task_Version_Task_Gate</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Gate_Task_Hooks</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="F_Task_Version_Task_Gate" sourceRef="Task_Version" targetRef="Task_Gate"/>
+    <bpmn:serviceTask id="Task_Hooks" name="Probar hooks">
+      <bpmn:incoming>F_Task_Gate_Task_Hooks</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Hooks_Task_Auditor</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="F_Task_Gate_Task_Hooks" sourceRef="Task_Gate" targetRef="Task_Hooks"/>
+    <bpmn:serviceTask id="Task_Auditor" name="Probar auditor">
+      <bpmn:incoming>F_Task_Hooks_Task_Auditor</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Auditor_Task_Disparos</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="F_Task_Hooks_Task_Auditor" sourceRef="Task_Hooks" targetRef="Task_Auditor"/>
+    <bpmn:serviceTask id="Task_Disparos" name="Probar disparos">
+      <bpmn:incoming>F_Task_Auditor_Task_Disparos</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Disparos_Task_Instalador</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="F_Task_Auditor_Task_Disparos" sourceRef="Task_Auditor" targetRef="Task_Disparos"/>
+    <bpmn:serviceTask id="Task_Instalador" name="Probar instalador y siembra">
+      <bpmn:incoming>F_Task_Disparos_Task_Instalador</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Instalador_Task_Grafo</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="F_Task_Disparos_Task_Instalador" sourceRef="Task_Disparos" targetRef="Task_Instalador"/>
+    <bpmn:serviceTask id="Task_Grafo" name="Auditar grafo">
+      <bpmn:incoming>F_Task_Instalador_Task_Grafo</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Grafo_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="F_Task_Instalador_Task_Grafo" sourceRef="Task_Instalador" targetRef="Task_Grafo"/>
+    <bpmn:endEvent id="End" name="Preflight verde">
+      <bpmn:incoming>F_Task_Grafo_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_Task_Grafo_End" sourceRef="Task_Grafo" targetRef="End"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_81_Preflight">
+    <bpmndi:BPMNPlane id="Plane_Diagram_81_Preflight" bpmnElement="Process_PreflightRelease">
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="Start">
+        <dc:Bounds x="80" y="220" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Version" bpmnElement="Task_Version">
+        <dc:Bounds x="180" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Start_Task_Version" bpmnElement="F_Start_Task_Version">
+        <di:waypoint x="116" y="238"/>
+        <di:waypoint x="180" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Gate" bpmnElement="Task_Gate">
+        <dc:Bounds x="410" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Version_Task_Gate" bpmnElement="F_Task_Version_Task_Gate">
+        <di:waypoint x="350" y="238"/>
+        <di:waypoint x="410" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Hooks" bpmnElement="Task_Hooks">
+        <dc:Bounds x="640" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Gate_Task_Hooks" bpmnElement="F_Task_Gate_Task_Hooks">
+        <di:waypoint x="580" y="238"/>
+        <di:waypoint x="640" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Auditor" bpmnElement="Task_Auditor">
+        <dc:Bounds x="870" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Hooks_Task_Auditor" bpmnElement="F_Task_Hooks_Task_Auditor">
+        <di:waypoint x="810" y="238"/>
+        <di:waypoint x="870" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Disparos" bpmnElement="Task_Disparos">
+        <dc:Bounds x="1100" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Auditor_Task_Disparos" bpmnElement="F_Task_Auditor_Task_Disparos">
+        <di:waypoint x="1040" y="238"/>
+        <di:waypoint x="1100" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Instalador" bpmnElement="Task_Instalador">
+        <dc:Bounds x="1330" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Disparos_Task_Instalador" bpmnElement="F_Task_Disparos_Task_Instalador">
+        <di:waypoint x="1270" y="238"/>
+        <di:waypoint x="1330" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Grafo" bpmnElement="Task_Grafo">
+        <dc:Bounds x="1560" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Instalador_Task_Grafo" bpmnElement="F_Task_Instalador_Task_Grafo">
+        <di:waypoint x="1500" y="238"/>
+        <di:waypoint x="1560" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End" bpmnElement="End">
+        <dc:Bounds x="1790" y="220" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Grafo_End" bpmnElement="F_Task_Grafo_End">
+        <di:waypoint x="1730" y="238"/>
+        <di:waypoint x="1790" y="238"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

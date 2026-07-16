@@ -1,0 +1,204 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_16_Cierra" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3">
+  <bpmn:collaboration id="Collab_Cierra">
+    <bpmn:participant id="Pool_Cierra" name="/jidoka:cierra — cerrar la sesión con estado durable" processRef="Process_Cierra"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Cierra" name="/jidoka:cierra — registrar, podar, verificar y (si aplica) publicar" isExecutable="false">
+    <bpmn:documentation>Fuente: .claude/commands/jidoka/cierra.md. Carriles: lo automático lo hace el Agente (tareas de servicio); el checkpoint del release es del Humano (OK del dueño).</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_Cierra">
+      <bpmn:lane id="Lane_Agente" name="Agente">
+        <bpmn:flowNodeRef>Inicio</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Registrar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Podar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Commit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Verificar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Sano</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Corregir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Release</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_PrepRelease</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Publicar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Cerrada</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Publicada</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Humano" name="Humano (dueño)">
+        <bpmn:flowNodeRef>U_Autorizar</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Inicio" name="Cerrar sesión / sprint">
+      <bpmn:outgoing>f1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="T_Registrar" name="Registrar: repartir por caducidad (HANDOFF, CHANGELOG, ADR, entrega)">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="T_Podar" name="Podar estado y andamiaje muerto (si dudas, marca)">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="T_Commit" name="Committear evidencia citada del Gemba (git add -f)">
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:serviceTask id="T_Verificar" name="Verificar: probar-gate.ps1 + verificar.ps1">
+      <bpmn:incoming>f4</bpmn:incoming>
+      <bpmn:incoming>f_loop</bpmn:incoming>
+      <bpmn:outgoing>f5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Sano" name="¿Motor sano y sin drift?">
+      <bpmn:incoming>f5</bpmn:incoming>
+      <bpmn:outgoing>f_no</bpmn:outgoing>
+      <bpmn:outgoing>f_si</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="T_Corregir" name="Corregir la causa (NO --no-verify)">
+      <bpmn:incoming>f_no</bpmn:incoming>
+      <bpmn:outgoing>f_loop</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gw_Release" name="¿El sprint entrega versión?">
+      <bpmn:incoming>f_si</bpmn:incoming>
+      <bpmn:outgoing>f_relno</bpmn:outgoing>
+      <bpmn:outgoing>f_relsi</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="T_PrepRelease" name="Preparar release (cerrar CHANGELOG, commit chore, tag anotado)">
+      <bpmn:incoming>f_relsi</bpmn:incoming>
+      <bpmn:outgoing>f_prep</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:userTask id="U_Autorizar" name="Autorizar el push (OK del dueño)">
+      <bpmn:incoming>f_prep</bpmn:incoming>
+      <bpmn:outgoing>f_auth</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="T_Publicar" name="Push + GitHub release">
+      <bpmn:incoming>f_auth</bpmn:incoming>
+      <bpmn:outgoing>f_pub</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="End_Cerrada" name="Sesión cerrada con estado durable">
+      <bpmn:incoming>f_relno</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="End_Publicada" name="Versión publicada">
+      <bpmn:incoming>f_pub</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="f1" sourceRef="Inicio" targetRef="T_Registrar"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_Registrar" targetRef="T_Podar"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="T_Podar" targetRef="T_Commit"/>
+    <bpmn:sequenceFlow id="f4" sourceRef="T_Commit" targetRef="T_Verificar"/>
+    <bpmn:sequenceFlow id="f5" sourceRef="T_Verificar" targetRef="Gw_Sano"/>
+    <bpmn:sequenceFlow id="f_no" name="no: fallas / drift" sourceRef="Gw_Sano" targetRef="T_Corregir"/>
+    <bpmn:sequenceFlow id="f_loop" sourceRef="T_Corregir" targetRef="T_Verificar"/>
+    <bpmn:sequenceFlow id="f_si" name="sí: verde" sourceRef="Gw_Sano" targetRef="Gw_Release"/>
+    <bpmn:sequenceFlow id="f_relno" name="no entrega versión" sourceRef="Gw_Release" targetRef="End_Cerrada"/>
+    <bpmn:sequenceFlow id="f_relsi" name="sí entrega versión" sourceRef="Gw_Release" targetRef="T_PrepRelease"/>
+    <bpmn:sequenceFlow id="f_prep" sourceRef="T_PrepRelease" targetRef="U_Autorizar"/>
+    <bpmn:sequenceFlow id="f_auth" sourceRef="U_Autorizar" targetRef="T_Publicar"/>
+    <bpmn:sequenceFlow id="f_pub" sourceRef="T_Publicar" targetRef="End_Publicada"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_16_Cierra">
+    <bpmndi:BPMNPlane id="Plane_16_Cierra" bpmnElement="Collab_Cierra">
+      <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Cierra" isHorizontal="true">
+        <dc:Bounds x="130" y="80" width="1740" height="380"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneAgente" bpmnElement="Lane_Agente" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1710" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneHumano" bpmnElement="Lane_Humano" isHorizontal="true">
+        <dc:Bounds x="160" y="330" width="1710" height="130"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Inicio" bpmnElement="Inicio">
+        <dc:Bounds x="190" y="172" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="168" y="215" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TRegistrar" bpmnElement="T_Registrar">
+        <dc:Bounds x="250" y="150" width="150" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TPodar" bpmnElement="T_Podar">
+        <dc:Bounds x="440" y="150" width="150" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TCommit" bpmnElement="T_Commit">
+        <dc:Bounds x="630" y="150" width="150" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TVerificar" bpmnElement="T_Verificar">
+        <dc:Bounds x="820" y="150" width="150" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwSano" bpmnElement="Gw_Sano" isMarkerVisible="true">
+        <dc:Bounds x="1010" y="165" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="995" y="128" width="80" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TCorregir" bpmnElement="T_Corregir">
+        <dc:Bounds x="900" y="265" width="160" height="55"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwRelease" bpmnElement="Gw_Release" isMarkerVisible="true">
+        <dc:Bounds x="1110" y="165" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1095" y="128" width="90" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TPrepRelease" bpmnElement="T_PrepRelease">
+        <dc:Bounds x="1210" y="150" width="150" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_UAutorizar" bpmnElement="U_Autorizar">
+        <dc:Bounds x="1210" y="360" width="150" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TPublicar" bpmnElement="T_Publicar">
+        <dc:Bounds x="1420" y="150" width="150" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndCerrada" bpmnElement="End_Cerrada">
+        <dc:Bounds x="1117" y="265" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1092" y="306" width="90" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndPublicada" bpmnElement="End_Publicada">
+        <dc:Bounds x="1620" y="172" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1600" y="215" width="76" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
+        <di:waypoint x="226" y="190"/>
+        <di:waypoint x="250" y="190"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
+        <di:waypoint x="400" y="190"/>
+        <di:waypoint x="440" y="190"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
+        <di:waypoint x="590" y="190"/>
+        <di:waypoint x="630" y="190"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f4" bpmnElement="f4">
+        <di:waypoint x="780" y="190"/>
+        <di:waypoint x="820" y="190"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f5" bpmnElement="f5">
+        <di:waypoint x="970" y="190"/>
+        <di:waypoint x="1010" y="190"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_no" bpmnElement="f_no">
+        <di:waypoint x="1035" y="215"/>
+        <di:waypoint x="1035" y="265"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_loop" bpmnElement="f_loop">
+        <di:waypoint x="900" y="292"/>
+        <di:waypoint x="845" y="292"/>
+        <di:waypoint x="845" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_si" bpmnElement="f_si">
+        <di:waypoint x="1060" y="190"/>
+        <di:waypoint x="1110" y="190"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_relno" bpmnElement="f_relno">
+        <di:waypoint x="1135" y="215"/>
+        <di:waypoint x="1135" y="265"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_relsi" bpmnElement="f_relsi">
+        <di:waypoint x="1160" y="190"/>
+        <di:waypoint x="1210" y="190"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_prep" bpmnElement="f_prep">
+        <di:waypoint x="1285" y="230"/>
+        <di:waypoint x="1285" y="360"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_auth" bpmnElement="f_auth">
+        <di:waypoint x="1360" y="400"/>
+        <di:waypoint x="1495" y="400"/>
+        <di:waypoint x="1495" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_pub" bpmnElement="f_pub">
+        <di:waypoint x="1570" y="190"/>
+        <di:waypoint x="1620" y="190"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

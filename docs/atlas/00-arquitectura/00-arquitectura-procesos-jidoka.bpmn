@@ -1,0 +1,200 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_00_Arquitectura" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2">
+  <bpmn:process id="Process_SeleccionarFamilia" name="Arquitectura de procesos de Jidoka" isExecutable="false">
+    <bpmn:documentation>Mapa de navegación. No implica que las cuatro familias se ejecuten en secuencia.</bpmn:documentation>
+    <bpmn:startEvent id="Start_Necesidad" name="Necesidad de actuar con Jidoka">
+      <bpmn:outgoing>Flow_Start_Identificar</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Task_Identificar" name="Identificar la necesidad operativa">
+      <bpmn:incoming>Flow_Start_Identificar</bpmn:incoming>
+      <bpmn:outgoing>Flow_Identificar_Gateway</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_Familia" name="¿Qué necesitas hacer?">
+      <bpmn:outgoing>Flow_Gateway_1</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Gateway_2</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Gateway_3</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Gateway_4</bpmn:outgoing>
+      <bpmn:incoming>Flow_Identificar_Gateway</bpmn:incoming>
+    </bpmn:exclusiveGateway>
+    <bpmn:callActivity id="Call_OperarSesion" name="[01] Operar una sesión y entregar un incremento" calledElement="Process_OperarSesion">
+      <bpmn:documentation>Proceso externo: Process_OperarSesion | Archivo: 00-arquitectura/01-operar-sesion-entregar-incremento.bpmn</bpmn:documentation>
+      <bpmn:incoming>Flow_Gateway_1</bpmn:incoming>
+      <bpmn:outgoing>Flow_Call_OperarSesion_End</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_OperarSesion">
+      <bpmn:text>Archivo: 00-arquitectura/01-operar-sesion-entregar-incremento.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_OperarSesion" sourceRef="Annotation_Call_OperarSesion" targetRef="Call_OperarSesion"/>
+    <bpmn:endEvent id="End_Operar" name="Familia de sesión seleccionada">
+      <bpmn:incoming>Flow_Call_OperarSesion_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_Gateway_1" sourceRef="Gateway_Familia" targetRef="Call_OperarSesion" name="Sesión / entrega"/>
+    <bpmn:sequenceFlow id="Flow_Call_OperarSesion_End" sourceRef="Call_OperarSesion" targetRef="End_Operar"/>
+    <bpmn:callActivity id="Call_InstalarMantener" name="[02] Instalar o mantener el método" calledElement="Process_InstalarMantener">
+      <bpmn:documentation>Proceso externo: Process_InstalarMantener | Archivo: 00-arquitectura/02-instalar-mantener-metodo.bpmn</bpmn:documentation>
+      <bpmn:incoming>Flow_Gateway_2</bpmn:incoming>
+      <bpmn:outgoing>Flow_Call_InstalarMantener_End</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_InstalarMantener">
+      <bpmn:text>Archivo: 00-arquitectura/02-instalar-mantener-metodo.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_InstalarMantener" sourceRef="Annotation_Call_InstalarMantener" targetRef="Call_InstalarMantener"/>
+    <bpmn:endEvent id="End_Instalar" name="Familia de instalación/mantenimiento seleccionada">
+      <bpmn:incoming>Flow_Call_InstalarMantener_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_Gateway_2" sourceRef="Gateway_Familia" targetRef="Call_InstalarMantener" name="Adopción / motor"/>
+    <bpmn:sequenceFlow id="Flow_Call_InstalarMantener_End" sourceRef="Call_InstalarMantener" targetRef="End_Instalar"/>
+    <bpmn:callActivity id="Call_AuditarHomologar" name="[03] Auditar, aprender u homologar" calledElement="Process_AuditarHomologar">
+      <bpmn:documentation>Proceso externo: Process_AuditarHomologar | Archivo: 00-arquitectura/03-auditar-aprender-homologar.bpmn</bpmn:documentation>
+      <bpmn:incoming>Flow_Gateway_3</bpmn:incoming>
+      <bpmn:outgoing>Flow_Call_AuditarHomologar_End</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_AuditarHomologar">
+      <bpmn:text>Archivo: 00-arquitectura/03-auditar-aprender-homologar.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_AuditarHomologar" sourceRef="Annotation_Call_AuditarHomologar" targetRef="Call_AuditarHomologar"/>
+    <bpmn:endEvent id="End_Auditar" name="Familia de auditoría/aprendizaje seleccionada">
+      <bpmn:incoming>Flow_Call_AuditarHomologar_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_Gateway_3" sourceRef="Gateway_Familia" targetRef="Call_AuditarHomologar" name="Auditoría / aprendizaje"/>
+    <bpmn:sequenceFlow id="Flow_Call_AuditarHomologar_End" sourceRef="Call_AuditarHomologar" targetRef="End_Auditar"/>
+    <bpmn:callActivity id="Call_Publicar" name="[04] Publicar una versión de Jidoka" calledElement="Process_PublicarJidoka">
+      <bpmn:documentation>Proceso externo: Process_PublicarJidoka | Archivo: 00-arquitectura/04-publicar-jidoka.bpmn</bpmn:documentation>
+      <bpmn:incoming>Flow_Gateway_4</bpmn:incoming>
+      <bpmn:outgoing>Flow_Call_Publicar_End</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_Publicar">
+      <bpmn:text>Archivo: 00-arquitectura/04-publicar-jidoka.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Publicar" sourceRef="Annotation_Call_Publicar" targetRef="Call_Publicar"/>
+    <bpmn:endEvent id="End_Publicar" name="Familia de publicación seleccionada">
+      <bpmn:incoming>Flow_Call_Publicar_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_Gateway_4" sourceRef="Gateway_Familia" targetRef="Call_Publicar" name="Release"/>
+    <bpmn:sequenceFlow id="Flow_Call_Publicar_End" sourceRef="Call_Publicar" targetRef="End_Publicar"/>
+    <bpmn:sequenceFlow id="Flow_Start_Identificar" sourceRef="Start_Necesidad" targetRef="Task_Identificar"/>
+    <bpmn:sequenceFlow id="Flow_Identificar_Gateway" sourceRef="Task_Identificar" targetRef="Gateway_Familia"/>
+    <bpmn:textAnnotation id="Annotation_Leyenda">
+      <bpmn:text>LEYENDA
+Borde grueso = Call Activity: abre otro archivo.
+Símbolo + = subproceso embebido: detalle dentro del mismo archivo.
+Tarea normal = paso atómico en este nivel.</bpmn:text>
+    </bpmn:textAnnotation>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_00_Arquitectura">
+    <bpmndi:BPMNPlane id="Plane_Diagram_00_Arquitectura" bpmnElement="Process_SeleccionarFamilia">
+      <bpmndi:BPMNShape id="Shape_Start_Necesidad" bpmnElement="Start_Necesidad">
+        <dc:Bounds x="120" y="300" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Identificar" bpmnElement="Task_Identificar">
+        <dc:Bounds x="210" y="278" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Familia" bpmnElement="Gateway_Familia" isMarkerVisible="true">
+        <dc:Bounds x="440" y="293" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Call_OperarSesion" bpmnElement="Call_OperarSesion">
+        <dc:Bounds x="580" y="80" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_OperarSesion" bpmnElement="Annotation_Call_OperarSesion">
+        <dc:Bounds x="580" y="178" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_OperarSesion" bpmnElement="Association_Annotation_Call_OperarSesion">
+        <di:waypoint x="690.0" y="178"/>
+        <di:waypoint x="690.0" y="168"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_Operar" bpmnElement="End_Operar">
+        <dc:Bounds x="880" y="103" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_Gateway_1" bpmnElement="Flow_Gateway_1">
+        <di:waypoint x="490" y="318"/>
+        <di:waypoint x="530" y="318"/>
+        <di:waypoint x="530" y="121"/>
+        <di:waypoint x="580" y="121"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Call_OperarSesion_End" bpmnElement="Flow_Call_OperarSesion_End">
+        <di:waypoint x="770" y="121"/>
+        <di:waypoint x="880" y="121"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Call_InstalarMantener" bpmnElement="Call_InstalarMantener">
+        <dc:Bounds x="580" y="230" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_InstalarMantener" bpmnElement="Annotation_Call_InstalarMantener">
+        <dc:Bounds x="580" y="328" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_InstalarMantener" bpmnElement="Association_Annotation_Call_InstalarMantener">
+        <di:waypoint x="690.0" y="328"/>
+        <di:waypoint x="690.0" y="318"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_Instalar" bpmnElement="End_Instalar">
+        <dc:Bounds x="880" y="253" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_Gateway_2" bpmnElement="Flow_Gateway_2">
+        <di:waypoint x="490" y="318"/>
+        <di:waypoint x="530" y="318"/>
+        <di:waypoint x="530" y="271"/>
+        <di:waypoint x="580" y="271"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Call_InstalarMantener_End" bpmnElement="Flow_Call_InstalarMantener_End">
+        <di:waypoint x="770" y="271"/>
+        <di:waypoint x="880" y="271"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Call_AuditarHomologar" bpmnElement="Call_AuditarHomologar">
+        <dc:Bounds x="580" y="380" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_AuditarHomologar" bpmnElement="Annotation_Call_AuditarHomologar">
+        <dc:Bounds x="580" y="478" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_AuditarHomologar" bpmnElement="Association_Annotation_Call_AuditarHomologar">
+        <di:waypoint x="690.0" y="478"/>
+        <di:waypoint x="690.0" y="468"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_Auditar" bpmnElement="End_Auditar">
+        <dc:Bounds x="880" y="403" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_Gateway_3" bpmnElement="Flow_Gateway_3">
+        <di:waypoint x="490" y="318"/>
+        <di:waypoint x="530" y="318"/>
+        <di:waypoint x="530" y="421"/>
+        <di:waypoint x="580" y="421"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Call_AuditarHomologar_End" bpmnElement="Flow_Call_AuditarHomologar_End">
+        <di:waypoint x="770" y="421"/>
+        <di:waypoint x="880" y="421"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Call_Publicar" bpmnElement="Call_Publicar">
+        <dc:Bounds x="580" y="530" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Publicar" bpmnElement="Annotation_Call_Publicar">
+        <dc:Bounds x="580" y="628" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Publicar" bpmnElement="Association_Annotation_Call_Publicar">
+        <di:waypoint x="690.0" y="628"/>
+        <di:waypoint x="690.0" y="618"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_Publicar" bpmnElement="End_Publicar">
+        <dc:Bounds x="880" y="553" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Flow_Gateway_4" bpmnElement="Flow_Gateway_4">
+        <di:waypoint x="490" y="318"/>
+        <di:waypoint x="530" y="318"/>
+        <di:waypoint x="530" y="571"/>
+        <di:waypoint x="580" y="571"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Call_Publicar_End" bpmnElement="Flow_Call_Publicar_End">
+        <di:waypoint x="770" y="571"/>
+        <di:waypoint x="880" y="571"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Start_Identificar" bpmnElement="Flow_Start_Identificar">
+        <di:waypoint x="156" y="318"/>
+        <di:waypoint x="210" y="318"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Identificar_Gateway" bpmnElement="Flow_Identificar_Gateway">
+        <di:waypoint x="380" y="318"/>
+        <di:waypoint x="440" y="318"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Annotation_Leyenda" bpmnElement="Annotation_Leyenda">
+        <dc:Bounds x="1040" y="220" width="330" height="140"/>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

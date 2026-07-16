@@ -1,0 +1,8 @@
+{
+  // Editar los diagramas del atlas (docs/atlas/*.bpmn, *.dmn) con un editor visual
+  // dentro de VS Code, con diff visual en los PRs. Apache-2.0.
+  // Alternativas sin VS Code: Camunda Modeler (escritorio) o demo.bpmn.io (arrastrar y soltar).
+  "recommendations": [
+    "miragon-gmbh.vs-code-bpmn-modeler"
+  ]
+}

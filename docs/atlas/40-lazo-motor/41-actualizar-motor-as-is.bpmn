@@ -1,0 +1,177 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_41_Actualizar" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2">
+  <bpmn:process id="Process_ActualizarMotor" name="Actualizar motor con conciencia de tres vías" isExecutable="false">
+    <bpmn:documentation>Fuente: tools/instalar.ps1 -Actualizar</bpmn:documentation>
+    <bpmn:startEvent id="Start" name="Actualización solicitada">
+      <bpmn:outgoing>F1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Task_Leer" name="Leer manifiesto, sello y exclusiones">
+      <bpmn:incoming>F1</bpmn:incoming>
+      <bpmn:outgoing>F2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_Pieza" name="Tomar siguiente pieza de mecánica">
+      <bpmn:incoming>F2</bpmn:incoming>
+      <bpmn:outgoing>F3</bpmn:outgoing>
+      <bpmn:incoming>F_Mas_Si</bpmn:incoming>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_Estado" name="¿Estado de la pieza?">
+      <bpmn:incoming>F3</bpmn:incoming>
+      <bpmn:outgoing>F_G_0</bpmn:outgoing>
+      <bpmn:outgoing>F_G_1</bpmn:outgoing>
+      <bpmn:outgoing>F_G_2</bpmn:outgoing>
+      <bpmn:outgoing>F_G_3</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_Agregar" name="Agregar pieza ausente">
+      <bpmn:incoming>F_G_0</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Agregar_Mas</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_AlDia" name="Conservar pieza al día">
+      <bpmn:incoming>F_G_1</bpmn:incoming>
+      <bpmn:outgoing>F_Task_AlDia_Mas</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_Actualizar" name="Actualizar pieza no modificada por el hijo">
+      <bpmn:incoming>F_G_2</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Actualizar_Mas</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_Diverge" name="Preservar personalización y dejar .jidoka-nuevo">
+      <bpmn:incoming>F_G_3</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Diverge_Mas</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_Mas" name="¿Quedan piezas?">
+      <bpmn:incoming>F_Task_Agregar_Mas</bpmn:incoming>
+      <bpmn:incoming>F_Task_AlDia_Mas</bpmn:incoming>
+      <bpmn:incoming>F_Task_Actualizar_Mas</bpmn:incoming>
+      <bpmn:incoming>F_Task_Diverge_Mas</bpmn:incoming>
+      <bpmn:outgoing>F_Mas_Si</bpmn:outgoing>
+      <bpmn:outgoing>F_Mas_No</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_Sello" name="Actualizar sello y resumir divergencias">
+      <bpmn:incoming>F_Mas_No</bpmn:incoming>
+      <bpmn:outgoing>F_Sello_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="End" name="Motor actualizado; instancia intacta">
+      <bpmn:incoming>F_Sello_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F1" sourceRef="Start" targetRef="Task_Leer"/>
+    <bpmn:sequenceFlow id="F2" sourceRef="Task_Leer" targetRef="Task_Pieza"/>
+    <bpmn:sequenceFlow id="F3" sourceRef="Task_Pieza" targetRef="Gateway_Estado"/>
+    <bpmn:sequenceFlow id="F_G_0" sourceRef="Gateway_Estado" targetRef="Task_Agregar" name="Ausente"/>
+    <bpmn:sequenceFlow id="F_Task_Agregar_Mas" sourceRef="Task_Agregar" targetRef="Gateway_Mas"/>
+    <bpmn:sequenceFlow id="F_G_1" sourceRef="Gateway_Estado" targetRef="Task_AlDia" name="Igual a Jidoka"/>
+    <bpmn:sequenceFlow id="F_Task_AlDia_Mas" sourceRef="Task_AlDia" targetRef="Gateway_Mas"/>
+    <bpmn:sequenceFlow id="F_G_2" sourceRef="Gateway_Estado" targetRef="Task_Actualizar" name="Igual a semilla"/>
+    <bpmn:sequenceFlow id="F_Task_Actualizar_Mas" sourceRef="Task_Actualizar" targetRef="Gateway_Mas"/>
+    <bpmn:sequenceFlow id="F_G_3" sourceRef="Gateway_Estado" targetRef="Task_Diverge" name="Personalizada"/>
+    <bpmn:sequenceFlow id="F_Task_Diverge_Mas" sourceRef="Task_Diverge" targetRef="Gateway_Mas"/>
+    <bpmn:sequenceFlow id="F_Mas_Si" sourceRef="Gateway_Mas" targetRef="Task_Pieza" name="Sí"/>
+    <bpmn:sequenceFlow id="F_Mas_No" sourceRef="Gateway_Mas" targetRef="Task_Sello" name="No"/>
+    <bpmn:sequenceFlow id="F_Sello_End" sourceRef="Task_Sello" targetRef="End"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_41_Actualizar">
+    <bpmndi:BPMNPlane id="Plane_Diagram_41_Actualizar" bpmnElement="Process_ActualizarMotor">
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="Start">
+        <dc:Bounds x="80" y="260" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Leer" bpmnElement="Task_Leer">
+        <dc:Bounds x="180" y="238" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Pieza" bpmnElement="Task_Pieza">
+        <dc:Bounds x="410" y="238" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Estado" bpmnElement="Gateway_Estado" isMarkerVisible="true">
+        <dc:Bounds x="650" y="253" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Agregar" bpmnElement="Task_Agregar">
+        <dc:Bounds x="790" y="70" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_AlDia" bpmnElement="Task_AlDia">
+        <dc:Bounds x="790" y="190" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Actualizar" bpmnElement="Task_Actualizar">
+        <dc:Bounds x="790" y="310" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Diverge" bpmnElement="Task_Diverge">
+        <dc:Bounds x="790" y="430" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Mas" bpmnElement="Gateway_Mas" isMarkerVisible="true">
+        <dc:Bounds x="1050" y="253" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Sello" bpmnElement="Task_Sello">
+        <dc:Bounds x="1180" y="238" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End" bpmnElement="End">
+        <dc:Bounds x="1420" y="260" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F1" bpmnElement="F1">
+        <di:waypoint x="116" y="278"/>
+        <di:waypoint x="180" y="278"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F2" bpmnElement="F2">
+        <di:waypoint x="350" y="278"/>
+        <di:waypoint x="410" y="278"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F3" bpmnElement="F3">
+        <di:waypoint x="580" y="278"/>
+        <di:waypoint x="650" y="278"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_G_0" bpmnElement="F_G_0">
+        <di:waypoint x="675" y="253"/>
+        <di:waypoint x="720" y="253"/>
+        <di:waypoint x="720" y="110"/>
+        <di:waypoint x="790" y="110"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Agregar_Mas" bpmnElement="F_Task_Agregar_Mas">
+        <di:waypoint x="960" y="110"/>
+        <di:waypoint x="1075" y="110"/>
+        <di:waypoint x="1075" y="253"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_G_1" bpmnElement="F_G_1">
+        <di:waypoint x="675" y="253"/>
+        <di:waypoint x="720" y="253"/>
+        <di:waypoint x="720" y="230"/>
+        <di:waypoint x="790" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Task_AlDia_Mas" bpmnElement="F_Task_AlDia_Mas">
+        <di:waypoint x="960" y="230"/>
+        <di:waypoint x="1075" y="230"/>
+        <di:waypoint x="1075" y="253"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_G_2" bpmnElement="F_G_2">
+        <di:waypoint x="675" y="303"/>
+        <di:waypoint x="720" y="303"/>
+        <di:waypoint x="720" y="350"/>
+        <di:waypoint x="790" y="350"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Actualizar_Mas" bpmnElement="F_Task_Actualizar_Mas">
+        <di:waypoint x="960" y="350"/>
+        <di:waypoint x="1075" y="350"/>
+        <di:waypoint x="1075" y="303"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_G_3" bpmnElement="F_G_3">
+        <di:waypoint x="675" y="303"/>
+        <di:waypoint x="720" y="303"/>
+        <di:waypoint x="720" y="470"/>
+        <di:waypoint x="790" y="470"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Diverge_Mas" bpmnElement="F_Task_Diverge_Mas">
+        <di:waypoint x="960" y="470"/>
+        <di:waypoint x="1075" y="470"/>
+        <di:waypoint x="1075" y="303"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Mas_Si" bpmnElement="F_Mas_Si">
+        <di:waypoint x="1075" y="303"/>
+        <di:waypoint x="1075" y="560"/>
+        <di:waypoint x="495" y="560"/>
+        <di:waypoint x="495" y="318"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Mas_No" bpmnElement="F_Mas_No">
+        <di:waypoint x="1100" y="278"/>
+        <di:waypoint x="1180" y="278"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Sello_End" bpmnElement="F_Sello_End">
+        <di:waypoint x="1350" y="278"/>
+        <di:waypoint x="1420" y="278"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

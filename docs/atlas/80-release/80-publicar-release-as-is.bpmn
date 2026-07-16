@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_80_Publicar" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2">
+  <bpmn:process id="Process_PublicarRelease" name="Publicar una versión de Jidoka" isExecutable="false">
+    <bpmn:documentation>Fuente: tools/publicar.ps1</bpmn:documentation>
+    <bpmn:startEvent id="Start" name="Inicio">
+      <bpmn:outgoing>F_Start_Task_LeerVersion</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Task_LeerVersion" name="Leer versión del SSOT">
+      <bpmn:incoming>F_Start_Task_LeerVersion</bpmn:incoming>
+      <bpmn:outgoing>F_Task_LeerVersion_Task_Notas</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="F_Start_Task_LeerVersion" sourceRef="Start" targetRef="Task_LeerVersion"/>
+    <bpmn:serviceTask id="Task_Notas" name="Derivar título y notas del CHANGELOG">
+      <bpmn:incoming>F_Task_LeerVersion_Task_Notas</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Notas_Task_Guardas</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="F_Task_LeerVersion_Task_Notas" sourceRef="Task_LeerVersion" targetRef="Task_Notas"/>
+    <bpmn:serviceTask id="Task_Guardas" name="Verificar main, árbol limpio y tag ausente">
+      <bpmn:incoming>F_Task_Notas_Task_Guardas</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Guardas_Task_Release</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="F_Task_Notas_Task_Guardas" sourceRef="Task_Notas" targetRef="Task_Guardas"/>
+    <bpmn:serviceTask id="Task_Release" name="Crear tag y GitHub release">
+      <bpmn:incoming>F_Task_Guardas_Task_Release</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Release_Task_Confirmar</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="F_Task_Guardas_Task_Release" sourceRef="Task_Guardas" targetRef="Task_Release"/>
+    <bpmn:task id="Task_Confirmar" name="Confirmar publicación">
+      <bpmn:incoming>F_Task_Release_Task_Confirmar</bpmn:incoming>
+      <bpmn:outgoing>F_Task_Confirmar_End</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="F_Task_Release_Task_Confirmar" sourceRef="Task_Release" targetRef="Task_Confirmar"/>
+    <bpmn:endEvent id="End" name="Release publicado">
+      <bpmn:incoming>F_Task_Confirmar_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_Task_Confirmar_End" sourceRef="Task_Confirmar" targetRef="End"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_80_Publicar">
+    <bpmndi:BPMNPlane id="Plane_Diagram_80_Publicar" bpmnElement="Process_PublicarRelease">
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="Start">
+        <dc:Bounds x="80" y="220" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_LeerVersion" bpmnElement="Task_LeerVersion">
+        <dc:Bounds x="180" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Start_Task_LeerVersion" bpmnElement="F_Start_Task_LeerVersion">
+        <di:waypoint x="116" y="238"/>
+        <di:waypoint x="180" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Notas" bpmnElement="Task_Notas">
+        <dc:Bounds x="410" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_LeerVersion_Task_Notas" bpmnElement="F_Task_LeerVersion_Task_Notas">
+        <di:waypoint x="350" y="238"/>
+        <di:waypoint x="410" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Guardas" bpmnElement="Task_Guardas">
+        <dc:Bounds x="640" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Notas_Task_Guardas" bpmnElement="F_Task_Notas_Task_Guardas">
+        <di:waypoint x="580" y="238"/>
+        <di:waypoint x="640" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Release" bpmnElement="Task_Release">
+        <dc:Bounds x="870" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Guardas_Task_Release" bpmnElement="F_Task_Guardas_Task_Release">
+        <di:waypoint x="810" y="238"/>
+        <di:waypoint x="870" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Confirmar" bpmnElement="Task_Confirmar">
+        <dc:Bounds x="1100" y="198" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Release_Task_Confirmar" bpmnElement="F_Task_Release_Task_Confirmar">
+        <di:waypoint x="1040" y="238"/>
+        <di:waypoint x="1100" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End" bpmnElement="End">
+        <dc:Bounds x="1330" y="220" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Task_Confirmar_End" bpmnElement="F_Task_Confirmar_End">
+        <di:waypoint x="1270" y="238"/>
+        <di:waypoint x="1330" y="238"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
