@@ -1,0 +1,217 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_02_InstalarMantener" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:process id="Process_InstalarMantener" name="Instalar o mantener el método Jidoka" isExecutable="false">
+    <bpmn:documentation>Mapa de familia. Cada rama es una necesidad distinta.</bpmn:documentation>
+    <bpmn:startEvent id="Start_Nec" name="Necesidad de adoptar o mantener Jidoka">
+      <bpmn:outgoing>F_Start_G</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="Gateway_Nec" name="¿Qué necesitas?">
+      <bpmn:outgoing>F_G_0</bpmn:outgoing>
+      <bpmn:outgoing>F_G_1</bpmn:outgoing>
+      <bpmn:outgoing>F_G_2</bpmn:outgoing>
+      <bpmn:outgoing>F_G_3</bpmn:outgoing>
+      <bpmn:outgoing>F_G_4</bpmn:outgoing>
+      <bpmn:incoming>F_Start_G</bpmn:incoming>
+    </bpmn:exclusiveGateway>
+    <bpmn:callActivity id="Call_Instalar" name="[30] Instalar Jidoka" calledElement="Process_Instalar">
+      <bpmn:documentation>Proceso externo: Process_Instalar | Archivo: 30-instalacion/30-instalar-as-is.bpmn</bpmn:documentation>
+      <bpmn:incoming>F_G_0</bpmn:incoming>
+      <bpmn:outgoing>F_Call_Instalar_E</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_Instalar">
+      <bpmn:text>Archivo: 30-instalacion/30-instalar-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Instalar" sourceRef="Annotation_Call_Instalar" targetRef="Call_Instalar"/>
+    <bpmn:endEvent id="End_I" name="Método instalado">
+      <bpmn:incoming>F_Call_Instalar_E</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_G_0" sourceRef="Gateway_Nec" targetRef="Call_Instalar" name="Instalar"/>
+    <bpmn:sequenceFlow id="F_Call_Instalar_E" sourceRef="Call_Instalar" targetRef="End_I"/>
+    <bpmn:callActivity id="Call_Estado" name="[40] Consultar estado del motor" calledElement="Process_EstadoMotor">
+      <bpmn:documentation>Proceso externo: Process_EstadoMotor | Archivo: 40-lazo-motor/40-estado-motor-as-is.bpmn</bpmn:documentation>
+      <bpmn:incoming>F_G_1</bpmn:incoming>
+      <bpmn:outgoing>F_Call_Estado_E</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_Estado">
+      <bpmn:text>Archivo: 40-lazo-motor/40-estado-motor-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Estado" sourceRef="Annotation_Call_Estado" targetRef="Call_Estado"/>
+    <bpmn:endEvent id="End_E" name="Estado informado">
+      <bpmn:incoming>F_Call_Estado_E</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_G_1" sourceRef="Gateway_Nec" targetRef="Call_Estado" name="Consultar"/>
+    <bpmn:sequenceFlow id="F_Call_Estado_E" sourceRef="Call_Estado" targetRef="End_E"/>
+    <bpmn:callActivity id="Call_Actualizar" name="[41] Actualizar motor" calledElement="Process_ActualizarMotor">
+      <bpmn:documentation>Proceso externo: Process_ActualizarMotor | Archivo: 40-lazo-motor/41-actualizar-motor-as-is.bpmn</bpmn:documentation>
+      <bpmn:incoming>F_G_2</bpmn:incoming>
+      <bpmn:outgoing>F_Call_Actualizar_E</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_Actualizar">
+      <bpmn:text>Archivo: 40-lazo-motor/41-actualizar-motor-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Actualizar" sourceRef="Annotation_Call_Actualizar" targetRef="Call_Actualizar"/>
+    <bpmn:endEvent id="End_A" name="Motor actualizado o divergencias expuestas">
+      <bpmn:incoming>F_Call_Actualizar_E</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_G_2" sourceRef="Gateway_Nec" targetRef="Call_Actualizar" name="Actualizar"/>
+    <bpmn:sequenceFlow id="F_Call_Actualizar_E" sourceRef="Call_Actualizar" targetRef="End_A"/>
+    <bpmn:callActivity id="Call_Sellar" name="[42] Sellar motor convergido" calledElement="Process_SellarMotor">
+      <bpmn:documentation>Proceso externo: Process_SellarMotor | Archivo: 40-lazo-motor/42-sellar-motor-as-is.bpmn</bpmn:documentation>
+      <bpmn:incoming>F_G_3</bpmn:incoming>
+      <bpmn:outgoing>F_Call_Sellar_E</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_Sellar">
+      <bpmn:text>Archivo: 40-lazo-motor/42-sellar-motor-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Sellar" sourceRef="Annotation_Call_Sellar" targetRef="Call_Sellar"/>
+    <bpmn:endEvent id="End_S" name="Motor sellado">
+      <bpmn:incoming>F_Call_Sellar_E</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_G_3" sourceRef="Gateway_Nec" targetRef="Call_Sellar" name="Sellar"/>
+    <bpmn:sequenceFlow id="F_Call_Sellar_E" sourceRef="Call_Sellar" targetRef="End_S"/>
+    <bpmn:callActivity id="Call_Leccion" name="[44] Reportar lección" calledElement="Process_ReportarLeccion">
+      <bpmn:documentation>Proceso externo: Process_ReportarLeccion | Archivo: 40-lazo-motor/44-reportar-leccion-as-is.bpmn</bpmn:documentation>
+      <bpmn:incoming>F_G_4</bpmn:incoming>
+      <bpmn:outgoing>F_Call_Leccion_E</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_Leccion">
+      <bpmn:text>Archivo: 40-lazo-motor/44-reportar-leccion-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Leccion" sourceRef="Annotation_Call_Leccion" targetRef="Call_Leccion"/>
+    <bpmn:endEvent id="End_L" name="Lección registrada">
+      <bpmn:incoming>F_Call_Leccion_E</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_G_4" sourceRef="Gateway_Nec" targetRef="Call_Leccion" name="Reportar"/>
+    <bpmn:sequenceFlow id="F_Call_Leccion_E" sourceRef="Call_Leccion" targetRef="End_L"/>
+    <bpmn:sequenceFlow id="F_Start_G" sourceRef="Start_Nec" targetRef="Gateway_Nec"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_02_InstalarMantener">
+    <bpmndi:BPMNPlane id="Plane_Diagram_02_InstalarMantener" bpmnElement="Process_InstalarMantener">
+      <bpmndi:BPMNShape id="Shape_Start_Nec" bpmnElement="Start_Nec">
+        <dc:Bounds x="100" y="300" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Nec" bpmnElement="Gateway_Nec" isMarkerVisible="true">
+        <dc:Bounds x="230" y="293" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Call_Instalar" bpmnElement="Call_Instalar">
+        <dc:Bounds x="420" y="80" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Instalar" bpmnElement="Annotation_Call_Instalar">
+        <dc:Bounds x="420" y="178" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Instalar" bpmnElement="Association_Annotation_Call_Instalar">
+        <di:waypoint x="530.0" y="178"/>
+        <di:waypoint x="530.0" y="168"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_I" bpmnElement="End_I">
+        <dc:Bounds x="760" y="103" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_G_0" bpmnElement="F_G_0">
+        <di:waypoint x="280" y="318"/>
+        <di:waypoint x="330" y="318"/>
+        <di:waypoint x="330" y="121"/>
+        <di:waypoint x="420" y="121"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Call_Instalar_E" bpmnElement="F_Call_Instalar_E">
+        <di:waypoint x="610" y="121"/>
+        <di:waypoint x="760" y="121"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Call_Estado" bpmnElement="Call_Estado">
+        <dc:Bounds x="420" y="220" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Estado" bpmnElement="Annotation_Call_Estado">
+        <dc:Bounds x="420" y="318" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Estado" bpmnElement="Association_Annotation_Call_Estado">
+        <di:waypoint x="530.0" y="318"/>
+        <di:waypoint x="530.0" y="308"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_E" bpmnElement="End_E">
+        <dc:Bounds x="760" y="243" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_G_1" bpmnElement="F_G_1">
+        <di:waypoint x="280" y="318"/>
+        <di:waypoint x="330" y="318"/>
+        <di:waypoint x="330" y="261"/>
+        <di:waypoint x="420" y="261"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Call_Estado_E" bpmnElement="F_Call_Estado_E">
+        <di:waypoint x="610" y="261"/>
+        <di:waypoint x="760" y="261"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Call_Actualizar" bpmnElement="Call_Actualizar">
+        <dc:Bounds x="420" y="360" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Actualizar" bpmnElement="Annotation_Call_Actualizar">
+        <dc:Bounds x="420" y="458" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Actualizar" bpmnElement="Association_Annotation_Call_Actualizar">
+        <di:waypoint x="530.0" y="458"/>
+        <di:waypoint x="530.0" y="448"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_A" bpmnElement="End_A">
+        <dc:Bounds x="760" y="383" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_G_2" bpmnElement="F_G_2">
+        <di:waypoint x="280" y="318"/>
+        <di:waypoint x="330" y="318"/>
+        <di:waypoint x="330" y="401"/>
+        <di:waypoint x="420" y="401"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Call_Actualizar_E" bpmnElement="F_Call_Actualizar_E">
+        <di:waypoint x="610" y="401"/>
+        <di:waypoint x="760" y="401"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Call_Sellar" bpmnElement="Call_Sellar">
+        <dc:Bounds x="420" y="500" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Sellar" bpmnElement="Annotation_Call_Sellar">
+        <dc:Bounds x="420" y="598" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Sellar" bpmnElement="Association_Annotation_Call_Sellar">
+        <di:waypoint x="530.0" y="598"/>
+        <di:waypoint x="530.0" y="588"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_S" bpmnElement="End_S">
+        <dc:Bounds x="760" y="523" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_G_3" bpmnElement="F_G_3">
+        <di:waypoint x="280" y="318"/>
+        <di:waypoint x="330" y="318"/>
+        <di:waypoint x="330" y="541"/>
+        <di:waypoint x="420" y="541"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Call_Sellar_E" bpmnElement="F_Call_Sellar_E">
+        <di:waypoint x="610" y="541"/>
+        <di:waypoint x="760" y="541"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Call_Leccion" bpmnElement="Call_Leccion">
+        <dc:Bounds x="420" y="640" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Leccion" bpmnElement="Annotation_Call_Leccion">
+        <dc:Bounds x="420" y="738" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Leccion" bpmnElement="Association_Annotation_Call_Leccion">
+        <di:waypoint x="530.0" y="738"/>
+        <di:waypoint x="530.0" y="728"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_L" bpmnElement="End_L">
+        <dc:Bounds x="760" y="663" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_G_4" bpmnElement="F_G_4">
+        <di:waypoint x="280" y="318"/>
+        <di:waypoint x="330" y="318"/>
+        <di:waypoint x="330" y="681"/>
+        <di:waypoint x="420" y="681"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Call_Leccion_E" bpmnElement="F_Call_Leccion_E">
+        <di:waypoint x="610" y="681"/>
+        <di:waypoint x="760" y="681"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Start_G" bpmnElement="F_Start_G">
+        <di:waypoint x="136" y="318"/>
+        <di:waypoint x="230" y="318"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

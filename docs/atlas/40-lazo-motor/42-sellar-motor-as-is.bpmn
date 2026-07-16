@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_42_Sellar" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:collaboration id="Collab_Sellar">
+    <bpmn:participant id="Pool_Sellar" name="sellar (-Sellar) — clasificar pristina vs. customizada" processRef="Process_SellarMotor"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_SellarMotor" name="sellar el motor sin pisar personalizaciones" isExecutable="false">
+    <bpmn:documentation>Fuente: tools/instalar.ps1 -Sellar. Proceso de puro motor: clasifica cada pieza pristina vs. customizada y escribe el sello respetando las exclusiones.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_Sellar">
+      <bpmn:lane id="Lane_Motor" name="Motor Jidoka (script)">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Inventario</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Comparar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Escribir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="sellar solicitado">
+      <bpmn:outgoing>f1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="T_Inventario" name="Inventariar las piezas de mecánica">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_Comparar" name="Comparar el hijo contra Jidoka (pristina vs. customizada)">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_Escribir" name="Escribir el sello preservando las exclusiones">
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="End" name="Motor sellado sin pisar personalizaciones">
+      <bpmn:incoming>f4</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_Inventario"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_Inventario" targetRef="T_Comparar"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="T_Comparar" targetRef="T_Escribir"/>
+    <bpmn:sequenceFlow id="f4" sourceRef="T_Escribir" targetRef="End"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_42_Sellar">
+    <bpmndi:BPMNPlane id="Plane_42_Sellar" bpmnElement="Collab_Sellar">
+      <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Sellar" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="940" height="200"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneM" bpmnElement="Lane_Motor" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="910" height="200"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
+        <dc:Bounds x="210" y="165" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="196" y="198" width="60" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TInventario" bpmnElement="T_Inventario">
+        <dc:Bounds x="280" y="150" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TComparar" bpmnElement="T_Comparar">
+        <dc:Bounds x="490" y="150" width="180" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TEscribir" bpmnElement="T_Escribir">
+        <dc:Bounds x="720" y="150" width="180" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_End" bpmnElement="End">
+        <dc:Bounds x="950" y="165" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="925" y="198" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
+        <di:waypoint x="240" y="180"/>
+        <di:waypoint x="280" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
+        <di:waypoint x="440" y="180"/>
+        <di:waypoint x="490" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
+        <di:waypoint x="670" y="180"/>
+        <di:waypoint x="720" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f4" bpmnElement="f4">
+        <di:waypoint x="900" y="180"/>
+        <di:waypoint x="950" y="180"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

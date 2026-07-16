@@ -1,0 +1,139 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_13_Construye" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:collaboration id="Collab_Construye">
+    <bpmn:participant id="Pool_Construye" name="Construir una rebanada — el lazo (kanban/lazo.md)" processRef="Process_Construye"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Construye" name="Construir una rebanada: Intención → Construcción → Verificación → Registro" isExecutable="false">
+    <bpmn:documentation>Fuente: kanban/lazo.md y el ritual de sprint. Carriles: el Agente construye y verifica; el push espera el OK del Humano.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_Construye">
+      <bpmn:lane id="Lane_Agente" name="Agente (constructor)">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Intencion</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Construir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Verificar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Verde</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Registrar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Humano" name="Humano (dueño)">
+        <bpmn:flowNodeRef>U_OKPush</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="Rebanada a construir">
+      <bpmn:outgoing>f1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="T_Intencion" name="Intención: capacidad y criterios (Dado/cuando/entonces) ANTES del código">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="T_Construir" name="Construcción: rebanadas verticales, cada una commiteable y verde">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:incoming>f_no</bpmn:incoming>
+      <bpmn:outgoing>f3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:serviceTask id="T_Verificar" name="Verificación: criterios → tests y correr la app">
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Verde" name="¿Verde? (el artefacto, no la palabra)">
+      <bpmn:incoming>f4</bpmn:incoming>
+      <bpmn:outgoing>f_no</bpmn:outgoing>
+      <bpmn:outgoing>f_si</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="T_Registrar" name="Registro por caducidad: ADR / CHANGELOG / HANDOFF">
+      <bpmn:incoming>f_si</bpmn:incoming>
+      <bpmn:outgoing>f_reg_ok</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:userTask id="U_OKPush" name="OK humano para el push">
+      <bpmn:incoming>f_reg_ok</bpmn:incoming>
+      <bpmn:outgoing>f_ok_end</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="End" name="Rebanada consolidada (verde + registrada)">
+      <bpmn:incoming>f_ok_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_Intencion"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_Intencion" targetRef="T_Construir"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="T_Construir" targetRef="T_Verificar"/>
+    <bpmn:sequenceFlow id="f4" sourceRef="T_Verificar" targetRef="Gw_Verde"/>
+    <bpmn:sequenceFlow id="f_no" name="no" sourceRef="Gw_Verde" targetRef="T_Construir"/>
+    <bpmn:sequenceFlow id="f_si" name="sí" sourceRef="Gw_Verde" targetRef="T_Registrar"/>
+    <bpmn:sequenceFlow id="f_reg_ok" sourceRef="T_Registrar" targetRef="U_OKPush"/>
+    <bpmn:sequenceFlow id="f_ok_end" sourceRef="U_OKPush" targetRef="End"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_13_Construye">
+    <bpmndi:BPMNPlane id="Plane_13_Construye" bpmnElement="Collab_Construye">
+      <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Construye" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1420" height="400"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneA" bpmnElement="Lane_Agente" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1390" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneH" bpmnElement="Lane_Humano" isHorizontal="true">
+        <dc:Bounds x="190" y="330" width="1390" height="150"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
+        <dc:Bounds x="210" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="192" y="218" width="70" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TIntencion" bpmnElement="T_Intencion">
+        <dc:Bounds x="280" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TConstruir" bpmnElement="T_Construir">
+        <dc:Bounds x="490" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TVerificar" bpmnElement="T_Verificar">
+        <dc:Bounds x="700" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwVerde" bpmnElement="Gw_Verde" isMarkerVisible="true">
+        <dc:Bounds x="910" y="180" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="895" y="143" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TRegistrar" bpmnElement="T_Registrar">
+        <dc:Bounds x="1010" y="170" width="170" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_UOKPush" bpmnElement="U_OKPush">
+        <dc:Bounds x="1240" y="375" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_End" bpmnElement="End">
+        <dc:Bounds x="1460" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1435" y="218" width="90" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
+        <di:waypoint x="240" y="200"/>
+        <di:waypoint x="280" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
+        <di:waypoint x="440" y="200"/>
+        <di:waypoint x="490" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
+        <di:waypoint x="650" y="200"/>
+        <di:waypoint x="700" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f4" bpmnElement="f4">
+        <di:waypoint x="860" y="200"/>
+        <di:waypoint x="910" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_no" bpmnElement="f_no">
+        <di:waypoint x="930" y="180"/>
+        <di:waypoint x="930" y="120"/>
+        <di:waypoint x="570" y="120"/>
+        <di:waypoint x="570" y="170"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_si" bpmnElement="f_si">
+        <di:waypoint x="950" y="200"/>
+        <di:waypoint x="1010" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_reg_ok" bpmnElement="f_reg_ok">
+        <di:waypoint x="1180" y="200"/>
+        <di:waypoint x="1315" y="200"/>
+        <di:waypoint x="1315" y="375"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_ok_end" bpmnElement="f_ok_end">
+        <di:waypoint x="1390" y="405"/>
+        <di:waypoint x="1475" y="405"/>
+        <di:waypoint x="1475" y="215"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

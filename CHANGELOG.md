@@ -2,9 +2,9 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
-## [1.17.0] — 2026-07-16
+## [1.18.0] — 2026-07-16
 
-### La bajada que dolió — cosecha #7 del lazo (issues #86–#91 + #82, ADR 0035)
+### La bajada que dolió — cosecha #7 del lazo (issues #86–#91 + #82, ADR 0037)
 
 Seis issues llegados en batch de la primera bajada real 1.13→1.16 en un hijo instalado (caso 1). Plan-contrato: `docs/sprints/sprint-cosecha-7-plan.md`.
 
@@ -12,6 +12,42 @@ Seis issues llegados en batch de la primera bajada real 1.13→1.16 en un hijo i
 - **`fix` — el juez sin hueco (R2, #88).** `no-borres-el-motor` solo acepta como "ADR nuevo" los **agregados** de verdad (`--diff-filter=A` + `-AgregadosInyectados`): un ADR editado —o borrado— ya no destraba borrar una pieza del motor. 2 casos negativos nuevos en `probar-gate` (14/14).
 - **`feat`/`fix` — mecánica menor (R3, #89/#90/#91).** Guard del manifiesto sin `stubs` en `sembrar-manual` (+ caso regresivo: `@($null)` de PS 5.1 ya no revienta la siembra a medias); **costura `.local` del CI**: `andon.yml` invoca `tools/ci.local.ps1` si existe (espejo de `verificar.local.ps1` — la customización del hijo deja de re-divergir en cada bajada) con tabla de costuras en la guía; el sello se escribe con newline final (4 sitios + check). El "resumen doble" del #91 **no reproduce** en corrida real: artefacto de captura, acusado en el issue.
 - **Evidencia:** `qa_runs/cosecha-7-20260716/LOG.md` — suite completa verde (instalador 67/67, sembrar 36/36, gate 14/14) + demo de migración end-to-end sobre un hijo 1.16.1 real.
+- **Nota de numeración:** esta cosecha se construyó en paralelo al atlas (`v1.17.0`, ADRs 0035/0036): su ADR nació como 0035 y se renumeró a **0037** al reconciliar; la versión pasó de 1.17.0 a **1.18.0**.
+
+## [1.17.0] — 2026-07-16
+
+### El atlas de procesos del método vive en el repo, en BPMN (ADR 0035)
+
+El método se documenta como diagrama de proceso navegable, versionado en `docs/atlas/`. BPMN ganó un bake-off de 3 formatos (BPMN vs Mermaid vs D2) por fidelidad de swimlanes: es el único que dibuja los carriles agente/humano como bandas reales — y ese reparto es el corazón de Jidoka.
+
+- **`docs` — atlas importado a `docs/atlas/`** (25 BPMN + 1 DMN + índice `RELACIONES.csv`), limpio de la copia duplicada anidada con que llegó. Interno: no entra a `docs/guias/`, no se publica a npm.
+- **`feat` — toolchain del atlas** (`docs/atlas/tools/`): `atlas:validate` (sin dependencias; verifica que todo `calledElement` resuelva y toda Call Activity esté en el CSV), `atlas:render` (SVG por `npx bpmn-to-image`, on-demand para no bajar Chromium en cada `npm install`), `atlas:layout` (`bpmn-auto-layout`, geometría automática). Scripts en `package.json`; `bpmn-auto-layout` como única `devDependency`.
+- **`feat` — `16-cierra` re-modelado como patrón:** pool con carriles Agente/Humano, tareas de servicio (agente) y de usuario (`OK del dueño`), gateways `¿motor sano y sin drift?` (con lazo de corrección sin `--no-verify`) y `¿entrega versión?`. Los otros 19 diagramas siguen happy-path (siguiente lote).
+- **`chore` — recomendación de editor** (`.vscode/extensions.json`: Miragon BPMN Modeler) con excepción en `.gitignore` para que viaje con el repo.
+- **`docs` — ADR 0035** (aceptado) y guía de colaboración en `docs/atlas/README.md` (convención BPMN-formal / Mermaid-borrador).
+
+### El atlas se acopla al flujo (aviso comando→diagrama) y se homologa a WYSIWYG (ADR 0036)
+
+Decidido el acoplamiento **asimétrico**: el proceso (el `.md` del comando) es la fuente; prosa y diagrama son dos vistas; el código es implementación. Se descarta el acoplamiento simétrico de tres vías (fatiga, choca con el un-solo-bloqueo del manifiesto).
+
+- **`feat` — área `atlas` en `tools/blast-radius.json`:** tocar un comando `/jidoka:*` **avisa** (no bloquea) revisar su diagrama en `docs/atlas/` (que lo declara como `Fuente`). El bloqueo no se cablea (regla 2-3: se gana con drift real). `probar-gate` sigue 10/10; `andon/README.md` actualizado (9 áreas).
+- **`feat` — `atlas:sellar`** (`docs/atlas/tools/sellar-plataforma.mjs`): escribe `modeler:executionPlatform` (Camunda 7) en los `.bpmn`/`.dmn` para que el editor visual los abra directo, sin preguntar la plataforma en cada archivo.
+- **`refactor` — `10-arranca` homologado a WYSIWYG:** los dos subprocesos embebidos ahora se muestran **expandidos** en el lienzo (sin drill-down), consistente con el resto del atlas. Se elimina el único diagrama que exigía doble clic para ver su detalle.
+- **`chore` — `jidoka.code-workspace`** en la raíz: abre el repo con la extensión y la asociación de `.bpmn` al editor visual listas.
+
+### La familia del ritual, re-modelada completa (carriles + gateways)
+
+Los 9 diagramas de `10-ritual/` dejan de ser happy-path: cada uno se re-modeló desde su comando fuente con pool + carriles Agente/Humano, tareas de servicio (engrane) y de usuario (STOP), y gateways reales.
+
+- **`refactor`** — `11-descubre` (juez de verdad + aprobación nombrada), `12-planea` (niebla→Call Activity a descubre, STOP del QUÉ), `13-construye` (el lazo Intención→Construcción→Verificación→Registro con reintento y OK humano), `14-revisión` (review-stop + pre-push + el muro de CI), `15-gemba` (objetivo vs. checkpoint del cliente), `17-que-sigue` (proponer por valor, la señal la da el cliente), `18-desatendido` (las dos lanes agente/humano + click-it-down). `10-arranca` y `16-cierra` ya estaban.
+- Cada diagrama declara su `Fuente` (el aviso `atlas` del blast-radius apunta ahí). Los 25 SVG re-renderizados; `atlas:validate` sin huecos.
+
+### El atlas completo, sin happy-path: instalación, lazo-motor, auditoría y release
+
+Las 4 familias fuera del ritual (10 diagramas) se re-modelaron con carriles donde hay actor humano y gateways en las decisiones reales; los procesos de puro motor van en un carril único (honesto), no forzando un carril humano donde no lo hay.
+
+- **`refactor`** — `30-instalar` (arquetipo humano + gate del smoke), `40-estado-motor` (gateway de divergencia), `41-actualizar` (loop por pieza con el gateway de 4 estados: ausente/al día/actualizar/diverge), `42-sellar` (pipeline de motor), `44-reportar-leccion` (lab reporta / mantenedor decide construir-vs-diferir), `70-auditoría-en-rama` (fan-out + veredictos GO/NO-GO), `71-nocturna` (reparto ejecutar-vs-preparar), `72-homologación` (gateway de 3 destinos: ascender/esperar/descartar), `80-publicar` (guardas + OK nombrado del dueño), `81-preflight` (las 7 suites → gate verde/rojo).
+- **Con esto los 25 diagramas del atlas están re-modelados** (ninguno en happy-path). Cada uno inspeccionado a la vista; 25 SVG re-renderizados; `atlas:validate` sin huecos.
 
 ## [1.16.1] — 2026-07-16
 

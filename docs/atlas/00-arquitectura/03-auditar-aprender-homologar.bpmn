@@ -1,0 +1,141 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_03_AuditarHomologar" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:process id="Process_AuditarHomologar" name="Auditar, aprender u homologar" isExecutable="false">
+    <bpmn:documentation>Mapa de familia.</bpmn:documentation>
+    <bpmn:startEvent id="Start_Nec" name="Necesidad de revisar o cosechar aprendizaje">
+      <bpmn:outgoing>F_Start_G</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="Gateway_Nec" name="¿Qué necesitas?">
+      <bpmn:outgoing>F_G_0</bpmn:outgoing>
+      <bpmn:outgoing>F_G_1</bpmn:outgoing>
+      <bpmn:outgoing>F_G_2</bpmn:outgoing>
+      <bpmn:incoming>F_Start_G</bpmn:incoming>
+    </bpmn:exclusiveGateway>
+    <bpmn:callActivity id="Call_Auditar" name="[70] Auditar en rama" calledElement="Process_AuditoriaRama">
+      <bpmn:documentation>Proceso externo: Process_AuditoriaRama | Archivo: 70-auditoria/70-auditoria-en-rama-as-is.bpmn</bpmn:documentation>
+      <bpmn:incoming>F_G_0</bpmn:incoming>
+      <bpmn:outgoing>F_Call_Auditar_E</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_Auditar">
+      <bpmn:text>Archivo: 70-auditoria/70-auditoria-en-rama-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Auditar" sourceRef="Annotation_Call_Auditar" targetRef="Call_Auditar"/>
+    <bpmn:endEvent id="End_A" name="Auditoría sintetizada">
+      <bpmn:incoming>F_Call_Auditar_E</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_G_0" sourceRef="Gateway_Nec" targetRef="Call_Auditar" name="Auditar"/>
+    <bpmn:sequenceFlow id="F_Call_Auditar_E" sourceRef="Call_Auditar" targetRef="End_A"/>
+    <bpmn:callActivity id="Call_Noct" name="[71] Auditar sin humano presente" calledElement="Process_AuditoriaNocturna">
+      <bpmn:documentation>Proceso externo: Process_AuditoriaNocturna | Archivo: 70-auditoria/71-auditoria-nocturna-as-is.bpmn</bpmn:documentation>
+      <bpmn:incoming>F_G_1</bpmn:incoming>
+      <bpmn:outgoing>F_Call_Noct_E</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_Noct">
+      <bpmn:text>Archivo: 70-auditoria/71-auditoria-nocturna-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Noct" sourceRef="Annotation_Call_Noct" targetRef="Call_Noct"/>
+    <bpmn:endEvent id="End_N" name="Agenda y pendientes preparados">
+      <bpmn:incoming>F_Call_Noct_E</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_G_1" sourceRef="Gateway_Nec" targetRef="Call_Noct" name="Auditar desatendido"/>
+    <bpmn:sequenceFlow id="F_Call_Noct_E" sourceRef="Call_Noct" targetRef="End_N"/>
+    <bpmn:callActivity id="Call_Hom" name="[72] Homologar conocimiento al método" calledElement="Process_Homologacion">
+      <bpmn:documentation>Proceso externo: Process_Homologacion | Archivo: 70-auditoria/72-homologacion-as-is.bpmn</bpmn:documentation>
+      <bpmn:incoming>F_G_2</bpmn:incoming>
+      <bpmn:outgoing>F_Call_Hom_E</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_Hom">
+      <bpmn:text>Archivo: 70-auditoria/72-homologacion-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Hom" sourceRef="Annotation_Call_Hom" targetRef="Call_Hom"/>
+    <bpmn:endEvent id="End_H" name="Lección ascendida, diferida o descartada">
+      <bpmn:incoming>F_Call_Hom_E</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_G_2" sourceRef="Gateway_Nec" targetRef="Call_Hom" name="Homologar"/>
+    <bpmn:sequenceFlow id="F_Call_Hom_E" sourceRef="Call_Hom" targetRef="End_H"/>
+    <bpmn:sequenceFlow id="F_Start_G" sourceRef="Start_Nec" targetRef="Gateway_Nec"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_03_AuditarHomologar">
+    <bpmndi:BPMNPlane id="Plane_Diagram_03_AuditarHomologar" bpmnElement="Process_AuditarHomologar">
+      <bpmndi:BPMNShape id="Shape_Start_Nec" bpmnElement="Start_Nec">
+        <dc:Bounds x="100" y="260" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Nec" bpmnElement="Gateway_Nec" isMarkerVisible="true">
+        <dc:Bounds x="230" y="253" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Call_Auditar" bpmnElement="Call_Auditar">
+        <dc:Bounds x="420" y="80" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Auditar" bpmnElement="Annotation_Call_Auditar">
+        <dc:Bounds x="420" y="178" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Auditar" bpmnElement="Association_Annotation_Call_Auditar">
+        <di:waypoint x="530.0" y="178"/>
+        <di:waypoint x="530.0" y="168"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_A" bpmnElement="End_A">
+        <dc:Bounds x="760" y="103" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_G_0" bpmnElement="F_G_0">
+        <di:waypoint x="280" y="278"/>
+        <di:waypoint x="330" y="278"/>
+        <di:waypoint x="330" y="121"/>
+        <di:waypoint x="420" y="121"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Call_Auditar_E" bpmnElement="F_Call_Auditar_E">
+        <di:waypoint x="610" y="121"/>
+        <di:waypoint x="760" y="121"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Call_Noct" bpmnElement="Call_Noct">
+        <dc:Bounds x="420" y="240" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Noct" bpmnElement="Annotation_Call_Noct">
+        <dc:Bounds x="420" y="338" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Noct" bpmnElement="Association_Annotation_Call_Noct">
+        <di:waypoint x="530.0" y="338"/>
+        <di:waypoint x="530.0" y="328"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_N" bpmnElement="End_N">
+        <dc:Bounds x="760" y="263" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_G_1" bpmnElement="F_G_1">
+        <di:waypoint x="280" y="278"/>
+        <di:waypoint x="330" y="278"/>
+        <di:waypoint x="330" y="281"/>
+        <di:waypoint x="420" y="281"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Call_Noct_E" bpmnElement="F_Call_Noct_E">
+        <di:waypoint x="610" y="281"/>
+        <di:waypoint x="760" y="281"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Call_Hom" bpmnElement="Call_Hom">
+        <dc:Bounds x="420" y="400" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Hom" bpmnElement="Annotation_Call_Hom">
+        <dc:Bounds x="420" y="498" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Hom" bpmnElement="Association_Annotation_Call_Hom">
+        <di:waypoint x="530.0" y="498"/>
+        <di:waypoint x="530.0" y="488"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_H" bpmnElement="End_H">
+        <dc:Bounds x="760" y="423" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_G_2" bpmnElement="F_G_2">
+        <di:waypoint x="280" y="278"/>
+        <di:waypoint x="330" y="278"/>
+        <di:waypoint x="330" y="441"/>
+        <di:waypoint x="420" y="441"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Call_Hom_E" bpmnElement="F_Call_Hom_E">
+        <di:waypoint x="610" y="441"/>
+        <di:waypoint x="760" y="441"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Start_G" bpmnElement="F_Start_G">
+        <di:waypoint x="136" y="278"/>
+        <di:waypoint x="230" y="278"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

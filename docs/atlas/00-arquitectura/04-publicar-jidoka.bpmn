@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_04_Publicar" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:process id="Process_PublicarJidoka" name="Publicar una versión de Jidoka" isExecutable="false">
+    <bpmn:documentation>El release solo continúa si el preflight queda verde.</bpmn:documentation>
+    <bpmn:startEvent id="Start_Publicar" name="Versión preparada para publicación">
+      <bpmn:outgoing>F_Start_Pre</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:callActivity id="Call_Preflight" name="[81] Ejecutar preflight" calledElement="Process_PreflightRelease">
+      <bpmn:documentation>Proceso externo: Process_PreflightRelease | Archivo: 80-release/81-preflight-release-as-is.bpmn</bpmn:documentation>
+      <bpmn:incoming>F_Start_Pre</bpmn:incoming>
+      <bpmn:outgoing>F_Pre_G</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_Preflight">
+      <bpmn:text>Archivo: 80-release/81-preflight-release-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Preflight" sourceRef="Annotation_Call_Preflight" targetRef="Call_Preflight"/>
+    <bpmn:exclusiveGateway id="Gateway_Verde" name="¿Suite verde?">
+      <bpmn:incoming>F_Pre_G</bpmn:incoming>
+      <bpmn:outgoing>F_G_No</bpmn:outgoing>
+      <bpmn:outgoing>F_G_Si</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_Detenido" name="Publicación detenida">
+      <bpmn:incoming>F_G_No</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:callActivity id="Call_Publicar" name="[80] Publicar release" calledElement="Process_PublicarRelease">
+      <bpmn:documentation>Proceso externo: Process_PublicarRelease | Archivo: 80-release/80-publicar-release-as-is.bpmn</bpmn:documentation>
+      <bpmn:incoming>F_G_Si</bpmn:incoming>
+      <bpmn:outgoing>F_Pub_End</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_Publicar">
+      <bpmn:text>Archivo: 80-release/80-publicar-release-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Publicar" sourceRef="Annotation_Call_Publicar" targetRef="Call_Publicar"/>
+    <bpmn:endEvent id="End_Publicado" name="Release publicado">
+      <bpmn:incoming>F_Pub_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_Start_Pre" sourceRef="Start_Publicar" targetRef="Call_Preflight"/>
+    <bpmn:sequenceFlow id="F_Pre_G" sourceRef="Call_Preflight" targetRef="Gateway_Verde"/>
+    <bpmn:sequenceFlow id="F_G_No" sourceRef="Gateway_Verde" targetRef="End_Detenido" name="No"/>
+    <bpmn:sequenceFlow id="F_G_Si" sourceRef="Gateway_Verde" targetRef="Call_Publicar" name="Sí"/>
+    <bpmn:sequenceFlow id="F_Pub_End" sourceRef="Call_Publicar" targetRef="End_Publicado"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_04_Publicar">
+    <bpmndi:BPMNPlane id="Plane_Diagram_04_Publicar" bpmnElement="Process_PublicarJidoka">
+      <bpmndi:BPMNShape id="Shape_Start_Publicar" bpmnElement="Start_Publicar">
+        <dc:Bounds x="100" y="220" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Call_Preflight" bpmnElement="Call_Preflight">
+        <dc:Bounds x="210" y="198" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Preflight" bpmnElement="Annotation_Call_Preflight">
+        <dc:Bounds x="210" y="296" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Preflight" bpmnElement="Association_Annotation_Call_Preflight">
+        <di:waypoint x="320.0" y="296"/>
+        <di:waypoint x="320.0" y="286"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Gateway_Verde" bpmnElement="Gateway_Verde" isMarkerVisible="true">
+        <dc:Bounds x="470" y="213" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_Detenido" bpmnElement="End_Detenido">
+        <dc:Bounds x="620" y="100" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Call_Publicar" bpmnElement="Call_Publicar">
+        <dc:Bounds x="620" y="260" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Publicar" bpmnElement="Annotation_Call_Publicar">
+        <dc:Bounds x="620" y="358" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Publicar" bpmnElement="Association_Annotation_Call_Publicar">
+        <di:waypoint x="730.0" y="358"/>
+        <di:waypoint x="730.0" y="348"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_Publicado" bpmnElement="End_Publicado">
+        <dc:Bounds x="900" y="283" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Start_Pre" bpmnElement="F_Start_Pre">
+        <di:waypoint x="136" y="238"/>
+        <di:waypoint x="210" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Pre_G" bpmnElement="F_Pre_G">
+        <di:waypoint x="400" y="239"/>
+        <di:waypoint x="470" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_G_No" bpmnElement="F_G_No">
+        <di:waypoint x="495" y="213"/>
+        <di:waypoint x="495" y="118"/>
+        <di:waypoint x="620" y="118"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_G_Si" bpmnElement="F_G_Si">
+        <di:waypoint x="495" y="263"/>
+        <di:waypoint x="495" y="301"/>
+        <di:waypoint x="620" y="301"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Pub_End" bpmnElement="F_Pub_End">
+        <di:waypoint x="810" y="301"/>
+        <di:waypoint x="900" y="301"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

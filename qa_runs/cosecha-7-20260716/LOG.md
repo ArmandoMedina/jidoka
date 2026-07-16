@@ -20,7 +20,7 @@
 
 | # | Test | Casos | Exit |
 |---|---|---|---|
-| 1 | probar-version | 4/4 (`1.17.0` consistente en version.txt / CHANGELOG / package.json) | 0 |
+| 1 | probar-version | 4/4 (`1.18.0` consistente en version.txt / CHANGELOG / package.json) | 0 |
 | 2 | probar-gate | 14/14 (2 negativos nuevos del #88) | 0 |
 | 3 | probar-hooks | 29/29 | 0 |
 | 4 | probar-auditor | 7/7 | 0 |
@@ -32,7 +32,9 @@
 | — | verificar.ps1 | `[OK] blast-radius al dia` → `Todo limpio` | 0 |
 | — | auditar.ps1 | `Grafo de docs integro` | 0 |
 
-> Nota honesta: la primera corrida de `probar-version` dio ROJO (3/4) porque la sección nueva del CHANGELOG decía `[Sin publicar]` con el SSOT en `1.16.1` — la invariante del test es correcta y mordió como debe; se curó titulando `[1.17.0]` y subiendo el SSOT + `package.json` en el mismo PR (el release deriva del SSOT, ADR 0020).
+> Nota honesta: la primera corrida de `probar-version` dio ROJO (3/4) porque la sección nueva del CHANGELOG decía `[Sin publicar]` con el SSOT en `1.16.1` — la invariante del test es correcta y mordió como debe; se curó titulando la sección y subiendo el SSOT + `package.json` en el mismo PR (el release deriva del SSOT, ADR 0020).
+>
+> Reconciliación con el atlas: `v1.17.0` (atlas BPMN, ADRs 0035/0036) se liberó en `main` mientras esta cosecha se construía — la cosecha se renumeró a **`v1.18.0` / ADR 0037** y la suite completa se re-corrió sobre el árbol mergeado (esta tabla refleja la corrida final).
 
 ### Demo de migración (#86) — hijo real pre-1.17 → cosecha #7
 
