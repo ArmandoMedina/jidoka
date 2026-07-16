@@ -68,12 +68,19 @@ El atlas de procesos vive versionado en `docs/atlas/` y su formato canónico es 
   vivo; los diagramas se renderizan a SVG que sí se ven en GitHub/PRs; `atlas:validate` caza enlaces
   padre→hijo rotos.
 - **Más difícil / deuda:** editar BPMN a mano es verboso (mitigado, no eliminado); el render depende
-  de bajar Chromium la primera vez. Los 19 diagramas de detalle siguen siendo *happy-path* sin
-  gateways ni carriles: solo `16-cierra` se re-modeló como patrón. Re-modelar el resto queda de
-  siguiente lote, con Armando revisando. `atlas:validate` **no** se cableó a Andon/CI todavía (regla
-  2-3: que pruebe valor antes de ganarse un gate).
+  de bajar Chromium la primera vez. Al decidir esto solo `16-cierra` se re-modeló como patrón y los
+  otros 24 quedaban *happy-path* — **esa deuda ya se cerró (ver Enmienda 2026-07-16).** `atlas:validate`
+  **no** se cableó a Andon/CI todavía (regla 2-3: que pruebe valor antes de ganarse un gate).
 - **Aviso de ley:** editar `package.json` dispara el aviso `raiz` del blast-radius (se anota en
   HANDOFF); el ADR se lista en el índice en el mismo commit (bloqueo duro del área `decisiones`).
+
+## Enmienda (2026-07-16) — el atlas completo, sin happy-path
+
+La deuda de "solo `16-cierra` re-modelado" se cerró en el mismo arco: **los 25 diagramas de proceso
+del atlas están re-modelados** con carriles (donde hay actor humano) y gateways (donde hay decisión);
+los procesos de puro motor van en un carril único. También se cableó el acoplamiento del atlas al flujo
+como **aviso comando→diagrama** (ADR [0033](0033-acoplamiento-proceso-docs-diagrama.md)). Sigue abierto
+solo lo dicho arriba: `atlas:validate` no se cableó a un gate todavía (regla 2-3).
 
 ---
 

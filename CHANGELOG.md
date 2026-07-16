@@ -2,7 +2,7 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
-## [Sin publicar]
+## [1.15.0] — 2026-07-16
 
 ### El atlas de procesos del método vive en el repo, en BPMN (ADR 0032)
 

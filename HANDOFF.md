@@ -16,7 +16,7 @@
 
 **Tercer lote en el mismo PR (2026-07-16):** la familia `10-ritual/` completa re-modelada con carriles + gateways (los 7 que faltaban: descubre, planea, construye, revisión, gemba, que-sigue, desatendido; arranca y cierra ya estaban). Cada uno desde su comando fuente, con carriles Agente/Humano, service/user tasks y decisiones reales; inspeccionados a la vista (render limpio). `atlas:validate` sin huecos, 25 SVG re-renderizados.
 
-**Cuarto lote en el mismo PR (2026-07-16):** las 4 familias restantes (`30-instalacion`, `40-lazo-motor`, `70-auditoria`, `80-release` — 10 diagramas) re-modeladas con carriles (donde hay humano) y gateways (donde hay decisión); los procesos de puro motor en un carril único. **Con esto los 25 diagramas del atlas están re-modelados — ninguno en happy-path.** Todos inspeccionados a la vista; `atlas:validate` sin huecos; 25 SVG re-renderizados. **Pendiente (humano):** revisar y mergear el PR #85. (Nota: el ADR 0032 aún menciona "solo 16-cierra re-modelado" como deuda; esa deuda ya se cerró — no re-abrir.)
+**Cuarto lote en el mismo PR (2026-07-16):** las 4 familias restantes (`30-instalacion`, `40-lazo-motor`, `70-auditoria`, `80-release` — 10 diagramas) re-modeladas con carriles (donde hay humano) y gateways (donde hay decisión); los procesos de puro motor en un carril único. **Con esto los 25 diagramas del atlas están re-modelados — ninguno en happy-path.** Todos inspeccionados a la vista; `atlas:validate` sin huecos; 25 SVG re-renderizados. El ADR 0032 quedó **enmendado** (la deuda de "solo 16-cierra" se cerró). **Se corta como `v1.15.0`** (MINOR: capa de atlas aditiva) y se mergea el PR #85.
 
 ## Dónde estamos (2026-07-15 — CERRADO Y LIBERADO · Jidoka `v1.14.0` · queda el demo de campo)
 
