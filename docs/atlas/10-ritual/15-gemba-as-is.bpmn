@@ -1,74 +1,135 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_15_Gemba" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
-  <bpmn:process id="Process_Gemba" name="/jidoka:gemba — demostrar el incremento" isExecutable="false">
-    <bpmn:documentation>Fuente: .claude/commands/jidoka/gemba.md</bpmn:documentation>
-    <bpmn:startEvent id="Start" name="Inicio">
-      <bpmn:outgoing>F_Start_Task_Correr</bpmn:outgoing>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_15_Gemba" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:collaboration id="Collab_Gemba">
+    <bpmn:participant id="Pool_Gemba" name="/jidoka:gemba — el demo que verifica el cliente" processRef="Process_Gemba"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Gemba" name="/jidoka:gemba — producir la evidencia real del incremento" isExecutable="false">
+    <bpmn:documentation>Fuente: .claude/commands/jidoka/gemba.md. Carriles: el Agente corre el demo y surte la evidencia; el checkpoint visual lo responde el Humano con sus ojos.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_Gemba">
+      <bpmn:lane id="Lane_Agente" name="Agente (surte la evidencia)">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_CorrerDemo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Artefactos</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Tipo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Veredicto</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Citar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Humano" name="Humano (cliente)">
+        <bpmn:flowNodeRef>U_Cliente</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="Incremento a demostrar">
+      <bpmn:outgoing>f1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="Task_Correr" name="Correr el producto real E2E">
-      <bpmn:incoming>F_Start_Task_Correr</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Correr_Task_Evidencia</bpmn:outgoing>
+    <bpmn:serviceTask id="T_CorrerDemo" name="Correr el demo E2E desde el producto real (no un script por fuera)">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="F_Start_Task_Correr" sourceRef="Start" targetRef="Task_Correr"/>
-    <bpmn:task id="Task_Evidencia" name="Guardar LOG.md y artefactos de la corrida">
-      <bpmn:incoming>F_Task_Correr_Task_Evidencia</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Evidencia_Task_Presentar</bpmn:outgoing>
+    <bpmn:task id="T_Artefactos" name="Dejar artefactos y LOG.md en qa_runs/ (datos sintéticos)">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f3</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="F_Task_Correr_Task_Evidencia" sourceRef="Task_Correr" targetRef="Task_Evidencia"/>
-    <bpmn:userTask id="Task_Presentar" name="Presentar la evidencia al cliente">
-      <bpmn:incoming>F_Task_Evidencia_Task_Presentar</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Presentar_Task_Vercedicto</bpmn:outgoing>
+    <bpmn:exclusiveGateway id="Gw_Tipo" name="¿Objetivo o subjetivo/visual?">
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f_obj</bpmn:outgoing>
+      <bpmn:outgoing>f_subj</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="T_Veredicto" name="Veredicto por artefacto (test verde, tabla N/N)">
+      <bpmn:incoming>f_obj</bpmn:incoming>
+      <bpmn:outgoing>f_ver_citar</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:userTask id="U_Cliente" name="STOP: ¿se ve bien? lo responde el cliente con sus ojos">
+      <bpmn:incoming>f_subj</bpmn:incoming>
+      <bpmn:outgoing>f_cli_citar</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:sequenceFlow id="F_Task_Evidencia_Task_Presentar" sourceRef="Task_Evidencia" targetRef="Task_Presentar"/>
-    <bpmn:task id="Task_Vercedicto" name="Registrar el veredicto fuera de qa_runs">
-      <bpmn:incoming>F_Task_Presentar_Task_Vercedicto</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Vercedicto_End</bpmn:outgoing>
+    <bpmn:task id="T_Citar" name="Citar la corrida en HANDOFF/CHANGELOG y git add -f (obligatorio)">
+      <bpmn:incoming>f_ver_citar</bpmn:incoming>
+      <bpmn:incoming>f_cli_citar</bpmn:incoming>
+      <bpmn:outgoing>f_citar_end</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="F_Task_Presentar_Task_Vercedicto" sourceRef="Task_Presentar" targetRef="Task_Vercedicto"/>
-    <bpmn:endEvent id="End" name="Demo evaluado con evidencia">
-      <bpmn:incoming>F_Task_Vercedicto_End</bpmn:incoming>
+    <bpmn:endEvent id="End" name="Incremento verificado con evidencia">
+      <bpmn:incoming>f_citar_end</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="F_Task_Vercedicto_End" sourceRef="Task_Vercedicto" targetRef="End"/>
+    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_CorrerDemo"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_CorrerDemo" targetRef="T_Artefactos"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="T_Artefactos" targetRef="Gw_Tipo"/>
+    <bpmn:sequenceFlow id="f_obj" name="objetivo" sourceRef="Gw_Tipo" targetRef="T_Veredicto"/>
+    <bpmn:sequenceFlow id="f_subj" name="subjetivo" sourceRef="Gw_Tipo" targetRef="U_Cliente"/>
+    <bpmn:sequenceFlow id="f_ver_citar" sourceRef="T_Veredicto" targetRef="T_Citar"/>
+    <bpmn:sequenceFlow id="f_cli_citar" sourceRef="U_Cliente" targetRef="T_Citar"/>
+    <bpmn:sequenceFlow id="f_citar_end" sourceRef="T_Citar" targetRef="End"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_15_Gemba">
-    <bpmndi:BPMNPlane id="Plane_Diagram_15_Gemba" bpmnElement="Process_Gemba">
-      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="Start">
-        <dc:Bounds x="80" y="220" width="36" height="36"/>
+    <bpmndi:BPMNPlane id="Plane_15_Gemba" bpmnElement="Collab_Gemba">
+      <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Gemba" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1180" height="400"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Task_Correr" bpmnElement="Task_Correr">
-        <dc:Bounds x="180" y="198" width="170" height="80"/>
+      <bpmndi:BPMNShape id="S_LaneA" bpmnElement="Lane_Agente" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1150" height="250"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Start_Task_Correr" bpmnElement="F_Start_Task_Correr">
-        <di:waypoint x="116" y="238"/>
-        <di:waypoint x="180" y="238"/>
+      <bpmndi:BPMNShape id="S_LaneH" bpmnElement="Lane_Humano" isHorizontal="true">
+        <dc:Bounds x="190" y="330" width="1150" height="150"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
+        <dc:Bounds x="210" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="188" y="218" width="80" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TCorrerDemo" bpmnElement="T_CorrerDemo">
+        <dc:Bounds x="280" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TArtefactos" bpmnElement="T_Artefactos">
+        <dc:Bounds x="490" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwTipo" bpmnElement="Gw_Tipo" isMarkerVisible="true">
+        <dc:Bounds x="700" y="180" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="685" y="143" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TVeredicto" bpmnElement="T_Veredicto">
+        <dc:Bounds x="800" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_UCliente" bpmnElement="U_Cliente">
+        <dc:Bounds x="625" y="375" width="190" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TCitar" bpmnElement="T_Citar">
+        <dc:Bounds x="1010" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_End" bpmnElement="End">
+        <dc:Bounds x="1230" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1205" y="218" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
+        <di:waypoint x="240" y="200"/>
+        <di:waypoint x="280" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Evidencia" bpmnElement="Task_Evidencia">
-        <dc:Bounds x="410" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Correr_Task_Evidencia" bpmnElement="F_Task_Correr_Task_Evidencia">
-        <di:waypoint x="350" y="238"/>
-        <di:waypoint x="410" y="238"/>
+      <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
+        <di:waypoint x="440" y="200"/>
+        <di:waypoint x="490" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Presentar" bpmnElement="Task_Presentar">
-        <dc:Bounds x="640" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Evidencia_Task_Presentar" bpmnElement="F_Task_Evidencia_Task_Presentar">
-        <di:waypoint x="580" y="238"/>
-        <di:waypoint x="640" y="238"/>
+      <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
+        <di:waypoint x="650" y="200"/>
+        <di:waypoint x="700" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Vercedicto" bpmnElement="Task_Vercedicto">
-        <dc:Bounds x="870" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Presentar_Task_Vercedicto" bpmnElement="F_Task_Presentar_Task_Vercedicto">
-        <di:waypoint x="810" y="238"/>
-        <di:waypoint x="870" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_obj" bpmnElement="f_obj">
+        <di:waypoint x="740" y="200"/>
+        <di:waypoint x="800" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_End" bpmnElement="End">
-        <dc:Bounds x="1100" y="220" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Vercedicto_End" bpmnElement="F_Task_Vercedicto_End">
-        <di:waypoint x="1040" y="238"/>
-        <di:waypoint x="1100" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_subj" bpmnElement="f_subj">
+        <di:waypoint x="720" y="220"/>
+        <di:waypoint x="720" y="375"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_ver_citar" bpmnElement="f_ver_citar">
+        <di:waypoint x="960" y="200"/>
+        <di:waypoint x="1010" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_cli_citar" bpmnElement="f_cli_citar">
+        <di:waypoint x="815" y="405"/>
+        <di:waypoint x="1090" y="405"/>
+        <di:waypoint x="1090" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_citar_end" bpmnElement="f_citar_end">
+        <di:waypoint x="1170" y="200"/>
+        <di:waypoint x="1230" y="200"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

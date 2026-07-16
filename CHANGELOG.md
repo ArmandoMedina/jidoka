@@ -23,6 +23,13 @@ Decidido el acoplamiento **asimétrico**: el proceso (el `.md` del comando) es l
 - **`refactor` — `10-arranca` homologado a WYSIWYG:** los dos subprocesos embebidos ahora se muestran **expandidos** en el lienzo (sin drill-down), consistente con el resto del atlas. Se elimina el único diagrama que exigía doble clic para ver su detalle.
 - **`chore` — `jidoka.code-workspace`** en la raíz: abre el repo con la extensión y la asociación de `.bpmn` al editor visual listas.
 
+### La familia del ritual, re-modelada completa (carriles + gateways)
+
+Los 9 diagramas de `10-ritual/` dejan de ser happy-path: cada uno se re-modeló desde su comando fuente con pool + carriles Agente/Humano, tareas de servicio (engrane) y de usuario (STOP), y gateways reales.
+
+- **`refactor`** — `11-descubre` (juez de verdad + aprobación nombrada), `12-planea` (niebla→Call Activity a descubre, STOP del QUÉ), `13-construye` (el lazo Intención→Construcción→Verificación→Registro con reintento y OK humano), `14-revisión` (review-stop + pre-push + el muro de CI), `15-gemba` (objetivo vs. checkpoint del cliente), `17-que-sigue` (proponer por valor, la señal la da el cliente), `18-desatendido` (las dos lanes agente/humano + click-it-down). `10-arranca` y `16-cierra` ya estaban.
+- Cada diagrama declara su `Fuente` (el aviso `atlas` del blast-radius apunta ahí). Los 25 SVG re-renderizados; `atlas:validate` sin huecos.
+
 ## [1.14.0] — 2026-07-15
 
 ### El instalador AV-seguro se vuelve completo — `sembrar-manual.ps1` siembra la instancia entera (ADR 0027, enmienda)

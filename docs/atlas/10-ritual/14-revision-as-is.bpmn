@@ -1,86 +1,175 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_14_Revisar" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
-  <bpmn:process id="Process_Revisar" name="Revisar el cambio con robots y gates" isExecutable="false">
-    <bpmn:documentation>Fuente: review-stop, verificar.ps1 y CI</bpmn:documentation>
-    <bpmn:startEvent id="Start" name="Inicio">
-      <bpmn:outgoing>F_Start_Task_Diff</bpmn:outgoing>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_14_Revisar" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:collaboration id="Collab_Revisar">
+    <bpmn:participant id="Pool_Revisar" name="Revisión — review-stop, verificar y el muro de CI" processRef="Process_Revisar"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Revisar" name="Revisión: el muro real es el check server-side" isExecutable="false">
+    <bpmn:documentation>Fuente: review-stop (.claude/hooks), tools/verificar.ps1 y el CI (andon.yml). Carriles: el Agente revisa y sube; el Humano pone el marcador y mergea con orden nombrada.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_Revisar">
+      <bpmn:lane id="Lane_Agente" name="Agente + gates automáticos">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_CodeReview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Marcador</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Push</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Prepush</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_CI</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Corregir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Humano" name="Humano (dueño)">
+        <bpmn:flowNodeRef>U_Marcador</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>U_Merge</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="Código listo para revisar">
+      <bpmn:outgoing>f1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:task id="Task_Diff" name="Preparar el diff revisable">
-      <bpmn:incoming>F_Start_Task_Diff</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Diff_Task_CodeReview</bpmn:outgoing>
+    <bpmn:task id="T_CodeReview" name="Correr /code-review sobre el diff">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:incoming>f_frena</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="F_Start_Task_Diff" sourceRef="Start" targetRef="Task_Diff"/>
-    <bpmn:serviceTask id="Task_CodeReview" name="Ejecutar revisión de código">
-      <bpmn:incoming>F_Task_Diff_Task_CodeReview</bpmn:incoming>
-      <bpmn:outgoing>F_Task_CodeReview_Task_Hallazgos</bpmn:outgoing>
+    <bpmn:userTask id="U_Marcador" name="Revisar y poner el marcador (SHA del diff)">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f_marc_gw</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_Marcador" name="review-stop: ¿marcador = SHA del diff?">
+      <bpmn:incoming>f_marc_gw</bpmn:incoming>
+      <bpmn:outgoing>f_frena</bpmn:outgoing>
+      <bpmn:outgoing>f_pasa_marc</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="T_Push" name="Push a la rama del PR">
+      <bpmn:incoming>f_pasa_marc</bpmn:incoming>
+      <bpmn:incoming>f_corr_push</bpmn:incoming>
+      <bpmn:outgoing>f_push_pre</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:serviceTask id="T_Prepush" name="pre-push: verificar.ps1 (avisa / bloquea local)">
+      <bpmn:incoming>f_push_pre</bpmn:incoming>
+      <bpmn:outgoing>f_pre_ci</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="F_Task_Diff_Task_CodeReview" sourceRef="Task_Diff" targetRef="Task_CodeReview"/>
-    <bpmn:task id="Task_Hallazgos" name="Atender o registrar hallazgos">
-      <bpmn:incoming>F_Task_CodeReview_Task_Hallazgos</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Hallazgos_Task_Docs</bpmn:outgoing>
+    <bpmn:exclusiveGateway id="Gw_CI" name="check andon en CI (el muro real server-side)">
+      <bpmn:incoming>f_pre_ci</bpmn:incoming>
+      <bpmn:outgoing>f_falla</bpmn:outgoing>
+      <bpmn:outgoing>f_pasa_ci</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="T_Corregir" name="Corregir la causa (no --no-verify)">
+      <bpmn:incoming>f_falla</bpmn:incoming>
+      <bpmn:outgoing>f_corr_push</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="F_Task_CodeReview_Task_Hallazgos" sourceRef="Task_CodeReview" targetRef="Task_Hallazgos"/>
-    <bpmn:task id="Task_Docs" name="Sincronizar documentos dueños">
-      <bpmn:incoming>F_Task_Hallazgos_Task_Docs</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Docs_Task_Gates</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:sequenceFlow id="F_Task_Hallazgos_Task_Docs" sourceRef="Task_Hallazgos" targetRef="Task_Docs"/>
-    <bpmn:serviceTask id="Task_Gates" name="Ejecutar gates aplicables">
-      <bpmn:incoming>F_Task_Docs_Task_Gates</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Gates_End</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="F_Task_Docs_Task_Gates" sourceRef="Task_Docs" targetRef="Task_Gates"/>
-    <bpmn:endEvent id="End" name="Cambio revisado y listo para Gemba">
-      <bpmn:incoming>F_Task_Gates_End</bpmn:incoming>
+    <bpmn:userTask id="U_Merge" name="Merge (orden nombrada del dueño)">
+      <bpmn:incoming>f_pasa_ci</bpmn:incoming>
+      <bpmn:outgoing>f_merge_end</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="End" name="Cambio integrado a main">
+      <bpmn:incoming>f_merge_end</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="F_Task_Gates_End" sourceRef="Task_Gates" targetRef="End"/>
+    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_CodeReview"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_CodeReview" targetRef="U_Marcador"/>
+    <bpmn:sequenceFlow id="f_marc_gw" sourceRef="U_Marcador" targetRef="Gw_Marcador"/>
+    <bpmn:sequenceFlow id="f_frena" name="no: frena" sourceRef="Gw_Marcador" targetRef="T_CodeReview"/>
+    <bpmn:sequenceFlow id="f_pasa_marc" name="sí" sourceRef="Gw_Marcador" targetRef="T_Push"/>
+    <bpmn:sequenceFlow id="f_push_pre" sourceRef="T_Push" targetRef="T_Prepush"/>
+    <bpmn:sequenceFlow id="f_pre_ci" sourceRef="T_Prepush" targetRef="Gw_CI"/>
+    <bpmn:sequenceFlow id="f_falla" name="falla" sourceRef="Gw_CI" targetRef="T_Corregir"/>
+    <bpmn:sequenceFlow id="f_corr_push" sourceRef="T_Corregir" targetRef="T_Push"/>
+    <bpmn:sequenceFlow id="f_pasa_ci" name="pasa" sourceRef="Gw_CI" targetRef="U_Merge"/>
+    <bpmn:sequenceFlow id="f_merge_end" sourceRef="U_Merge" targetRef="End"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_14_Revisar">
-    <bpmndi:BPMNPlane id="Plane_Diagram_14_Revisar" bpmnElement="Process_Revisar">
-      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="Start">
-        <dc:Bounds x="80" y="220" width="36" height="36"/>
+    <bpmndi:BPMNPlane id="Plane_14_Revisar" bpmnElement="Collab_Revisar">
+      <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Revisar" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1500" height="400"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Task_Diff" bpmnElement="Task_Diff">
-        <dc:Bounds x="180" y="198" width="170" height="80"/>
+      <bpmndi:BPMNShape id="S_LaneA" bpmnElement="Lane_Agente" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1470" height="250"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Start_Task_Diff" bpmnElement="F_Start_Task_Diff">
-        <di:waypoint x="116" y="238"/>
-        <di:waypoint x="180" y="238"/>
+      <bpmndi:BPMNShape id="S_LaneH" bpmnElement="Lane_Humano" isHorizontal="true">
+        <dc:Bounds x="190" y="330" width="1470" height="150"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
+        <dc:Bounds x="210" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="188" y="218" width="80" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TCodeReview" bpmnElement="T_CodeReview">
+        <dc:Bounds x="280" y="170" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_UMarcador" bpmnElement="U_Marcador">
+        <dc:Bounds x="480" y="375" width="180" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwMarcador" bpmnElement="Gw_Marcador" isMarkerVisible="true">
+        <dc:Bounds x="720" y="180" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="700" y="143" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TPush" bpmnElement="T_Push">
+        <dc:Bounds x="820" y="170" width="120" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TPrepush" bpmnElement="T_Prepush">
+        <dc:Bounds x="1000" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwCI" bpmnElement="Gw_CI" isMarkerVisible="true">
+        <dc:Bounds x="1220" y="180" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1200" y="143" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TCorregir" bpmnElement="T_Corregir">
+        <dc:Bounds x="1165" y="265" width="150" height="55"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_UMerge" bpmnElement="U_Merge">
+        <dc:Bounds x="1330" y="375" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_End" bpmnElement="End">
+        <dc:Bounds x="1540" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1515" y="218" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
+        <di:waypoint x="240" y="200"/>
+        <di:waypoint x="280" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_CodeReview" bpmnElement="Task_CodeReview">
-        <dc:Bounds x="410" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Diff_Task_CodeReview" bpmnElement="F_Task_Diff_Task_CodeReview">
-        <di:waypoint x="350" y="238"/>
-        <di:waypoint x="410" y="238"/>
+      <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
+        <di:waypoint x="355" y="230"/>
+        <di:waypoint x="355" y="405"/>
+        <di:waypoint x="480" y="405"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Hallazgos" bpmnElement="Task_Hallazgos">
-        <dc:Bounds x="640" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_CodeReview_Task_Hallazgos" bpmnElement="F_Task_CodeReview_Task_Hallazgos">
-        <di:waypoint x="580" y="238"/>
-        <di:waypoint x="640" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_marc_gw" bpmnElement="f_marc_gw">
+        <di:waypoint x="660" y="405"/>
+        <di:waypoint x="740" y="405"/>
+        <di:waypoint x="740" y="220"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Docs" bpmnElement="Task_Docs">
-        <dc:Bounds x="870" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Hallazgos_Task_Docs" bpmnElement="F_Task_Hallazgos_Task_Docs">
-        <di:waypoint x="810" y="238"/>
-        <di:waypoint x="870" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_frena" bpmnElement="f_frena">
+        <di:waypoint x="740" y="180"/>
+        <di:waypoint x="740" y="120"/>
+        <di:waypoint x="355" y="120"/>
+        <di:waypoint x="355" y="170"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Gates" bpmnElement="Task_Gates">
-        <dc:Bounds x="1100" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Docs_Task_Gates" bpmnElement="F_Task_Docs_Task_Gates">
-        <di:waypoint x="1040" y="238"/>
-        <di:waypoint x="1100" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_pasa_marc" bpmnElement="f_pasa_marc">
+        <di:waypoint x="760" y="200"/>
+        <di:waypoint x="820" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_End" bpmnElement="End">
-        <dc:Bounds x="1330" y="220" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Gates_End" bpmnElement="F_Task_Gates_End">
-        <di:waypoint x="1270" y="238"/>
-        <di:waypoint x="1330" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_push_pre" bpmnElement="f_push_pre">
+        <di:waypoint x="940" y="200"/>
+        <di:waypoint x="1000" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_pre_ci" bpmnElement="f_pre_ci">
+        <di:waypoint x="1160" y="200"/>
+        <di:waypoint x="1220" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_falla" bpmnElement="f_falla">
+        <di:waypoint x="1240" y="220"/>
+        <di:waypoint x="1240" y="265"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_corr_push" bpmnElement="f_corr_push">
+        <di:waypoint x="1165" y="292"/>
+        <di:waypoint x="880" y="292"/>
+        <di:waypoint x="880" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_pasa_ci" bpmnElement="f_pasa_ci">
+        <di:waypoint x="1260" y="200"/>
+        <di:waypoint x="1405" y="200"/>
+        <di:waypoint x="1405" y="375"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_merge_end" bpmnElement="f_merge_end">
+        <di:waypoint x="1480" y="405"/>
+        <di:waypoint x="1555" y="405"/>
+        <di:waypoint x="1555" y="215"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

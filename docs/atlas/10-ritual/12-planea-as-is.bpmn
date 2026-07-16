@@ -1,158 +1,179 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_12_Planea" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
-  <bpmn:process id="Process_Planea" name="/jidoka:planea — crear el contrato del sprint" isExecutable="false">
-    <bpmn:documentation>Fuente: .claude/commands/jidoka/planea.md</bpmn:documentation>
-    <bpmn:startEvent id="Start" name="Necesidad de planear">
-      <bpmn:outgoing>F1</bpmn:outgoing>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_12_Planea" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:collaboration id="Collab_Planea">
+    <bpmn:participant id="Pool_Planea" name="/jidoka:planea — el QUÉ aprobado antes del código (R0)" processRef="Process_Planea"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Planea" name="/jidoka:planea — diseñar el sprint con R0 y STOP" isExecutable="false">
+    <bpmn:documentation>Fuente: .claude/commands/jidoka/planea.md. Carriles: el Agente lee, redacta y planea; el Humano aprueba el QUÉ con nombre antes del CÓMO.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_Planea">
+      <bpmn:lane id="Lane_Agente" name="Agente (planeador)">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Leer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Niebla</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Criterios</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Aprob</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Plan</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Archivar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Call_Descubre</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Espera</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Construir</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Humano" name="Humano (cliente)">
+        <bpmn:flowNodeRef>U_Aprobar</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="QUÉ pedido a planear">
+      <bpmn:outgoing>f1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:task id="Task_Leer" name="Leer producto y ROADMAP">
-      <bpmn:incoming>F1</bpmn:incoming>
-      <bpmn:outgoing>F2</bpmn:outgoing>
+    <bpmn:task id="T_Leer" name="Leer product/ y ROADMAP (encuadre)">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:exclusiveGateway id="Gateway_Claro" name="¿QUÉ suficientemente claro?">
-      <bpmn:incoming>F2</bpmn:incoming>
-      <bpmn:outgoing>F_NoClaro</bpmn:outgoing>
-      <bpmn:outgoing>F_Claro</bpmn:outgoing>
+    <bpmn:exclusiveGateway id="Gw_Niebla" name="¿QUÉ ambiguo o product/ vacío?">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f_si_niebla</bpmn:outgoing>
+      <bpmn:outgoing>f_no_niebla</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:callActivity id="Call_Descubre" name="[11] Descubrir el QUÉ" calledElement="Process_Descubre">
+    <bpmn:callActivity id="Call_Descubre" name="→ /jidoka:descubre (disolver la niebla)" calledElement="Process_Descubre">
       <bpmn:documentation>Proceso externo: Process_Descubre | Archivo: 10-ritual/11-descubre-as-is.bpmn</bpmn:documentation>
-      <bpmn:incoming>F_NoClaro</bpmn:incoming>
-      <bpmn:outgoing>F_Desc_Crit</bpmn:outgoing>
+      <bpmn:incoming>f_si_niebla</bpmn:incoming>
+      <bpmn:outgoing>f_descubre_crit</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:textAnnotation id="Annotation_Call_Descubre">
-      <bpmn:text>Archivo: 10-ritual/11-descubre-as-is.bpmn</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_Annotation_Call_Descubre" sourceRef="Annotation_Call_Descubre" targetRef="Call_Descubre"/>
-    <bpmn:task id="Task_Criterios" name="Redactar capacidad y criterios">
-      <bpmn:incoming>F_Desc_Crit</bpmn:incoming>
-      <bpmn:incoming>F_Claro</bpmn:incoming>
-      <bpmn:outgoing>F_Crit_Stop</bpmn:outgoing>
+    <bpmn:task id="T_Criterios" name="Redactar capacidad y criterios (Dado/cuando/entonces); demo sin código">
+      <bpmn:incoming>f_no_niebla</bpmn:incoming>
+      <bpmn:incoming>f_descubre_crit</bpmn:incoming>
+      <bpmn:outgoing>f_crit_aprob</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:userTask id="Task_Stop" name="Presentar R0 y esperar aprobación nombrada">
-      <bpmn:incoming>F_Crit_Stop</bpmn:incoming>
-      <bpmn:outgoing>F_Stop_G</bpmn:outgoing>
+    <bpmn:userTask id="U_Aprobar" name="STOP: aprobación nombrada del QUÉ">
+      <bpmn:incoming>f_crit_aprob</bpmn:incoming>
+      <bpmn:outgoing>f_aprob_gw</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:exclusiveGateway id="Gateway_Aprob" name="¿Aprobado?">
-      <bpmn:incoming>F_Stop_G</bpmn:incoming>
-      <bpmn:outgoing>F_Aprob_No</bpmn:outgoing>
-      <bpmn:outgoing>F_Aprob_Si</bpmn:outgoing>
+    <bpmn:exclusiveGateway id="Gw_Aprob" name="¿QUÉ aprobado con nombre?">
+      <bpmn:incoming>f_aprob_gw</bpmn:incoming>
+      <bpmn:outgoing>f_no_aprob</bpmn:outgoing>
+      <bpmn:outgoing>f_si_aprob</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:endEvent id="End_No" name="Plan no aprobado">
-      <bpmn:incoming>F_Aprob_No</bpmn:incoming>
+    <bpmn:endEvent id="End_Espera" name="Espera aprobación (nada irreversible)">
+      <bpmn:incoming>f_no_aprob</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:task id="Task_Plan" name="Diseñar rebanadas, archivos y demo">
-      <bpmn:incoming>F_Aprob_Si</bpmn:incoming>
-      <bpmn:outgoing>F_Plan_Arch</bpmn:outgoing>
+    <bpmn:task id="T_Plan" name="Redactar el plan: rebanadas verticales, archivos, demo, no-metas">
+      <bpmn:incoming>f_si_aprob</bpmn:incoming>
+      <bpmn:outgoing>f_plan_arch</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Task_Archivar" name="Archivar plan e indexar sprint">
-      <bpmn:incoming>F_Plan_Arch</bpmn:incoming>
-      <bpmn:outgoing>F_Arch_End</bpmn:outgoing>
+    <bpmn:task id="T_Archivar" name="Archivar sprint-N-plan.md e índice">
+      <bpmn:incoming>f_plan_arch</bpmn:incoming>
+      <bpmn:outgoing>f_arch_end</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:endEvent id="End_Si" name="Plan aprobado y versionado">
-      <bpmn:incoming>F_Arch_End</bpmn:incoming>
+    <bpmn:endEvent id="End_Construir" name="Plan aprobado → construir">
+      <bpmn:incoming>f_arch_end</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="F1" sourceRef="Start" targetRef="Task_Leer"/>
-    <bpmn:sequenceFlow id="F2" sourceRef="Task_Leer" targetRef="Gateway_Claro"/>
-    <bpmn:sequenceFlow id="F_NoClaro" sourceRef="Gateway_Claro" targetRef="Call_Descubre" name="No"/>
-    <bpmn:sequenceFlow id="F_Desc_Crit" sourceRef="Call_Descubre" targetRef="Task_Criterios"/>
-    <bpmn:sequenceFlow id="F_Claro" sourceRef="Gateway_Claro" targetRef="Task_Criterios" name="Sí"/>
-    <bpmn:sequenceFlow id="F_Crit_Stop" sourceRef="Task_Criterios" targetRef="Task_Stop"/>
-    <bpmn:sequenceFlow id="F_Stop_G" sourceRef="Task_Stop" targetRef="Gateway_Aprob"/>
-    <bpmn:sequenceFlow id="F_Aprob_No" sourceRef="Gateway_Aprob" targetRef="End_No" name="No"/>
-    <bpmn:sequenceFlow id="F_Aprob_Si" sourceRef="Gateway_Aprob" targetRef="Task_Plan" name="Sí"/>
-    <bpmn:sequenceFlow id="F_Plan_Arch" sourceRef="Task_Plan" targetRef="Task_Archivar"/>
-    <bpmn:sequenceFlow id="F_Arch_End" sourceRef="Task_Archivar" targetRef="End_Si"/>
+    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_Leer"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_Leer" targetRef="Gw_Niebla"/>
+    <bpmn:sequenceFlow id="f_si_niebla" name="sí" sourceRef="Gw_Niebla" targetRef="Call_Descubre"/>
+    <bpmn:sequenceFlow id="f_no_niebla" name="no" sourceRef="Gw_Niebla" targetRef="T_Criterios"/>
+    <bpmn:sequenceFlow id="f_descubre_crit" sourceRef="Call_Descubre" targetRef="T_Criterios"/>
+    <bpmn:sequenceFlow id="f_crit_aprob" sourceRef="T_Criterios" targetRef="U_Aprobar"/>
+    <bpmn:sequenceFlow id="f_aprob_gw" sourceRef="U_Aprobar" targetRef="Gw_Aprob"/>
+    <bpmn:sequenceFlow id="f_no_aprob" name="no" sourceRef="Gw_Aprob" targetRef="End_Espera"/>
+    <bpmn:sequenceFlow id="f_si_aprob" name="sí" sourceRef="Gw_Aprob" targetRef="T_Plan"/>
+    <bpmn:sequenceFlow id="f_plan_arch" sourceRef="T_Plan" targetRef="T_Archivar"/>
+    <bpmn:sequenceFlow id="f_arch_end" sourceRef="T_Archivar" targetRef="End_Construir"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_12_Planea">
-    <bpmndi:BPMNPlane id="Plane_Diagram_12_Planea" bpmnElement="Process_Planea">
-      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="Start">
-        <dc:Bounds x="80" y="220" width="36" height="36"/>
+    <bpmndi:BPMNPlane id="Plane_12_Planea" bpmnElement="Collab_Planea">
+      <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Planea" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1560" height="400"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Task_Leer" bpmnElement="Task_Leer">
-        <dc:Bounds x="180" y="198" width="170" height="80"/>
+      <bpmndi:BPMNShape id="S_LaneA" bpmnElement="Lane_Agente" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1530" height="250"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Gateway_Claro" bpmnElement="Gateway_Claro" isMarkerVisible="true">
-        <dc:Bounds x="410" y="213" width="50" height="50"/>
+      <bpmndi:BPMNShape id="S_LaneH" bpmnElement="Lane_Humano" isHorizontal="true">
+        <dc:Bounds x="190" y="330" width="1530" height="150"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Call_Descubre" bpmnElement="Call_Descubre">
-        <dc:Bounds x="540" y="330" width="190" height="82"/>
+      <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
+        <dc:Bounds x="210" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="188" y="218" width="80" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Annotation_Call_Descubre" bpmnElement="Annotation_Call_Descubre">
-        <dc:Bounds x="540" y="428" width="220" height="40"/>
+      <bpmndi:BPMNShape id="S_TLeer" bpmnElement="T_Leer">
+        <dc:Bounds x="290" y="170" width="150" height="60"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Descubre" bpmnElement="Association_Annotation_Call_Descubre">
-        <di:waypoint x="650.0" y="428"/>
-        <di:waypoint x="650.0" y="418"/>
+      <bpmndi:BPMNShape id="S_GwNiebla" bpmnElement="Gw_Niebla" isMarkerVisible="true">
+        <dc:Bounds x="490" y="180" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="475" y="143" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_CallDescubre" bpmnElement="Call_Descubre">
+        <dc:Bounds x="435" y="262" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TCriterios" bpmnElement="T_Criterios">
+        <dc:Bounds x="590" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_UAprobar" bpmnElement="U_Aprobar">
+        <dc:Bounds x="820" y="375" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwAprob" bpmnElement="Gw_Aprob" isMarkerVisible="true">
+        <dc:Bounds x="1030" y="180" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1015" y="143" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndEspera" bpmnElement="End_Espera">
+        <dc:Bounds x="1035" y="270" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1005" y="302" width="100" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TPlan" bpmnElement="T_Plan">
+        <dc:Bounds x="1130" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TArchivar" bpmnElement="T_Archivar">
+        <dc:Bounds x="1350" y="170" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndConstruir" bpmnElement="End_Construir">
+        <dc:Bounds x="1560" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1535" y="218" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
+        <di:waypoint x="240" y="200"/>
+        <di:waypoint x="290" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Criterios" bpmnElement="Task_Criterios">
-        <dc:Bounds x="540" y="140" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Task_Stop" bpmnElement="Task_Stop">
-        <dc:Bounds x="780" y="140" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Gateway_Aprob" bpmnElement="Gateway_Aprob" isMarkerVisible="true">
-        <dc:Bounds x="1020" y="155" width="50" height="50"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_End_No" bpmnElement="End_No">
-        <dc:Bounds x="1160" y="60" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Task_Plan" bpmnElement="Task_Plan">
-        <dc:Bounds x="1160" y="210" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Task_Archivar" bpmnElement="Task_Archivar">
-        <dc:Bounds x="1390" y="210" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_End_Si" bpmnElement="End_Si">
-        <dc:Bounds x="1630" y="233" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F1" bpmnElement="F1">
-        <di:waypoint x="116" y="238"/>
-        <di:waypoint x="180" y="238"/>
+      <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
+        <di:waypoint x="440" y="200"/>
+        <di:waypoint x="490" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_F2" bpmnElement="F2">
-        <di:waypoint x="350" y="238"/>
-        <di:waypoint x="410" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_si_niebla" bpmnElement="f_si_niebla">
+        <di:waypoint x="510" y="220"/>
+        <di:waypoint x="510" y="262"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_F_NoClaro" bpmnElement="F_NoClaro">
-        <di:waypoint x="435" y="263"/>
-        <di:waypoint x="435" y="371"/>
-        <di:waypoint x="540" y="371"/>
+      <bpmndi:BPMNEdge id="E_f_no_niebla" bpmnElement="f_no_niebla">
+        <di:waypoint x="530" y="200"/>
+        <di:waypoint x="590" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_F_Desc_Crit" bpmnElement="F_Desc_Crit">
-        <di:waypoint x="730" y="371"/>
-        <di:waypoint x="750" y="371"/>
-        <di:waypoint x="750" y="100"/>
-        <di:waypoint x="625" y="100"/>
-        <di:waypoint x="625" y="140"/>
+      <bpmndi:BPMNEdge id="E_f_descubre_crit" bpmnElement="f_descubre_crit">
+        <di:waypoint x="585" y="292"/>
+        <di:waypoint x="665" y="292"/>
+        <di:waypoint x="665" y="230"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_F_Claro" bpmnElement="F_Claro">
-        <di:waypoint x="460" y="238"/>
-        <di:waypoint x="540" y="180"/>
+      <bpmndi:BPMNEdge id="E_f_crit_aprob" bpmnElement="f_crit_aprob">
+        <di:waypoint x="750" y="200"/>
+        <di:waypoint x="895" y="200"/>
+        <di:waypoint x="895" y="375"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_F_Crit_Stop" bpmnElement="F_Crit_Stop">
-        <di:waypoint x="710" y="180"/>
-        <di:waypoint x="780" y="180"/>
+      <bpmndi:BPMNEdge id="E_f_aprob_gw" bpmnElement="f_aprob_gw">
+        <di:waypoint x="970" y="405"/>
+        <di:waypoint x="1050" y="405"/>
+        <di:waypoint x="1050" y="220"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_F_Stop_G" bpmnElement="F_Stop_G">
-        <di:waypoint x="950" y="180"/>
-        <di:waypoint x="1020" y="180"/>
+      <bpmndi:BPMNEdge id="E_f_no_aprob" bpmnElement="f_no_aprob">
+        <di:waypoint x="1050" y="220"/>
+        <di:waypoint x="1050" y="270"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_F_Aprob_No" bpmnElement="F_Aprob_No">
-        <di:waypoint x="1045" y="155"/>
-        <di:waypoint x="1045" y="78"/>
-        <di:waypoint x="1160" y="78"/>
+      <bpmndi:BPMNEdge id="E_f_si_aprob" bpmnElement="f_si_aprob">
+        <di:waypoint x="1070" y="200"/>
+        <di:waypoint x="1130" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_F_Aprob_Si" bpmnElement="F_Aprob_Si">
-        <di:waypoint x="1070" y="180"/>
-        <di:waypoint x="1160" y="250"/>
+      <bpmndi:BPMNEdge id="E_f_plan_arch" bpmnElement="f_plan_arch">
+        <di:waypoint x="1290" y="200"/>
+        <di:waypoint x="1350" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_F_Plan_Arch" bpmnElement="F_Plan_Arch">
-        <di:waypoint x="1330" y="250"/>
-        <di:waypoint x="1390" y="250"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_F_Arch_End" bpmnElement="F_Arch_End">
-        <di:waypoint x="1560" y="250"/>
-        <di:waypoint x="1630" y="251"/>
+      <bpmndi:BPMNEdge id="E_f_arch_end" bpmnElement="f_arch_end">
+        <di:waypoint x="1500" y="200"/>
+        <di:waypoint x="1560" y="200"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

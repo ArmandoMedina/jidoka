@@ -1,98 +1,165 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_11_Descubre" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
-  <bpmn:process id="Process_Descubre" name="/jidoka:descubre — descubrir el QUÉ" isExecutable="false">
-    <bpmn:documentation>Fuente: .claude/commands/jidoka/descubre.md</bpmn:documentation>
-    <bpmn:startEvent id="Start" name="Inicio">
-      <bpmn:outgoing>F_Start_Task_Inyectar</bpmn:outgoing>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_11_Descubre" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:collaboration id="Collab_Descubre">
+    <bpmn:participant id="Pool_Descubre" name="/jidoka:descubre — sacar el QUÉ cuando está borroso" processRef="Process_Descubre"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Descubre" name="/jidoka:descubre — entrevista de descubrimiento" isExecutable="false">
+    <bpmn:documentation>Fuente: .claude/commands/jidoka/descubre.md. Carriles: el Agente entrevista y estructura; el Humano (cliente/experto) aporta hechos y aprueba con nombre.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_Descubre">
+      <bpmn:lane id="Lane_Agente" name="Agente (entrevistador)">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Diagnostico</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Entrevista</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Juez</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Brief</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Aprob</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Planea</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Definicion</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Humano" name="Humano (cliente / experto)">
+        <bpmn:flowNodeRef>U_Experto</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>U_Aprobar</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="QUÉ borroso">
+      <bpmn:outgoing>f1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:task id="Task_Inyectar" name="Leer e inyectar el brief existente">
-      <bpmn:incoming>F_Start_Task_Inyectar</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Inyectar_Task_Diagnosticar</bpmn:outgoing>
+    <bpmn:task id="T_Diagnostico" name="Diagnóstico: 1 pregunta cerrada (3 nieblas + juez de verdad)">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="F_Start_Task_Inyectar" sourceRef="Start" targetRef="Task_Inyectar"/>
-    <bpmn:task id="Task_Diagnosticar" name="Diagnosticar tipo de niebla y autoridad">
-      <bpmn:incoming>F_Task_Inyectar_Task_Diagnosticar</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Diagnosticar_Task_Entrevistar</bpmn:outgoing>
+    <bpmn:task id="T_Entrevista" name="Entrevista por ruta A/B/C (hechos pasados, filtro Mom Test)">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f3</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="F_Task_Inyectar_Task_Diagnosticar" sourceRef="Task_Inyectar" targetRef="Task_Diagnosticar"/>
-    <bpmn:userTask id="Task_Entrevistar" name="Entrevistar con hechos pasados">
-      <bpmn:incoming>F_Task_Diagnosticar_Task_Entrevistar</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Entrevistar_Task_Kit</bpmn:outgoing>
+    <bpmn:exclusiveGateway id="Gw_Juez" name="¿El juez de verdad es un tercero sin IA?">
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f_si_juez</bpmn:outgoing>
+      <bpmn:outgoing>f_no_juez</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="U_Experto" name="Kit portátil: el experto responde (evidencia en docs/gemba)">
+      <bpmn:incoming>f_si_juez</bpmn:incoming>
+      <bpmn:outgoing>f_exp_brief</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:sequenceFlow id="F_Task_Diagnosticar_Task_Entrevistar" sourceRef="Task_Diagnosticar" targetRef="Task_Entrevistar"/>
-    <bpmn:task id="Task_Kit" name="Preparar kit portátil si la autoridad es externa">
-      <bpmn:incoming>F_Task_Entrevistar_Task_Kit</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Kit_Task_Poblar</bpmn:outgoing>
+    <bpmn:task id="T_Brief" name="Poblar brief sin huecos (caso, métrica, autoridad, apetito, no-metas)">
+      <bpmn:incoming>f_no_juez</bpmn:incoming>
+      <bpmn:incoming>f_exp_brief</bpmn:incoming>
+      <bpmn:outgoing>f_brief_aprob</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="F_Task_Entrevistar_Task_Kit" sourceRef="Task_Entrevistar" targetRef="Task_Kit"/>
-    <bpmn:task id="Task_Poblar" name="Poblar el brief sin inventar huecos">
-      <bpmn:incoming>F_Task_Kit_Task_Poblar</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Poblar_Task_Aprobar</bpmn:outgoing>
-    </bpmn:task>
-    <bpmn:sequenceFlow id="F_Task_Kit_Task_Poblar" sourceRef="Task_Kit" targetRef="Task_Poblar"/>
-    <bpmn:userTask id="Task_Aprobar" name="Obtener aprobación nombrada">
-      <bpmn:incoming>F_Task_Poblar_Task_Aprobar</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Aprobar_End</bpmn:outgoing>
+    <bpmn:userTask id="U_Aprobar" name="STOP: aprobación nombrada del QUÉ">
+      <bpmn:incoming>f_brief_aprob</bpmn:incoming>
+      <bpmn:outgoing>f_aprob_gw</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:sequenceFlow id="F_Task_Poblar_Task_Aprobar" sourceRef="Task_Poblar" targetRef="Task_Aprobar"/>
-    <bpmn:endEvent id="End" name="QUÉ aprobado o brief en definición">
-      <bpmn:incoming>F_Task_Aprobar_End</bpmn:incoming>
+    <bpmn:exclusiveGateway id="Gw_Aprob" name="¿Aprobó nombrando el QUÉ?">
+      <bpmn:incoming>f_aprob_gw</bpmn:incoming>
+      <bpmn:outgoing>f_si_aprob</bpmn:outgoing>
+      <bpmn:outgoing>f_no_aprob</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_Planea" name="→ /jidoka:planea con el brief">
+      <bpmn:incoming>f_si_aprob</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="F_Task_Aprobar_End" sourceRef="Task_Aprobar" targetRef="End"/>
+    <bpmn:endEvent id="End_Definicion" name="Brief en_definicion (retomar sin re-preguntar)">
+      <bpmn:incoming>f_no_aprob</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_Diagnostico"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_Diagnostico" targetRef="T_Entrevista"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="T_Entrevista" targetRef="Gw_Juez"/>
+    <bpmn:sequenceFlow id="f_si_juez" name="sí" sourceRef="Gw_Juez" targetRef="U_Experto"/>
+    <bpmn:sequenceFlow id="f_no_juez" name="no" sourceRef="Gw_Juez" targetRef="T_Brief"/>
+    <bpmn:sequenceFlow id="f_exp_brief" sourceRef="U_Experto" targetRef="T_Brief"/>
+    <bpmn:sequenceFlow id="f_brief_aprob" sourceRef="T_Brief" targetRef="U_Aprobar"/>
+    <bpmn:sequenceFlow id="f_aprob_gw" sourceRef="U_Aprobar" targetRef="Gw_Aprob"/>
+    <bpmn:sequenceFlow id="f_si_aprob" name="sí" sourceRef="Gw_Aprob" targetRef="End_Planea"/>
+    <bpmn:sequenceFlow id="f_no_aprob" name="no / cansado" sourceRef="Gw_Aprob" targetRef="End_Definicion"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_11_Descubre">
-    <bpmndi:BPMNPlane id="Plane_Diagram_11_Descubre" bpmnElement="Process_Descubre">
-      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="Start">
-        <dc:Bounds x="80" y="220" width="36" height="36"/>
+    <bpmndi:BPMNPlane id="Plane_11_Descubre" bpmnElement="Collab_Descubre">
+      <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Descubre" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1420" height="400"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Task_Inyectar" bpmnElement="Task_Inyectar">
-        <dc:Bounds x="180" y="198" width="170" height="80"/>
+      <bpmndi:BPMNShape id="S_LaneA" bpmnElement="Lane_Agente" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1390" height="250"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Start_Task_Inyectar" bpmnElement="F_Start_Task_Inyectar">
-        <di:waypoint x="116" y="238"/>
-        <di:waypoint x="180" y="238"/>
+      <bpmndi:BPMNShape id="S_LaneH" bpmnElement="Lane_Humano" isHorizontal="true">
+        <dc:Bounds x="190" y="330" width="1390" height="150"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
+        <dc:Bounds x="210" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="198" y="218" width="60" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TDiagnostico" bpmnElement="T_Diagnostico">
+        <dc:Bounds x="280" y="170" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TEntrevista" bpmnElement="T_Entrevista">
+        <dc:Bounds x="480" y="170" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwJuez" bpmnElement="Gw_Juez" isMarkerVisible="true">
+        <dc:Bounds x="680" y="180" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="665" y="143" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_UExperto" bpmnElement="U_Experto">
+        <dc:Bounds x="620" y="375" width="180" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TBrief" bpmnElement="T_Brief">
+        <dc:Bounds x="800" y="170" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_UAprobar" bpmnElement="U_Aprobar">
+        <dc:Bounds x="1010" y="375" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwAprob" bpmnElement="Gw_Aprob" isMarkerVisible="true">
+        <dc:Bounds x="1220" y="180" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1205" y="143" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndPlanea" bpmnElement="End_Planea">
+        <dc:Bounds x="1350" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1320" y="218" width="92" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndDefinicion" bpmnElement="End_Definicion">
+        <dc:Bounds x="1225" y="265" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1195" y="297" width="100" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
+        <di:waypoint x="240" y="200"/>
+        <di:waypoint x="280" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Diagnosticar" bpmnElement="Task_Diagnosticar">
-        <dc:Bounds x="410" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Inyectar_Task_Diagnosticar" bpmnElement="F_Task_Inyectar_Task_Diagnosticar">
-        <di:waypoint x="350" y="238"/>
-        <di:waypoint x="410" y="238"/>
+      <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
+        <di:waypoint x="430" y="200"/>
+        <di:waypoint x="480" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Entrevistar" bpmnElement="Task_Entrevistar">
-        <dc:Bounds x="640" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Diagnosticar_Task_Entrevistar" bpmnElement="F_Task_Diagnosticar_Task_Entrevistar">
-        <di:waypoint x="580" y="238"/>
-        <di:waypoint x="640" y="238"/>
+      <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
+        <di:waypoint x="630" y="200"/>
+        <di:waypoint x="680" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Kit" bpmnElement="Task_Kit">
-        <dc:Bounds x="870" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Entrevistar_Task_Kit" bpmnElement="F_Task_Entrevistar_Task_Kit">
-        <di:waypoint x="810" y="238"/>
-        <di:waypoint x="870" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_si_juez" bpmnElement="f_si_juez">
+        <di:waypoint x="700" y="220"/>
+        <di:waypoint x="700" y="375"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Poblar" bpmnElement="Task_Poblar">
-        <dc:Bounds x="1100" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Kit_Task_Poblar" bpmnElement="F_Task_Kit_Task_Poblar">
-        <di:waypoint x="1040" y="238"/>
-        <di:waypoint x="1100" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_no_juez" bpmnElement="f_no_juez">
+        <di:waypoint x="720" y="200"/>
+        <di:waypoint x="800" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Aprobar" bpmnElement="Task_Aprobar">
-        <dc:Bounds x="1330" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Poblar_Task_Aprobar" bpmnElement="F_Task_Poblar_Task_Aprobar">
-        <di:waypoint x="1270" y="238"/>
-        <di:waypoint x="1330" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_exp_brief" bpmnElement="f_exp_brief">
+        <di:waypoint x="800" y="405"/>
+        <di:waypoint x="875" y="405"/>
+        <di:waypoint x="875" y="230"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_End" bpmnElement="End">
-        <dc:Bounds x="1560" y="220" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Aprobar_End" bpmnElement="F_Task_Aprobar_End">
-        <di:waypoint x="1500" y="238"/>
-        <di:waypoint x="1560" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_brief_aprob" bpmnElement="f_brief_aprob">
+        <di:waypoint x="950" y="200"/>
+        <di:waypoint x="1085" y="200"/>
+        <di:waypoint x="1085" y="375"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_aprob_gw" bpmnElement="f_aprob_gw">
+        <di:waypoint x="1160" y="405"/>
+        <di:waypoint x="1240" y="405"/>
+        <di:waypoint x="1240" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_si_aprob" bpmnElement="f_si_aprob">
+        <di:waypoint x="1260" y="200"/>
+        <di:waypoint x="1350" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_no_aprob" bpmnElement="f_no_aprob">
+        <di:waypoint x="1240" y="220"/>
+        <di:waypoint x="1240" y="265"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
