@@ -49,6 +49,8 @@ El roster de arriba dice **quién responde**; el asiento con dientes —el que d
 
 **El tier ya está fijado en el agente** (`.claude/agents/`, ADR 0033): elige el asiento, no el modelo. Al delegar, anuncia **qué se delegó a quién** ("delegado a `explorador`: localizar todas las referencias a X") — no un ritual de "sentarse" en el hilo principal.
 
+Si `.claude/agents/` no está sembrado en este repo, delega con el agente general (`general-purpose`) y anuncia igual el asiento que representa — la degradación se acusa, no se finge.
+
 Si el hilo principal hace **excepcionalmente** el trabajo de un asiento (edición acoplada con bucle TDD sobre los mismos archivos, contexto que ya vive en el hilo), acúsalo como **excepción**, no como rito: `🎭 Asiento: <rol> (en sesión) — <por qué>` (criterio completo en `kanban/roles.md`).
 
 ## 4. Desconfía de la compactación

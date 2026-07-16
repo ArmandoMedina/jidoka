@@ -47,6 +47,12 @@ try {
   Check 'instala: el motor queda sembrado' (Test-Path (Join-Path $tmp 'tools/verificar.ps1')) "no aparecio tools/verificar.ps1"
   Check 'instala: la ley del arquetipo queda sembrada' (Test-Path (Join-Path $tmp 'tools/blast-radius.json')) "no aparecio la ley"
   Check 'instala: los comandos /jidoka:* quedan sembrados' (Test-Path (Join-Path $tmp '.claude/commands/jidoka/arranca.md')) "no aparecio arranca.md"
+  # Cosecha #7 (issue #87): los agentes-asiento del ADR 0033 viajan en el kit -- el arranca
+  # sembrado los referencia, asi que la siembra debe entregarlos (los 4) + su lint.
+  foreach ($ag in 'explorador','mecanico','auditor','arquitecto') {
+    Check "instala: el agente-asiento '$ag' queda sembrado" (Test-Path (Join-Path $tmp ".claude/agents/$ag.md")) "no aparecio .claude/agents/$ag.md"
+  }
+  Check 'instala: el lint de agentes queda sembrado (probar-agentes.ps1)' (Test-Path (Join-Path $tmp 'tools/probar-agentes.ps1')) "no aparecio probar-agentes.ps1"
   Check 'instala: core.hooksPath quedo configurado' ((git -C $tmp config core.hooksPath) -eq '.githooks') "hooksPath no quedo"
 
   # 1b. SELLO de version: el hijo sabe de que Jidoka viene su motor, con hashes que casan.

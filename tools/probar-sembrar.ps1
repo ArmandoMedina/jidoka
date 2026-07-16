@@ -40,6 +40,11 @@ try {
   Check 'siembra: el propio fallback queda sembrado (sembrar-manual.ps1)' (Test-Path (Join-Path $tmp 'tools/sembrar-manual.ps1')) "no aparecio sembrar-manual.ps1"
   Check 'siembra: la ley del arquetipo queda sembrada' (Test-Path (Join-Path $tmp 'tools/blast-radius.json')) "no aparecio la ley"
   Check 'siembra: los comandos /jidoka:* quedan sembrados' (Test-Path (Join-Path $tmp '.claude/commands/jidoka/arranca.md')) "no aparecio arranca.md"
+  # Cosecha #7 (issue #87): los agentes-asiento viajan tambien por el fallback AV-seguro (+ su lint).
+  foreach ($ag in 'explorador','mecanico','auditor','arquitecto') {
+    Check "siembra: el agente-asiento '$ag' queda sembrado" (Test-Path (Join-Path $tmp ".claude/agents/$ag.md")) "no aparecio .claude/agents/$ag.md"
+  }
+  Check 'siembra: el lint de agentes queda sembrado (probar-agentes.ps1)' (Test-Path (Join-Path $tmp 'tools/probar-agentes.ps1')) "no aparecio probar-agentes.ps1"
   Check 'siembra: core.hooksPath quedo configurado' ((git -C $tmp config core.hooksPath) -eq '.githooks') "hooksPath no quedo"
   # Stubs de instancia: el fallback ahora siembra la instancia completa (no-clobber), no solo
   # la mecanica -- para que un hijo en maquina donde instalar.ps1 cae en cuarentena no quede

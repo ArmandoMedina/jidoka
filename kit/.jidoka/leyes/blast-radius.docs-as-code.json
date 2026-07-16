@@ -43,7 +43,7 @@
   {
     "nombre": "ritual",
     "desc": "el ritual ejecutable: los comandos /jidoka:* y las skills-asiento",
-    "fuente": [".claude/commands/*", ".claude/skills/*"],
+    "fuente": [".claude/commands/*", ".claude/skills/*", ".claude/agents/*"],
     "doc_bloquea": [],
     "doc_avisa": ["CHANGELOG.md"],
     "rol": "Escribano"
