@@ -65,6 +65,13 @@ de AF447). Diseño correcto: la IA le **sube** el juicio al humano (muestra el p
 decidir con contexto, ancla la capacitación en el artefacto versionado, no en su memoria de
 modelo); nunca se lo **sustituye**.
 
+> **Corolario de diseño (el juez falla cerrado; el motor no se muta en silencio).** Un gate que
+> certifica sin haber medido de verdad —un `[OK]` sobre un test que no corrió, un review verde
+> sobre una pieza del motor que desapareció del árbol— es peor que ningún gate: aparenta el muro
+> que no está. Ante la duda entre aprobar de más o bloquear de más, el gate **falla cerrado**; y
+> mutar el propio motor (borrar una pieza, no solo tocarla sin su doc) exige la misma decisión
+> nombrada que cualquier otro cambio de gobierno. (Disparo `no-borres-el-motor`, ADR 0032.)
+
 ## El límite honesto
 
 Nada de esto es técnicamente nuevo — cada mecanismo tiene décadas (ver linajes en `01-` y `02-`).

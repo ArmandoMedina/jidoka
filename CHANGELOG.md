@@ -2,6 +2,17 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.15.0] — 2026-07-16
+
+### El juez falla cerrado — el preflight no aprueba lo que no corrió y el motor no se borra sin decisión (ADR 0032)
+
+Cosecha #6 del lazo, nacida de dos fallas de la misma familia cazadas en vivo cortando `v1.14.0`: **jueces del motor que aprueban lo que no midieron**. El preflight del release imprimió `[OK]` de un test cuyo archivo estaba en cuarentena de AV ([#78](https://github.com/ArmandoMedina/jidoka/issues/78)); y en un sprint anterior un subagente borró 750 líneas del motor sin que ningún gate lo cazara ([#73](https://github.com/ArmandoMedina/jidoka/issues/73)).
+
+- **`fix` — el preflight de `publicar.ps1` falla cerrado ante un test ausente (#78).** Guarda `Test-Path` antes de correr cada `probar-*` (un archivo en cuarentena mata el corte con la ruta alterna señalada: la evidencia server-side vive en el CI) + reset de `$LASTEXITCODE` antes de cada test (la otra mitad del mecanismo: el exit viciado del test anterior). Decisión del cliente (2026-07-16): morir siempre, no "[AUSENTE] y seguir". `probar-publicar` sube a 7 casos (ROJO→VERDE).
+- **`feat` — salvavidas `no-borres-el-motor` en `verificar.ps1` (#73, disparo 15.º).** Si el cambio **borra** una pieza del motor (`tools/*.ps1`, `tools/blast-radius.json`) sin un ADR nuevo en el mismo cambio → `[BLOQUEA]`. Una decisión se documenta; un accidente no — restaurar es seguro, el archivo sigue en git. Detección vía `--diff-filter=D`; parámetro `-BorradosInyectados` para pruebas; `probar-gate` sube a 12 casos (ROJO→VERDE).
+- **`docs` — las rutas AV dejan de ser invisibles.** La guía del motor gana la receta oficial `skip-worktree` (#79: cuándo, cómo auditarla con `git ls-files -v`, cómo revertirla — la cura mecánica queda regla 2-3); el README presenta `sembrar-manual.ps1` como ruta AV-independiente de primera clase (#74-R2).
+- **`docs` — la frontera de producto se declara (#71, primer paso).** README + ROADMAP distinguen **Jidoka Core** (estable) de las **familias opcionales** (Discovery / Docs / Operations / Observability) con su estado de madurez. Solo documentación; nada se reorganiza.
+
 ## [1.14.0] — 2026-07-15
 
 ### El instalador AV-seguro se vuelve completo — `sembrar-manual.ps1` siembra la instancia entera (ADR 0027, enmienda)
