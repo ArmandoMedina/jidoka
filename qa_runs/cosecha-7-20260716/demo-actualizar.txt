@@ -1,0 +1,24 @@
+﻿== Actualizar motor: hijo en Jidoka 1.16.1 -> Jidoka 1.16.1 ==
+  (el sello ya declara 1.16.1; re-checando piezas por si cambiaron)
+  [ACTUALIZA] tools/verificar.ps1
+  [ACTUALIZA] tools/probar-gate.ps1
+  [NUEVO]  tools/probar-agentes.ps1
+  [ACTUALIZA] tools/sembrar-manual.ps1
+  [ACTUALIZA] .claude/commands/jidoka/arranca.md
+  [ACTUALIZA] .claude/skills/arquitecto-doc/SKILL.md
+  [NUEVO]  .claude/agents/arquitecto.md
+  [NUEVO]  .claude/agents/auditor.md
+  [NUEVO]  .claude/agents/explorador.md
+  [NUEVO]  .claude/agents/mecanico.md
+  [ACTUALIZA] .github/workflows/andon.yml
+  [ACTUALIZA] docs/guias/mantener-el-motor-al-dia.md
+  [ACTUALIZA] kit/.jidoka/templates/infra.md
+  [MIGRA] product/PRODUCT_BRIEF.md sembrado: el motor nuevo lo asume y el hijo no lo tenia
+  [MIGRA] product/infra.md sembrado: el motor nuevo lo asume y el hijo no lo tenia
+  [MIGRA] CONTRIBUTING.md sembrado: el motor nuevo lo asume y el hijo no lo tenia
+  [MIGRA] el sello no registra el arquetipo (pre-1.17): los stubs por-arquetipo no se auto-siembran; si te falta la semilla del QUE, revisa stubs_arquetipo del manifiesto a mano
+
+== Motor: 74 al dia | 8 actualizado(s) | 5 nuevo(s) | 0 divergen | 3 stub(s) migrado(s) ==
+Instancia (ley, product/, HANDOFF, ADRs) intacta: lo existente no se toca; solo se sembro lo que el motor nuevo asume y faltaba ([MIGRA]).
+Siguiente: revisa el diff en una rama y abrelo como PR (el diff ES la revision).
+

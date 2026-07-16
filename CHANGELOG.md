@@ -2,6 +2,17 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.17.0] — 2026-07-16
+
+### La bajada que dolió — cosecha #7 del lazo (issues #86–#91 + #82, ADR 0035)
+
+Seis issues llegados en batch de la primera bajada real 1.13→1.16 en un hijo instalado (caso 1). Plan-contrato: `docs/sprints/sprint-cosecha-7-plan.md`.
+
+- **`feat` — la conciencia viaja en el kit (R1, #86/#87, cura B del #82).** Los agentes-asiento del ADR 0033 (`.claude/agents/`, los 4 tiereados) y su lint `probar-agentes.ps1` entran al manifiesto; las leyes-plantilla ganan `.claude/agents/*` en `ritual`. La instancia que el `arranca` inyecta se vuelve stub común de todo arquetipo: `product/PRODUCT_BRIEF.md` (deja la raíz), `product/infra.md` —con `## El casting`: la casa única del roster, se inyecta donde vive— y `CONTRIBUTING.md` mínimo; la plantilla `recursos-del-proyecto.md` se retira. `-Actualizar` (instalar y `sembrar-manual`) **migra**: siembra no-clobber los stubs que el hijo no tiene (`[MIGRA]`); lo condicionado a arquetipo solo si el sello registra `producto` (campo nuevo del sello; con sello viejo avisa, no adivina).
+- **`fix` — el juez sin hueco (R2, #88).** `no-borres-el-motor` solo acepta como "ADR nuevo" los **agregados** de verdad (`--diff-filter=A` + `-AgregadosInyectados`): un ADR editado —o borrado— ya no destraba borrar una pieza del motor. 2 casos negativos nuevos en `probar-gate` (14/14).
+- **`feat`/`fix` — mecánica menor (R3, #89/#90/#91).** Guard del manifiesto sin `stubs` en `sembrar-manual` (+ caso regresivo: `@($null)` de PS 5.1 ya no revienta la siembra a medias); **costura `.local` del CI**: `andon.yml` invoca `tools/ci.local.ps1` si existe (espejo de `verificar.local.ps1` — la customización del hijo deja de re-divergir en cada bajada) con tabla de costuras en la guía; el sello se escribe con newline final (4 sitios + check). El "resumen doble" del #91 **no reproduce** en corrida real: artefacto de captura, acusado en el issue.
+- **Evidencia:** `qa_runs/cosecha-7-20260716/LOG.md` — suite completa verde (instalador 67/67, sembrar 36/36, gate 14/14) + demo de migración end-to-end sobre un hijo 1.16.1 real.
+
 ## [1.16.1] — 2026-07-16
 
 ### El método se mide a sí mismo — primer pase del análisis de costo neto sobre el lab real (issue #72)
