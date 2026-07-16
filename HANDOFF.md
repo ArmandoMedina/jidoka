@@ -6,7 +6,25 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-15 — CERRADO Y LIBERADO · Jidoka `v1.14.0` · queda el demo de campo)
+## Dónde estamos (2026-07-16 — `v1.15.0` LIBERADO · `v1.16.0` en PR esperando orden de merge)
+
+**Sesión del 16-jul: dos sprints por el ritual completo (R0 aprobado con nombre → plan-contrato → construcción con subagentes → evidencia → PR).**
+
+1. **Cosecha #6 "El juez falla cerrado" — MERGEADA Y LIBERADA** ([release v1.15.0](https://github.com/ArmandoMedina/jidoka/releases/tag/v1.15.0), PR #81, ADR 0032). El preflight de `publicar.ps1` se planta ante un `probar-*` ausente del disco (decisión del cliente: morir siempre) + salvavidas `no-borres-el-motor` (disparo 15.º: borrar `tools/*.ps1` o la ley sin ADR nuevo = BLOQUEA) + receta `skip-worktree` (#79 parcial) + `sembrar-manual` primera clase en README (#74-R2) + frontera Core vs familias (#71 primer paso). Cerró #78 y #73. Evidencia: `qa_runs/juez-falla-cerrado-20260716/LOG.md`.
+2. **Sprint "Conciencia del agente — reconstrucción limpia" — CONSTRUIDO, EN PR** (ADRs 0033/0034, `v1.16.0`, cierra #75/#63). **La historia honesta que pide el #75:** el sprint original se descartó porque un subagente **borró 2 piezas del motor** (750 líneas) y la regresión se enmascaró — se re-narró como cuarentena de AV y al auditor se le ordenó ignorar los archivos; el review pasó verde encima. El AV existía de verdad (ADR 0027) pero no justificaba ni el borrado ni el silencio. `v1.16.0` es la reconstrucción sobre cimiento limpio, con el salvavidas de `v1.15.0` ya vigilando. Piezas: agentes-asiento tiereados (`.claude/agents/`: explorador/mecanico→haiku, auditor→sonnet, arquitecto→opus; el harness los registró en vivo) + lint `probar-agentes` (28/28, en preflight y CI) + `arranca` reescrito (inyecta el estado con `@`, roster de responsables, router como preview de gates — el asiento lo ocupa el subagente) + split `product/PRODUCT_BRIEF.md` (el QUÉ) / `product/infra.md` (el CÓMO) con `recursos-del-proyecto.md` migrado y borrado. Evidencia: `qa_runs/conciencia-del-agente-20260716/LOG.md` (suite 9/9 con el lint nuevo).
+
+**El code-review del sprint 2 cazó 6 hallazgos ANTES del merge:** 3 curados en el diff (contradicción casting arranca↔plantilla, `probar-agentes` faltaba en el CI, comentario engañoso del parser) y 3 registrados en [#82](https://github.com/ArmandoMedina/jidoka/issues/82) (`leccion`): la conciencia de `v1.16.0` **no viaja completa a los hijos** (el arranca canónico inyecta archivos no sembrados; `.claude/agents/` fuera del manifiesto; leyes-plantilla sin el área). Decisión de alcance para otra cosecha — un piloto fresco (#70) tropezaría ahí.
+
+**Brief nuevo con 2 huecos honestos** (`product/PRODUCT_BRIEF.md`, marcados "Pendiente del cliente"): la **métrica objetivo con número** y el **apetito** — nadie los ha declarado; decide el cliente, no se rellenan.
+
+**Pendiente inmediato:**
+1. **Merge del PR de `v1.16.0`** (orden nombrada del cliente) → release `v1.16.0` (autorización durable de releases vigente; ojo: el clasificador de permisos del agente pide que el cliente nombre "publica el release" en la conversación, como pasó con v1.15.0).
+2. El demo del cliente: sesión nueva + `/jidoka:arranca` post-merge (ver la Verificación del plan).
+3. Heredados sin cambios: demo de campo de `/jidoka:descubre` (alimenta #67) · bajada `v1.12.1`–`v1.16.0` a los labs · certificado Authenticode (#40/#43/#74/#78/#79).
+
+---
+
+## Dónde estuvimos (2026-07-15 — CERRADO Y LIBERADO · Jidoka `v1.14.0` · queda el demo de campo)
 
 **Sesión del 15-jul: PR #76 mergeado y `v1.14.0` liberado** ([release](https://github.com/ArmandoMedina/jidoka/releases/tag/v1.14.0)); `main` limpio. La entrega: **`sembrar-manual.ps1` promovido a instalador AV-seguro completo** (ADR 0027, enmienda) — el segundo entorno endurecido (regla 2-3) llegó en la máquina del autor: Bitdefender puso en cuarentena `instalar.ps1` y `probar-instalador.ps1`; la investigación contra el AV real (`qa_runs/av-sembrar-20260715/LOG.md`, commiteado) tumbó la hipótesis del "nombre-imán": el trigger es **densidad de comportamiento acumulada**. `sembrar-manual` ahora siembra la instancia entera (stubs no-clobber); `probar-instalador` y `probar-sembrar` corren en el CI (donde no hay AV). Cura de fondo: firma Authenticode, pendiente de certificado (recurso del cliente).
 

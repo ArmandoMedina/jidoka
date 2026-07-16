@@ -8,4 +8,4 @@ El QUÉ de Jidoka en lenguaje llano: **dominios → módulos → capacidades**, 
 - **Módulos:** [[MOD-ritual]] · [[MOD-andon]]
 - **Capacidades:** [[RIT-1-ritual-ejecutable]] · [[AND-1-muro-andon]]
 
-`recursos-del-proyecto.md` (lo que la sesión no debe preguntar) vive aquí también, como nota `tipo: recursos`.
+Aquí viven también dos notas hermanas con dueño claro: [[PRODUCT_BRIEF]] — el **QUÉ** de Jidoka consolidado en una página (`tipo: brief`) — e [[infra]] — el **CÓMO-operativo**: identidades, máquinas y convenciones que la sesión no debe preguntar (`tipo: recursos`).

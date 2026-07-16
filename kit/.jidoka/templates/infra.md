@@ -1,0 +1,27 @@
+---
+tipo: recursos
+estado: vigente
+---
+# Infra — [nombre del proyecto]
+
+> **El CÓMO-operativo: lo que la sesión no debe preguntarte al abrir.** Punteros a lo que el trabajo necesita: material de referencia, identidades por servicio, máquinas y ambientes, convenciones ya decididas. `/jidoka:arranca` lo lee al abrir para no re-preguntar sesión tras sesión.
+>
+> **Regla dura: punteros, nunca secretos.** Aquí van *dónde* está algo y *cómo se llama*, jamás el contenido sensible. Nada de tokens, contraseñas, llaves ni claves de API — esos viven en el gestor de secretos / variables de entorno, y aquí solo se nombra cuál. Si este archivo versiona, un secreto filtrado aquí es un secreto en el historial de git para siempre (afín al disparo `frontera-nda`).
+>
+> El **casting** (quién ocupa cada asiento, por nombre) no vive aquí: vive en `recursos-del-proyecto.md` (su plantilla, en este mismo directorio). Sin casting, la sesión cae a los roles neutrales de `kanban/roles.md`. El QUÉ del producto tampoco: ese es el brief (`PRODUCT_BRIEF.md`).
+
+## Material de referencia
+
+[Docs, specs, diseños, tickets que la sesión debe conocer. Puntero + una línea de qué es. Ej: "El brief de producto vive en `PRODUCT_BRIEF.md`". "El estado en vuelo vive en `HANDOFF.md` (se lee y se limpia al abrir)."]
+
+## Identidades por servicio
+
+[Con qué cuenta/usuario se opera cada servicio — el *nombre*, no la credencial. Ej: "GitHub: se pushea como `usuario`; el remoto es `origin`." "Deploy: cuenta `proj-prod` en el servicio Y; el secreto se llama `DEPLOY_TOKEN` y vive en las Actions secrets del repo."]
+
+## Máquinas y ambientes
+
+[Dónde corre y se prueba esto. Ej: "Dev en Windows 11 / PowerShell 5.1 (ver `docs/guias/entorno-windows-powershell51.md`)." "Ambiente de prueba limpio: <cuál, cómo se levanta, qué NO tiene>." Nombra el ambiente bueno y el feo si hay varios, para que la sesión sepa cuál usar para qué.]
+
+## Convenciones que no se re-preguntan
+
+[Decisiones operativas ya tomadas que la sesión debe respetar sin volver a consultarlas. Ej: "Los commits no llevan trailer de sesión (ADR 000X)." "La rama de trabajo se saca de `main`, nunca se commitea directo." "Evidencia-no-palabra: nada se anuncia como hecho hasta que corre."]

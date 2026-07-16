@@ -2,6 +2,16 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.16.0] — 2026-07-16
+
+### La conciencia del agente se instala — asientos-subagente tiereados y el arranca que inyecta, no encarga (ADRs 0033/0034)
+
+Reconstrucción limpia del sprint descartado por la regresión enmascarada ([#75](https://github.com/ArmandoMedina/jidoka/issues/75) es el inventario; el salvavidas que la caza nació en `v1.15.0`). Principio de la familia (ADR 0029): *nada de conciencia depende de la iniciativa del agente*.
+
+- **`feat` — agentes-asiento tiereados ([#63](https://github.com/ArmandoMedina/jidoka/issues/63), ADR 0033).** `.claude/agents/{explorador,mecanico→haiku · auditor→sonnet · arquitecto→opus}` con `model:` y `tools:` fijos en frontmatter: el tier deja de vivir en prosa que nadie obliga a leer — se elige el asiento, no el modelo. Lint `tools/probar-agentes.ps1` (caza aliases inventados; en el preflight del release) y `".claude/agents/*"` entra al área `ritual` de la ley. La tabla asiento→tier aterriza en `kanban/roles.md`.
+- **`feat` — el `arranca` inyecta, no encarga (ADR 0034).** El estado (`@HANDOFF`, `@product/PRODUCT_BRIEF.md`, `@product/infra.md`, `@CONTRIBUTING.md`) se inyecta al abrir — un puntero es una esperanza, un `@` es un hecho. **Reframe rol-teatro:** el orquestador ya no "se sienta" — el roster es la tabla de responsables, el router es un preview de gates, y el asiento con dientes lo ocupa el subagente tiereado.
+- **`feat` — el QUÉ y el CÓMO-operativo se separan (#75).** `product/recursos-del-proyecto.md` se divide en `product/PRODUCT_BRIEF.md` (el QUÉ de Jidoka, consolidado desde lo ya escrito) y `product/infra.md` (identidades, máquinas, convenciones). El casting nombrado sobrevive como plantilla en `kit/` (los hijos castean; la nave usa roles neutrales a propósito — decisión 2026-07-14). Plantilla nueva `kit/.jidoka/templates/infra.md` para los hijos.
+
 ## [1.15.0] — 2026-07-16
 
 ### El juez falla cerrado — el preflight no aprueba lo que no corrió y el motor no se borra sin decisión (ADR 0032)
