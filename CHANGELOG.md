@@ -2,6 +2,13 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.16.1] — 2026-07-16
+
+### El método se mide a sí mismo — primer pase del análisis de costo neto sobre el lab real (issue #72)
+
+- **`docs` — `docs/analisis/costo-neto-sgi-202607.md`** (`en_revision`): el análisis manual que pidió el issue #72, sobre evidencia existente de SimGhostInputs (dos barridos independientes: artefactos locales + API de GitHub). Titulares: el **muro server-side paga su costo con margen** (206 corridas, ~10 % rojas corregidas en minutos, 3 doc-drifts reales frenados antes del merge, ruleset sin bypass); el **costo dominante es el lazo y la doc ceremonial**, no los gates; y **cuatro piezas con cero señal de vida** en el lab (auditor `docs-graph` sin fallo histórico, `sprint-entrega.md` sin usos, `reportar-leccion` sin issues, summary de avisos afirmado en doc pero no implementado en config) quedan sobre la mesa para poda o prueba de vida (#46). Limitaciones explícitas; la instrumentación permanente (#66) espera la segunda medición (regla 2-3).
+- **`docs` — #74-R3 evaluado en el issue** (sin cambio de código): `instalar.ps1` no contiene `-ExecutionPolicy Bypass` y la evidencia AV de `v1.14.0` ya midió que quitarlo no baja del umbral heurístico. Del issue queda vivo solo el certificado Authenticode.
+
 ## [1.16.0] — 2026-07-16
 
 ### La conciencia del agente se instala — asientos-subagente tiereados y el arranca que inyecta, no encarga (ADRs 0033/0034)
