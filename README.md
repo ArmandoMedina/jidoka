@@ -76,6 +76,12 @@ git reset --hard HEAD~1      # limpieza: borra el commit del demo
 
 En tu repo sembrado el mismo verificador corre solo en cada `git push` (mide los commits que estás por subir; el instalador deja el motor en `tools/` y el índice de ADRs listo). Y el paso 3 no es un truco de demo: el caso "ADR sin listar DEBE bloquear" vive en el **self-test** (`tools/probar-gate.ps1`) que corre en cada PR de este repo — un gate que nunca rechaza nada está podrido aunque el tablero esté verde; aquí, quien valida también se valida.
 
+**¿Tu antivirus bloquea `instalar.ps1`?** Pasa (caso real: Bitdefender lo pone en cuarentena por la densidad de
+comportamiento de cualquier instalador — spawn de PowerShell + copia masiva). `tools/sembrar-manual.ps1` es la
+ruta **AV-independiente de primera clase** — no un hack de emergencia: siembra la instancia entera (ley,
+stubs, sello) sin depender de que `instalar.ps1` sea legible. Detalle completo en
+[`docs/guias/mantener-el-motor-al-dia.md`](docs/guias/mantener-el-motor-al-dia.md#en-windows-endurecido-antivirus-usa-sembrar-manualps1).
+
 ## Corriendo en un repo real
 
 El método no se prueba en un pizarrón: [**SimGhostInputs**](https://github.com/ArmandoMedina/SimGhostInputs) — una herramienta de telemetría para simracing — es un repo público construido dirigiendo agentes con este método. Puedes auditarlo tú mismo: [32 versiones publicadas](https://github.com/ArmandoMedina/SimGhostInputs/releases) con instalador generado por CI, [sus decisiones documentadas](https://github.com/ArmandoMedina/SimGhostInputs/tree/master/docs/decisions), la evidencia de demos en [`qa_runs/`](https://github.com/ArmandoMedina/SimGhostInputs/tree/master/qa_runs) y la misma maquinaria de gates (`.githooks/`, `tools/`) corriendo en sus PRs — el GIF de arriba es una corrida real ahí. Nada de esto hay que creerlo: se hace clic. La historia completa del linaje, en [`docs/casos-de-exito.md`](docs/casos-de-exito.md).
@@ -106,6 +112,21 @@ Un sprint de Jidoka es un lazo corto de cuatro tiempos. La tarjeta pasa por **Bo
 4. **Cierra** (`/jidoka:cierra`) — **Kaizen**: la retro al récord del sprint; el estado al HANDOFF. La lección viaja al siguiente sprint; el contexto no.
 
 Tres reglas de diseño que lo atraviesan todo: **el plan ligero es el contrato** (sin ceremonia de más); **cada asiento tiene una sola responsabilidad** ([`kanban/roles.md`](kanban/roles.md)); y **la disciplina escala con el riesgo** — al instalar eliges el arquetipo de tu repo y se enciende solo la maquinaria que ese proyecto merece. Es un menú, no un molde.
+
+### La frontera: Jidoka Core vs. familias opcionales
+
+Una revisión externa (2026-07-15, issue [#71](https://github.com/ArmandoMedina/jidoka/issues/71)) pidió declarar
+esta frontera antes de seguir ampliando familias. Que una capacidad sea válida no significa que pertenezca al
+núcleo — cada familia opcional declara su **madurez** en vez de darse por sentada:
+
+- **Jidoka Core (estable):** memoria por artefactos (HANDOFF/ADRs), el plan aprobado como contrato, los gates
+  deterministas fuera del LLM (Andon/blast-radius), CI + protección de rama + self-tests, el Gemba humano, el
+  ritual mínimo (arranca/planea/cierra), el instalador + el sello + la actualización de tres vías.
+- **Familias opcionales**, cada una con su estado real:
+  - **Discovery** (`/jidoka:descubre`, brief, kit de entrevista) — 1 caso real; demo de campo pendiente.
+  - **Docs** (arquetipo `doc-only`) — diferido, sin consumidor (regla 2-3).
+  - **Operations** (arquetipo `operacion`, gates de lo irreversible) — registrado, sin construir.
+  - **Observability** (telemetría de lecturas, prueba de vida de gates, costo neto) — registrado, sin construir.
 
 ## Dónde va Jidoka
 

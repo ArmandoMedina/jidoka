@@ -40,6 +40,14 @@ $selfTests = Get-ChildItem (Join-Path $PSScriptRoot 'probar-*.ps1') |
 $fuera = @($selfTests | Where-Object { $publicarSrc -notmatch ("'" + [regex]::Escape($_) + "'") })
 Check 'preflight: incluye todos los self-tests probar-*.ps1 del motor' ($fuera.Count -eq 0) "fuera del preflight: $($fuera -join ', ')"
 
+# El preflight debe FALLAR CERRADO si el archivo de un test NO existe en disco (issue #78,
+# gemelo del caso anterior: estar en la lista no basta si el archivo puede no estar en el
+# disco). Sin la guarda, CommandNotFoundException (no-terminante) se traga con *> $null y
+# $LASTEXITCODE conserva el 0 del test anterior -> [OK] de un test que jamas corrio.
+# Cazado en vivo cortando v1.14.0 con probar-instalador en cuarentena de AV.
+Check 'preflight: guarda Test-Path antes de correr cada test (un test ausente muere, no da [OK] mudo)' `
+  ($publicarSrc -match 'Test-Path\s+\$tPath') 'publicar.ps1 no tiene la guarda Test-Path del preflight (issue #78)'
+
 Write-Host ""
 if ($script:fallos -gt 0) {
   Write-Host "== $($script:fallos) de $($script:casos) fallidos. publicar.ps1 tiene un bug. ==" -ForegroundColor Red

@@ -2,9 +2,9 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
-## [1.15.0] — 2026-07-16
+## [1.17.0] — 2026-07-16
 
-### El atlas de procesos del método vive en el repo, en BPMN (ADR 0032)
+### El atlas de procesos del método vive en el repo, en BPMN (ADR 0035)
 
 El método se documenta como diagrama de proceso navegable, versionado en `docs/atlas/`. BPMN ganó un bake-off de 3 formatos (BPMN vs Mermaid vs D2) por fidelidad de swimlanes: es el único que dibuja los carriles agente/humano como bandas reales — y ese reparto es el corazón de Jidoka.
 
@@ -12,9 +12,9 @@ El método se documenta como diagrama de proceso navegable, versionado en `docs/
 - **`feat` — toolchain del atlas** (`docs/atlas/tools/`): `atlas:validate` (sin dependencias; verifica que todo `calledElement` resuelva y toda Call Activity esté en el CSV), `atlas:render` (SVG por `npx bpmn-to-image`, on-demand para no bajar Chromium en cada `npm install`), `atlas:layout` (`bpmn-auto-layout`, geometría automática). Scripts en `package.json`; `bpmn-auto-layout` como única `devDependency`.
 - **`feat` — `16-cierra` re-modelado como patrón:** pool con carriles Agente/Humano, tareas de servicio (agente) y de usuario (`OK del dueño`), gateways `¿motor sano y sin drift?` (con lazo de corrección sin `--no-verify`) y `¿entrega versión?`. Los otros 19 diagramas siguen happy-path (siguiente lote).
 - **`chore` — recomendación de editor** (`.vscode/extensions.json`: Miragon BPMN Modeler) con excepción en `.gitignore` para que viaje con el repo.
-- **`docs` — ADR 0032** (aceptado) y guía de colaboración en `docs/atlas/README.md` (convención BPMN-formal / Mermaid-borrador).
+- **`docs` — ADR 0035** (aceptado) y guía de colaboración en `docs/atlas/README.md` (convención BPMN-formal / Mermaid-borrador).
 
-### El atlas se acopla al flujo (aviso comando→diagrama) y se homologa a WYSIWYG (ADR 0033)
+### El atlas se acopla al flujo (aviso comando→diagrama) y se homologa a WYSIWYG (ADR 0036)
 
 Decidido el acoplamiento **asimétrico**: el proceso (el `.md` del comando) es la fuente; prosa y diagrama son dos vistas; el código es implementación. Se descarta el acoplamiento simétrico de tres vías (fatiga, choca con el un-solo-bloqueo del manifiesto).
 
@@ -36,6 +36,34 @@ Las 4 familias fuera del ritual (10 diagramas) se re-modelaron con carriles dond
 
 - **`refactor`** — `30-instalar` (arquetipo humano + gate del smoke), `40-estado-motor` (gateway de divergencia), `41-actualizar` (loop por pieza con el gateway de 4 estados: ausente/al día/actualizar/diverge), `42-sellar` (pipeline de motor), `44-reportar-leccion` (lab reporta / mantenedor decide construir-vs-diferir), `70-auditoría-en-rama` (fan-out + veredictos GO/NO-GO), `71-nocturna` (reparto ejecutar-vs-preparar), `72-homologación` (gateway de 3 destinos: ascender/esperar/descartar), `80-publicar` (guardas + OK nombrado del dueño), `81-preflight` (las 7 suites → gate verde/rojo).
 - **Con esto los 25 diagramas del atlas están re-modelados** (ninguno en happy-path). Cada uno inspeccionado a la vista; 25 SVG re-renderizados; `atlas:validate` sin huecos.
+
+## [1.16.1] — 2026-07-16
+
+### El método se mide a sí mismo — primer pase del análisis de costo neto sobre el lab real (issue #72)
+
+- **`docs` — `docs/analisis/costo-neto-sgi-202607.md`** (`en_revision`): el análisis manual que pidió el issue #72, sobre evidencia existente de SimGhostInputs (dos barridos independientes: artefactos locales + API de GitHub). Titulares: el **muro server-side paga su costo con margen** (206 corridas, ~10 % rojas corregidas en minutos, 3 doc-drifts reales frenados antes del merge, ruleset sin bypass); el **costo dominante es el lazo y la doc ceremonial**, no los gates; y **cuatro piezas con cero señal de vida** en el lab (auditor `docs-graph` sin fallo histórico, `sprint-entrega.md` sin usos, `reportar-leccion` sin issues, summary de avisos afirmado en doc pero no implementado en config) quedan sobre la mesa para poda o prueba de vida (#46). Limitaciones explícitas; la instrumentación permanente (#66) espera la segunda medición (regla 2-3).
+- **`docs` — #74-R3 evaluado en el issue** (sin cambio de código): `instalar.ps1` no contiene `-ExecutionPolicy Bypass` y la evidencia AV de `v1.14.0` ya midió que quitarlo no baja del umbral heurístico. Del issue queda vivo solo el certificado Authenticode.
+
+## [1.16.0] — 2026-07-16
+
+### La conciencia del agente se instala — asientos-subagente tiereados y el arranca que inyecta, no encarga (ADRs 0033/0034)
+
+Reconstrucción limpia del sprint descartado por la regresión enmascarada ([#75](https://github.com/ArmandoMedina/jidoka/issues/75) es el inventario; el salvavidas que la caza nació en `v1.15.0`). Principio de la familia (ADR 0029): *nada de conciencia depende de la iniciativa del agente*.
+
+- **`feat` — agentes-asiento tiereados ([#63](https://github.com/ArmandoMedina/jidoka/issues/63), ADR 0033).** `.claude/agents/{explorador,mecanico→haiku · auditor→sonnet · arquitecto→opus}` con `model:` y `tools:` fijos en frontmatter: el tier deja de vivir en prosa que nadie obliga a leer — se elige el asiento, no el modelo. Lint `tools/probar-agentes.ps1` (caza aliases inventados; en el preflight del release) y `".claude/agents/*"` entra al área `ritual` de la ley. La tabla asiento→tier aterriza en `kanban/roles.md`.
+- **`feat` — el `arranca` inyecta, no encarga (ADR 0034).** El estado (`@HANDOFF`, `@product/PRODUCT_BRIEF.md`, `@product/infra.md`, `@CONTRIBUTING.md`) se inyecta al abrir — un puntero es una esperanza, un `@` es un hecho. **Reframe rol-teatro:** el orquestador ya no "se sienta" — el roster es la tabla de responsables, el router es un preview de gates, y el asiento con dientes lo ocupa el subagente tiereado.
+- **`feat` — el QUÉ y el CÓMO-operativo se separan (#75).** `product/recursos-del-proyecto.md` se divide en `product/PRODUCT_BRIEF.md` (el QUÉ de Jidoka, consolidado desde lo ya escrito) y `product/infra.md` (identidades, máquinas, convenciones). El casting nombrado sobrevive como plantilla en `kit/` (los hijos castean; la nave usa roles neutrales a propósito — decisión 2026-07-14). Plantilla nueva `kit/.jidoka/templates/infra.md` para los hijos.
+
+## [1.15.0] — 2026-07-16
+
+### El juez falla cerrado — el preflight no aprueba lo que no corrió y el motor no se borra sin decisión (ADR 0032)
+
+Cosecha #6 del lazo, nacida de dos fallas de la misma familia cazadas en vivo cortando `v1.14.0`: **jueces del motor que aprueban lo que no midieron**. El preflight del release imprimió `[OK]` de un test cuyo archivo estaba en cuarentena de AV ([#78](https://github.com/ArmandoMedina/jidoka/issues/78)); y en un sprint anterior un subagente borró 750 líneas del motor sin que ningún gate lo cazara ([#73](https://github.com/ArmandoMedina/jidoka/issues/73)).
+
+- **`fix` — el preflight de `publicar.ps1` falla cerrado ante un test ausente (#78).** Guarda `Test-Path` antes de correr cada `probar-*` (un archivo en cuarentena mata el corte con la ruta alterna señalada: la evidencia server-side vive en el CI) + reset de `$LASTEXITCODE` antes de cada test (la otra mitad del mecanismo: el exit viciado del test anterior). Decisión del cliente (2026-07-16): morir siempre, no "[AUSENTE] y seguir". `probar-publicar` sube a 7 casos (ROJO→VERDE).
+- **`feat` — salvavidas `no-borres-el-motor` en `verificar.ps1` (#73, disparo 15.º).** Si el cambio **borra** una pieza del motor (`tools/*.ps1`, `tools/blast-radius.json`) sin un ADR nuevo en el mismo cambio → `[BLOQUEA]`. Una decisión se documenta; un accidente no — restaurar es seguro, el archivo sigue en git. Detección vía `--diff-filter=D`; parámetro `-BorradosInyectados` para pruebas; `probar-gate` sube a 12 casos (ROJO→VERDE).
+- **`docs` — las rutas AV dejan de ser invisibles.** La guía del motor gana la receta oficial `skip-worktree` (#79: cuándo, cómo auditarla con `git ls-files -v`, cómo revertirla — la cura mecánica queda regla 2-3); el README presenta `sembrar-manual.ps1` como ruta AV-independiente de primera clase (#74-R2).
+- **`docs` — la frontera de producto se declara (#71, primer paso).** README + ROADMAP distinguen **Jidoka Core** (estable) de las **familias opcionales** (Discovery / Docs / Operations / Observability) con su estado de madurez. Solo documentación; nada se reorganiza.
 
 ## [1.14.0] — 2026-07-15
 

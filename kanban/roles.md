@@ -53,6 +53,15 @@ La regla que lo vuelve una sola metodología y no dos: **la maquinaria es neutra
 
 El orquestador elige el modelo según la tarea: **pequeño** para lo mecánico, **medio** para juicio acotado, **grande** para decisiones con trade-offs. Si dudas entre dos, sube uno.
 
+| Asiento-subagente | Tier | Para qué |
+|---|---|---|
+| explorador | haiku (pequeño) | barridos de lectura, localizar |
+| mecanico | haiku (pequeño) | edits mecánicos bien especificados |
+| auditor | sonnet (medio) | juicio acotado: revisar contra spec, correr tests |
+| arquitecto | opus (grande) | trade-offs: diseño, alternativas, riesgos |
+
+Estos cuatro viven instalados como agentes-asiento en `.claude/agents/` con su `model:` fijo en el frontmatter — la elección del tier deja de depender de la iniciativa del agente (ADR [0033](../docs/decisions/0033-tiers-como-agentes-asiento.md)); el lint `tools/probar-agentes.ps1` vigila que cada `model:` sea un alias real del harness.
+
 ## Las reglas duras (pagadas con incidentes reales del linaje)
 
 1. **La lectura voluminosa SIEMPRE va a un subagente.** El subagente quema *su* contexto y devuelve solo el veredicto. Caso real: dos transcripts de ~250 KB leídos en el hilo principal degradaron la sesión entera.

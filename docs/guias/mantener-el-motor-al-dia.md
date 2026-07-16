@@ -105,6 +105,44 @@ arquetipo y los **stubs de instancia**, fija `core.hooksPath` y escribe el sello
 Y si prefieres AGREGAR `instalar.ps1` a la lista blanca de tu AV, esa es la otra salida — pero el fallback
 existe para que el método baje **aunque no puedas tocar la política del AV**.
 
+### El parche `skip-worktree`: cuando el AV se come una pieza ya sembrada
+
+Un caso distinto al de arriba: no es que `instalar.ps1` esté en cuarentena, es que el AV puso en
+cuarentena **una pieza ya sembrada** en tu repo (p.ej. `tools/instalar.ps1` mismo, una vez sembrado). El
+archivo desaparece del disco y `git status` la reporta como **borrada** — te ensucia el árbol con algo que tú
+no tocaste.
+
+**El parche local:**
+
+```powershell
+git update-index --skip-worktree tools/instalar.ps1
+```
+
+Con eso, el árbol vuelve a reportarse limpio.
+
+> **La trampa — por qué esta receta existe:** el parche es **invisible**. `git status` dice "limpio" con
+> piezas del motor fuera del disco, y **no viaja con el clon** (es estado del índice local, no algo que
+> commiteas). Un release se cortó con "árbol limpio: `True`" y dos piezas del motor ausentes en el disco —
+> nadie lo vio porque nada lo dijo. **No te creas el "limpio"** sin auditar: si sospechas piezas con el
+> parche puesto, revisa con
+>
+> ```powershell
+> git ls-files -v tools/ | findstr /R "^S"
+> ```
+>
+> — las líneas que empiezan con `S` son las que tienen `skip-worktree` activo.
+
+**Cómo revertirlo** (cuando el AV deje de comerse la pieza — p.ej. con el motor firmado, ver arriba):
+
+```powershell
+git update-index --no-skip-worktree tools/instalar.ps1
+git checkout -- tools/instalar.ps1
+```
+
+> Nota: que `estado-motor.ps1` **acuse este estado solo** (sin que tengas que saber correr el `findstr` de
+> arriba) es una cura mecánica pendiente, registrada como candidata en el issue #79 (regla 2-3: esperando el
+> 2º caso antes de construirla).
+
 ## Rechazar piezas que no quieres: `excluir`
 
 Si una pieza del núcleo no encaja en tu repo (p.ej. un `probar-gate.ps1` genérico incompatible con tu

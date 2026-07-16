@@ -76,12 +76,24 @@ if (-not $SoloVerificar) {
 # (2>&1, p.ej. "LF -> CRLF") dentro de un test no debe volverse error fatal (como andon.yml).
 $ErrorActionPreference = 'Continue'
 Write-Host "== Suite de self-tests (evidencia-no-palabra antes de publicar) =="
-foreach ($t in @('probar-version','probar-gate','probar-hooks','probar-auditor','probar-disparos','probar-instalador','probar-sembrar')) {
-  & (Join-Path $PSScriptRoot "$t.ps1") *> $null
+foreach ($t in @('probar-version','probar-gate','probar-hooks','probar-auditor','probar-disparos','probar-instalador','probar-sembrar','probar-agentes')) {
+  # Falla CERRADO si el archivo del test no existe (issue #78): sin esta guarda, el
+  # CommandNotFoundException (no-terminante) se traga con *> $null y $LASTEXITCODE
+  # conserva el 0 del test ANTERIOR -> [OK] de un test que jamas corrio. Cazado en vivo
+  # cortando v1.14.0 (probar-instalador en cuarentena de AV). El juez que no midio no aprueba.
+  $tPath = Join-Path $PSScriptRoot "$t.ps1"
+  if (-not (Test-Path $tPath)) {
+    Die "$t.ps1 no existe en disco (AV/cuarentena?): no se publica a ciegas desde esta maquina. La evidencia server-side vive en el CI (andon.yml lo corre); release en dos pasos como v1.14.0 (preflight en CI + gh release create)."
+  }
+  $global:LASTEXITCODE = 0   # sin exit viciado del test anterior (la otra mitad del #78)
+  & $tPath *> $null
   if ($LASTEXITCODE -ne 0) { Die "$t.ps1 fallo (exit $LASTEXITCODE): no se publica." }
   Write-Host "  [OK] $t" -ForegroundColor Green
 }
-& (Join-Path $PSScriptRoot 'auditar.ps1') *> $null
+$auditarPath = Join-Path $PSScriptRoot 'auditar.ps1'
+if (-not (Test-Path $auditarPath)) { Die "auditar.ps1 no existe en disco (AV/cuarentena?): no se publica a ciegas." }
+$global:LASTEXITCODE = 0
+& $auditarPath *> $null
 if ($LASTEXITCODE -ne 0) { Die "auditar.ps1 fallo: no se publica." }
 Write-Host "  [OK] auditar" -ForegroundColor Green
 

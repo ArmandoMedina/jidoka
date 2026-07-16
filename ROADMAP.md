@@ -2,6 +2,20 @@
 
 > Norte: **la disciplina en el robot, el juicio en el humano** — empaquetado para que cualquiera lo instale. Cada sprint entrega un incremento demostrable (Gemba); este roadmap es el récord de hacia dónde va la beta. Regla del repo: *evidencia-no-palabra* — nada se anuncia como existente hasta que corre.
 
+## Frontera: Jidoka Core vs. familias opcionales (issue #71)
+
+Una revisión externa (2026-07-15) pidió declarar esta frontera **antes** de seguir ampliando familias — es
+documentación, nada se reorganiza ni se retira. La regla: una capacidad válida no necesariamente pertenece al
+núcleo; el estado de madurez se declara (`experimental` / `1 caso real` / `2-3 casos` / `estable`), no se asume.
+
+| Capa | Contenido | Madurez |
+|---|---|---|
+| **Jidoka Core** | Memoria por artefactos (HANDOFF/ADRs), plan aprobado como contrato, gates deterministas fuera del LLM (Andon/blast-radius), CI + protección de rama + self-tests, Gemba humano, ritual mínimo (arranca/planea/cierra), instalador + sello + actualización de tres vías | **estable** |
+| **Discovery** (`/jidoka:descubre`, brief, kit de entrevista) | La capa de consultoría — sacar el QUÉ borroso | 1 caso real; demo de campo pendiente |
+| **Docs** (arquetipo `doc-only`) | Ley `capacidad→evidencia` + gobernanza `borrador→referencia→oficial` | diferido, sin consumidor (regla 2-3) |
+| **Operations** (arquetipo `operacion`) | Gates de lo irreversible, ledger, prueba de vida | registrado (#44), sin construir |
+| **Observability** | Telemetría de lecturas, prueba de vida de gates, costo neto | registrado (#46), sin construir |
+
 ## Sprint 0 — Identidad · ✅ Publicado (`v0.1.0-beta`)
 - Doctrina embebida (`doctrina/`, 9 docs, self-contained), el sistema TPS (Jidoka·Andon·Kanban·Kaizen·Gemba·Poka-yoke), README, licencia MIT, los 12 disparos.
 
