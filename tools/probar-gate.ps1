@@ -109,7 +109,14 @@ $tmpB = Join-Path $env:TEMP 'jidoka-blast-radius-borrado.json'
 Caso 'bloquea: BORRAR pieza del motor sin ADR nuevo (no-borres-el-motor)' 1 '[BLOQUEA] [no-borres-el-motor]' '' `
   @{ Cambiados = @('README.md'); BorradosInyectados = @('tools/verificar.ps1'); Manifiesto = $tmpB }
 Caso 'pasa: BORRAR pieza del motor CON ADR nuevo en el mismo cambio (no-borres-el-motor)' 0 '' '[BLOQUEA]' `
-  @{ Cambiados = @('docs/decisions/0099-prueba.md'); BorradosInyectados = @('tools/verificar.ps1'); Manifiesto = $tmpB }
+  @{ Cambiados = @('docs/decisions/0099-prueba.md'); AgregadosInyectados = @('docs/decisions/0099-prueba.md'); BorradosInyectados = @('tools/verificar.ps1'); Manifiesto = $tmpB }
+# Issue #88 (cosecha #7): "ADR nuevo" = AGREGADO de verdad. Un ADR meramente EDITADO
+# (esta en cambiados pero no en agregados) o BORRADO no destraba el borrado del motor
+# -- antes bastaba corregir un typo en un ADR viejo para pasar el salvavidas.
+Caso 'bloquea: borrar motor con ADR solo EDITADO no destraba (no-borres-el-motor, #88)' 1 '[BLOQUEA] [no-borres-el-motor]' '' `
+  @{ Cambiados = @('docs/decisions/0001-viejo.md'); BorradosInyectados = @('tools/verificar.ps1'); Manifiesto = $tmpB }
+Caso 'bloquea: borrar motor y ademas BORRAR un ADR no destraba (no-borres-el-motor, #88)' 1 '[BLOQUEA] [no-borres-el-motor]' '' `
+  @{ Cambiados = @('docs/decisions/0001-viejo.md'); BorradosInyectados = @('tools/verificar.ps1', 'docs/decisions/0001-viejo.md'); Manifiesto = $tmpB }
 
 Remove-Item $tmpB -ErrorAction SilentlyContinue
 
