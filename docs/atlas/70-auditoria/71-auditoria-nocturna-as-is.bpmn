@@ -1,86 +1,144 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_71_AuditNoct" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="OpenAI BPMN Atlas Generator" exporterVersion="0.2" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
-  <bpmn:process id="Process_AuditoriaNocturna" name="Auditoría desatendida nocturna" isExecutable="false">
-    <bpmn:documentation>Fuente: kanban/auditoria.md y kanban/desatendido.md</bpmn:documentation>
-    <bpmn:startEvent id="Start" name="Inicio">
-      <bpmn:outgoing>F_Start_Task_Reconocer</bpmn:outgoing>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_71_AuditNoct" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:collaboration id="Collab_AuditNoct">
+    <bpmn:participant id="Pool_AuditNoct" name="Auditoría nocturna — reparte lo ejecutable de lo que espera al humano" processRef="Process_AuditoriaNocturna"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_AuditoriaNocturna" name="Auditoría nocturna: ejecuta lo reversible, deja listo lo de juicio" isExecutable="false">
+    <bpmn:documentation>Fuente: kanban/auditoria.md y kanban/desatendido.md. Corrida sin humano presente (un solo actor: el agente nocturno); reparte por hallazgo entre ejecutar y preparar para el humano.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_AuditNoct">
+      <bpmn:lane id="Lane_Agente" name="Agente (corrida nocturna, sin humano)">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Reconocer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Agenda</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Reparto</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Ejecutar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Humano</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Join</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Cierre</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="Corrida nocturna dispara">
+      <bpmn:outgoing>f1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="Task_Reconocer" name="Reconocer también lo sano">
-      <bpmn:incoming>F_Start_Task_Reconocer</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Reconocer_Task_Agenda</bpmn:outgoing>
+    <bpmn:serviceTask id="T_Reconocer" name="Reconocer también lo sano">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="F_Start_Task_Reconocer" sourceRef="Start" targetRef="Task_Reconocer"/>
-    <bpmn:task id="Task_Agenda" name="Actualizar agenda persistente">
-      <bpmn:incoming>F_Task_Reconocer_Task_Agenda</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Agenda_Task_Agente</bpmn:outgoing>
+    <bpmn:task id="T_Agenda" name="Actualizar la agenda persistente">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f3</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="F_Task_Reconocer_Task_Agenda" sourceRef="Task_Reconocer" targetRef="Task_Agenda"/>
-    <bpmn:serviceTask id="Task_Agente" name="Ejecutar hallazgos reversibles">
-      <bpmn:incoming>F_Task_Agenda_Task_Agente</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Agente_Task_Humano</bpmn:outgoing>
+    <bpmn:exclusiveGateway id="Gw_Reparto" name="¿Reversible y autorizado? (por hallazgo)">
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f_si</bpmn:outgoing>
+      <bpmn:outgoing>f_no</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="T_Ejecutar" name="Ejecutar hallazgos reversibles (cada uno verde)">
+      <bpmn:incoming>f_si</bpmn:incoming>
+      <bpmn:outgoing>f_ej_join</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="F_Task_Agenda_Task_Agente" sourceRef="Task_Agenda" targetRef="Task_Agente"/>
-    <bpmn:task id="Task_Humano" name="Preparar decisiones para el humano">
-      <bpmn:incoming>F_Task_Agente_Task_Humano</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Humano_Task_Cierre</bpmn:outgoing>
+    <bpmn:task id="T_Humano" name="Preparar la decisión para el humano ([humano])">
+      <bpmn:incoming>f_no</bpmn:incoming>
+      <bpmn:outgoing>f_hu_join</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="F_Task_Agente_Task_Humano" sourceRef="Task_Agente" targetRef="Task_Humano"/>
-    <bpmn:task id="Task_Cierre" name="Cerrar cada ítem con evidencia">
-      <bpmn:incoming>F_Task_Humano_Task_Cierre</bpmn:incoming>
-      <bpmn:outgoing>F_Task_Cierre_End</bpmn:outgoing>
+    <bpmn:exclusiveGateway id="Gw_Join">
+      <bpmn:incoming>f_ej_join</bpmn:incoming>
+      <bpmn:incoming>f_hu_join</bpmn:incoming>
+      <bpmn:outgoing>f_join_cierre</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="T_Cierre" name="Cerrar cada ítem con evidencia">
+      <bpmn:incoming>f_join_cierre</bpmn:incoming>
+      <bpmn:outgoing>f_cierre_end</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:sequenceFlow id="F_Task_Humano_Task_Cierre" sourceRef="Task_Humano" targetRef="Task_Cierre"/>
     <bpmn:endEvent id="End" name="Agenda priorizada y pendientes humanos listos">
-      <bpmn:incoming>F_Task_Cierre_End</bpmn:incoming>
+      <bpmn:incoming>f_cierre_end</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="F_Task_Cierre_End" sourceRef="Task_Cierre" targetRef="End"/>
+    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_Reconocer"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_Reconocer" targetRef="T_Agenda"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="T_Agenda" targetRef="Gw_Reparto"/>
+    <bpmn:sequenceFlow id="f_si" name="sí: ejecuta" sourceRef="Gw_Reparto" targetRef="T_Ejecutar"/>
+    <bpmn:sequenceFlow id="f_no" name="no: prepara" sourceRef="Gw_Reparto" targetRef="T_Humano"/>
+    <bpmn:sequenceFlow id="f_ej_join" sourceRef="T_Ejecutar" targetRef="Gw_Join"/>
+    <bpmn:sequenceFlow id="f_hu_join" sourceRef="T_Humano" targetRef="Gw_Join"/>
+    <bpmn:sequenceFlow id="f_join_cierre" sourceRef="Gw_Join" targetRef="T_Cierre"/>
+    <bpmn:sequenceFlow id="f_cierre_end" sourceRef="T_Cierre" targetRef="End"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_71_AuditNoct">
-    <bpmndi:BPMNPlane id="Plane_Diagram_71_AuditNoct" bpmnElement="Process_AuditoriaNocturna">
-      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="Start">
-        <dc:Bounds x="80" y="220" width="36" height="36"/>
+    <bpmndi:BPMNPlane id="Plane_71_AuditNoct" bpmnElement="Collab_AuditNoct">
+      <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_AuditNoct" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1440" height="360"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Task_Reconocer" bpmnElement="Task_Reconocer">
-        <dc:Bounds x="180" y="198" width="170" height="80"/>
+      <bpmndi:BPMNShape id="S_LaneA" bpmnElement="Lane_Agente" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1410" height="360"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Start_Task_Reconocer" bpmnElement="F_Start_Task_Reconocer">
-        <di:waypoint x="116" y="238"/>
-        <di:waypoint x="180" y="238"/>
+      <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
+        <dc:Bounds x="210" y="165" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="188" y="198" width="80" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TReconocer" bpmnElement="T_Reconocer">
+        <dc:Bounds x="280" y="150" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TAgenda" bpmnElement="T_Agenda">
+        <dc:Bounds x="490" y="150" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwReparto" bpmnElement="Gw_Reparto" isMarkerVisible="true">
+        <dc:Bounds x="700" y="160" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="685" y="123" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TEjecutar" bpmnElement="T_Ejecutar">
+        <dc:Bounds x="800" y="150" width="190" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_THumano" bpmnElement="T_Humano">
+        <dc:Bounds x="800" y="280" width="190" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwJoin" bpmnElement="Gw_Join" isMarkerVisible="true">
+        <dc:Bounds x="1050" y="160" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TCierre" bpmnElement="T_Cierre">
+        <dc:Bounds x="1150" y="150" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_End" bpmnElement="End">
+        <dc:Bounds x="1400" y="165" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1375" y="198" width="90" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
+        <di:waypoint x="240" y="180"/>
+        <di:waypoint x="280" y="180"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Agenda" bpmnElement="Task_Agenda">
-        <dc:Bounds x="410" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Reconocer_Task_Agenda" bpmnElement="F_Task_Reconocer_Task_Agenda">
-        <di:waypoint x="350" y="238"/>
-        <di:waypoint x="410" y="238"/>
+      <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
+        <di:waypoint x="440" y="180"/>
+        <di:waypoint x="490" y="180"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Agente" bpmnElement="Task_Agente">
-        <dc:Bounds x="640" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Agenda_Task_Agente" bpmnElement="F_Task_Agenda_Task_Agente">
-        <di:waypoint x="580" y="238"/>
-        <di:waypoint x="640" y="238"/>
+      <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
+        <di:waypoint x="650" y="180"/>
+        <di:waypoint x="700" y="180"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Humano" bpmnElement="Task_Humano">
-        <dc:Bounds x="870" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Agente_Task_Humano" bpmnElement="F_Task_Agente_Task_Humano">
-        <di:waypoint x="810" y="238"/>
-        <di:waypoint x="870" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_si" bpmnElement="f_si">
+        <di:waypoint x="740" y="180"/>
+        <di:waypoint x="800" y="180"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Task_Cierre" bpmnElement="Task_Cierre">
-        <dc:Bounds x="1100" y="198" width="170" height="80"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Humano_Task_Cierre" bpmnElement="F_Task_Humano_Task_Cierre">
-        <di:waypoint x="1040" y="238"/>
-        <di:waypoint x="1100" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_no" bpmnElement="f_no">
+        <di:waypoint x="720" y="200"/>
+        <di:waypoint x="720" y="310"/>
+        <di:waypoint x="800" y="310"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_End" bpmnElement="End">
-        <dc:Bounds x="1330" y="220" width="36" height="36"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_F_Task_Cierre_End" bpmnElement="F_Task_Cierre_End">
-        <di:waypoint x="1270" y="238"/>
-        <di:waypoint x="1330" y="238"/>
+      <bpmndi:BPMNEdge id="E_f_ej_join" bpmnElement="f_ej_join">
+        <di:waypoint x="990" y="180"/>
+        <di:waypoint x="1050" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_hu_join" bpmnElement="f_hu_join">
+        <di:waypoint x="990" y="310"/>
+        <di:waypoint x="1070" y="310"/>
+        <di:waypoint x="1070" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_join_cierre" bpmnElement="f_join_cierre">
+        <di:waypoint x="1090" y="180"/>
+        <di:waypoint x="1150" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_cierre_end" bpmnElement="f_cierre_end">
+        <di:waypoint x="1310" y="180"/>
+        <di:waypoint x="1400" y="180"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

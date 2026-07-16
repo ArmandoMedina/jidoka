@@ -30,6 +30,13 @@ Los 9 diagramas de `10-ritual/` dejan de ser happy-path: cada uno se re-modeló 
 - **`refactor`** — `11-descubre` (juez de verdad + aprobación nombrada), `12-planea` (niebla→Call Activity a descubre, STOP del QUÉ), `13-construye` (el lazo Intención→Construcción→Verificación→Registro con reintento y OK humano), `14-revisión` (review-stop + pre-push + el muro de CI), `15-gemba` (objetivo vs. checkpoint del cliente), `17-que-sigue` (proponer por valor, la señal la da el cliente), `18-desatendido` (las dos lanes agente/humano + click-it-down). `10-arranca` y `16-cierra` ya estaban.
 - Cada diagrama declara su `Fuente` (el aviso `atlas` del blast-radius apunta ahí). Los 25 SVG re-renderizados; `atlas:validate` sin huecos.
 
+### El atlas completo, sin happy-path: instalación, lazo-motor, auditoría y release
+
+Las 4 familias fuera del ritual (10 diagramas) se re-modelaron con carriles donde hay actor humano y gateways en las decisiones reales; los procesos de puro motor van en un carril único (honesto), no forzando un carril humano donde no lo hay.
+
+- **`refactor`** — `30-instalar` (arquetipo humano + gate del smoke), `40-estado-motor` (gateway de divergencia), `41-actualizar` (loop por pieza con el gateway de 4 estados: ausente/al día/actualizar/diverge), `42-sellar` (pipeline de motor), `44-reportar-leccion` (lab reporta / mantenedor decide construir-vs-diferir), `70-auditoría-en-rama` (fan-out + veredictos GO/NO-GO), `71-nocturna` (reparto ejecutar-vs-preparar), `72-homologación` (gateway de 3 destinos: ascender/esperar/descartar), `80-publicar` (guardas + OK nombrado del dueño), `81-preflight` (las 7 suites → gate verde/rojo).
+- **Con esto los 25 diagramas del atlas están re-modelados** (ninguno en happy-path). Cada uno inspeccionado a la vista; 25 SVG re-renderizados; `atlas:validate` sin huecos.
+
 ## [1.14.0] — 2026-07-15
 
 ### El instalador AV-seguro se vuelve completo — `sembrar-manual.ps1` siembra la instancia entera (ADR 0027, enmienda)
