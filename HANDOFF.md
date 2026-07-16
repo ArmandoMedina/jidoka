@@ -6,7 +6,26 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-16 — la nave se audita a sí misma · `v1.19.0` · auditoría + curas en el mismo día)
+## Dónde estamos (2026-07-16 tarde — «El atlas dice la verdad» · rama `atlas-fiel-20260716` · CONSTRUIDO, sin mergear)
+
+**Sprint de fidelidad del atlas, nacido de que el cliente sintió que el 10-arranca «era diferente» — y tenía razón.** Se auditaron los 24 diagramas AS-IS contra su **fuente real** (comando `.md` / script `.ps1`): **14 fieles, 10 desviados**. Las 4 rebanadas construidas y committeadas en la rama (R0 aprobado en plan mode, plan-contrato en `docs/sprints/sprint-atlas-fiel-plan.md`). Evidencia: `atlas:validate` verde (26 diagramas), `verificar.ps1` limpio, cada diagrama tocado re-renderizado e inspeccionado a la vista. Informe durable: `docs/analisis/fidelidad-atlas-202607.md`.
+
+1. **R1 (commit 26e690a):** el informe de fidelidad + **10-arranca reconstruido fiel** a `arranca.md` — la versión «bonita» de la mañana **inventaba** un bucle de aclaración y «leer doc activada» y **omitía** §3 (el asiento), §5 (reglas duras) y las lecturas de brief/CONTRIBUTING; el router estaba en el carril equivocado. Todo curado.
+2. **R2 (5afd545):** **diagrama nuevo `31-sembrar-manual`** — la ruta AV-segura (`sembrar-manual.ps1`) que faltaba en el mapa; enlazada como 6ª rama del `02` y en `RELACIONES.csv` (que además perdió 2 filas obsoletas de los subprocesos del viejo 10-arranca).
+3. **R3 (87f6aa1):** las 5 omisiones de lógica anotadas fiel a su fuente — 11-descubre (Paso 0), 13-construye (explorar/consolidar), 70-auditoría (pasos 6/7), 71-nocturna (click-it-down), 72-homologación (regla NDA).
+4. **R4 (5840914 + 2d895b7):** 30-instalar y 42-sellar contra el `instalar.ps1` **real** (leído de git); menores 12 y 44.
+
+**Corrección clave cazada por el cliente:** el primer pase marcó 30/41/42 como «fuente muerta» porque `instalar.ps1` no está en disco — pero **está en git, `skip-worktree` + cuarentena AV** (#79). 41-actualizar resultó **FIEL**. Lección de tooling (issue aparte, NO en este sprint): **auditar el atlas contra el disco miente cuando hay piezas `skip-worktree`; hay que leer de git.**
+
+**Pendiente (humano — nada bloquea al agente):**
+1. **Gemba del cliente:** abrir los SVG en `docs/atlas/render/` (empezar por `10-arranca-con-subprocesos.svg` y `31-sembrar-manual-as-is.svg`) y confirmar a la vista.
+2. **El pulido visual fino** de los diagramas tocados es del cliente (su terreno declarado); el agente entregó fidelidad + layout funcional legible.
+3. **Merge de la rama `atlas-fiel-20260716` a `main`** — requiere orden nombrada del cliente (convención de `infra.md`). Sugerido: MINOR (agrega el diagrama AV y cura fidelidad). Hay ~30 PNG de inspección untracked en `render/` (scratch; no se commitean).
+4. **Abrir el issue de la lección de tooling** (`auditar`/atlas leen disco, no ven `skip-worktree`).
+
+---
+
+## Dónde estuvimos (2026-07-16 — la nave se audita a sí misma · `v1.19.0` · auditoría + curas en el mismo día)
 
 **Sesión de auditoría pedida por el cliente ("¿es real o es teatro?") con curas ordenadas y liberadas el mismo día.** Dos PRs: los 5 informes (PR #94, `docs/analisis/`) y las curas (`v1.19.0`, ADR 0038, rama `fixes-auditoria-20260716`). Evidencia: `qa_runs/fixes-auditoria-20260716/LOG.md` (suite local completa verde; instalador en CI).
 
