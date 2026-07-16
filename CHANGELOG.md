@@ -2,6 +2,19 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.20.0] — 2026-07-16
+
+### El atlas dice la verdad — fidelidad de los 24 diagramas contra su fuente real
+
+Sprint nacido de que el cliente sintió que `10-arranca` "era diferente" — y tenía razón. Se auditaron los 24 diagramas AS-IS contra su **fuente real** (comando `.md` / script `.ps1`), con cada hallazgo verificado y citado: **14 fieles, 10 desviados**. Plan-contrato: `docs/sprints/sprint-atlas-fiel-plan.md`; informe durable: `docs/analisis/fidelidad-atlas-202607.md`.
+
+- **`fix` — `10-arranca` reconstruido fiel a `arranca.md`:** la versión anterior **inventaba** un bucle de aclaración y una tarea "leer doc activada", y **omitía** §3 (el asiento lo ocupa el subagente), §5 (reglas duras) y las lecturas de PRODUCT_BRIEF/CONTRIBUTING; el router estaba en el carril Motor en vez de Agente. Ahora modela las 6 secciones reales en orden, con el STOP del cliente al final.
+- **`feat` — la ruta AV-segura dibujada (`31-sembrar-manual-as-is.bpmn`, nuevo):** el instalador AV-seguro (`sembrar-manual.ps1`, ADR 0027) que faltaba en el mapa — 8 secciones, 2 modos (siembra fresca / `-Actualizar`), guarda AV anotada. Enlazado como 6ª rama del mapa `02-instalar-mantener-metodo` y en `RELACIONES.csv` (que además pierde 2 filas obsoletas de subprocesos del viejo 10-arranca).
+- **`fix` — 5 omisiones de lógica del método anotadas** fiel a su fuente: `11-descubre` (Paso 0: leer el brief, no re-preguntar), `13-construye` (Paso 0: la maquinaria no corre mientras exploras), `70-auditoria` (pasos 6/7: descartado a propósito + checklist humano), `71-nocturna` (el click-it-down, la regla más importante del modo desatendido), `72-homologacion` (la regla dura de la frontera NDA).
+- **`fix` — 30-instalar y 42-sellar reconciliados contra el `instalar.ps1` real** (leído de git, `skip-worktree` por cuarentena AV): el desglose del sembrado + no-clobber del sello (30) y la clasificación pristina-vs-customizada del modo `-Sellar` (42). Menores: `12-planea` (residuo pendiente) y `44-reportar-leccion` (Fuente ampliada al ritual completo).
+- **Lección de tooling (issue aparte):** auditar el atlas contra el disco miente cuando hay piezas `skip-worktree` — hay que leer de git. La cazó el cliente (un falso "fuente muerta" de `instalar.ps1`); `41-actualizar` resultó fiel.
+- **Evidencia:** `atlas:validate` sin huecos (26 diagramas, 25 call activities, todas en el CSV); `verificar.ps1` limpio; cada diagrama tocado re-renderizado e inspeccionado a la vista.
+
 ## [1.19.0] — 2026-07-16
 
 ### La nave se audita a sí misma — 5 auditorías + curas (issues #95–#99, ADR 0038)

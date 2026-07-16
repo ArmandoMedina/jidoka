@@ -78,6 +78,10 @@
     <bpmn:sequenceFlow id="f_si_aprob" name="sí" sourceRef="Gw_Aprob" targetRef="T_Plan"/>
     <bpmn:sequenceFlow id="f_plan_arch" sourceRef="T_Plan" targetRef="T_Archivar"/>
     <bpmn:sequenceFlow id="f_arch_end" sourceRef="T_Archivar" targetRef="End_Construir"/>
+    <bpmn:textAnnotation id="Ann_Pendiente">
+      <bpmn:text>Borde: lo que ni el descubrimiento resuelva se marca como pendiente del cliente, no se rellena (planea.md, kanban/estados.md).</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Pendiente" sourceRef="Ann_Pendiente" targetRef="Call_Descubre"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_12_Planea">
     <bpmndi:BPMNPlane id="Plane_12_Planea" bpmnElement="Collab_Planea">
@@ -174,6 +178,13 @@
       <bpmndi:BPMNEdge id="E_f_arch_end" bpmnElement="f_arch_end">
         <di:waypoint x="1500" y="200"/>
         <di:waypoint x="1560" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_Pendiente" bpmnElement="Ann_Pendiente">
+        <dc:Bounds x="200" y="30" width="400" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_Pendiente" bpmnElement="Assoc_Pendiente">
+        <di:waypoint x="400" y="70"/>
+        <di:waypoint x="510" y="262"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

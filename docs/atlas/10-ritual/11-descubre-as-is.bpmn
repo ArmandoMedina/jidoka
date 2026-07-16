@@ -71,6 +71,10 @@
     <bpmn:sequenceFlow id="f_aprob_gw" sourceRef="U_Aprobar" targetRef="Gw_Aprob"/>
     <bpmn:sequenceFlow id="f_si_aprob" name="sí" sourceRef="Gw_Aprob" targetRef="End_Planea"/>
     <bpmn:sequenceFlow id="f_no_aprob" name="no / cansado" sourceRef="Gw_Aprob" targetRef="End_Definicion"/>
+    <bpmn:textAnnotation id="Ann_Paso0">
+      <bpmn:text>Paso 0 (falta modelar): antes de entrevistar, leer product/PRODUCT_BRIEF.md si existe y NO re-preguntar lo ya definido — se confirma con un ejemplo (descubre.md).</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Paso0" sourceRef="Ann_Paso0" targetRef="Start"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_11_Descubre">
     <bpmndi:BPMNPlane id="Plane_11_Descubre" bpmnElement="Collab_Descubre">
@@ -160,6 +164,13 @@
       <bpmndi:BPMNEdge id="E_f_no_aprob" bpmnElement="f_no_aprob">
         <di:waypoint x="1240" y="220"/>
         <di:waypoint x="1240" y="265"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_Paso0" bpmnElement="Ann_Paso0">
+        <dc:Bounds x="170" y="20" width="360" height="55"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_Paso0" bpmnElement="Assoc_Paso0">
+        <di:waypoint x="350" y="75"/>
+        <di:waypoint x="225" y="185"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
