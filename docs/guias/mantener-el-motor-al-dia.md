@@ -55,6 +55,21 @@ Cada `[DIVERGE]` deja un sidecar `<pieza>.jidoka-nuevo` con la versión de Jidok
 - Reconciliar a mano, o mover tu ajuste a la costura `.local` (p.ej. `tools/verificar.local.ps1`), para que la
   mecánica converja sin bifurcarse.
 
+### Las costuras `.local`: customiza sin divergir
+
+Las piezas del motor traen puntos de extensión para que tu customización viva en la **instancia** (archivos
+tuyos que el lazo jamás toca) en vez de editada dentro de la mecánica — editar la mecánica te condena a
+reconciliar el mismo `[DIVERGE]` en **cada** bajada, para siempre:
+
+| Quieres agregar | NO edites | Pon tu código en |
+|---|---|---|
+| Checks propios al gate local | `tools/verificar.ps1` | `tools/verificar.local.ps1` (se dot-sourcea si existe) |
+| Checks propios al CI (p.ej. lint de fronteras, npm test) | `.github/workflows/andon.yml` | `tools/ci.local.ps1` (el workflow lo invoca si existe — cosecha #7, issue #90) |
+
+`tools/ci.local.ps1` corre en el mismo job del check `andon` (PowerShell, exit ≠ 0 = rojo). Si tus checks
+necesitan setup pesado (Node, contenedores), la alternativa sigue siendo un **workflow propio aparte**
+(`fronteras.yml` tuyo) — también instancia, también libre de DIVERGE.
+
 > **Los `.jidoka-nuevo` son andamio de reconciliación, no herramienta terminada: bórralos antes de commitear.** En
 > cualquiera de los tres caminos, el sidecar desaparece del árbol una vez que decidiste — lo que entra al diff del PR
 > es tu decisión *aplicada* (adoptaste, conservaste o reconciliaste), nunca el `.jidoka-nuevo` en sí.

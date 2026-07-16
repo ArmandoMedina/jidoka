@@ -40,11 +40,21 @@ try {
   Check 'siembra: el propio fallback queda sembrado (sembrar-manual.ps1)' (Test-Path (Join-Path $tmp 'tools/sembrar-manual.ps1')) "no aparecio sembrar-manual.ps1"
   Check 'siembra: la ley del arquetipo queda sembrada' (Test-Path (Join-Path $tmp 'tools/blast-radius.json')) "no aparecio la ley"
   Check 'siembra: los comandos /jidoka:* quedan sembrados' (Test-Path (Join-Path $tmp '.claude/commands/jidoka/arranca.md')) "no aparecio arranca.md"
+  # Cosecha #7 (issue #87): los agentes-asiento viajan tambien por el fallback AV-seguro (+ su lint).
+  foreach ($ag in 'explorador','mecanico','auditor','arquitecto') {
+    Check "siembra: el agente-asiento '$ag' queda sembrado" (Test-Path (Join-Path $tmp ".claude/agents/$ag.md")) "no aparecio .claude/agents/$ag.md"
+  }
+  Check 'siembra: el lint de agentes queda sembrado (probar-agentes.ps1)' (Test-Path (Join-Path $tmp 'tools/probar-agentes.ps1')) "no aparecio probar-agentes.ps1"
   Check 'siembra: core.hooksPath quedo configurado' ((git -C $tmp config core.hooksPath) -eq '.githooks') "hooksPath no quedo"
   # Stubs de instancia: el fallback ahora siembra la instancia completa (no-clobber), no solo
   # la mecanica -- para que un hijo en maquina donde instalar.ps1 cae en cuarentena no quede
   # a medias (jidoka#40/#43, ADR 0027 enmienda). docs-as-code -> producto 'grafo' -> product/.
   Check 'siembra: los stubs de instancia comunes quedan sembrados (HANDOFF)' (Test-Path (Join-Path $tmp 'HANDOFF.md')) "no aparecio HANDOFF.md"
+  # Cosecha #7 (issue #86): la instancia que el arranca inyecta viaja como stub comun.
+  Check 'siembra: el brief queda en product/ (lo inyecta el arranca)' (Test-Path (Join-Path $tmp 'product/PRODUCT_BRIEF.md')) "no aparecio product/PRODUCT_BRIEF.md"
+  $infraStubS = Join-Path $tmp 'product/infra.md'
+  Check 'siembra: product/infra.md trae la seccion del casting' ((Test-Path $infraStubS) -and ((Get-Content $infraStubS -Raw) -match '## El casting')) "infra.md ausente o sin ## El casting"
+  Check 'siembra: CONTRIBUTING.md queda sembrado' (Test-Path (Join-Path $tmp 'CONTRIBUTING.md')) "no aparecio CONTRIBUTING.md"
   Check 'siembra: la semilla del QUE del arquetipo queda sembrada (grafo -> product/README)' (Test-Path (Join-Path $tmp 'product/README.md')) "no aparecio product/README.md"
 
   # 1b. SELLO identico al que deja instalar.ps1: version + cada hash casa con lo sembrado.
@@ -148,6 +158,30 @@ try {
   $out6b = Run-PS-Out $em -Jidoka $fakeSinInst
   Check 'degradacion: sin instalar.ps1 legible, apunta al fallback sembrar-manual.ps1' (($out6b -match 'AVISO') -and ($out6b -match 'sembrar-manual\.ps1')) "no apunto al fallback: $out6b"
   Remove-Item $fakeSinInst -Recurse -Force -ErrorAction SilentlyContinue
+
+  # 7. GUARD del manifiesto sin 'stubs' (cosecha #7, issue #89): un checkout de Jidoka
+  #    viejo (o un manifiesto parcial) sin el campo 'stubs' NO revienta la siembra a
+  #    medias -- en PS 5.1 @($null) no es vacio y el foreach llegaba a Join-Path con
+  #    $null.ruta, dejando mecanica copiada pero sin sello (el estado a-medias de #40/#43).
+  $fakeSinStubs = Join-Path $env:TEMP ("jidoka-fakeSinStubs-" + [guid]::NewGuid().ToString('N').Substring(0,6))
+  $tmpSinStubs  = Join-Path $env:TEMP ("jidoka-sembrarSS-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+  try {
+    New-Item -ItemType Directory -Path (Join-Path $fakeSinStubs 'kit/.jidoka/instalar') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $fakeSinStubs 'kit/.jidoka/leyes') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $fakeSinStubs 'tools') -Force | Out-Null
+    Set-Content -Path (Join-Path $fakeSinStubs 'tools/version.txt') -Value '9.9.9-sinstubs' -Encoding ASCII
+    Copy-Item (Join-Path $jidoka 'kit/.jidoka/leyes/blast-radius.docs-as-code.json') (Join-Path $fakeSinStubs 'kit/.jidoka/leyes/blast-radius.docs-as-code.json') -Force
+    $manifSin = Get-Content (Join-Path $jidoka 'kit/.jidoka/instalar/manifiesto.json') -Raw | ConvertFrom-Json
+    $manifSin.PSObject.Properties.Remove('stubs')
+    [System.IO.File]::WriteAllText((Join-Path $fakeSinStubs 'kit/.jidoka/instalar/manifiesto.json'), ($manifSin | ConvertTo-Json -Depth 10), (New-Object System.Text.UTF8Encoding($false)))
+    $codeSin = Run-PS $sembrar -Destino $tmpSinStubs -Jidoka $fakeSinStubs
+    Check 'guard #89: manifiesto sin stubs NO revienta la siembra (exit 0)' ($codeSin -eq 0) "exit $codeSin (esperaba 0)"
+    Check 'guard #89: la siembra llega hasta el sello (no quedo a medias)' (Test-Path (Join-Path $tmpSinStubs 'tools/jidoka-motor.json')) "no aparecio el sello"
+  }
+  finally {
+    Remove-Item $fakeSinStubs -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item $tmpSinStubs -Recurse -Force -ErrorAction SilentlyContinue
+  }
 }
 finally {
   Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue

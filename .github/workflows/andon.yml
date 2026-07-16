@@ -82,6 +82,22 @@ jobs:
           }
           exit $code
 
+      # Costura .local del CI (cosecha #7, issue #90): los checks PROPIOS del hijo
+      # viven en tools/ci.local.ps1 (instancia), no editados dentro de este workflow.
+      # Asi andon.yml queda pristino y -Actualizar no marca DIVERGE en cada bajada --
+      # el mismo patron que la costura tools/verificar.local.ps1 del verificador.
+      - name: extension local del CI (tools/ci.local.ps1, si existe)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Continue'
+          if (Test-Path '.\tools\ci.local.ps1') {
+            Write-Host "== Extension local del CI (tools/ci.local.ps1) =="
+            .\tools\ci.local.ps1
+            exit $LASTEXITCODE
+          }
+          Write-Host "(sin extension local: tools/ci.local.ps1 no existe -- nada que correr)"
+          exit 0
+
       - name: auditor del grafo de docs (product/) sobre el rango del PR
         shell: powershell
         env:

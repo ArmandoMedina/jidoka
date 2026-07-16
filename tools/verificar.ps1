@@ -13,6 +13,7 @@
 #       ./tools/verificar.ps1 -Base origin/main      (CI: rango del PR, base...HEAD)
 #       ./tools/verificar.ps1 -Cambiados a.md,b.md   (prueba: lista inyectada, sin git)
 #       -BorradosInyectados x.ps1                    (prueba: borrados inyectados, con -Cambiados)
+#       -AgregadosInyectados docs/decisions/0099.md  (prueba: agregados inyectados, con -Cambiados)
 #       -Manifiesto <ruta>                           (prueba/CI: manifiesto alterno)
 #       -Repo <ruta>                                 (CI: raiz del repo, si el script corre copiado fuera de tools/)
 # Nota: archivo ASCII a proposito (sin acentos) para no depender del BOM en PS 5.1.
@@ -21,6 +22,7 @@ param(
   [string]$Base = '',
   [string[]]$Cambiados = @(),
   [string[]]$BorradosInyectados = @(),
+  [string[]]$AgregadosInyectados = @(),
   [string]$Manifiesto = '',
   [string]$Repo = ''
 )
@@ -55,19 +57,25 @@ function Match-Any($list, $pattern) {
 Write-Host "== Verificar (Jidoka Andon; ley tools/blast-radius.json) =="
 
 # $eliminados: los BORRADOS del mismo rango (--diff-filter=D), para el salvavidas
-# no-borres-el-motor. Ojo PS 5.1: la variable NO puede llamarse $borrados (case-
-# insensitive: pisaria el param $BorradosInyectados). Si la llamada git de borrados
-# falla NO es Fail (el rango ya se valido con la llamada principal): sin borrados.
+# no-borres-el-motor. $adiciones: los AGREGADOS (--diff-filter=A), para que "ADR
+# nuevo" signifique nuevo DE VERDAD (issue #88: un ADR meramente editado o borrado
+# no destraba el borrado del motor). Ojo PS 5.1: las variables NO pueden llamarse
+# $borrados/$agregados (case-insensitive: pisarian los params *Inyectados). Si la
+# llamada git secundaria falla NO es Fail (el rango ya se valido con la principal).
 $eliminados = @()
+$adiciones = @()
 if ($Cambiados.Count -gt 0) {
   $changed = $Cambiados
   $eliminados = $BorradosInyectados
+  $adiciones = $AgregadosInyectados
 }
 elseif ($Base) {
   $changed = git diff --name-only "$Base...HEAD" 2>$null
   if ($LASTEXITCODE -ne 0) { Fail "no pude calcular el rango $Base...HEAD (base inexistente o historia incompleta)" }
   $eliminados = git diff --name-only --diff-filter=D "$Base...HEAD" 2>$null
   if ($LASTEXITCODE -ne 0) { $eliminados = @() }
+  $adiciones = git diff --name-only --diff-filter=A "$Base...HEAD" 2>$null
+  if ($LASTEXITCODE -ne 0) { $adiciones = @() }
 }
 else {
   $upstream = git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null
@@ -77,6 +85,8 @@ else {
     if ($LASTEXITCODE -ne 0) { Fail "no pude calcular el rango @{u}...HEAD" }
     $eliminados = git diff --name-only --diff-filter=D '@{u}...HEAD' 2>$null
     if ($LASTEXITCODE -ne 0) { $eliminados = @() }
+    $adiciones = git diff --name-only --diff-filter=A '@{u}...HEAD' 2>$null
+    if ($LASTEXITCODE -ne 0) { $adiciones = @() }
   }
   else {
     # Sin upstream (rama nueva): solo se ve el working tree. Limite conocido:
@@ -85,6 +95,8 @@ else {
     if ($LASTEXITCODE -ne 0) { Fail "no pude leer el working tree (git diff HEAD)" }
     $eliminados = git diff --name-only --diff-filter=D HEAD 2>$null
     if ($LASTEXITCODE -ne 0) { $eliminados = @() }
+    $adiciones = git diff --name-only --diff-filter=A HEAD 2>$null
+    if ($LASTEXITCODE -ne 0) { $adiciones = @() }
   }
 }
 
@@ -141,7 +153,9 @@ if (-not $hayFalta -and -not $hayAviso) { Ok "blast-radius al dia (o sin cambios
 # sin su doc dueno, pero no cubre BORRAR una pieza del motor (tools/*.ps1 o la ley
 # misma). Un borrado asi solo pasa si el mismo cambio trae un ADR nuevo en
 # docs/decisions/ (el indice README.md no cuenta: no es una decision nueva).
-$decisionesNuevas = @($changed | Where-Object { $_ -ne 'docs/decisions/README.md' })
+# Issue #88: "nuevo" = AGREGADO de verdad ($adiciones, --diff-filter=A). Un ADR
+# meramente editado -- o peor, borrado -- NO destraba el borrado del motor.
+$decisionesNuevas = @($adiciones | Where-Object { $_ -ne 'docs/decisions/README.md' })
 $hayAdrNuevo = Match-Any $decisionesNuevas 'docs/decisions/*.md'
 foreach ($del in @($eliminados | Where-Object { $_ })) {
   if (-not ((Test-Pattern $del 'tools/*.ps1') -or (Test-Pattern $del 'tools/blast-radius.json'))) { continue }

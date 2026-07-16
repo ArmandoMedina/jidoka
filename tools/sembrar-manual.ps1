@@ -182,36 +182,55 @@ if (-not $Actualizar) {
   }
 }
 
-# --- 5b. Sembrar los stubs de instancia (solo siembra fresca, no-clobber) --------
-# La INSTANCIA (HANDOFF, ROADMAP, CHANGELOG, indice de ADRs, .gitignore) + la semilla del
-# QUE segun arquetipo (grafo product/README o brief). El contenido vive INLINE en el
-# manifiesto (stubs + stubs_arquetipo). Nunca se actualiza; solo se crea si falta. Sin esto
-# el hijo queda a medias en una maquina donde instalar.ps1 no puede correr (el caso AV).
+# --- 5b. Sembrar los stubs de instancia (no-clobber SIEMPRE) ---------------------
+# La INSTANCIA (HANDOFF, ROADMAP, CHANGELOG, indice de ADRs, .gitignore, y el brief/
+# infra/CONTRIBUTING que el arranca inyecta) + la semilla del QUE segun arquetipo. El
+# contenido vive INLINE en el manifiesto (stubs + stubs_arquetipo). Lo existente jamas
+# se pisa. En siembra fresca se crea todo lo que falte; en -Actualizar se siembran SOLO
+# los stubs que el motor nuevo asume y el hijo no tiene (migracion, cosecha #7 issue
+# #86) -- lo condicionado a arquetipo solo si el sello lo registra (sellos 1.17+).
+# Guard (issue #89): un manifiesto sin 'stubs' no revienta la siembra a medias --
+# en PS 5.1 @($null) NO es vacio, el Where-Object lo filtra.
 $stubsCreados = 0
+$stubs = @($manif.stubs | Where-Object { $_ })
 if (-not $Actualizar) {
-  $stubs = @($manif.stubs)
   if ($arq.producto -and $manif.stubs_arquetipo.($arq.producto)) { $stubs += $manif.stubs_arquetipo.($arq.producto) }
   if ($arq.gobernanza -and $manif.stubs_arquetipo.gobernanza) { $stubs += $manif.stubs_arquetipo.gobernanza }
-  foreach ($s in $stubs) {
-    $dst = Join-Path $Destino $s.ruta
-    if (Test-Path -LiteralPath $dst) { continue }
-    $parent = Split-Path -Parent $dst
-    if ($parent -and -not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
-    [System.IO.File]::WriteAllText($dst, $s.contenido, $utf8)
-    $stubsCreados++
-    Write-Host "  [STUB] $($s.ruta)" -ForegroundColor Green
-  }
-  if ($stubsCreados) { Ok "$stubsCreados stub(s) de instancia sembrado(s)" }
+} else {
+  if ($selloViejo.producto -and $manif.stubs_arquetipo.($selloViejo.producto)) { $stubs += $manif.stubs_arquetipo.($selloViejo.producto) }
+  if ($selloViejo.gobernanza -and $manif.stubs_arquetipo.gobernanza) { $stubs += $manif.stubs_arquetipo.gobernanza }
+}
+$tagStub = if ($Actualizar) { '[MIGRA]' } else { '[STUB]' }
+foreach ($s in $stubs) {
+  $dst = Join-Path $Destino $s.ruta
+  if (Test-Path -LiteralPath $dst) { continue }
+  $parent = Split-Path -Parent $dst
+  if ($parent -and -not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+  [System.IO.File]::WriteAllText($dst, $s.contenido, $utf8)
+  $stubsCreados++
+  Write-Host "  $tagStub $($s.ruta)" -ForegroundColor Green
+}
+if ($stubsCreados) { Ok "$stubsCreados stub(s) de instancia sembrado(s)" }
+if ($Actualizar -and -not $selloViejo.producto -and @($manif.stubs_arquetipo.PSObject.Properties).Count) {
+  Info "(el sello no registra el arquetipo (pre-1.17): los stubs por-arquetipo no se auto-siembran; revisa stubs_arquetipo a mano si te falta la semilla del QUE)"
 }
 
 # --- 6. Escribir el sello (tools/jidoka-motor.json) -----------------------------
-# version + hash de cada pieza pristina/enviada. En -Actualizar preserva la lista de
-# exclusion; en siembra fresca la anota si el arquetipo excluyo piezas.
+# version + hash de cada pieza pristina/enviada + arquetipo (producto/gobernanza,
+# cosecha #7: para que -Actualizar pueda decidir stubs condicionados sin adivinar).
+# En -Actualizar preserva exclusion y arquetipo; en fresca los anota del arquetipo.
 $selloNuevo = [ordered]@{ version = $version; sembrado_hashes = $seed }
+if ($Actualizar) {
+  if ($selloViejo.producto) { $selloNuevo.producto = $selloViejo.producto }
+  if ($selloViejo.gobernanza) { $selloNuevo.gobernanza = $true }
+} else {
+  if ($arq.producto) { $selloNuevo.producto = $arq.producto }
+  if ($arq.gobernanza) { $selloNuevo.gobernanza = $true }
+}
 if ($excluir.Count) { $selloNuevo.excluir = @($excluir) }
 $parent = Split-Path -Parent $selloDst
 if ($parent -and -not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
-[System.IO.File]::WriteAllText($selloDst, ($selloNuevo | ConvertTo-Json -Depth 5), $utf8)
+[System.IO.File]::WriteAllText($selloDst, (($selloNuevo | ConvertTo-Json -Depth 5) + "`n"), $utf8)
 
 # --- 7. Encender core.hooksPath -------------------------------------------------
 if ($manif.post.hooksPath) {

@@ -47,6 +47,21 @@ try {
   Check 'instala: el motor queda sembrado' (Test-Path (Join-Path $tmp 'tools/verificar.ps1')) "no aparecio tools/verificar.ps1"
   Check 'instala: la ley del arquetipo queda sembrada' (Test-Path (Join-Path $tmp 'tools/blast-radius.json')) "no aparecio la ley"
   Check 'instala: los comandos /jidoka:* quedan sembrados' (Test-Path (Join-Path $tmp '.claude/commands/jidoka/arranca.md')) "no aparecio arranca.md"
+  # Cosecha #7 (issue #87): los agentes-asiento del ADR 0033 viajan en el kit -- el arranca
+  # sembrado los referencia, asi que la siembra debe entregarlos (los 4) + su lint.
+  foreach ($ag in 'explorador','mecanico','auditor','arquitecto') {
+    Check "instala: el agente-asiento '$ag' queda sembrado" (Test-Path (Join-Path $tmp ".claude/agents/$ag.md")) "no aparecio .claude/agents/$ag.md"
+  }
+  Check 'instala: el lint de agentes queda sembrado (probar-agentes.ps1)' (Test-Path (Join-Path $tmp 'tools/probar-agentes.ps1')) "no aparecio probar-agentes.ps1"
+  # Cosecha #7 (issue #86): la instancia que el arranca inyecta es stub COMUN a todo
+  # arquetipo (brief + infra + CONTRIBUTING, en las rutas que el arranca inyecta) --
+  # sin ellos la sesion del hijo abre con @ rotos.
+  Check 'instala: el brief queda en product/ (lo inyecta el arranca)' (Test-Path (Join-Path $tmp 'product/PRODUCT_BRIEF.md')) "no aparecio product/PRODUCT_BRIEF.md"
+  Check 'instala: NO deja PRODUCT_BRIEF.md en la raiz (ruta vieja)' (-not (Test-Path (Join-Path $tmp 'PRODUCT_BRIEF.md'))) "aparecio PRODUCT_BRIEF.md en la raiz"
+  $infraStub = Join-Path $tmp 'product/infra.md'
+  Check 'instala: product/infra.md queda sembrado' (Test-Path $infraStub) "no aparecio product/infra.md"
+  Check 'instala: infra.md trae la seccion del casting (la casa unica del roster)' ((Test-Path $infraStub) -and ((Get-Content $infraStub -Raw) -match '## El casting')) "infra.md sin ## El casting"
+  Check 'instala: CONTRIBUTING.md queda sembrado' (Test-Path (Join-Path $tmp 'CONTRIBUTING.md')) "no aparecio CONTRIBUTING.md"
   Check 'instala: core.hooksPath quedo configurado' ((git -C $tmp config core.hooksPath) -eq '.githooks') "hooksPath no quedo"
 
   # 1b. SELLO de version: el hijo sabe de que Jidoka viene su motor, con hashes que casan.
@@ -70,6 +85,9 @@ try {
   Check 'sello: version == tools/version.txt' $selloVerOk "sello.version != $verTxt"
   Check 'sello: registra al menos una pieza de motor' $countOk "sembrado_hashes vacio"
   Check 'sello: cada hash casa con el archivo sembrado' $hashesOk "algun hash no coincide con lo sembrado"
+  # Issue #91 (cosecha #7): el sello se escribe CON newline final -- sin el, todo diff
+  # futuro del hijo arrastra el marcador "No newline at end of file".
+  Check 'sello: termina con newline final (#91)' ((Test-Path $selloPath) -and ([System.IO.File]::ReadAllText($selloPath)).EndsWith("`n")) "el sello no termina en newline"
 
   # 1f. ENLACES DE METODO: ningun doc sembrado debe citar un doc de metodo ausente
   #     (kanban/ andon/ doctrina/ docs/guias/) -- cierra los "enlaces muertos en un repo
@@ -140,6 +158,30 @@ try {
   Run-PS $instalar -Destino $tmp -Actualizar | Out-Null
   $persiste = ((Get-Content $audChild -Raw) -match 'ajuste propio del hijo') -and (Test-Path "$audChild.jidoka-nuevo")
   Check 'actualizar (2a vez): la divergencia persiste, lo demas converge' $persiste "no fue idempotente"
+
+  # 5c2. MIGRACION (cosecha #7, issue #86): un hijo "pre-1.17" -- sin los stubs que el
+  # arranca nuevo inyecta y con sello sin arquetipo -- recibe en -Actualizar los stubs
+  # comunes que le faltan ([MIGRA]) sin tocar la instancia existente; lo condicionado a
+  # arquetipo NO se adivina (avisa). Con sello 1.17+ (producto registrado) SI se decide.
+  Remove-Item (Join-Path $tmp 'product/PRODUCT_BRIEF.md') -Force
+  Remove-Item (Join-Path $tmp 'product/infra.md') -Force
+  Remove-Item (Join-Path $tmp 'CONTRIBUTING.md') -Force
+  Remove-Item (Join-Path $tmp 'product/README.md') -Force
+  $selloMig = Get-Content $selloPath -Raw | ConvertFrom-Json
+  $selloMig.PSObject.Properties.Remove('producto')
+  [System.IO.File]::WriteAllText($selloPath, ($selloMig | ConvertTo-Json -Depth 5), (New-Object System.Text.UTF8Encoding($false)))
+  $outMig = Run-PS-Out $instalar -Destino $tmp -Actualizar
+  $stubsMigraron = (Test-Path (Join-Path $tmp 'product/PRODUCT_BRIEF.md')) -and (Test-Path (Join-Path $tmp 'product/infra.md')) -and (Test-Path (Join-Path $tmp 'CONTRIBUTING.md'))
+  Check 'migra: -Actualizar siembra los stubs comunes que el hijo no tenia ([MIGRA])' ($stubsMigraron -and ($outMig -match 'MIGRA')) "faltan stubs (brief/infra/CONTRIBUTING) o no reporto MIGRA"
+  Check 'migra: la instancia existente NO se toca (HANDOFF con marca)' ((Get-Content $handoff -Raw) -match $marca) "se toco HANDOFF"
+  Check 'migra: sello pre-1.17 (sin producto) NO adivina el stub del arquetipo y avisa' ((-not (Test-Path (Join-Path $tmp 'product/README.md'))) -and ($outMig -match 'pre-1\.17')) "sembro el stub de arquetipo sin sello, o no aviso"
+  $selloMig2 = Get-Content $selloPath -Raw | ConvertFrom-Json
+  $selloMig2 | Add-Member -NotePropertyName producto -NotePropertyValue 'grafo' -Force
+  [System.IO.File]::WriteAllText($selloPath, ($selloMig2 | ConvertTo-Json -Depth 5), (New-Object System.Text.UTF8Encoding($false)))
+  Run-PS $instalar -Destino $tmp -Actualizar | Out-Null
+  Check 'migra: con sello 1.17+ (producto=grafo) siembra la semilla del QUE faltante' (Test-Path (Join-Path $tmp 'product/README.md')) "no sembro product/README.md"
+  $selloTrasMigra = Get-Content $selloPath -Raw | ConvertFrom-Json
+  Check 'migra: -Actualizar preserva el producto registrado en el sello' ($selloTrasMigra.producto -eq 'grafo') "el sello perdio producto (quedo '$($selloTrasMigra.producto)')"
 
   # 5d. ESTADO-MOTOR: el aviso de divergencia (nunca bloquea; exit 0 siempre).
   $em = Join-Path $tmp 'tools/estado-motor.ps1'
@@ -235,9 +277,12 @@ try {
   $tmp2 = Join-Path $env:TEMP ("jidoka-smoke2-" + [guid]::NewGuid().ToString('N').Substring(0,8))
   try {
     Run-PS $instalar -Destino $tmp2 -Arquetipo 'code-first' -Yes | Out-Null
-    $brief = (Test-Path (Join-Path $tmp2 'PRODUCT_BRIEF.md'))
+    # Cosecha #7 (issue #86): el brief es stub comun en product/ (el arranca lo inyecta
+    # para todo arquetipo); la raiz queda limpia y el grafo sigue siendo solo de docs-as-code.
+    $brief = (Test-Path (Join-Path $tmp2 'product/PRODUCT_BRIEF.md'))
+    $briefRaiz = (Test-Path (Join-Path $tmp2 'PRODUCT_BRIEF.md'))
     $grafo = (Test-Path (Join-Path $tmp2 'product/README.md'))
-    Check 'code-first: siembra PRODUCT_BRIEF y NO el grafo de notas' ($brief -and -not $grafo) "brief=$brief grafo=$grafo"
+    Check 'code-first: siembra product/PRODUCT_BRIEF (no en raiz) y NO el grafo de notas' ($brief -and -not $briefRaiz -and -not $grafo) "brief=$brief raiz=$briefRaiz grafo=$grafo"
     $leyOk = $false
     try { Get-Content (Join-Path $tmp2 'tools/blast-radius.json') -Raw | ConvertFrom-Json | Out-Null; $leyOk = $true } catch {}
     Check 'code-first: su ley parsea' $leyOk "la ley code-first no parsea"
@@ -275,8 +320,8 @@ try {
   try {
     Run-PS $instalar -Destino $tmp3 -Yes | Out-Null
     $g3 = (Test-Path (Join-Path $tmp3 'product/README.md'))
-    $b3 = (Test-Path (Join-Path $tmp3 'PRODUCT_BRIEF.md'))
-    Check 'default -Yes sin -Arquetipo: cae a docs-as-code (grafo, no brief)' ($g3 -and -not $b3) "grafo=$g3 brief=$b3"
+    $b3raiz = (Test-Path (Join-Path $tmp3 'PRODUCT_BRIEF.md'))
+    Check 'default -Yes sin -Arquetipo: cae a docs-as-code (grafo; raiz sin brief)' ($g3 -and -not $b3raiz) "grafo=$g3 briefRaiz=$b3raiz"
   }
   finally { Remove-Item $tmp3 -Recurse -Force -ErrorAction SilentlyContinue }
 }
