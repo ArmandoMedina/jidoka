@@ -86,6 +86,8 @@
     <bpmn:sequenceFlow id="f_nda_adr" sourceRef="T_NDA" targetRef="T_ADR"/>
     <bpmn:sequenceFlow id="f_adr_ver" sourceRef="T_ADR" targetRef="T_Verificar"/>
     <bpmn:sequenceFlow id="f_ver_end" sourceRef="T_Verificar" targetRef="End"/>
+    <bpmn:textAnnotation id="Ann_NDA" text="Regla dura de la frontera NDA: lo pusheado se reescribe, no se parcha — un secreto en el historial no se arregla con un commit encima. Una violación DETIENE y re-encamina, no continúa (homologacion.md)."/>
+    <bpmn:association id="Assoc_NDA" sourceRef="Ann_NDA" targetRef="T_NDA"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_72_Homologacion">
     <bpmndi:BPMNPlane id="Plane_72_Homologacion" bpmnElement="Collab_Homologacion">
@@ -196,6 +198,13 @@
       <bpmndi:BPMNEdge id="E_f_ver_end" bpmnElement="f_ver_end">
         <di:waypoint x="1710" y="180"/>
         <di:waypoint x="1760" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_NDA" bpmnElement="Ann_NDA">
+        <dc:Bounds x="1050" y="0" width="420" height="55"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_NDA" bpmnElement="Assoc_NDA">
+        <di:waypoint x="1260" y="55"/>
+        <di:waypoint x="1215" y="150"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

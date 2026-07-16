@@ -56,6 +56,10 @@
     <bpmn:sequenceFlow id="f5" sourceRef="T_Paquetes" targetRef="U_Veredictos"/>
     <bpmn:sequenceFlow id="f6" sourceRef="U_Veredictos" targetRef="T_Registrar"/>
     <bpmn:sequenceFlow id="f7" sourceRef="T_Registrar" targetRef="End"/>
+    <bpmn:textAnnotation id="Ann_Pasos67">
+      <bpmn:text>Paso 6 (falta modelar): lo que NO se va a arreglar se lista con su porqué — evita inflar el backlog y deja el juicio registrado. Paso 7: lo que exige juicio del cliente sale como checklist (auditoria.md).</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Pasos67" sourceRef="Ann_Pasos67" targetRef="U_Veredictos"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_70_Auditoria">
     <bpmndi:BPMNPlane id="Plane_70_Auditoria" bpmnElement="Collab_Auditoria">
@@ -122,6 +126,13 @@
       <bpmndi:BPMNEdge id="E_f7" bpmnElement="f7">
         <di:waypoint x="1280" y="180"/>
         <di:waypoint x="1350" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_Pasos67" bpmnElement="Ann_Pasos67">
+        <dc:Bounds x="680" y="20" width="420" height="55"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_Pasos67" bpmnElement="Assoc_Pasos67">
+        <di:waypoint x="890" y="75"/>
+        <di:waypoint x="920" y="360"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -59,6 +59,10 @@
     <bpmn:sequenceFlow id="f_si" name="sí" sourceRef="Gw_Verde" targetRef="T_Registrar"/>
     <bpmn:sequenceFlow id="f_reg_ok" sourceRef="T_Registrar" targetRef="U_OKPush"/>
     <bpmn:sequenceFlow id="f_ok_end" sourceRef="U_OKPush" targetRef="End"/>
+    <bpmn:textAnnotation id="Ann_Paso0">
+      <bpmn:text>Paso 0 (falta modelar): mientras exploras, nada de la maquinaria de gates corre; el commit es libre pero el push espera el OK humano (kanban/lazo.md).</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Paso0" sourceRef="Ann_Paso0" targetRef="T_Construir"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_13_Construye">
     <bpmndi:BPMNPlane id="Plane_13_Construye" bpmnElement="Collab_Construye">
@@ -133,6 +137,13 @@
         <di:waypoint x="1390" y="405"/>
         <di:waypoint x="1475" y="405"/>
         <di:waypoint x="1475" y="215"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_Paso0" bpmnElement="Ann_Paso0">
+        <dc:Bounds x="50" y="15" width="380" height="55"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_Paso0" bpmnElement="Assoc_Paso0">
+        <di:waypoint x="240" y="70"/>
+        <di:waypoint x="570" y="170"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
