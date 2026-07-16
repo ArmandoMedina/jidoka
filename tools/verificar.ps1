@@ -12,6 +12,7 @@
 # Uso:  ./tools/verificar.ps1                        (local: upstream...HEAD o working tree)
 #       ./tools/verificar.ps1 -Base origin/main      (CI: rango del PR, base...HEAD)
 #       ./tools/verificar.ps1 -Cambiados a.md,b.md   (prueba: lista inyectada, sin git)
+#       -BorradosInyectados x.ps1                    (prueba: borrados inyectados, con -Cambiados)
 #       -Manifiesto <ruta>                           (prueba/CI: manifiesto alterno)
 #       -Repo <ruta>                                 (CI: raiz del repo, si el script corre copiado fuera de tools/)
 # Nota: archivo ASCII a proposito (sin acentos) para no depender del BOM en PS 5.1.
@@ -19,6 +20,7 @@
 param(
   [string]$Base = '',
   [string[]]$Cambiados = @(),
+  [string[]]$BorradosInyectados = @(),
   [string]$Manifiesto = '',
   [string]$Repo = ''
 )
@@ -52,10 +54,20 @@ function Match-Any($list, $pattern) {
 
 Write-Host "== Verificar (Jidoka Andon; ley tools/blast-radius.json) =="
 
-if ($Cambiados.Count -gt 0) { $changed = $Cambiados }
+# $eliminados: los BORRADOS del mismo rango (--diff-filter=D), para el salvavidas
+# no-borres-el-motor. Ojo PS 5.1: la variable NO puede llamarse $borrados (case-
+# insensitive: pisaria el param $BorradosInyectados). Si la llamada git de borrados
+# falla NO es Fail (el rango ya se valido con la llamada principal): sin borrados.
+$eliminados = @()
+if ($Cambiados.Count -gt 0) {
+  $changed = $Cambiados
+  $eliminados = $BorradosInyectados
+}
 elseif ($Base) {
   $changed = git diff --name-only "$Base...HEAD" 2>$null
   if ($LASTEXITCODE -ne 0) { Fail "no pude calcular el rango $Base...HEAD (base inexistente o historia incompleta)" }
+  $eliminados = git diff --name-only --diff-filter=D "$Base...HEAD" 2>$null
+  if ($LASTEXITCODE -ne 0) { $eliminados = @() }
 }
 else {
   $upstream = git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>$null
@@ -63,12 +75,16 @@ else {
     # 3 puntos (merge-base), consistente con el CI: mide MIS cambios, no los del upstream.
     $changed = git diff --name-only '@{u}...HEAD' 2>$null
     if ($LASTEXITCODE -ne 0) { Fail "no pude calcular el rango @{u}...HEAD" }
+    $eliminados = git diff --name-only --diff-filter=D '@{u}...HEAD' 2>$null
+    if ($LASTEXITCODE -ne 0) { $eliminados = @() }
   }
   else {
     # Sin upstream (rama nueva): solo se ve el working tree. Limite conocido:
     # el primer push de una rama nueva no se verifica aqui; lo cubre el CI en el PR.
     $changed = git diff --name-only HEAD 2>$null
     if ($LASTEXITCODE -ne 0) { Fail "no pude leer el working tree (git diff HEAD)" }
+    $eliminados = git diff --name-only --diff-filter=D HEAD 2>$null
+    if ($LASTEXITCODE -ne 0) { $eliminados = @() }
   }
 }
 
@@ -120,6 +136,22 @@ foreach ($entry in $manifest) {
 }
 
 if (-not $hayFalta -and -not $hayAviso) { Ok "blast-radius al dia (o sin cambios en areas cubiertas)" }
+
+# Salvavidas no-borres-el-motor (issue #73): la ley de arriba cubre TOCAR un area
+# sin su doc dueno, pero no cubre BORRAR una pieza del motor (tools/*.ps1 o la ley
+# misma). Un borrado asi solo pasa si el mismo cambio trae un ADR nuevo en
+# docs/decisions/ (el indice README.md no cuenta: no es una decision nueva).
+$decisionesNuevas = @($changed | Where-Object { $_ -ne 'docs/decisions/README.md' })
+$hayAdrNuevo = Match-Any $decisionesNuevas 'docs/decisions/*.md'
+foreach ($del in @($eliminados | Where-Object { $_ })) {
+  if (-not ((Test-Pattern $del 'tools/*.ps1') -or (Test-Pattern $del 'tools/blast-radius.json'))) { continue }
+  if ($hayAdrNuevo) {
+    Ok "[no-borres-el-motor] el cambio BORRA $del (pieza del motor) con un ADR nuevo en el mismo cambio: decision documentada"
+  }
+  else {
+    Block "[no-borres-el-motor] el cambio BORRA $del (pieza del motor) sin un ADR nuevo en el mismo cambio: una decision se documenta, un accidente no. Restaurar es seguro (el archivo sigue en git); si es decision, escribe el ADR en docs/decisions/."
+  }
+}
 
 # Costura .local: extension de mecanica ESPECIFICA del repo (p.ej. lint/tests de un
 # lenguaje: ruff, pytest). El motor generico NO se bifurca -- el hijo pone sus checks

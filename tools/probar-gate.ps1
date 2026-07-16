@@ -88,6 +88,31 @@ Caso 'pasa: area tocada CON su nota de producto (product_avisa sintetico)' 0 '' 
 
 Remove-Item $tmpP -ErrorAction SilentlyContinue
 
+# Salvavidas no-borres-el-motor (issue #73): BORRAR una pieza del motor (tools/*.ps1
+# o la ley) sin un ADR nuevo en el mismo cambio BLOQUEA; con ADR presente, pasa.
+# Manifiesto sintetico MINIMO (ninguna area cubre los cambios) para aislar el
+# salvavidas de la ley real.
+$tmpB = Join-Path $env:TEMP 'jidoka-blast-radius-borrado.json'
+@'
+[
+  {
+    "nombre": "prueba-vacia",
+    "desc": "manifiesto minimo: ninguna area cubre los cambios",
+    "fuente": ["zona-inexistente/*"],
+    "doc_bloquea": [],
+    "doc_avisa": [],
+    "rol": "prueba"
+  }
+]
+'@ | Set-Content -Path $tmpB -Encoding Ascii
+
+Caso 'bloquea: BORRAR pieza del motor sin ADR nuevo (no-borres-el-motor)' 1 '[BLOQUEA] [no-borres-el-motor]' '' `
+  @{ Cambiados = @('README.md'); BorradosInyectados = @('tools/verificar.ps1'); Manifiesto = $tmpB }
+Caso 'pasa: BORRAR pieza del motor CON ADR nuevo en el mismo cambio (no-borres-el-motor)' 0 '' '[BLOQUEA]' `
+  @{ Cambiados = @('docs/decisions/0099-prueba.md'); BorradosInyectados = @('tools/verificar.ps1'); Manifiesto = $tmpB }
+
+Remove-Item $tmpB -ErrorAction SilentlyContinue
+
 # Falla CERRADO: si git no puede calcular el rango, el gate NO aprueba a ciegas (exit 2).
 Caso 'falla cerrado: base de git inexistente (no aprueba a ciegas)' 2 '[ERROR]' 'Todo limpio' `
   @{ Base = 'origin/rama-que-no-existe-jamas' }

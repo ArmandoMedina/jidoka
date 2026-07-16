@@ -116,3 +116,13 @@ el mensaje llega en el momento del disparo y no puede asumir que la IA leyó nad
 > falible. Los dos pájaros comen del mismo comedero — los artefactos durables.
 
 **Catalogo-solo:** principio de capacitación (cómo la IA ancla la enseñanza al artefacto versionado); se consume al enseñar al humano, no hay un gate en runtime que lo dispare.
+
+### no-borres-el-motor
+> Borrar una pieza del motor (`tools/*.ps1`, `tools/blast-radius.json`) no es lo mismo que
+> tocarla: la ley del blast-radius cubre tocar un área sin su doc, no que un área desaparezca.
+> Si el diff borra una pieza del motor y no hay un ADR nuevo en el mismo cambio, el gate
+> BLOQUEA — restaurar es seguro (el archivo sigue en git), pero decidir borrarlo sin dejar
+> el porqué no lo es. Caso de campo (issue #73): un subagente borró `instalar.ps1` y su
+> self-test, y el review pasó verde encima.
+
+**Cableado en:** `tools/verificar.ps1`
