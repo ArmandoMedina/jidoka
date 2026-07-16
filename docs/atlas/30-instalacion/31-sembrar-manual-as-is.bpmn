@@ -1,0 +1,246 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_31_Sembrar" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3">
+  <bpmn:collaboration id="Collaboration_31_Sembrar">
+    <bpmn:participant id="Participant_Sembrar" name="sembrar-manual (-Actualizar opcional) — instalador AV-seguro" processRef="Process_Sembrar"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Sembrar" name="sembrar-manual — siembra AV-segura del motor" isExecutable="false">
+    <bpmn:documentation>Fuente: tools/sembrar-manual.ps1. La ruta AV-segura: independiente de instalar.ps1 (sin -ExecutionPolicy Bypass, sin el nombre "instalar"), para Windows endurecido donde el AV pone instalar.ps1 en cuarentena (ADR 0027). Dos modos: siembra fresca (default) y -Actualizar. Las guardas Die (sec 1, 2, 3) se listan en la anotación; el flujo principal son las 8 secciones del script.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_31_Sembrar">
+      <bpmn:lane id="Lane_Motor" name="Motor Jidoka (script)">
+        <bpmn:flowNodeRef>Start_Sembrar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Resolver</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Destino</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Modo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_ValidarArq</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_SembrarMecF</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_SembrarLey</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_LeerSello</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_SembrarMecA</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Join</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Stubs</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Sello</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Hooks</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Sembrado</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_Sembrar" name="Siembra manual solicitada (Windows endurecido / AV)">
+      <bpmn:outgoing>F_Start_Res</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="T_Resolver" name="1. Resolver el checkout de Jidoka (la fuente del motor)">
+      <bpmn:incoming>F_Start_Res</bpmn:incoming>
+      <bpmn:outgoing>F_Res_Dest</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_Destino" name="2. Preparar el destino (git init si hace falta)">
+      <bpmn:incoming>F_Res_Dest</bpmn:incoming>
+      <bpmn:outgoing>F_Dest_Modo</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Modo" name="¿modo -Actualizar?">
+      <bpmn:incoming>F_Dest_Modo</bpmn:incoming>
+      <bpmn:outgoing>F_Modo_Fresca</bpmn:outgoing>
+      <bpmn:outgoing>F_Modo_Act</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="T_ValidarArq" name="3. Validar el arquetipo">
+      <bpmn:incoming>F_Modo_Fresca</bpmn:incoming>
+      <bpmn:outgoing>F_Arq_Mec</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_SembrarMecF" name="4. Sembrar la mecánica (no-clobber)">
+      <bpmn:incoming>F_Arq_Mec</bpmn:incoming>
+      <bpmn:outgoing>F_MecF_Ley</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_SembrarLey" name="5. Sembrar la ley del arquetipo (solo siembra fresca)">
+      <bpmn:incoming>F_MecF_Ley</bpmn:incoming>
+      <bpmn:outgoing>F_Ley_Join</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_LeerSello" name="3. Leer el sello previo (excluir + hashes sembrados)">
+      <bpmn:incoming>F_Modo_Act</bpmn:incoming>
+      <bpmn:outgoing>F_Sello_MecA</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_SembrarMecA" name="4. Re-sembrar la mecánica (3 vías por hash: al día / actualiza / preserva)">
+      <bpmn:incoming>F_Sello_MecA</bpmn:incoming>
+      <bpmn:outgoing>F_MecA_Join</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Join">
+      <bpmn:incoming>F_Ley_Join</bpmn:incoming>
+      <bpmn:incoming>F_MecA_Join</bpmn:incoming>
+      <bpmn:outgoing>F_Join_Stubs</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="T_Stubs" name="5b. Sembrar los stubs de instancia (no-clobber SIEMPRE)">
+      <bpmn:incoming>F_Join_Stubs</bpmn:incoming>
+      <bpmn:outgoing>F_Stubs_Sello</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_Sello" name="6. Escribir el sello (tools/jidoka-motor.json)">
+      <bpmn:incoming>F_Stubs_Sello</bpmn:incoming>
+      <bpmn:outgoing>F_Sello_Hooks</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_Hooks" name="7. Encender core.hooksPath">
+      <bpmn:incoming>F_Sello_Hooks</bpmn:incoming>
+      <bpmn:outgoing>F_Hooks_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="End_Sembrado" name="Motor sembrado sin instalar.ps1 (AV-seguro); instancia intacta">
+      <bpmn:incoming>F_Hooks_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_Start_Res" sourceRef="Start_Sembrar" targetRef="T_Resolver"/>
+    <bpmn:sequenceFlow id="F_Res_Dest" sourceRef="T_Resolver" targetRef="T_Destino"/>
+    <bpmn:sequenceFlow id="F_Dest_Modo" sourceRef="T_Destino" targetRef="Gw_Modo"/>
+    <bpmn:sequenceFlow id="F_Modo_Fresca" sourceRef="Gw_Modo" targetRef="T_ValidarArq" name="no (siembra fresca)"/>
+    <bpmn:sequenceFlow id="F_Arq_Mec" sourceRef="T_ValidarArq" targetRef="T_SembrarMecF"/>
+    <bpmn:sequenceFlow id="F_MecF_Ley" sourceRef="T_SembrarMecF" targetRef="T_SembrarLey"/>
+    <bpmn:sequenceFlow id="F_Ley_Join" sourceRef="T_SembrarLey" targetRef="Gw_Join"/>
+    <bpmn:sequenceFlow id="F_Modo_Act" sourceRef="Gw_Modo" targetRef="T_LeerSello" name="sí (-Actualizar)"/>
+    <bpmn:sequenceFlow id="F_Sello_MecA" sourceRef="T_LeerSello" targetRef="T_SembrarMecA"/>
+    <bpmn:sequenceFlow id="F_MecA_Join" sourceRef="T_SembrarMecA" targetRef="Gw_Join"/>
+    <bpmn:sequenceFlow id="F_Join_Stubs" sourceRef="Gw_Join" targetRef="T_Stubs"/>
+    <bpmn:sequenceFlow id="F_Stubs_Sello" sourceRef="T_Stubs" targetRef="T_Sello"/>
+    <bpmn:sequenceFlow id="F_Sello_Hooks" sourceRef="T_Sello" targetRef="T_Hooks"/>
+    <bpmn:sequenceFlow id="F_Hooks_End" sourceRef="T_Hooks" targetRef="End_Sembrado"/>
+    <bpmn:textAnnotation id="Ann_AV">
+      <bpmn:text>RUTA AV-SEGURA (ADR 0027): independiente de instalar.ps1 — sin -ExecutionPolicy Bypass y sin el nombre "instalar", que el AV pone en cuarentena en Windows endurecido.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_AV" sourceRef="Ann_AV" targetRef="T_Resolver"/>
+    <bpmn:textAnnotation id="Ann_Guardas">
+      <bpmn:text>Guardas (Die): sin checkout de Jidoka (sec 1); el destino es el propio Jidoka (sec 2); -Actualizar sin sello previo (sec 3); arquetipo inválido (sec 3, fresca).</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Guardas" sourceRef="Ann_Guardas" targetRef="Gw_Modo"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_31_Sembrar">
+    <bpmndi:BPMNPlane id="Plane_Diagram_31_Sembrar" bpmnElement="Collaboration_31_Sembrar">
+      <bpmndi:BPMNShape id="Shape_Participant_Sembrar" bpmnElement="Participant_Sembrar" isHorizontal="true">
+        <dc:Bounds x="160" y="100" width="2380" height="420"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Motor" bpmnElement="Lane_Motor" isHorizontal="true">
+        <dc:Bounds x="190" y="100" width="2350" height="420"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Start_Sembrar" bpmnElement="Start_Sembrar">
+        <dc:Bounds x="222" y="282" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="210" y="322" width="80" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_Resolver" bpmnElement="T_Resolver">
+        <dc:Bounds x="300" y="270" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_Destino" bpmnElement="T_Destino">
+        <dc:Bounds x="500" y="270" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gw_Modo" bpmnElement="Gw_Modo" isMarkerVisible="true">
+        <dc:Bounds x="700" y="280" width="40" height="40"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="680" y="336" width="80" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_ValidarArq" bpmnElement="T_ValidarArq">
+        <dc:Bounds x="800" y="150" width="150" height="56"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_SembrarMecF" bpmnElement="T_SembrarMecF">
+        <dc:Bounds x="990" y="150" width="150" height="56"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_SembrarLey" bpmnElement="T_SembrarLey">
+        <dc:Bounds x="1180" y="150" width="150" height="56"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_LeerSello" bpmnElement="T_LeerSello">
+        <dc:Bounds x="800" y="392" width="150" height="56"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_SembrarMecA" bpmnElement="T_SembrarMecA">
+        <dc:Bounds x="990" y="392" width="150" height="56"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gw_Join" bpmnElement="Gw_Join" isMarkerVisible="true">
+        <dc:Bounds x="1400" y="280" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_Stubs" bpmnElement="T_Stubs">
+        <dc:Bounds x="1490" y="270" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_Sello" bpmnElement="T_Sello">
+        <dc:Bounds x="1700" y="270" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_T_Hooks" bpmnElement="T_Hooks">
+        <dc:Bounds x="1900" y="270" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_Sembrado" bpmnElement="End_Sembrado">
+        <dc:Bounds x="2100" y="282" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2078" y="322" width="90" height="40"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Start_Res" bpmnElement="F_Start_Res">
+        <di:waypoint x="258" y="300"/>
+        <di:waypoint x="300" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Res_Dest" bpmnElement="F_Res_Dest">
+        <di:waypoint x="450" y="300"/>
+        <di:waypoint x="500" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Dest_Modo" bpmnElement="F_Dest_Modo">
+        <di:waypoint x="650" y="300"/>
+        <di:waypoint x="700" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Modo_Fresca" bpmnElement="F_Modo_Fresca">
+        <di:waypoint x="720" y="280"/>
+        <di:waypoint x="720" y="178"/>
+        <di:waypoint x="800" y="178"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="640" y="200" width="90" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Arq_Mec" bpmnElement="F_Arq_Mec">
+        <di:waypoint x="950" y="178"/>
+        <di:waypoint x="990" y="178"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_MecF_Ley" bpmnElement="F_MecF_Ley">
+        <di:waypoint x="1140" y="178"/>
+        <di:waypoint x="1180" y="178"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Ley_Join" bpmnElement="F_Ley_Join">
+        <di:waypoint x="1330" y="178"/>
+        <di:waypoint x="1420" y="178"/>
+        <di:waypoint x="1420" y="280"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Modo_Act" bpmnElement="F_Modo_Act">
+        <di:waypoint x="720" y="320"/>
+        <di:waypoint x="720" y="420"/>
+        <di:waypoint x="800" y="420"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="640" y="393" width="80" height="27"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Sello_MecA" bpmnElement="F_Sello_MecA">
+        <di:waypoint x="950" y="420"/>
+        <di:waypoint x="990" y="420"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_MecA_Join" bpmnElement="F_MecA_Join">
+        <di:waypoint x="1140" y="420"/>
+        <di:waypoint x="1420" y="420"/>
+        <di:waypoint x="1420" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Join_Stubs" bpmnElement="F_Join_Stubs">
+        <di:waypoint x="1440" y="300"/>
+        <di:waypoint x="1490" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Stubs_Sello" bpmnElement="F_Stubs_Sello">
+        <di:waypoint x="1650" y="300"/>
+        <di:waypoint x="1700" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Sello_Hooks" bpmnElement="F_Sello_Hooks">
+        <di:waypoint x="1850" y="300"/>
+        <di:waypoint x="1900" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Hooks_End" bpmnElement="F_Hooks_End">
+        <di:waypoint x="2050" y="300"/>
+        <di:waypoint x="2100" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_AV" bpmnElement="Ann_AV">
+        <dc:Bounds x="290" y="120" width="380" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_AV" bpmnElement="Assoc_AV">
+        <di:waypoint x="400" y="190"/>
+        <di:waypoint x="390" y="270"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_Guardas" bpmnElement="Ann_Guardas">
+        <dc:Bounds x="1490" y="390" width="420" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_Guardas" bpmnElement="Assoc_Guardas">
+        <di:waypoint x="1490" y="410"/>
+        <di:waypoint x="740" y="380"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

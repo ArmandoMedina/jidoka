@@ -11,6 +11,7 @@
       <bpmn:outgoing>F_G_2</bpmn:outgoing>
       <bpmn:outgoing>F_G_3</bpmn:outgoing>
       <bpmn:outgoing>F_G_4</bpmn:outgoing>
+      <bpmn:outgoing>F_G_5</bpmn:outgoing>
       <bpmn:incoming>F_Start_G</bpmn:incoming>
     </bpmn:exclusiveGateway>
     <bpmn:callActivity id="Call_Instalar" name="[30] Instalar Jidoka" calledElement="Process_Instalar">
@@ -83,6 +84,20 @@
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="F_G_4" sourceRef="Gateway_Nec" targetRef="Call_Leccion" name="Reportar"/>
     <bpmn:sequenceFlow id="F_Call_Leccion_E" sourceRef="Call_Leccion" targetRef="End_L"/>
+    <bpmn:callActivity id="Call_Sembrar" name="[31] Instalar (AV-seguro)" calledElement="Process_Sembrar">
+      <bpmn:documentation>Proceso externo: Process_Sembrar | Archivo: 30-instalacion/31-sembrar-manual-as-is.bpmn. La ruta AV-segura de instalar, cuando el AV pone instalar.ps1 en cuarentena (ADR 0027).</bpmn:documentation>
+      <bpmn:incoming>F_G_5</bpmn:incoming>
+      <bpmn:outgoing>F_Call_Sembrar_E</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:textAnnotation id="Annotation_Call_Sembrar">
+      <bpmn:text>Archivo: 30-instalacion/31-sembrar-manual-as-is.bpmn</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Call_Sembrar" sourceRef="Annotation_Call_Sembrar" targetRef="Call_Sembrar"/>
+    <bpmn:endEvent id="End_Sem" name="Método instalado (AV-seguro)">
+      <bpmn:incoming>F_Call_Sembrar_E</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_G_5" sourceRef="Gateway_Nec" targetRef="Call_Sembrar" name="Instalar (AV)"/>
+    <bpmn:sequenceFlow id="F_Call_Sembrar_E" sourceRef="Call_Sembrar" targetRef="End_Sem"/>
     <bpmn:sequenceFlow id="F_Start_G" sourceRef="Start_Nec" targetRef="Gateway_Nec"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_02_InstalarMantener">
@@ -207,6 +222,29 @@
       <bpmndi:BPMNEdge id="Edge_F_Call_Leccion_E" bpmnElement="F_Call_Leccion_E">
         <di:waypoint x="610" y="681"/>
         <di:waypoint x="760" y="681"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Call_Sembrar" bpmnElement="Call_Sembrar">
+        <dc:Bounds x="420" y="760" width="190" height="82"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_Sembrar" bpmnElement="Annotation_Call_Sembrar">
+        <dc:Bounds x="420" y="858" width="220" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Sembrar" bpmnElement="Association_Annotation_Call_Sembrar">
+        <di:waypoint x="530.0" y="858"/>
+        <di:waypoint x="530.0" y="842"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_End_Sem" bpmnElement="End_Sem">
+        <dc:Bounds x="760" y="783" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_G_5" bpmnElement="F_G_5">
+        <di:waypoint x="280" y="318"/>
+        <di:waypoint x="330" y="318"/>
+        <di:waypoint x="330" y="801"/>
+        <di:waypoint x="420" y="801"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Call_Sembrar_E" bpmnElement="F_Call_Sembrar_E">
+        <di:waypoint x="610" y="801"/>
+        <di:waypoint x="760" y="801"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Start_G" bpmnElement="F_Start_G">
         <di:waypoint x="136" y="318"/>
