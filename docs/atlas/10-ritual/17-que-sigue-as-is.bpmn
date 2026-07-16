@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_17_QueSigue" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:collaboration id="Collab_QueSigue">
+    <bpmn:participant id="Pool_QueSigue" name="/jidoka:que-sigue — proponer el siguiente paso por valor" processRef="Process_QueSigue"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_QueSigue" name="/jidoka:que-sigue — leer el estado y proponer, no arrancar" isExecutable="false">
+    <bpmn:documentation>Fuente: .claude/commands/jidoka/que-sigue.md. Carriles: el Agente lee y propone; la señal para arrancar la da el Humano (propone, no arranca solo).</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_QueSigue">
+      <bpmn:lane id="Lane_Agente" name="Agente (propone)">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Leer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Separar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Ordenar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Tamano</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Planea</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Rebanada</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Humano" name="Humano (cliente)">
+        <bpmn:flowNodeRef>U_Senal</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="¿Y ahora qué?">
+      <bpmn:outgoing>f1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="T_Leer" name="Leer HANDOFF + ROADMAP + git (el estado real)">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:task id="T_Separar" name="Separar lo que decide la IA de lo que decide el humano">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="T_Ordenar" name="Ordenar por valor (no esfuerzo); ser honesto del tamaño">
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gw_Tamano" name="¿Es un sprint entero?">
+      <bpmn:incoming>f4</bpmn:incoming>
+      <bpmn:outgoing>f_si</bpmn:outgoing>
+      <bpmn:outgoing>f_no</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="T_Planea" name="Ofrecer /jidoka:planea">
+      <bpmn:incoming>f_si</bpmn:incoming>
+      <bpmn:outgoing>f_plan_senal</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="T_Rebanada" name="Ofrecer la rebanada directa">
+      <bpmn:incoming>f_no</bpmn:incoming>
+      <bpmn:outgoing>f_reb_senal</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:userTask id="U_Senal" name="STOP: el cliente da la señal (propone, no arranca solo)">
+      <bpmn:incoming>f_plan_senal</bpmn:incoming>
+      <bpmn:incoming>f_reb_senal</bpmn:incoming>
+      <bpmn:outgoing>f_senal_end</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="End" name="Siguiente paso elegido por el cliente">
+      <bpmn:incoming>f_senal_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_Leer"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_Leer" targetRef="T_Separar"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="T_Separar" targetRef="T_Ordenar"/>
+    <bpmn:sequenceFlow id="f4" sourceRef="T_Ordenar" targetRef="Gw_Tamano"/>
+    <bpmn:sequenceFlow id="f_si" name="sí" sourceRef="Gw_Tamano" targetRef="T_Planea"/>
+    <bpmn:sequenceFlow id="f_no" name="no" sourceRef="Gw_Tamano" targetRef="T_Rebanada"/>
+    <bpmn:sequenceFlow id="f_plan_senal" sourceRef="T_Planea" targetRef="U_Senal"/>
+    <bpmn:sequenceFlow id="f_reb_senal" sourceRef="T_Rebanada" targetRef="U_Senal"/>
+    <bpmn:sequenceFlow id="f_senal_end" sourceRef="U_Senal" targetRef="End"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_17_QueSigue">
+    <bpmndi:BPMNPlane id="Plane_17_QueSigue" bpmnElement="Collab_QueSigue">
+      <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_QueSigue" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1320" height="400"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneA" bpmnElement="Lane_Agente" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1290" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneH" bpmnElement="Lane_Humano" isHorizontal="true">
+        <dc:Bounds x="190" y="330" width="1290" height="150"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
+        <dc:Bounds x="210" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="196" y="218" width="60" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TLeer" bpmnElement="T_Leer">
+        <dc:Bounds x="280" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TSeparar" bpmnElement="T_Separar">
+        <dc:Bounds x="490" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TOrdenar" bpmnElement="T_Ordenar">
+        <dc:Bounds x="700" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwTamano" bpmnElement="Gw_Tamano" isMarkerVisible="true">
+        <dc:Bounds x="910" y="180" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="895" y="143" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TPlanea" bpmnElement="T_Planea">
+        <dc:Bounds x="990" y="95" width="160" height="55"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TRebanada" bpmnElement="T_Rebanada">
+        <dc:Bounds x="990" y="170" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_USenal" bpmnElement="U_Senal">
+        <dc:Bounds x="1210" y="375" width="180" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_End" bpmnElement="End">
+        <dc:Bounds x="1430" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1405" y="218" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
+        <di:waypoint x="240" y="200"/>
+        <di:waypoint x="280" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
+        <di:waypoint x="440" y="200"/>
+        <di:waypoint x="490" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
+        <di:waypoint x="650" y="200"/>
+        <di:waypoint x="700" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f4" bpmnElement="f4">
+        <di:waypoint x="860" y="200"/>
+        <di:waypoint x="910" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_si" bpmnElement="f_si">
+        <di:waypoint x="930" y="180"/>
+        <di:waypoint x="930" y="122"/>
+        <di:waypoint x="990" y="122"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_no" bpmnElement="f_no">
+        <di:waypoint x="950" y="200"/>
+        <di:waypoint x="990" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_plan_senal" bpmnElement="f_plan_senal">
+        <di:waypoint x="1150" y="122"/>
+        <di:waypoint x="1300" y="122"/>
+        <di:waypoint x="1300" y="375"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_reb_senal" bpmnElement="f_reb_senal">
+        <di:waypoint x="1150" y="200"/>
+        <di:waypoint x="1300" y="200"/>
+        <di:waypoint x="1300" y="375"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_senal_end" bpmnElement="f_senal_end">
+        <di:waypoint x="1390" y="405"/>
+        <di:waypoint x="1445" y="405"/>
+        <di:waypoint x="1445" y="215"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

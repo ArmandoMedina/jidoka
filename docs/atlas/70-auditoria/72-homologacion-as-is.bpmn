@@ -1,0 +1,202 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_72_Homologacion" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:collaboration id="Collab_Homologacion">
+    <bpmn:participant id="Pool_Homologacion" name="Homologación — una lección asciende, espera o se descarta" processRef="Process_Homologacion"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Homologacion" name="Homologación: clasificar y (si asciende) neutralizar, registrar y publicar" isExecutable="false">
+    <bpmn:documentation>Fuente: kanban/homologacion.md. Carriles: el Agente inventaría, neutraliza y publica; el Humano (cliente) clasifica el destino de la lección.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_Homologacion">
+      <bpmn:lane id="Lane_Agente" name="Agente (cosechador)">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Inventario</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Destino</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Ascender</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Esperar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Descartar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Join</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_NDA</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_ADR</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Verificar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Humano" name="Humano (cliente)">
+        <bpmn:flowNodeRef>U_Clasificar</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="Lección de campo registrada">
+      <bpmn:outgoing>f1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="T_Inventario" name="Inventariar pieza, estado y dolor repetido">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:userTask id="U_Clasificar" name="Clasificar con el cliente">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f3</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_Destino" name="¿Destino de la lección?">
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f_asc</bpmn:outgoing>
+      <bpmn:outgoing>f_esp</bpmn:outgoing>
+      <bpmn:outgoing>f_desc</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="T_Ascender" name="Neutralizar y diseñar para ascenso">
+      <bpmn:incoming>f_asc</bpmn:incoming>
+      <bpmn:outgoing>f_asc_join</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="T_Esperar" name="Dejar esperando maduración 2-3">
+      <bpmn:incoming>f_esp</bpmn:incoming>
+      <bpmn:outgoing>f_esp_join</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="T_Descartar" name="Descartar con razón registrada">
+      <bpmn:incoming>f_desc</bpmn:incoming>
+      <bpmn:outgoing>f_desc_join</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gw_Join">
+      <bpmn:incoming>f_asc_join</bpmn:incoming>
+      <bpmn:incoming>f_esp_join</bpmn:incoming>
+      <bpmn:incoming>f_desc_join</bpmn:incoming>
+      <bpmn:outgoing>f_join_nda</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="T_NDA" name="Verificar la frontera NDA">
+      <bpmn:incoming>f_join_nda</bpmn:incoming>
+      <bpmn:outgoing>f_nda_adr</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:task id="T_ADR" name="Registrar la decisión en un ADR">
+      <bpmn:incoming>f_nda_adr</bpmn:incoming>
+      <bpmn:outgoing>f_adr_ver</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:serviceTask id="T_Verificar" name="Verificar Jidoka y publicar si aplica">
+      <bpmn:incoming>f_adr_ver</bpmn:incoming>
+      <bpmn:outgoing>f_ver_end</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="End" name="Lección ascendida, diferida o descartada">
+      <bpmn:incoming>f_ver_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_Inventario"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_Inventario" targetRef="U_Clasificar"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="U_Clasificar" targetRef="Gw_Destino"/>
+    <bpmn:sequenceFlow id="f_asc" name="ascender" sourceRef="Gw_Destino" targetRef="T_Ascender"/>
+    <bpmn:sequenceFlow id="f_esp" name="esperar" sourceRef="Gw_Destino" targetRef="T_Esperar"/>
+    <bpmn:sequenceFlow id="f_desc" name="descartar" sourceRef="Gw_Destino" targetRef="T_Descartar"/>
+    <bpmn:sequenceFlow id="f_asc_join" sourceRef="T_Ascender" targetRef="Gw_Join"/>
+    <bpmn:sequenceFlow id="f_esp_join" sourceRef="T_Esperar" targetRef="Gw_Join"/>
+    <bpmn:sequenceFlow id="f_desc_join" sourceRef="T_Descartar" targetRef="Gw_Join"/>
+    <bpmn:sequenceFlow id="f_join_nda" sourceRef="Gw_Join" targetRef="T_NDA"/>
+    <bpmn:sequenceFlow id="f_nda_adr" sourceRef="T_NDA" targetRef="T_ADR"/>
+    <bpmn:sequenceFlow id="f_adr_ver" sourceRef="T_ADR" targetRef="T_Verificar"/>
+    <bpmn:sequenceFlow id="f_ver_end" sourceRef="T_Verificar" targetRef="End"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_72_Homologacion">
+    <bpmndi:BPMNPlane id="Plane_72_Homologacion" bpmnElement="Collab_Homologacion">
+      <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Homologacion" isHorizontal="true">
+        <dc:Bounds x="160" y="60" width="1900" height="480"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneA" bpmnElement="Lane_Agente" isHorizontal="true">
+        <dc:Bounds x="190" y="60" width="1870" height="320"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneH" bpmnElement="Lane_Humano" isHorizontal="true">
+        <dc:Bounds x="190" y="380" width="1870" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
+        <dc:Bounds x="210" y="165" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="186" y="198" width="84" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TInventario" bpmnElement="T_Inventario">
+        <dc:Bounds x="280" y="150" width="170" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_UClasificar" bpmnElement="U_Clasificar">
+        <dc:Bounds x="480" y="420" width="170" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwDestino" bpmnElement="Gw_Destino" isMarkerVisible="true">
+        <dc:Bounds x="700" y="160" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="685" y="123" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TAscender" bpmnElement="T_Ascender">
+        <dc:Bounds x="800" y="90" width="190" height="52"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TEsperar" bpmnElement="T_Esperar">
+        <dc:Bounds x="800" y="154" width="190" height="52"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TDescartar" bpmnElement="T_Descartar">
+        <dc:Bounds x="800" y="218" width="190" height="52"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwJoin" bpmnElement="Gw_Join" isMarkerVisible="true">
+        <dc:Bounds x="1050" y="160" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TNDA" bpmnElement="T_NDA">
+        <dc:Bounds x="1140" y="150" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TADR" bpmnElement="T_ADR">
+        <dc:Bounds x="1340" y="150" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TVerificar" bpmnElement="T_Verificar">
+        <dc:Bounds x="1540" y="150" width="170" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_End" bpmnElement="End">
+        <dc:Bounds x="1760" y="165" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1735" y="198" width="90" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
+        <di:waypoint x="240" y="180"/>
+        <di:waypoint x="280" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
+        <di:waypoint x="365" y="210"/>
+        <di:waypoint x="365" y="450"/>
+        <di:waypoint x="480" y="450"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
+        <di:waypoint x="650" y="450"/>
+        <di:waypoint x="720" y="450"/>
+        <di:waypoint x="720" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_asc" bpmnElement="f_asc">
+        <di:waypoint x="740" y="180"/>
+        <di:waypoint x="770" y="180"/>
+        <di:waypoint x="770" y="116"/>
+        <di:waypoint x="800" y="116"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_esp" bpmnElement="f_esp">
+        <di:waypoint x="740" y="180"/>
+        <di:waypoint x="800" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_desc" bpmnElement="f_desc">
+        <di:waypoint x="740" y="180"/>
+        <di:waypoint x="770" y="180"/>
+        <di:waypoint x="770" y="244"/>
+        <di:waypoint x="800" y="244"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_asc_join" bpmnElement="f_asc_join">
+        <di:waypoint x="990" y="116"/>
+        <di:waypoint x="1070" y="116"/>
+        <di:waypoint x="1070" y="160"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_esp_join" bpmnElement="f_esp_join">
+        <di:waypoint x="990" y="180"/>
+        <di:waypoint x="1050" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_desc_join" bpmnElement="f_desc_join">
+        <di:waypoint x="990" y="244"/>
+        <di:waypoint x="1070" y="244"/>
+        <di:waypoint x="1070" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_join_nda" bpmnElement="f_join_nda">
+        <di:waypoint x="1090" y="180"/>
+        <di:waypoint x="1140" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_nda_adr" bpmnElement="f_nda_adr">
+        <di:waypoint x="1290" y="180"/>
+        <di:waypoint x="1340" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_adr_ver" bpmnElement="f_adr_ver">
+        <di:waypoint x="1490" y="180"/>
+        <di:waypoint x="1540" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_ver_end" bpmnElement="f_ver_end">
+        <di:waypoint x="1710" y="180"/>
+        <di:waypoint x="1760" y="180"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

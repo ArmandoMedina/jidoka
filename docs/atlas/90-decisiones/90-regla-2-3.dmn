@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" id="Definitions_Regla23" name="Regla 2–3" namespace="https://github.com/ArmandoMedina/jidoka/process-atlas" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <decision id="Decision_Regla23" name="Clasificar maduración de una lección">
+    <decisionTable id="DecisionTable_Regla23" hitPolicy="FIRST">
+      <input id="Input_Usos" label="Usos reales independientes">
+        <inputExpression id="InputExpr_Usos" typeRef="number">
+          <text>usosReales</text>
+        </inputExpression>
+      </input>
+      <output id="Output_Destino" label="Destino" name="destino" typeRef="string"/>
+      <rule id="Rule_1">
+        <inputEntry id="InputEntry_1">
+          <text>&lt; 2</text>
+        </inputEntry>
+        <outputEntry id="OutputEntry_1">
+          <text>"espera maduración"</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_2">
+        <inputEntry id="InputEntry_2">
+          <text>[2..3]</text>
+        </inputEntry>
+        <outputEntry id="OutputEntry_2">
+          <text>"candidata a ascenso estable"</text>
+        </outputEntry>
+      </rule>
+      <rule id="Rule_3">
+        <inputEntry id="InputEntry_3">
+          <text>&gt; 3</text>
+        </inputEntry>
+        <outputEntry id="OutputEntry_3">
+          <text>"estable o revisar poda si no se usa"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

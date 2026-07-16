@@ -1,0 +1,405 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_10_Arranca" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:collaboration id="Collaboration_10_Arranca">
+    <bpmn:participant id="Participant_Usuario" name="Usuario"/>
+    <bpmn:participant id="Participant_Proyecto" name="Proyecto gobernado con Jidoka" processRef="Process_Arranca"/>
+    <bpmn:messageFlow id="MF_Start" sourceRef="Participant_Usuario" targetRef="Start_Arranque" name="/jidoka:arranca" messageRef="Message_Arranque"/>
+    <bpmn:messageFlow id="MF_Aclarar" sourceRef="Send_Aclarar" targetRef="Participant_Usuario" name="Aclaración" messageRef="Message_Aclaracion"/>
+    <bpmn:messageFlow id="MF_Respuesta" sourceRef="Participant_Usuario" targetRef="Catch_Respuesta" name="Respuesta" messageRef="Message_Respuesta"/>
+    <bpmn:messageFlow id="MF_Orient" sourceRef="Send_Orientar" targetRef="Participant_Usuario" name="Orientación" messageRef="Message_Orientacion"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_Arranca" name="/jidoka:arranca — abrir y orientar la sesión" isExecutable="false">
+    <bpmn:documentation>Fuente: .claude/commands/jidoka/arranca.md. Subprocesos EXPANDIDOS en el lienzo (sin drill-down): el detalle se ve aquí mismo.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_10_Arranca">
+      <bpmn:lane id="Lane_Agente" name="Agente orquestador">
+        <bpmn:flowNodeRef>Start_Arranque</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Sub_RecuperarContexto</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Delimitar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Contexto</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Send_Aclarar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Catch_Respuesta</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Sub_DeterminarSiguiente</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Send_Orientar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Orientada</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Motor" name="Motor Jidoka / repositorio">
+        <bpmn:flowNodeRef>Task_Inspeccionar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Rutear</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_Arranque" name="Solicitud de arranque recibida">
+      <bpmn:messageEventDefinition id="MED_Start_Arranque" messageRef="Message_Arranque"/>
+      <bpmn:outgoing>F_Start_Ctx</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:subProcess id="Sub_RecuperarContexto" name="Recuperar contexto mínimo" triggeredByEvent="false">
+      <bpmn:startEvent id="Ctx_Start" name="Contexto requerido">
+        <bpmn:outgoing>Ctx_F1</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:task id="Ctx_HANDOFF" name="Leer HANDOFF.md">
+        <bpmn:incoming>Ctx_F1</bpmn:incoming>
+        <bpmn:outgoing>Ctx_F2</bpmn:outgoing>
+      </bpmn:task>
+      <bpmn:task id="Ctx_Recursos" name="Leer recursos y casting">
+        <bpmn:incoming>Ctx_F2</bpmn:incoming>
+        <bpmn:outgoing>Ctx_F3</bpmn:outgoing>
+      </bpmn:task>
+      <bpmn:exclusiveGateway id="Ctx_Activo" name="¿Hay retoma o plan activo?">
+        <bpmn:incoming>Ctx_F3</bpmn:incoming>
+        <bpmn:outgoing>Ctx_F_Si</bpmn:outgoing>
+        <bpmn:outgoing>Ctx_F_No</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:task id="Ctx_Plan" name="Leer plan activo y referencias de retoma">
+        <bpmn:incoming>Ctx_F_Si</bpmn:incoming>
+        <bpmn:outgoing>Ctx_F_Plan</bpmn:outgoing>
+      </bpmn:task>
+      <bpmn:exclusiveGateway id="Ctx_Join">
+        <bpmn:incoming>Ctx_F_Plan</bpmn:incoming>
+        <bpmn:incoming>Ctx_F_No</bpmn:incoming>
+        <bpmn:outgoing>Ctx_F_End</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="Ctx_End" name="Contexto mínimo recuperado">
+        <bpmn:incoming>Ctx_F_End</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Ctx_F1" sourceRef="Ctx_Start" targetRef="Ctx_HANDOFF"/>
+      <bpmn:sequenceFlow id="Ctx_F2" sourceRef="Ctx_HANDOFF" targetRef="Ctx_Recursos"/>
+      <bpmn:sequenceFlow id="Ctx_F3" sourceRef="Ctx_Recursos" targetRef="Ctx_Activo"/>
+      <bpmn:sequenceFlow id="Ctx_F_Si" sourceRef="Ctx_Activo" targetRef="Ctx_Plan" name="Sí"/>
+      <bpmn:sequenceFlow id="Ctx_F_Plan" sourceRef="Ctx_Plan" targetRef="Ctx_Join"/>
+      <bpmn:sequenceFlow id="Ctx_F_No" sourceRef="Ctx_Activo" targetRef="Ctx_Join" name="No"/>
+      <bpmn:sequenceFlow id="Ctx_F_End" sourceRef="Ctx_Join" targetRef="Ctx_End"/>
+      <bpmn:incoming>F_Start_Ctx</bpmn:incoming>
+      <bpmn:outgoing>F_Ctx_Inspect</bpmn:outgoing>
+    </bpmn:subProcess>
+    <bpmn:serviceTask id="Task_Inspeccionar" name="Inspeccionar Git y estado del motor">
+      <bpmn:incoming>F_Ctx_Inspect</bpmn:incoming>
+      <bpmn:outgoing>F_Inspect_Router</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Task_Rutear" name="Ejecutar router de áreas, roles y gates">
+      <bpmn:incoming>F_Inspect_Router</bpmn:incoming>
+      <bpmn:outgoing>F_Router_Delim</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:task id="Task_Delimitar" name="Delimitar objetivo y situación de la sesión">
+      <bpmn:incoming>F_Router_Delim</bpmn:incoming>
+      <bpmn:outgoing>F_Delim_G</bpmn:outgoing>
+      <bpmn:incoming>F_Resp_Delim</bpmn:incoming>
+    </bpmn:task>
+    <bpmn:exclusiveGateway id="Gateway_Contexto" name="¿Falta contexto crítico?">
+      <bpmn:incoming>F_Delim_G</bpmn:incoming>
+      <bpmn:outgoing>F_G_Si</bpmn:outgoing>
+      <bpmn:outgoing>F_G_No</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sendTask id="Send_Aclarar" name="Solicitar aclaración al usuario" messageRef="Message_Aclaracion">
+      <bpmn:incoming>F_G_Si</bpmn:incoming>
+      <bpmn:outgoing>F_Aclarar_Resp</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:intermediateCatchEvent id="Catch_Respuesta" name="Respuesta recibida">
+      <bpmn:messageEventDefinition id="MED_Respuesta" messageRef="Message_Respuesta"/>
+      <bpmn:incoming>F_Aclarar_Resp</bpmn:incoming>
+      <bpmn:outgoing>F_Resp_Delim</bpmn:outgoing>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:subProcess id="Sub_DeterminarSiguiente" name="Determinar siguiente paso" triggeredByEvent="false">
+      <bpmn:startEvent id="Next_Start" name="Situación delimitada">
+        <bpmn:outgoing>Next_F1</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:task id="Next_Docs" name="Leer solo documentación activada">
+        <bpmn:incoming>Next_F1</bpmn:incoming>
+        <bpmn:outgoing>Next_F2</bpmn:outgoing>
+      </bpmn:task>
+      <bpmn:task id="Next_Eval" name="Evaluar tamaño, valor y riesgo">
+        <bpmn:incoming>Next_F2</bpmn:incoming>
+        <bpmn:outgoing>Next_F3</bpmn:outgoing>
+      </bpmn:task>
+      <bpmn:exclusiveGateway id="Next_Plan" name="¿Requiere plan aprobado?">
+        <bpmn:incoming>Next_F3</bpmn:incoming>
+        <bpmn:outgoing>Next_Si</bpmn:outgoing>
+        <bpmn:outgoing>Next_No</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:task id="Next_Recomendar" name="Recomendar /jidoka:planea">
+        <bpmn:incoming>Next_Si</bpmn:incoming>
+        <bpmn:outgoing>Next_Rec_Join</bpmn:outgoing>
+      </bpmn:task>
+      <bpmn:task id="Next_Accion" name="Preparar siguiente acción acotada">
+        <bpmn:incoming>Next_No</bpmn:incoming>
+        <bpmn:outgoing>Next_Acc_Join</bpmn:outgoing>
+      </bpmn:task>
+      <bpmn:exclusiveGateway id="Next_Join">
+        <bpmn:incoming>Next_Rec_Join</bpmn:incoming>
+        <bpmn:incoming>Next_Acc_Join</bpmn:incoming>
+        <bpmn:outgoing>Next_Join_End</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:endEvent id="Next_End" name="Siguiente paso formulado">
+        <bpmn:incoming>Next_Join_End</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Next_F1" sourceRef="Next_Start" targetRef="Next_Docs"/>
+      <bpmn:sequenceFlow id="Next_F2" sourceRef="Next_Docs" targetRef="Next_Eval"/>
+      <bpmn:sequenceFlow id="Next_F3" sourceRef="Next_Eval" targetRef="Next_Plan"/>
+      <bpmn:sequenceFlow id="Next_Si" sourceRef="Next_Plan" targetRef="Next_Recomendar" name="Sí"/>
+      <bpmn:sequenceFlow id="Next_No" sourceRef="Next_Plan" targetRef="Next_Accion" name="No"/>
+      <bpmn:sequenceFlow id="Next_Rec_Join" sourceRef="Next_Recomendar" targetRef="Next_Join"/>
+      <bpmn:sequenceFlow id="Next_Acc_Join" sourceRef="Next_Accion" targetRef="Next_Join"/>
+      <bpmn:sequenceFlow id="Next_Join_End" sourceRef="Next_Join" targetRef="Next_End"/>
+      <bpmn:incoming>F_G_No</bpmn:incoming>
+      <bpmn:outgoing>F_Next_Orient</bpmn:outgoing>
+    </bpmn:subProcess>
+    <bpmn:sendTask id="Send_Orientar" name="Presentar orientación y esperar decisión" messageRef="Message_Orientacion">
+      <bpmn:incoming>F_Next_Orient</bpmn:incoming>
+      <bpmn:outgoing>F_Orient_End</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="End_Orientada" name="Sesión orientada; construcción no iniciada">
+      <bpmn:incoming>F_Orient_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_Start_Ctx" sourceRef="Start_Arranque" targetRef="Sub_RecuperarContexto"/>
+    <bpmn:sequenceFlow id="F_Ctx_Inspect" sourceRef="Sub_RecuperarContexto" targetRef="Task_Inspeccionar"/>
+    <bpmn:sequenceFlow id="F_Inspect_Router" sourceRef="Task_Inspeccionar" targetRef="Task_Rutear"/>
+    <bpmn:sequenceFlow id="F_Router_Delim" sourceRef="Task_Rutear" targetRef="Task_Delimitar"/>
+    <bpmn:sequenceFlow id="F_Delim_G" sourceRef="Task_Delimitar" targetRef="Gateway_Contexto"/>
+    <bpmn:sequenceFlow id="F_G_Si" sourceRef="Gateway_Contexto" targetRef="Send_Aclarar" name="Sí"/>
+    <bpmn:sequenceFlow id="F_Aclarar_Resp" sourceRef="Send_Aclarar" targetRef="Catch_Respuesta"/>
+    <bpmn:sequenceFlow id="F_Resp_Delim" sourceRef="Catch_Respuesta" targetRef="Task_Delimitar"/>
+    <bpmn:sequenceFlow id="F_G_No" sourceRef="Gateway_Contexto" targetRef="Sub_DeterminarSiguiente" name="No"/>
+    <bpmn:sequenceFlow id="F_Next_Orient" sourceRef="Sub_DeterminarSiguiente" targetRef="Send_Orientar"/>
+    <bpmn:sequenceFlow id="F_Orient_End" sourceRef="Send_Orientar" targetRef="End_Orientada"/>
+    <bpmn:textAnnotation id="Annotation_Legend">
+      <bpmn:text>Subprocesos EXPANDIDOS: el detalle se ve aquí mismo, sin drill-down.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_Annotation_Legend" sourceRef="Annotation_Legend" targetRef="Sub_RecuperarContexto"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_10_Arranca">
+    <bpmndi:BPMNPlane id="Plane_Diagram_10_Arranca" bpmnElement="Collaboration_10_Arranca">
+      <bpmndi:BPMNShape id="Shape_Participant_Usuario" bpmnElement="Participant_Usuario" isHorizontal="true">
+        <dc:Bounds x="200" y="80" width="3500" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Participant_Proyecto" bpmnElement="Participant_Proyecto" isHorizontal="true">
+        <dc:Bounds x="200" y="170" width="3500" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Agente" bpmnElement="Lane_Agente" isHorizontal="true">
+        <dc:Bounds x="230" y="170" width="3470" height="330"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Lane_Motor" bpmnElement="Lane_Motor" isHorizontal="true">
+        <dc:Bounds x="230" y="500" width="3470" height="140"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Start_Arranque" bpmnElement="Start_Arranque">
+        <dc:Bounds x="250" y="320" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Sub_RecuperarContexto" bpmnElement="Sub_RecuperarContexto" isExpanded="true">
+        <dc:Bounds x="320" y="210" width="800" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_Start" bpmnElement="Ctx_Start">
+        <dc:Bounds x="345" y="315" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_HANDOFF" bpmnElement="Ctx_HANDOFF">
+        <dc:Bounds x="395" y="303" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_Recursos" bpmnElement="Ctx_Recursos">
+        <dc:Bounds x="555" y="303" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_Activo" bpmnElement="Ctx_Activo" isMarkerVisible="true">
+        <dc:Bounds x="715" y="310" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_Plan" bpmnElement="Ctx_Plan">
+        <dc:Bounds x="785" y="240" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_Join" bpmnElement="Ctx_Join" isMarkerVisible="true">
+        <dc:Bounds x="965" y="310" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ctx_End" bpmnElement="Ctx_End">
+        <dc:Bounds x="1035" y="315" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F1" bpmnElement="Ctx_F1">
+        <di:waypoint x="375" y="330"/>
+        <di:waypoint x="395" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F2" bpmnElement="Ctx_F2">
+        <di:waypoint x="535" y="330"/>
+        <di:waypoint x="555" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F3" bpmnElement="Ctx_F3">
+        <di:waypoint x="695" y="330"/>
+        <di:waypoint x="715" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F_Si" bpmnElement="Ctx_F_Si">
+        <di:waypoint x="735" y="310"/>
+        <di:waypoint x="735" y="267"/>
+        <di:waypoint x="785" y="267"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F_Plan" bpmnElement="Ctx_F_Plan">
+        <di:waypoint x="925" y="267"/>
+        <di:waypoint x="985" y="267"/>
+        <di:waypoint x="985" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F_No" bpmnElement="Ctx_F_No">
+        <di:waypoint x="755" y="330"/>
+        <di:waypoint x="965" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Ctx_F_End" bpmnElement="Ctx_F_End">
+        <di:waypoint x="1005" y="330"/>
+        <di:waypoint x="1035" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Task_Inspeccionar" bpmnElement="Task_Inspeccionar">
+        <dc:Bounds x="1180" y="540" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Rutear" bpmnElement="Task_Rutear">
+        <dc:Bounds x="1380" y="540" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Delimitar" bpmnElement="Task_Delimitar">
+        <dc:Bounds x="1580" y="308" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Contexto" bpmnElement="Gateway_Contexto" isMarkerVisible="true">
+        <dc:Bounds x="1780" y="318" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Send_Aclarar" bpmnElement="Send_Aclarar">
+        <dc:Bounds x="1880" y="220" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Catch_Respuesta" bpmnElement="Catch_Respuesta">
+        <dc:Bounds x="2090" y="238" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Sub_DeterminarSiguiente" bpmnElement="Sub_DeterminarSiguiente" isExpanded="true">
+        <dc:Bounds x="2200" y="215" width="920" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Start" bpmnElement="Next_Start">
+        <dc:Bounds x="2225" y="320" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Docs" bpmnElement="Next_Docs">
+        <dc:Bounds x="2275" y="308" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Eval" bpmnElement="Next_Eval">
+        <dc:Bounds x="2435" y="308" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Plan" bpmnElement="Next_Plan" isMarkerVisible="true">
+        <dc:Bounds x="2595" y="315" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Recomendar" bpmnElement="Next_Recomendar">
+        <dc:Bounds x="2665" y="245" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Accion" bpmnElement="Next_Accion">
+        <dc:Bounds x="2665" y="390" width="140" height="54"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_Join" bpmnElement="Next_Join" isMarkerVisible="true">
+        <dc:Bounds x="2860" y="315" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Next_End" bpmnElement="Next_End">
+        <dc:Bounds x="2935" y="320" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Next_F1" bpmnElement="Next_F1">
+        <di:waypoint x="2255" y="335"/>
+        <di:waypoint x="2275" y="335"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_F2" bpmnElement="Next_F2">
+        <di:waypoint x="2415" y="335"/>
+        <di:waypoint x="2435" y="335"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_F3" bpmnElement="Next_F3">
+        <di:waypoint x="2575" y="335"/>
+        <di:waypoint x="2595" y="335"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_Si" bpmnElement="Next_Si">
+        <di:waypoint x="2615" y="315"/>
+        <di:waypoint x="2615" y="272"/>
+        <di:waypoint x="2665" y="272"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_No" bpmnElement="Next_No">
+        <di:waypoint x="2615" y="355"/>
+        <di:waypoint x="2615" y="417"/>
+        <di:waypoint x="2665" y="417"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_Rec_Join" bpmnElement="Next_Rec_Join">
+        <di:waypoint x="2805" y="272"/>
+        <di:waypoint x="2880" y="272"/>
+        <di:waypoint x="2880" y="315"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_Acc_Join" bpmnElement="Next_Acc_Join">
+        <di:waypoint x="2805" y="417"/>
+        <di:waypoint x="2880" y="417"/>
+        <di:waypoint x="2880" y="355"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Next_Join_End" bpmnElement="Next_Join_End">
+        <di:waypoint x="2900" y="335"/>
+        <di:waypoint x="2935" y="335"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Send_Orientar" bpmnElement="Send_Orientar">
+        <dc:Bounds x="3200" y="308" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_Orientada" bpmnElement="End_Orientada">
+        <dc:Bounds x="3400" y="320" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Start_Ctx" bpmnElement="F_Start_Ctx">
+        <di:waypoint x="280" y="335"/>
+        <di:waypoint x="320" y="335"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Ctx_Inspect" bpmnElement="F_Ctx_Inspect">
+        <di:waypoint x="1120" y="400"/>
+        <di:waypoint x="1150" y="400"/>
+        <di:waypoint x="1150" y="570"/>
+        <di:waypoint x="1180" y="570"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Inspect_Router" bpmnElement="F_Inspect_Router">
+        <di:waypoint x="1330" y="570"/>
+        <di:waypoint x="1380" y="570"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Router_Delim" bpmnElement="F_Router_Delim">
+        <di:waypoint x="1530" y="570"/>
+        <di:waypoint x="1555" y="570"/>
+        <di:waypoint x="1555" y="338"/>
+        <di:waypoint x="1580" y="338"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Delim_G" bpmnElement="F_Delim_G">
+        <di:waypoint x="1730" y="338"/>
+        <di:waypoint x="1780" y="338"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_G_Si" bpmnElement="F_G_Si">
+        <di:waypoint x="1800" y="318"/>
+        <di:waypoint x="1800" y="250"/>
+        <di:waypoint x="1880" y="250"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Aclarar_Resp" bpmnElement="F_Aclarar_Resp">
+        <di:waypoint x="2030" y="250"/>
+        <di:waypoint x="2090" y="253"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Resp_Delim" bpmnElement="F_Resp_Delim">
+        <di:waypoint x="2105" y="268"/>
+        <di:waypoint x="2105" y="190"/>
+        <di:waypoint x="1655" y="190"/>
+        <di:waypoint x="1655" y="308"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_G_No" bpmnElement="F_G_No">
+        <di:waypoint x="1820" y="338"/>
+        <di:waypoint x="2200" y="340"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Next_Orient" bpmnElement="F_Next_Orient">
+        <di:waypoint x="3120" y="340"/>
+        <di:waypoint x="3200" y="338"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Orient_End" bpmnElement="F_Orient_End">
+        <di:waypoint x="3350" y="338"/>
+        <di:waypoint x="3400" y="335"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_Start" bpmnElement="MF_Start">
+        <di:waypoint x="265" y="140"/>
+        <di:waypoint x="265" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_Aclarar" bpmnElement="MF_Aclarar">
+        <di:waypoint x="1955" y="220"/>
+        <di:waypoint x="1955" y="140"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_Respuesta" bpmnElement="MF_Respuesta">
+        <di:waypoint x="2105" y="140"/>
+        <di:waypoint x="2105" y="238"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_Orient" bpmnElement="MF_Orient">
+        <di:waypoint x="3275" y="308"/>
+        <di:waypoint x="3275" y="140"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Annotation_Legend" bpmnElement="Annotation_Legend">
+        <dc:Bounds x="360" y="150" width="420" height="45"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Legend" bpmnElement="Association_Annotation_Legend">
+        <di:waypoint x="570" y="195"/>
+        <di:waypoint x="600" y="210"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+  <bpmn:message id="Message_Arranque" name="Solicitud /jidoka:arranca"/>
+  <bpmn:message id="Message_Aclaracion" name="Solicitud de aclaración"/>
+  <bpmn:message id="Message_Respuesta" name="Respuesta del usuario"/>
+  <bpmn:message id="Message_Orientacion" name="Orientación de sesión"/>
+</bpmn:definitions>

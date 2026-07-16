@@ -1,9 +1,18 @@
 {
   "name": "jidoka-method",
-  "version": "1.16.1",
+  "version": "1.17.0",
   "description": "El Sistema de Produccion Toyota para agentes de IA: doctrina + metodo + ritual de sprint, con gates deterministas (Andon). Instalador del metodo.",
   "bin": {
     "jidoka-method": "bin/jidoka-method.js"
+  },
+  "scripts": {
+    "atlas:validate": "node docs/atlas/tools/validar.mjs",
+    "atlas:render": "node docs/atlas/tools/render.mjs",
+    "atlas:layout": "node docs/atlas/tools/layout.mjs",
+    "atlas:sellar": "node docs/atlas/tools/sellar-plataforma.mjs"
+  },
+  "devDependencies": {
+    "bpmn-auto-layout": "^1.3.0"
   },
   "files": [
     "bin/",

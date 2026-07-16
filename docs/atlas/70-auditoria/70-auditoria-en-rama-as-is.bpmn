@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_70_Auditoria" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:collaboration id="Collab_Auditoria">
+    <bpmn:participant id="Pool_Auditoria" name="Auditoría en rama — hallazgos con evidencia y veredictos" processRef="Process_AuditoriaRama"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_AuditoriaRama" name="Auditoría en rama: fan-out, síntesis y veredictos GO/NO-GO" isExecutable="false">
+    <bpmn:documentation>Fuente: kanban/auditoria.md. Carriles: el Agente audita y sintetiza; el Humano emite GO/NO-GO por acción.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_Auditoria">
+      <bpmn:lane id="Lane_Agente" name="Agente (auditor)">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Rama</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Fanout</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Sintesis</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Paquetes</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Registrar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Humano" name="Humano (dueño)">
+        <bpmn:flowNodeRef>U_Veredictos</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="Auditoría solicitada">
+      <bpmn:outgoing>f1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="T_Rama" name="Crear la rama de auditoría">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:serviceTask id="T_Fanout" name="Despachar auditores por área (fan-out)">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:task id="T_Sintesis" name="Deduplicar y reconciliar hallazgos">
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f4</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="T_Paquetes" name="Agrupar paquetes de remediación">
+      <bpmn:incoming>f4</bpmn:incoming>
+      <bpmn:outgoing>f5</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:userTask id="U_Veredictos" name="Emitir GO/NO-GO por acción">
+      <bpmn:incoming>f5</bpmn:incoming>
+      <bpmn:outgoing>f6</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:task id="T_Registrar" name="Registrar descartes y decisiones humanas">
+      <bpmn:incoming>f6</bpmn:incoming>
+      <bpmn:outgoing>f7</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="End" name="Auditoría con evidencia y veredictos">
+      <bpmn:incoming>f7</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_Rama"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_Rama" targetRef="T_Fanout"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="T_Fanout" targetRef="T_Sintesis"/>
+    <bpmn:sequenceFlow id="f4" sourceRef="T_Sintesis" targetRef="T_Paquetes"/>
+    <bpmn:sequenceFlow id="f5" sourceRef="T_Paquetes" targetRef="U_Veredictos"/>
+    <bpmn:sequenceFlow id="f6" sourceRef="U_Veredictos" targetRef="T_Registrar"/>
+    <bpmn:sequenceFlow id="f7" sourceRef="T_Registrar" targetRef="End"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_70_Auditoria">
+    <bpmndi:BPMNPlane id="Plane_70_Auditoria" bpmnElement="Collab_Auditoria">
+      <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Auditoria" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1400" height="400"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneA" bpmnElement="Lane_Agente" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1370" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneH" bpmnElement="Lane_Humano" isHorizontal="true">
+        <dc:Bounds x="190" y="300" width="1370" height="180"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
+        <dc:Bounds x="210" y="165" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="190" y="198" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TRama" bpmnElement="T_Rama">
+        <dc:Bounds x="280" y="150" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TFanout" bpmnElement="T_Fanout">
+        <dc:Bounds x="480" y="150" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TSintesis" bpmnElement="T_Sintesis">
+        <dc:Bounds x="690" y="150" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TPaquetes" bpmnElement="T_Paquetes">
+        <dc:Bounds x="900" y="150" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_UVeredictos" bpmnElement="U_Veredictos">
+        <dc:Bounds x="855" y="360" width="190" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TRegistrar" bpmnElement="T_Registrar">
+        <dc:Bounds x="1110" y="150" width="170" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_End" bpmnElement="End">
+        <dc:Bounds x="1350" y="165" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1325" y="198" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
+        <di:waypoint x="240" y="180"/>
+        <di:waypoint x="280" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
+        <di:waypoint x="430" y="180"/>
+        <di:waypoint x="480" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
+        <di:waypoint x="640" y="180"/>
+        <di:waypoint x="690" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f4" bpmnElement="f4">
+        <di:waypoint x="850" y="180"/>
+        <di:waypoint x="900" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f5" bpmnElement="f5">
+        <di:waypoint x="975" y="210"/>
+        <di:waypoint x="975" y="360"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f6" bpmnElement="f6">
+        <di:waypoint x="1045" y="390"/>
+        <di:waypoint x="1195" y="390"/>
+        <di:waypoint x="1195" y="210"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f7" bpmnElement="f7">
+        <di:waypoint x="1280" y="180"/>
+        <di:waypoint x="1350" y="180"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

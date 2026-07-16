@@ -6,6 +6,10 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
+## Recién cortado (2026-07-16 — atlas de procesos BPMN · `v1.17.0` · PR #85)
+
+**El método gana el atlas de procesos navegable en `docs/atlas/`, en BPMN (ADRs [0035](docs/decisions/0035-atlas-de-procesos-bpmn.md) / [0036](docs/decisions/0036-acoplamiento-proceso-docs-diagrama.md)).** Los **25 diagramas re-modelados** con carriles (agente/humano) y gateways; toolchain Node (`atlas:validate|render|layout|sellar`); acoplamiento al flujo como **aviso comando→diagrama** (área `atlas` en la ley, no bloqueo — regla 2-3); editor Miragon recomendado + `jidoka.code-workspace`. Se corta como **`v1.17.0`** (MINOR aditivo). Nota: se renumeró de 0032/0033 a **0035/0036** por colisión con los ADR 0032-0034 que `main` liberó en paralelo (`v1.15.0`/`v1.16.0`). Evidencia: `atlas:validate` sin huecos, 25 SVG en `docs/atlas/render/`, cada diagrama inspeccionado a la vista. PR #85 mergeado.
+
 ## Dónde estamos (2026-07-16 — CERRADO Y LIBERADO · `v1.15.0` + `v1.16.0` · análisis de costo neto entregado)
 
 **Cola de la sesión del 16-jul (tarde):** `v1.16.0` **mergeado y liberado** ([release](https://github.com/ArmandoMedina/jidoka/releases/tag/v1.16.0) — `publicar.ps1` corrió completo de una, suite 9/9 con `probar-agentes`). Después, dos pendientes atendidos en autónomo:

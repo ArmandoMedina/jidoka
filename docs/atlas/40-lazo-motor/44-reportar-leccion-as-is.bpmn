@@ -1,0 +1,130 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_44_Leccion" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:collaboration id="Collab_Leccion">
+    <bpmn:participant id="Pool_Leccion" name="reportar-lección — la lección sube al upstream" processRef="Process_ReportarLeccion"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_ReportarLeccion" name="reportar-lección: el lab reporta, el mantenedor decide" isExecutable="false">
+    <bpmn:documentation>Fuente: tools/reportar-leccion.ps1. Carriles: el Agente del lab anonimiza y abre el issue; el Humano mantenedor de Jidoka decide construir o diferir por regla 2-3.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_Leccion">
+      <bpmn:lane id="Lane_Agente" name="Agente (lab que reporta)">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Anonimizar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Redactar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Abrir</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Humano" name="Humano (mantenedor de Jidoka)">
+        <bpmn:flowNodeRef>U_Acusar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Acuse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Construir</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Diferir</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="Lección de campo detectada">
+      <bpmn:outgoing>f1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="T_Anonimizar" name="Anonimizar el contexto sensible">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="T_Redactar" name="Redactar la lección y dónde se pagó">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f3</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:serviceTask id="T_Abrir" name="Abrir issue prellenado en Jidoka (upstream)">
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f_abrir_ac</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="U_Acusar" name="Acusar y triar la lección recibida">
+      <bpmn:incoming>f_abrir_ac</bpmn:incoming>
+      <bpmn:outgoing>f_ac_gw</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_Acuse" name="¿Construir o diferir (regla 2-3)?">
+      <bpmn:incoming>f_ac_gw</bpmn:incoming>
+      <bpmn:outgoing>f_construir</bpmn:outgoing>
+      <bpmn:outgoing>f_diferir</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_Construir" name="Se construye en Jidoka">
+      <bpmn:incoming>f_construir</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="End_Diferir" name="Diferida (espera 2-3 usos reales)">
+      <bpmn:incoming>f_diferir</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_Anonimizar"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_Anonimizar" targetRef="T_Redactar"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="T_Redactar" targetRef="T_Abrir"/>
+    <bpmn:sequenceFlow id="f_abrir_ac" sourceRef="T_Abrir" targetRef="U_Acusar"/>
+    <bpmn:sequenceFlow id="f_ac_gw" sourceRef="U_Acusar" targetRef="Gw_Acuse"/>
+    <bpmn:sequenceFlow id="f_construir" name="construir" sourceRef="Gw_Acuse" targetRef="End_Construir"/>
+    <bpmn:sequenceFlow id="f_diferir" name="diferir" sourceRef="Gw_Acuse" targetRef="End_Diferir"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_44_Leccion">
+    <bpmndi:BPMNPlane id="Plane_44_Leccion" bpmnElement="Collab_Leccion">
+      <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Leccion" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1320" height="400"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneA" bpmnElement="Lane_Agente" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1290" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneH" bpmnElement="Lane_Humano" isHorizontal="true">
+        <dc:Bounds x="190" y="300" width="1290" height="180"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
+        <dc:Bounds x="210" y="165" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="186" y="198" width="84" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TAnonimizar" bpmnElement="T_Anonimizar">
+        <dc:Bounds x="280" y="150" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TRedactar" bpmnElement="T_Redactar">
+        <dc:Bounds x="490" y="150" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TAbrir" bpmnElement="T_Abrir">
+        <dc:Bounds x="700" y="150" width="170" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_UAcusar" bpmnElement="U_Acusar">
+        <dc:Bounds x="800" y="350" width="180" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwAcuse" bpmnElement="Gw_Acuse" isMarkerVisible="true">
+        <dc:Bounds x="1050" y="360" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1035" y="323" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndConstruir" bpmnElement="End_Construir">
+        <dc:Bounds x="1160" y="365" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1140" y="397" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndDiferir" bpmnElement="End_Diferir">
+        <dc:Bounds x="1055" y="435" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1090" y="442" width="120" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
+        <di:waypoint x="240" y="180"/>
+        <di:waypoint x="280" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
+        <di:waypoint x="440" y="180"/>
+        <di:waypoint x="490" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
+        <di:waypoint x="650" y="180"/>
+        <di:waypoint x="700" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_abrir_ac" bpmnElement="f_abrir_ac">
+        <di:waypoint x="870" y="180"/>
+        <di:waypoint x="890" y="180"/>
+        <di:waypoint x="890" y="350"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_ac_gw" bpmnElement="f_ac_gw">
+        <di:waypoint x="980" y="380"/>
+        <di:waypoint x="1050" y="380"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_construir" bpmnElement="f_construir">
+        <di:waypoint x="1090" y="380"/>
+        <di:waypoint x="1160" y="380"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_diferir" bpmnElement="f_diferir">
+        <di:waypoint x="1070" y="400"/>
+        <di:waypoint x="1070" y="435"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

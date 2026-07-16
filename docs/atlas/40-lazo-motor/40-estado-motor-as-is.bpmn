@@ -1,0 +1,137 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_40_Estado" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
+  <bpmn:collaboration id="Collab_Estado">
+    <bpmn:participant id="Pool_Estado" name="estado-motor — divergencia del hijo (aviso, no muro)" processRef="Process_EstadoMotor"/>
+  </bpmn:collaboration>
+  <bpmn:process id="Process_EstadoMotor" name="estado-motor: informar gates y divergencia" isExecutable="false">
+    <bpmn:documentation>Fuente: tools/estado-motor.ps1. Proceso de puro motor (un solo actor: el script); su decisión es si el hijo está atrás de Jidoka.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_Estado">
+      <bpmn:lane id="Lane_Motor" name="Motor Jidoka (script)">
+        <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Gates</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Sello</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Comparar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Detalle</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Div</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Recomendar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_AlDia</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start" name="estado-motor solicitado">
+      <bpmn:outgoing>f1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="T_Gates" name="Mostrar gates vivos y dormidos (con la razón)">
+      <bpmn:incoming>f1</bpmn:incoming>
+      <bpmn:outgoing>f2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_Sello" name="Leer el sello del hijo">
+      <bpmn:incoming>f2</bpmn:incoming>
+      <bpmn:outgoing>f3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_Comparar" name="Comparar versión con Jidoka">
+      <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f4</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_Detalle" name="Comparar piezas por hash (con -Detallado)">
+      <bpmn:incoming>f4</bpmn:incoming>
+      <bpmn:outgoing>f5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Div" name="¿El hijo está atrás de Jidoka?">
+      <bpmn:incoming>f5</bpmn:incoming>
+      <bpmn:outgoing>f_si</bpmn:outgoing>
+      <bpmn:outgoing>f_no</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:task id="T_Recomendar" name="Recomendar ruta de actualización (aviso, no muro)">
+      <bpmn:incoming>f_si</bpmn:incoming>
+      <bpmn:outgoing>f_rec_end</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="End" name="Estado y divergencia informados">
+      <bpmn:incoming>f_rec_end</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="End_AlDia" name="Al día con Jidoka">
+      <bpmn:incoming>f_no</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_Gates"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_Gates" targetRef="T_Sello"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="T_Sello" targetRef="T_Comparar"/>
+    <bpmn:sequenceFlow id="f4" sourceRef="T_Comparar" targetRef="T_Detalle"/>
+    <bpmn:sequenceFlow id="f5" sourceRef="T_Detalle" targetRef="Gw_Div"/>
+    <bpmn:sequenceFlow id="f_si" name="sí: atrás" sourceRef="Gw_Div" targetRef="T_Recomendar"/>
+    <bpmn:sequenceFlow id="f_no" name="no" sourceRef="Gw_Div" targetRef="End_AlDia"/>
+    <bpmn:sequenceFlow id="f_rec_end" sourceRef="T_Recomendar" targetRef="End"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="Diagram_40_Estado">
+    <bpmndi:BPMNPlane id="Plane_40_Estado" bpmnElement="Collab_Estado">
+      <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Estado" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1400" height="300"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_LaneM" bpmnElement="Lane_Motor" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1370" height="300"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
+        <dc:Bounds x="210" y="165" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="186" y="198" width="84" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TGates" bpmnElement="T_Gates">
+        <dc:Bounds x="280" y="150" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TSello" bpmnElement="T_Sello">
+        <dc:Bounds x="490" y="150" width="140" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TComparar" bpmnElement="T_Comparar">
+        <dc:Bounds x="680" y="150" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TDetalle" bpmnElement="T_Detalle">
+        <dc:Bounds x="880" y="150" width="170" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwDiv" bpmnElement="Gw_Div" isMarkerVisible="true">
+        <dc:Bounds x="1090" y="160" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1075" y="123" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TRecomendar" bpmnElement="T_Recomendar">
+        <dc:Bounds x="1180" y="150" width="180" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_End" bpmnElement="End">
+        <dc:Bounds x="1420" y="165" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1395" y="198" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndAlDia" bpmnElement="End_AlDia">
+        <dc:Bounds x="1095" y="260" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1075" y="292" width="72" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
+        <di:waypoint x="240" y="180"/>
+        <di:waypoint x="280" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
+        <di:waypoint x="440" y="180"/>
+        <di:waypoint x="490" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
+        <di:waypoint x="630" y="180"/>
+        <di:waypoint x="680" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f4" bpmnElement="f4">
+        <di:waypoint x="830" y="180"/>
+        <di:waypoint x="880" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f5" bpmnElement="f5">
+        <di:waypoint x="1050" y="180"/>
+        <di:waypoint x="1090" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_si" bpmnElement="f_si">
+        <di:waypoint x="1130" y="180"/>
+        <di:waypoint x="1180" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_no" bpmnElement="f_no">
+        <di:waypoint x="1110" y="200"/>
+        <di:waypoint x="1110" y="260"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_rec_end" bpmnElement="f_rec_end">
+        <di:waypoint x="1360" y="180"/>
+        <di:waypoint x="1420" y="180"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
