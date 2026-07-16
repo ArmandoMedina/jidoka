@@ -6,7 +6,14 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-16 — `v1.15.0` LIBERADO · `v1.16.0` en PR esperando orden de merge)
+## Dónde estamos (2026-07-16 — CERRADO Y LIBERADO · `v1.15.0` + `v1.16.0` · análisis de costo neto entregado)
+
+**Cola de la sesión del 16-jul (tarde):** `v1.16.0` **mergeado y liberado** ([release](https://github.com/ArmandoMedina/jidoka/releases/tag/v1.16.0) — `publicar.ps1` corrió completo de una, suite 9/9 con `probar-agentes`). Después, dos pendientes atendidos en autónomo:
+
+1. **#74-R3 evaluado y cerrable** (comentado en el issue con evidencia): `instalar.ps1` NO contiene `-ExecutionPolicy Bypass` (barrido completo), el quickstart lanza directo, el wrapper npx es condicional desde #34, y la investigación AV de `v1.14.0` ya midió que quitar el flag no baja del umbral heurístico. Del issue solo queda vivo el certificado Authenticode (cliente).
+2. **#72 — primer pase del análisis de costo neto ENTREGADO** (`docs/analisis/costo-neto-sgi-202607.md`, `en_revision` — el Gemba lo hace el cliente). Sobre evidencia real de SGI, dos barridos (local + server-side): el muro server-side paga su costo con margen (206 corridas, 21 rojas ≈10 %, **3 doc-drifts reales frenados antes del merge**, vuelta al verde en minutos, ruleset sin bypass); el costo dominante es el **lazo** (3 bajadas de motor en un día con verificación manual) y la doc ceremonial; y **cuatro piezas con cero señal de vida** en SGI: `docs-graph` (0 fallos en el historial), `sprint-entrega.md` (0 usos), `reportar-leccion` (0 issues desde SGI), y el summary de avisos que el `andon/README.md` de SGI afirma pero su config no implementa. Candidatas a poda/prueba de vida (#46) en la próxima cosecha — medir también puede justificar eliminar.
+
+**El resto de la sesión del 16-jul (dos sprints por el ritual completo):**
 
 **Sesión del 16-jul: dos sprints por el ritual completo (R0 aprobado con nombre → plan-contrato → construcción con subagentes → evidencia → PR).**
 
@@ -17,10 +24,11 @@
 
 **Brief nuevo con 2 huecos honestos** (`product/PRODUCT_BRIEF.md`, marcados "Pendiente del cliente"): la **métrica objetivo con número** y el **apetito** — nadie los ha declarado; decide el cliente, no se rellenan.
 
-**Pendiente inmediato:**
-1. **Merge del PR de `v1.16.0`** (orden nombrada del cliente) → release `v1.16.0` (autorización durable de releases vigente; ojo: el clasificador de permisos del agente pide que el cliente nombre "publica el release" en la conversación, como pasó con v1.15.0).
-2. El demo del cliente: sesión nueva + `/jidoka:arranca` post-merge (ver la Verificación del plan).
-3. Heredados sin cambios: demo de campo de `/jidoka:descubre` (alimenta #67) · bajada `v1.12.1`–`v1.16.0` a los labs · certificado Authenticode (#40/#43/#74/#78/#79).
+**Pendiente (humano — nada bloquea al agente):**
+1. **El Gemba del análisis de costo neto** (`docs/analisis/costo-neto-sgi-202607.md`): leerlo y decidir qué se hace con las 4 piezas sin señal de vida (poda / prueba de vida / nada) — alimenta la próxima cosecha junto con #46/#66.
+2. **El demo de `v1.16.0`**: sesión nueva + `/jidoka:arranca` — ver el roster con tiers, el estado inyectado y el router como preview (la Verificación del sprint, owner: cliente).
+3. **Los 2 huecos del brief** (`product/PRODUCT_BRIEF.md`, marcados "Pendiente del cliente"): métrica objetivo con número y apetito.
+4. Heredados sin cambios: demo de campo de `/jidoka:descubre` (alimenta #67) · bajada `v1.12.1`–`v1.16.0` a los labs · certificado Authenticode (#40/#43/#74/#78/#79) · npm publish · cerrar #74 si el veredicto R3 convence.
 
 ---
 
