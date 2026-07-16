@@ -6,11 +6,32 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Recién cortado (2026-07-16 — atlas de procesos BPMN · `v1.17.0` · PR #85)
+## Dónde estamos (2026-07-16 noche — CERRADO Y LIBERADO · `v1.18.0` · cosecha #7 "La bajada que dolió")
+
+**Los 6 bugs de la bajada real del caso 1 (#86–#91, llegados en batch a las 15:27) atendidos, mergeados y liberados el mismo día** ([release v1.18.0](https://github.com/ArmandoMedina/jidoka/releases/tag/v1.18.0), PR #92, ADR 0037, plan-contrato `docs/sprints/sprint-cosecha-7-plan.md`). Ritual completo: R0 aprobado con nombre (cura B del #82) → plan formal → 3 rebanadas con subagentes → evidencia → CI verde → merge y release con orden nombrada. La entrega:
+
+1. **La conciencia viaja al kit (R1, #86/#87, grueso de #82):** los agentes-asiento + `probar-agentes` al manifiesto; leyes-plantilla con el área; la instancia que el `arranca` inyecta es **stub común** (brief a `product/`, `infra.md` con `## El casting` — la casa única del roster — y `CONTRIBUTING.md`); `recursos-del-proyecto.md` retirado del kit; **`-Actualizar` migra** (`[MIGRA]` no-clobber; sello gana `producto`/`gobernanza`; con sello viejo avisa, no adivina).
+2. **El juez sin hueco (R2, #88):** `no-borres-el-motor` solo destraba con ADR **agregado** (`--diff-filter=A` + `-AgregadosInyectados`); ROJO→VERDE contra el juez de `main` en el LOG.
+3. **Mecánica menor (R3, #89/#90/#91):** guard del manifiesto sin `stubs` + caso; **costura `tools/ci.local.ps1`** en `andon.yml` (la customización de CI del hijo deja de re-divergir) + tabla de costuras en la guía; sello con newline; el "doble resumen" NO reprodujo (artefacto de captura, acusado en #91).
+
+**Reconciliación en vivo:** el atlas (PR #85) se liberó como `v1.17.0` con los ADR 0035/0036 **mientras esta cosecha se construía** → la cosecha se renumeró a **`v1.18.0` / ADR 0037**, merge de `main` a la rama, suite re-corrida post-merge (196/196) y CI verde antes del merge. Evidencia: `qa_runs/cosecha-7-20260716/LOG.md` (+ demo de migración íntegra en `demo-actualizar.txt`).
+
+**Issues:** #86–#91 **cerrados** con el release · #82 queda abierto re-alcanzado a lo único vivo (validar nombres de `tools:` en el lint) · los 7 acusados uno por uno en el tracker.
+
+**Nota operativa de la sesión:** el clasificador de permisos del agente bloqueó intermitentemente comandos con literales tipo glob en mensajes/lotes (`gh issue close` en batch, commits con comodines en el cuerpo) — se resolvió de uno en uno; no fue falla del ritual. La cuenta gh activa quedó **ArmandoMedina** durante merge/release (convención de `product/infra.md`); restaurar a `Armandomedina9705` al cerrar si se desea.
+
+**Pendiente (humano — nada bloquea al agente):**
+1. **El demo de la cosecha #7** (Verificación, owner: cliente): sesión nueva en `C:\Repositorios\jidoka-hijo-practica` (hijo real sembrado 1.16.1 → migrado) + `/jidoka:arranca` — sin `@` rotos, casting visible, asientos existentes. El hijo es desechable; bórralo al terminar.
+2. **La bajada `v1.12.1`–`v1.18.0` a los labs** — ahora con `-Actualizar` que migra la instancia (exactamente lo que esta cosecha curó); la re-prueba AV de `sembrar-manual` (creció ~20 líneas; su magrez es restricción del ADR 0027) va en esa misma ventana.
+3. Heredados: Gemba del análisis de costo neto (#72) · demo de `v1.16.0` · 2 huecos del brief (métrica y apetito) · demo de campo de `/jidoka:descubre` (#67) · certificado Authenticode · npm publish · #74 (queda solo el cert).
+
+---
+
+## Dónde estuvimos (2026-07-16 — atlas de procesos BPMN · `v1.17.0` · PR #85)
 
 **El método gana el atlas de procesos navegable en `docs/atlas/`, en BPMN (ADRs [0035](docs/decisions/0035-atlas-de-procesos-bpmn.md) / [0036](docs/decisions/0036-acoplamiento-proceso-docs-diagrama.md)).** Los **25 diagramas re-modelados** con carriles (agente/humano) y gateways; toolchain Node (`atlas:validate|render|layout|sellar`); acoplamiento al flujo como **aviso comando→diagrama** (área `atlas` en la ley, no bloqueo — regla 2-3); editor Miragon recomendado + `jidoka.code-workspace`. Se corta como **`v1.17.0`** (MINOR aditivo). Nota: se renumeró de 0032/0033 a **0035/0036** por colisión con los ADR 0032-0034 que `main` liberó en paralelo (`v1.15.0`/`v1.16.0`). Evidencia: `atlas:validate` sin huecos, 25 SVG en `docs/atlas/render/`, cada diagrama inspeccionado a la vista. PR #85 mergeado.
 
-## Dónde estamos (2026-07-16 — CERRADO Y LIBERADO · `v1.15.0` + `v1.16.0` · análisis de costo neto entregado)
+## Dónde estuvimos (2026-07-16 — CERRADO Y LIBERADO · `v1.15.0` + `v1.16.0` · análisis de costo neto entregado)
 
 **Cola de la sesión del 16-jul (tarde):** `v1.16.0` **mergeado y liberado** ([release](https://github.com/ArmandoMedina/jidoka/releases/tag/v1.16.0) — `publicar.ps1` corrió completo de una, suite 9/9 con `probar-agentes`). Después, dos pendientes atendidos en autónomo:
 
