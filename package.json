@@ -8,7 +8,8 @@
   "scripts": {
     "atlas:validate": "node docs/atlas/tools/validar.mjs",
     "atlas:render": "node docs/atlas/tools/render.mjs",
-    "atlas:layout": "node docs/atlas/tools/layout.mjs"
+    "atlas:layout": "node docs/atlas/tools/layout.mjs",
+    "atlas:sellar": "node docs/atlas/tools/sellar-plataforma.mjs"
   },
   "devDependencies": {
     "bpmn-auto-layout": "^1.3.0"

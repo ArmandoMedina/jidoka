@@ -1,0 +1,16 @@
+{
+  "folders": [
+    { "path": "." }
+  ],
+  "settings": {
+    "workbench.editorAssociations": {
+      "*.bpmn": "bpmn-modeler.bpmn",
+      "*.dmn": "bpmn-modeler.dmn"
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "miragon-gmbh.vs-code-bpmn-modeler"
+    ]
+  }
+}
