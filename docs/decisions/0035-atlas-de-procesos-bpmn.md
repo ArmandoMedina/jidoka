@@ -1,4 +1,4 @@
-# ADR 0032 — El atlas de procesos vive en BPMN: el método se documenta como diagrama navegable
+# ADR 0035 — El atlas de procesos vive en BPMN: el método se documenta como diagrama navegable
 
 - **Estado:** aceptado
 - **Fecha:** 2026-07-16
@@ -79,7 +79,7 @@ El atlas de procesos vive versionado en `docs/atlas/` y su formato canónico es 
 La deuda de "solo `16-cierra` re-modelado" se cerró en el mismo arco: **los 25 diagramas de proceso
 del atlas están re-modelados** con carriles (donde hay actor humano) y gateways (donde hay decisión);
 los procesos de puro motor van en un carril único. También se cableó el acoplamiento del atlas al flujo
-como **aviso comando→diagrama** (ADR [0033](0033-acoplamiento-proceso-docs-diagrama.md)). Sigue abierto
+como **aviso comando→diagrama** (ADR [0036](0036-acoplamiento-proceso-docs-diagrama.md)). Sigue abierto
 solo lo dicho arriba: `atlas:validate` no se cableó a un gate todavía (regla 2-3).
 
 ---

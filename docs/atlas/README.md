@@ -3,7 +3,7 @@
 Traducción **AS-IS** del método Jidoka a diagramas de proceso navegables. Es documentación
 del método (para leerlo y auditarlo como un proceso), **no** una afirmación de que la
 metodología actual sea óptima. La decisión de adoptar esta capa vive en
-[`docs/decisions/0032-atlas-de-procesos-bpmn.md`](../decisions/0032-atlas-de-procesos-bpmn.md).
+[`docs/decisions/0035-atlas-de-procesos-bpmn.md`](../decisions/0035-atlas-de-procesos-bpmn.md).
 
 ## Por qué BPMN
 

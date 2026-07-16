@@ -1,11 +1,11 @@
-# ADR 0033 — El acoplamiento proceso↔docs↔diagrama es asimétrico: el proceso manda, el diagrama y la prosa son vistas, y el puente vive en el comando
+# ADR 0036 — El acoplamiento proceso↔docs↔diagrama es asimétrico: el proceso manda, el diagrama y la prosa son vistas, y el puente vive en el comando
 
 - **Estado:** aceptado
 - **Fecha:** 2026-07-16
 
 ## Contexto
 
-Con el atlas BPMN en el repo (ADR 0032) surge la pregunta natural: ¿se acopla al flujo Jidoka como el
+Con el atlas BPMN en el repo (ADR 0035) surge la pregunta natural: ¿se acopla al flujo Jidoka como el
 `blast-radius` acopla código↔docs, para que un diagrama no se pudra cuando el método cambia? La tentación
 es un acoplamiento **simétrico de tres vías** — "si mueves dev mueves docs, si mueves docs mueves diagrama"
 en cualquier dirección. Eso choca de frente con la doctrina anti-fatiga del propio motor: el manifiesto

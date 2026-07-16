@@ -48,7 +48,7 @@
   },
   {
     "nombre": "atlas",
-    "desc": "el atlas de procesos (docs/atlas/): la vista visual del metodo; un diagrama que no refleja su comando es doc-drift visual (ADR 0033)",
+    "desc": "el atlas de procesos (docs/atlas/): la vista visual del metodo; un diagrama que no refleja su comando es doc-drift visual (ADR 0036)",
     "fuente": [".claude/commands/jidoka/*"],
     "doc_bloquea": [],
     "doc_avisa": ["docs/atlas/*"],
