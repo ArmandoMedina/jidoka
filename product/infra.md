@@ -6,7 +6,7 @@ estado: vigente
 
 > **El CÓMO-operativo: lo que la sesión no debe preguntar al abrir.** Punteros, nunca secretos (ver la plantilla en `kit/.jidoka/templates/infra.md`). `/jidoka:arranca` lo lee. El QUÉ vive aparte, en [[PRODUCT_BRIEF]].
 
-> **Nota sobre el casting:** esta nave nodriza **no castea con nombres** — usa los roles neutrales de `kanban/roles.md` a propósito (decisión del cliente, 2026-07-14), que son el fallback del `arranca`. Los hijos sí castean con nombres, vía la plantilla `kit/.jidoka/templates/recursos-del-proyecto.md`.
+> **Nota sobre el casting:** esta nave nodriza **no castea con nombres** — usa los roles neutrales de `kanban/roles.md` a propósito (decisión del cliente, 2026-07-14), que son el fallback del `arranca`. Los hijos sí castean con nombres, en la sección `## El casting` de su `product/infra.md` (plantilla en `kit/.jidoka/templates/infra.md` — la casa única del roster desde la cosecha #7).
 
 ## Material de referencia
 

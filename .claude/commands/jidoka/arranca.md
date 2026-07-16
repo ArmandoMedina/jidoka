@@ -32,7 +32,7 @@ El estado del proyecto vive en artefactos, no en la memoria de nadie. Lo que sig
 
 Antes de construir, ubica dos tablas de la ley — ninguna se deduce sobre la marcha ni depende de tu iniciativa:
 
-- **El roster** es la **tabla de responsables**: quién responde por cada asiento del método — no un asiento que el hilo principal "ocupa". Si el repo declaró un casting con nombres, vive en la sección `## El casting` de su instancia de recursos (`product/recursos-del-proyecto.md` en los hijos; su plantilla viaja en `kit/.jidoka/templates/`). Si no hay casting declarado, usa los roles **neutrales** de `kanban/roles.md` — esta nave nodriza usa los neutrales a propósito (decisión del cliente, 2026-07-14) — y sugiere sembrar uno si el repo lo amerita.
+- **El roster** es la **tabla de responsables**: quién responde por cada asiento del método — no un asiento que el hilo principal "ocupa". Si el repo declaró un casting con nombres, vive en la sección `## El casting` de `product/infra.md` — **ya inyectado arriba**: el casting vive donde se inyecta (cosecha #7; los repos sembrados antes de v1.17 lo tenían en `product/recursos-del-proyecto.md` — migra esa sección a `infra.md`). Si no hay casting declarado, usa los roles **neutrales** de `kanban/roles.md` — esta nave nodriza usa los neutrales a propósito (decisión del cliente, 2026-07-14) — y sugiere sembrarlo si el repo lo amerita.
 - **El router** (`tools/rutear.ps1`) es el **preview de gates** de esta sesión: según lo que toques, ESTOS gates te van a vigilar al cerrar — no una tabla en la que "te sientas".
 !`powershell -NoProfile -File tools/rutear.ps1 || echo "(no hay router: tools/rutear.ps1 no esta sembrado -- actualiza el motor)"`
 

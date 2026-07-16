@@ -50,6 +50,11 @@ try {
   # la mecanica -- para que un hijo en maquina donde instalar.ps1 cae en cuarentena no quede
   # a medias (jidoka#40/#43, ADR 0027 enmienda). docs-as-code -> producto 'grafo' -> product/.
   Check 'siembra: los stubs de instancia comunes quedan sembrados (HANDOFF)' (Test-Path (Join-Path $tmp 'HANDOFF.md')) "no aparecio HANDOFF.md"
+  # Cosecha #7 (issue #86): la instancia que el arranca inyecta viaja como stub comun.
+  Check 'siembra: el brief queda en product/ (lo inyecta el arranca)' (Test-Path (Join-Path $tmp 'product/PRODUCT_BRIEF.md')) "no aparecio product/PRODUCT_BRIEF.md"
+  $infraStubS = Join-Path $tmp 'product/infra.md'
+  Check 'siembra: product/infra.md trae la seccion del casting' ((Test-Path $infraStubS) -and ((Get-Content $infraStubS -Raw) -match '## El casting')) "infra.md ausente o sin ## El casting"
+  Check 'siembra: CONTRIBUTING.md queda sembrado' (Test-Path (Join-Path $tmp 'CONTRIBUTING.md')) "no aparecio CONTRIBUTING.md"
   Check 'siembra: la semilla del QUE del arquetipo queda sembrada (grafo -> product/README)' (Test-Path (Join-Path $tmp 'product/README.md')) "no aparecio product/README.md"
 
   # 1b. SELLO identico al que deja instalar.ps1: version + cada hash casa con lo sembrado.
