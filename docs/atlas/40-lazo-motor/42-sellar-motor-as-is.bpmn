@@ -36,6 +36,10 @@
     <bpmn:sequenceFlow id="f2" sourceRef="T_Inventario" targetRef="T_Comparar"/>
     <bpmn:sequenceFlow id="f3" sourceRef="T_Comparar" targetRef="T_Escribir"/>
     <bpmn:sequenceFlow id="f4" sourceRef="T_Escribir" targetRef="End"/>
+    <bpmn:textAnnotation id="Ann_Clasif">
+      <bpmn:text>El modo -Sellar clasifica cada pieza pristina-vs-customizada-vs-ausente: solo las pristinas entran al sello; las customizadas se dejan FUERA a propósito (así el próximo -Actualizar las ve DIVERGE y las preserva). En re-sellado lee el sello previo y preserva su lista 'excluir'.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Clasif" sourceRef="Ann_Clasif" targetRef="T_Escribir"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_42_Sellar">
     <bpmndi:BPMNPlane id="Plane_42_Sellar" bpmnElement="Collab_Sellar">
@@ -77,6 +81,13 @@
       <bpmndi:BPMNEdge id="E_f4" bpmnElement="f4">
         <di:waypoint x="900" y="180"/>
         <di:waypoint x="950" y="180"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_Clasif" bpmnElement="Ann_Clasif">
+        <dc:Bounds x="160" y="20" width="440" height="55"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_Clasif" bpmnElement="Assoc_Clasif">
+        <di:waypoint x="380" y="75"/>
+        <di:waypoint x="810" y="150"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

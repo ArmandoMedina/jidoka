@@ -4,7 +4,7 @@
     <bpmn:participant id="Pool_Leccion" name="reportar-lección — la lección sube al upstream" processRef="Process_ReportarLeccion"/>
   </bpmn:collaboration>
   <bpmn:process id="Process_ReportarLeccion" name="reportar-lección: el lab reporta, el mantenedor decide" isExecutable="false">
-    <bpmn:documentation>Fuente: tools/reportar-leccion.ps1. El script SOLO abre la URL del template de issue en el navegador; el Humano hace la escritura (anonimizar, redactar, enviar). El Agente NO redacta ni anonimiza automaticamente.</bpmn:documentation>
+    <bpmn:documentation>Fuente: tools/reportar-leccion.ps1 (el script SOLO abre la URL del template de issue) + el ritual humano post-script (el Humano anonimiza, redacta y envía en GitHub Issues; el Agente NO redacta ni anonimiza automáticamente). El diagrama cubre el ritual completo, no solo el script.</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_Leccion">
       <bpmn:lane id="Lane_Agente" name="Agente (lab que reporta)">
         <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>

@@ -76,6 +76,10 @@
     <bpmn:sequenceFlow id="f6" sourceRef="T_Hooks" targetRef="T_Sello"/>
     <bpmn:sequenceFlow id="f7" sourceRef="T_Sello" targetRef="T_Brownfield"/>
     <bpmn:sequenceFlow id="f_end" sourceRef="T_Brownfield" targetRef="End"/>
+    <bpmn:textAnnotation id="Ann_Desglose">
+      <bpmn:text>El sembrado desglosa 4 acciones de instalar.ps1: copiar el motor genérico, sembrar la ley del arquetipo, crear stubs comunes, crear stubs del arquetipo (sec 4-5b). El sello es no-clobber: si ya existe, se salta. La validación del arquetipo ocurre antes de preparar el destino.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Desglose" sourceRef="Ann_Desglose" targetRef="T_Sembrar"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_30_Instalar">
     <bpmndi:BPMNPlane id="Plane_30_Instalar" bpmnElement="Collab_Instalar">
@@ -166,6 +170,13 @@
       <bpmndi:BPMNEdge id="E_f_end" bpmnElement="f_end">
         <di:waypoint x="1780" y="185"/>
         <di:waypoint x="1800" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_Desglose" bpmnElement="Ann_Desglose">
+        <dc:Bounds x="290" y="10" width="430" height="55"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_Desglose" bpmnElement="Assoc_Desglose">
+        <di:waypoint x="505" y="65"/>
+        <di:waypoint x="870" y="170"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
