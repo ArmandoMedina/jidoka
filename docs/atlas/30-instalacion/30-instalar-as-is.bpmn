@@ -4,19 +4,19 @@
     <bpmn:participant id="Pool_Instalar" name="Instalar el método en un repo destino" processRef="Process_Instalar"/>
   </bpmn:collaboration>
   <bpmn:process id="Process_Instalar" name="Instalar: sembrar la mecánica sin duplicar la ley (no-clobber)" isExecutable="false">
-    <bpmn:documentation>Fuente: tools/instalar.ps1 y el manifiesto de siembra (kit/.jidoka/instalar). Carriles: el Agente siembra; el Humano elige el arquetipo.</bpmn:documentation>
+    <bpmn:documentation>Fuente: tools/instalar.ps1. NO hay smoke test al final (instalar.ps1 no lo corre). Brownfield: settings.json preexistente y hooks no alambrados son posibles; el instalador reporta saltados. Die para arquetipo invalido. Carriles: el Agente siembra; el Humano elige el arquetipo.</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_Instalar">
       <bpmn:lane id="Lane_Agente" name="Agente / instalador">
         <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Destino</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Arquetipo</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Sembrar</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Instancia</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Hooks</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Sello</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>T_Smoke</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Gw_Smoke</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Brownfield</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>End_Roto</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Die</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_Humano" name="Humano (dueño del repo)">
         <bpmn:flowNodeRef>U_Arquetipo</bpmn:flowNodeRef>
@@ -33,8 +33,17 @@
       <bpmn:incoming>f2</bpmn:incoming>
       <bpmn:outgoing>f3</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:serviceTask id="T_Sembrar" name="Sembrar la mecánica sin sobrescribir (no-clobber)">
+    <bpmn:exclusiveGateway id="Gw_Arquetipo" name="¿Arquetipo válido?">
       <bpmn:incoming>f3</bpmn:incoming>
+      <bpmn:outgoing>f_arq_no</bpmn:outgoing>
+      <bpmn:outgoing>f_arq_si</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_Die" name="Die: arquetipo inválido">
+      <bpmn:incoming>f_arq_no</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="T_Sembrar" name="Sembrar la mecánica sin sobrescribir (no-clobber)">
+      <bpmn:documentation>Brownfield: si hay settings.json preexistente o hooks ya configurados, los salta y los reporta. Nunca borra nada del destino.</bpmn:documentation>
+      <bpmn:incoming>f_arq_si</bpmn:incoming>
       <bpmn:outgoing>f4</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="T_Instancia" name="Crear stubs y ley de la instancia (según arquetipo)">
@@ -45,46 +54,39 @@
       <bpmn:incoming>f5</bpmn:incoming>
       <bpmn:outgoing>f6</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="T_Sello" name="Escribir el sello del motor">
+    <bpmn:serviceTask id="T_Sello" name="Escribir el sello del motor (tools/jidoka-motor.json)">
       <bpmn:incoming>f6</bpmn:incoming>
       <bpmn:outgoing>f7</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="T_Smoke" name="Ejecutar la prueba de instalación (smoke)">
+    <bpmn:task id="T_Brownfield" name="Reportar saltados: settings.json preexistente, hooks no alambrados (aviso, no muro)">
+      <bpmn:documentation>instalar.ps1 NO corre un smoke test. Los saltados (no-clobber) se reportan para que el humano los revise a mano. Brownfield tipico: hooks ya configurados o ley propia.</bpmn:documentation>
       <bpmn:incoming>f7</bpmn:incoming>
-      <bpmn:outgoing>f8</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:exclusiveGateway id="Gw_Smoke" name="¿Smoke verde?">
-      <bpmn:incoming>f8</bpmn:incoming>
-      <bpmn:outgoing>f_verde</bpmn:outgoing>
-      <bpmn:outgoing>f_roto</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:endEvent id="End" name="Método sembrado y probado">
-      <bpmn:incoming>f_verde</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:endEvent id="End_Roto" name="STOP: siembra un motor roto (se caza aquí)">
-      <bpmn:incoming>f_roto</bpmn:incoming>
+      <bpmn:outgoing>f_end</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:endEvent id="End" name="Método sembrado (sin smoke test)">
+      <bpmn:incoming>f_end</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_Destino"/>
     <bpmn:sequenceFlow id="f2" sourceRef="T_Destino" targetRef="U_Arquetipo"/>
-    <bpmn:sequenceFlow id="f3" sourceRef="U_Arquetipo" targetRef="T_Sembrar"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="U_Arquetipo" targetRef="Gw_Arquetipo"/>
+    <bpmn:sequenceFlow id="f_arq_no" name="invalido (Die)" sourceRef="Gw_Arquetipo" targetRef="End_Die"/>
+    <bpmn:sequenceFlow id="f_arq_si" name="válido" sourceRef="Gw_Arquetipo" targetRef="T_Sembrar"/>
     <bpmn:sequenceFlow id="f4" sourceRef="T_Sembrar" targetRef="T_Instancia"/>
     <bpmn:sequenceFlow id="f5" sourceRef="T_Instancia" targetRef="T_Hooks"/>
     <bpmn:sequenceFlow id="f6" sourceRef="T_Hooks" targetRef="T_Sello"/>
-    <bpmn:sequenceFlow id="f7" sourceRef="T_Sello" targetRef="T_Smoke"/>
-    <bpmn:sequenceFlow id="f8" sourceRef="T_Smoke" targetRef="Gw_Smoke"/>
-    <bpmn:sequenceFlow id="f_verde" name="verde" sourceRef="Gw_Smoke" targetRef="End"/>
-    <bpmn:sequenceFlow id="f_roto" name="falla" sourceRef="Gw_Smoke" targetRef="End_Roto"/>
+    <bpmn:sequenceFlow id="f7" sourceRef="T_Sello" targetRef="T_Brownfield"/>
+    <bpmn:sequenceFlow id="f_end" sourceRef="T_Brownfield" targetRef="End"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_30_Instalar">
     <bpmndi:BPMNPlane id="Plane_30_Instalar" bpmnElement="Collab_Instalar">
       <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Instalar" isHorizontal="true">
-        <dc:Bounds x="160" y="80" width="1620" height="400"/>
+        <dc:Bounds x="160" y="80" width="1680" height="400"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_LaneA" bpmnElement="Lane_Agente" isHorizontal="true">
-        <dc:Bounds x="190" y="80" width="1590" height="250"/>
+        <dc:Bounds x="190" y="80" width="1650" height="260"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_LaneH" bpmnElement="Lane_Humano" isHorizontal="true">
-        <dc:Bounds x="190" y="330" width="1590" height="150"/>
+        <dc:Bounds x="190" y="340" width="1650" height="140"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
         <dc:Bounds x="210" y="185" width="30" height="30"/>
@@ -94,34 +96,34 @@
         <dc:Bounds x="280" y="170" width="150" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_UArquetipo" bpmnElement="U_Arquetipo">
-        <dc:Bounds x="450" y="375" width="190" height="60"/>
+        <dc:Bounds x="460" y="375" width="190" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwArquetipo" bpmnElement="Gw_Arquetipo" isMarkerVisible="true">
+        <dc:Bounds x="700" y="180" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="682" y="143" width="78" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndDie" bpmnElement="End_Die">
+        <dc:Bounds x="705" y="270" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="680" y="302" width="82" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TSembrar" bpmnElement="T_Sembrar">
-        <dc:Bounds x="680" y="170" width="160" height="60"/>
+        <dc:Bounds x="790" y="170" width="160" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TInstancia" bpmnElement="T_Instancia">
-        <dc:Bounds x="870" y="170" width="160" height="60"/>
+        <dc:Bounds x="1000" y="170" width="160" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_THooks" bpmnElement="T_Hooks">
-        <dc:Bounds x="1060" y="170" width="130" height="60"/>
+        <dc:Bounds x="1210" y="170" width="130" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TSello" bpmnElement="T_Sello">
-        <dc:Bounds x="1220" y="170" width="130" height="60"/>
+        <dc:Bounds x="1390" y="170" width="160" height="60"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="S_TSmoke" bpmnElement="T_Smoke">
-        <dc:Bounds x="1380" y="170" width="150" height="60"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="S_GwSmoke" bpmnElement="Gw_Smoke" isMarkerVisible="true">
-        <dc:Bounds x="1570" y="180" width="40" height="40"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="1558" y="143" width="66" height="27"/></bpmndi:BPMNLabel>
+      <bpmndi:BPMNShape id="S_TBrownfield" bpmnElement="T_Brownfield">
+        <dc:Bounds x="1600" y="155" width="180" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_End" bpmnElement="End">
-        <dc:Bounds x="1680" y="185" width="30" height="30"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="1655" y="218" width="82" height="27"/></bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="S_EndRoto" bpmnElement="End_Roto">
-        <dc:Bounds x="1575" y="270" width="30" height="30"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="1545" y="302" width="100" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="1800" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1775" y="218" width="82" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
         <di:waypoint x="240" y="200"/>
@@ -130,40 +132,40 @@
       <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
         <di:waypoint x="355" y="230"/>
         <di:waypoint x="355" y="405"/>
-        <di:waypoint x="450" y="405"/>
+        <di:waypoint x="460" y="405"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
-        <di:waypoint x="640" y="405"/>
-        <di:waypoint x="760" y="405"/>
-        <di:waypoint x="760" y="230"/>
+        <di:waypoint x="650" y="405"/>
+        <di:waypoint x="720" y="405"/>
+        <di:waypoint x="720" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_arq_no" bpmnElement="f_arq_no">
+        <di:waypoint x="720" y="220"/>
+        <di:waypoint x="720" y="270"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_arq_si" bpmnElement="f_arq_si">
+        <di:waypoint x="740" y="200"/>
+        <di:waypoint x="790" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f4" bpmnElement="f4">
-        <di:waypoint x="840" y="200"/>
-        <di:waypoint x="870" y="200"/>
+        <di:waypoint x="950" y="200"/>
+        <di:waypoint x="1000" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f5" bpmnElement="f5">
-        <di:waypoint x="1030" y="200"/>
-        <di:waypoint x="1060" y="200"/>
+        <di:waypoint x="1160" y="200"/>
+        <di:waypoint x="1210" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f6" bpmnElement="f6">
-        <di:waypoint x="1190" y="200"/>
-        <di:waypoint x="1220" y="200"/>
+        <di:waypoint x="1340" y="200"/>
+        <di:waypoint x="1390" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f7" bpmnElement="f7">
-        <di:waypoint x="1350" y="200"/>
-        <di:waypoint x="1380" y="200"/>
+        <di:waypoint x="1550" y="200"/>
+        <di:waypoint x="1600" y="185"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="E_f8" bpmnElement="f8">
-        <di:waypoint x="1530" y="200"/>
-        <di:waypoint x="1570" y="200"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="E_f_verde" bpmnElement="f_verde">
-        <di:waypoint x="1610" y="200"/>
-        <di:waypoint x="1680" y="200"/>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="E_f_roto" bpmnElement="f_roto">
-        <di:waypoint x="1590" y="220"/>
-        <di:waypoint x="1590" y="270"/>
+      <bpmndi:BPMNEdge id="E_f_end" bpmnElement="f_end">
+        <di:waypoint x="1780" y="185"/>
+        <di:waypoint x="1800" y="200"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

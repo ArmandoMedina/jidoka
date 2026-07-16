@@ -2,6 +2,18 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.19.0] — 2026-07-16
+
+### La nave se audita a sí misma — 5 auditorías + curas (issues #95–#99, ADR 0038)
+
+Sesión de auditoría pedida por el cliente: documentos y ley, fidelidad del atlas, garantía de la bajada a hijos, prueba de vida de la nodriza, y el veredicto teatro-vs-real. Los informes viven en `docs/analisis/` (`en_revision`); los hallazgos accionables se curaron en la misma sesión.
+
+- **`docs` — los 5 informes de la auditoría** (`docs/analisis/auditoria-{documentos-y-ley,atlas,kit}-202607.md`, `prueba-de-vida-nodriza-202607.md`, `veredicto-teatro-vs-real-202607.md`). El veredicto: el núcleo Toyota es maquinaria real con mordidas documentadas; la pata Scrum es conductual y se dobla (los demos del cliente se difieren); el teatro se acumula en los bordes (piezas sin consumidor). Incluye 3 hallazgos de subagente descartados al verificar, acusados por honestidad.
+- **`feat` — la ley gana cobertura (ADR 0038, #97):** el área `atlas` gana `tools/*.ps1` como fuente (el drift motor→diagrama de la ventana v1.17/v1.18 ya no es invisible); `metodo` gana `docs/atlas/*` (editar el atlas avisa CHANGELOG); `barreras` gana `bin/*` (el CLI ya no está sin vigilar); área nueva `guias` (tres viajan a los hijos); la raíz excluye sus canónicos reales (`CODE_OF_CONDUCT.md`, `package.json`, `package-lock.json`, `jidoka.code-workspace` — 4 falsos avisos curados). Todo aviso; el único bloqueo sigue siendo el índice de ADRs.
+- **`fix` — el atlas reconciliado con el motor (#95) y honesto en el ritual (#96):** 11 diagramas curados — `80-publicar` gana la suite de self-tests que omitía (el control más importante del release, invisible en su propio diagrama); `44-reportar-leccion` corrige carriles invertidos (anonimizar/redactar son del humano); `41-actualizar` refleja `[MIGRA]`/`[EXCLUIDA]`/Die sin sello (ADR 0037/0022); `81-preflight` gana `probar-agentes` y el guard que falla cerrado; `30-instalar` pierde el smoke que el script no corre y gana el aviso brownfield; `40-estado-motor` gana sus 3 exits tempranos; `01-operar` anota sus 3 gateways como decisión conductual y gana salida de abandono; `15-gemba` gana el camino de rechazo del cliente; `18-desatendido` representa "no edites tus propios gates". `atlas:validate` sin huecos; 25 SVG re-renderizados.
+- **`feat` — los tests del kit muerden más (#98 parcial):** `probar-sembrar` 36→38 (el sello registra `producto` en siembra fresca de ambos arquetipos — el hueco que dejaba pasar un sello mudo); `probar-agentes` 28→32 (los `tools:` de cada agente se validan contra lista cerrada — el typo `Gerp` ya no pasa, cierra lo vivo de #82); `sembrar-manual` avisa en vez de callar si un arquetipo pide gobernanza sin stub en el manifiesto. Diferido por cuarentena AV: los espejos en `instalar.ps1`/`probar-instalador.ps1` (ventana de campo).
+- **`chore` — prueba de vida de `auditar.ps1` (#99 parcial):** el gate del grafo mordió por primera vez en la nodriza (wikilink roto sintético → 5 BLOQUEA, exit 1 → verde al restaurar). Las 4 decisiones de poda del cliente quedan registradas en #99 como contrato de la próxima cosecha (sprint-entrega se cura por proceso, no se poda; `que-sigue` se funde; `desatendido` con plazo 2026-08-16; `jerarquia`/`verificacion` se podan).
+
 ## [1.18.0] — 2026-07-16
 
 ### La bajada que dolió — cosecha #7 del lazo (issues #86–#91 + #82, ADR 0037)

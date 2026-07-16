@@ -94,6 +94,7 @@
       <bpmn:incoming>F_Gemba_Acept</bpmn:incoming>
       <bpmn:outgoing>F_Acept_No</bpmn:outgoing>
       <bpmn:outgoing>F_Acept_Si</bpmn:outgoing>
+      <bpmn:outgoing>F_Abandono</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:callActivity id="Call_Cierra" name="[16] Cerrar sesión o sprint" calledElement="Process_Cierra">
       <bpmn:documentation>Proceso externo: Process_Cierra | Archivo: 10-ritual/16-cierra-as-is.bpmn</bpmn:documentation>
@@ -172,6 +173,22 @@
       <bpmn:text>NAVEGACIÓN
 Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automáticamente archivos externos: usa el nombre visible y la tabla RELACIONES.csv.</bpmn:text>
     </bpmn:textAnnotation>
+    <bpmn:textAnnotation id="Ann_GwPlan">
+      <bpmn:text>decisión conductual: la evalúa el agente en sesión, ningún hook la hace cumplir</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_GwPlan" sourceRef="Ann_GwPlan" targetRef="Gateway_Plan"/>
+    <bpmn:textAnnotation id="Ann_GwQueAprobado">
+      <bpmn:text>decisión conductual: la evalúa el agente en sesión, ningún hook la hace cumplir</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_GwQueAprobado" sourceRef="Ann_GwQueAprobado" targetRef="Gateway_QueAprobado"/>
+    <bpmn:textAnnotation id="Ann_GwAceptado">
+      <bpmn:text>decisión conductual: la evalúa el agente en sesión, ningún hook la hace cumplir</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_GwAceptado" sourceRef="Ann_GwAceptado" targetRef="Gateway_Aceptado"/>
+    <bpmn:endEvent id="End_Abandono" name="Sesión abandonada (ciclo roto por el humano)">
+      <bpmn:incoming>F_Abandono</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_Abandono" name="abandona" sourceRef="Gateway_Aceptado" targetRef="End_Abandono"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_01_OperarSesion">
     <bpmndi:BPMNPlane id="Plane_Diagram_01_OperarSesion" bpmnElement="Process_OperarSesion">
@@ -433,6 +450,38 @@ Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automát
       <bpmndi:BPMNShape id="Shape_Annotation_Call_QueSigue" bpmnElement="Annotation_Call_QueSigue">
         <dc:Bounds x="510" y="10" width="220" height="40" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ann_GwPlan" bpmnElement="Ann_GwPlan">
+        <dc:Bounds x="620" y="310" width="290" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ann_GwQueAprobado" bpmnElement="Ann_GwQueAprobado">
+        <dc:Bounds x="870" y="460" width="290" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ann_GwAceptado" bpmnElement="Ann_GwAceptado">
+        <dc:Bounds x="2000" y="310" width="290" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_Abandono" bpmnElement="End_Abandono">
+        <dc:Bounds x="2200" y="350" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2170" y="388" width="100" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_GwPlan" bpmnElement="Assoc_GwPlan">
+        <di:waypoint x="705" y="310" />
+        <di:waypoint x="705" y="293" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_GwQueAprobado" bpmnElement="Assoc_GwQueAprobado">
+        <di:waypoint x="955" y="460" />
+        <di:waypoint x="955" y="445" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_GwAceptado" bpmnElement="Assoc_GwAceptado">
+        <di:waypoint x="2085" y="310" />
+        <di:waypoint x="2085" y="293" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Abandono" bpmnElement="F_Abandono">
+        <di:waypoint x="2085" y="293" />
+        <di:waypoint x="2085" y="368" />
+        <di:waypoint x="2200" y="368" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

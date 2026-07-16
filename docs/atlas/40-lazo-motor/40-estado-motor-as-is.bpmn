@@ -4,41 +4,75 @@
     <bpmn:participant id="Pool_Estado" name="estado-motor — divergencia del hijo (aviso, no muro)" processRef="Process_EstadoMotor"/>
   </bpmn:collaboration>
   <bpmn:process id="Process_EstadoMotor" name="estado-motor: informar gates y divergencia" isExecutable="false">
-    <bpmn:documentation>Fuente: tools/estado-motor.ps1. Proceso de puro motor (un solo actor: el script); su decisión es si el hijo está atrás de Jidoka.</bpmn:documentation>
+    <bpmn:documentation>Fuente: tools/estado-motor.ps1. Tres salidas tempranas (exit 0): (a) no hay sello tools/jidoka-motor.json, (b) no hay ruta a Jidoka (-Jidoka o JIDOKA_HOME), (c) no existe tools/version.txt en Jidoka. La comparacion por-pieza (-Detallado) es condicional, no obligatoria. Es aviso, no muro (exit 0 siempre).</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_Estado">
       <bpmn:lane id="Lane_Motor" name="Motor Jidoka (script)">
         <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Gates</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>T_Sello</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Sello</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Ruta</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_VerTxt</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Comparar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Detallado</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Detalle</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gw_Div</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Recomendar</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_AlDia</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_SinSello</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_SinRuta</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_SinVer</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:startEvent id="Start" name="estado-motor solicitado">
       <bpmn:outgoing>f1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="T_Gates" name="Mostrar gates vivos y dormidos (con la razón)">
+    <bpmn:serviceTask id="T_Gates" name="Mostrar gates vivos y dormidos (con la razón) — siempre primero">
+      <bpmn:documentation>Via rutear.ps1 -Gates. Se imprime ANTES del sello para que nunca quede invisible aunque el proceso termine temprano (leccion #51: un gate dormido salia limpio y en silencio).</bpmn:documentation>
       <bpmn:incoming>f1</bpmn:incoming>
       <bpmn:outgoing>f2</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="T_Sello" name="Leer el sello del hijo">
+    <bpmn:exclusiveGateway id="Gw_Sello" name="¿Existe tools/jidoka-motor.json?">
       <bpmn:incoming>f2</bpmn:incoming>
-      <bpmn:outgoing>f3</bpmn:outgoing>
+      <bpmn:outgoing>f_sin_sello</bpmn:outgoing>
+      <bpmn:outgoing>f_con_sello</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_SinSello" name="Aviso: sin sello (no se puede comparar)">
+      <bpmn:incoming>f_sin_sello</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Gw_Ruta" name="¿Hay ruta a Jidoka (-Jidoka o JIDOKA_HOME)?">
+      <bpmn:incoming>f_con_sello</bpmn:incoming>
+      <bpmn:outgoing>f_sin_ruta</bpmn:outgoing>
+      <bpmn:outgoing>f_con_ruta</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_SinRuta" name="Aviso: sin ruta a Jidoka (no se puede comparar)">
+      <bpmn:incoming>f_sin_ruta</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Gw_VerTxt" name="¿Existe tools/version.txt en Jidoka?">
+      <bpmn:incoming>f_con_ruta</bpmn:incoming>
+      <bpmn:outgoing>f_sin_ver</bpmn:outgoing>
+      <bpmn:outgoing>f_con_ver</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_SinVer" name="Aviso: sin version.txt en Jidoka (no se puede comparar)">
+      <bpmn:incoming>f_sin_ver</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="T_Comparar" name="Comparar versión del sello con Jidoka">
+      <bpmn:incoming>f_con_ver</bpmn:incoming>
+      <bpmn:outgoing>f_comp_det</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="T_Comparar" name="Comparar versión con Jidoka">
-      <bpmn:incoming>f3</bpmn:incoming>
-      <bpmn:outgoing>f4</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:serviceTask id="T_Detalle" name="Comparar piezas por hash (con -Detallado)">
-      <bpmn:incoming>f4</bpmn:incoming>
-      <bpmn:outgoing>f5</bpmn:outgoing>
+    <bpmn:exclusiveGateway id="Gw_Detallado" name="¿Flag -Detallado activo?">
+      <bpmn:incoming>f_comp_det</bpmn:incoming>
+      <bpmn:outgoing>f_det_si</bpmn:outgoing>
+      <bpmn:outgoing>f_det_no</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="T_Detalle" name="Comparar piezas por hash (solo con -Detallado)">
+      <bpmn:documentation>Opcional: solo se corre si el flag -Detallado esta activo. Lista piezas divergentes y ausentes.</bpmn:documentation>
+      <bpmn:incoming>f_det_si</bpmn:incoming>
+      <bpmn:outgoing>f_det_gw</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Gw_Div" name="¿El hijo está atrás de Jidoka?">
-      <bpmn:incoming>f5</bpmn:incoming>
+      <bpmn:incoming>f_det_gw</bpmn:incoming>
+      <bpmn:incoming>f_det_no</bpmn:incoming>
       <bpmn:outgoing>f_si</bpmn:outgoing>
       <bpmn:outgoing>f_no</bpmn:outgoing>
     </bpmn:exclusiveGateway>
@@ -53,10 +87,17 @@
       <bpmn:incoming>f_no</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_Gates"/>
-    <bpmn:sequenceFlow id="f2" sourceRef="T_Gates" targetRef="T_Sello"/>
-    <bpmn:sequenceFlow id="f3" sourceRef="T_Sello" targetRef="T_Comparar"/>
-    <bpmn:sequenceFlow id="f4" sourceRef="T_Comparar" targetRef="T_Detalle"/>
-    <bpmn:sequenceFlow id="f5" sourceRef="T_Detalle" targetRef="Gw_Div"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="T_Gates" targetRef="Gw_Sello"/>
+    <bpmn:sequenceFlow id="f_sin_sello" name="no (aviso)" sourceRef="Gw_Sello" targetRef="End_SinSello"/>
+    <bpmn:sequenceFlow id="f_con_sello" name="sí" sourceRef="Gw_Sello" targetRef="Gw_Ruta"/>
+    <bpmn:sequenceFlow id="f_sin_ruta" name="no (aviso)" sourceRef="Gw_Ruta" targetRef="End_SinRuta"/>
+    <bpmn:sequenceFlow id="f_con_ruta" name="sí" sourceRef="Gw_Ruta" targetRef="Gw_VerTxt"/>
+    <bpmn:sequenceFlow id="f_sin_ver" name="no (aviso)" sourceRef="Gw_VerTxt" targetRef="End_SinVer"/>
+    <bpmn:sequenceFlow id="f_con_ver" name="sí" sourceRef="Gw_VerTxt" targetRef="T_Comparar"/>
+    <bpmn:sequenceFlow id="f_comp_det" sourceRef="T_Comparar" targetRef="Gw_Detallado"/>
+    <bpmn:sequenceFlow id="f_det_si" name="sí: -Detallado" sourceRef="Gw_Detallado" targetRef="T_Detalle"/>
+    <bpmn:sequenceFlow id="f_det_no" name="no (solo versión)" sourceRef="Gw_Detallado" targetRef="Gw_Div"/>
+    <bpmn:sequenceFlow id="f_det_gw" sourceRef="T_Detalle" targetRef="Gw_Div"/>
     <bpmn:sequenceFlow id="f_si" name="sí: atrás" sourceRef="Gw_Div" targetRef="T_Recomendar"/>
     <bpmn:sequenceFlow id="f_no" name="no" sourceRef="Gw_Div" targetRef="End_AlDia"/>
     <bpmn:sequenceFlow id="f_rec_end" sourceRef="T_Recomendar" targetRef="End"/>
@@ -64,73 +105,128 @@
   <bpmndi:BPMNDiagram id="Diagram_40_Estado">
     <bpmndi:BPMNPlane id="Plane_40_Estado" bpmnElement="Collab_Estado">
       <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Estado" isHorizontal="true">
-        <dc:Bounds x="160" y="80" width="1400" height="300"/>
+        <dc:Bounds x="160" y="80" width="1860" height="480"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_LaneM" bpmnElement="Lane_Motor" isHorizontal="true">
-        <dc:Bounds x="190" y="80" width="1370" height="300"/>
+        <dc:Bounds x="190" y="80" width="1830" height="480"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
-        <dc:Bounds x="210" y="165" width="30" height="30"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="186" y="198" width="84" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="210" y="305" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="186" y="338" width="84" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TGates" bpmnElement="T_Gates">
-        <dc:Bounds x="280" y="150" width="160" height="60"/>
+        <dc:Bounds x="280" y="290" width="190" height="60"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="S_TSello" bpmnElement="T_Sello">
-        <dc:Bounds x="490" y="150" width="140" height="60"/>
+      <bpmndi:BPMNShape id="S_GwSello" bpmnElement="Gw_Sello" isMarkerVisible="true">
+        <dc:Bounds x="520" y="300" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="502" y="263" width="78" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndSinSello" bpmnElement="End_SinSello">
+        <dc:Bounds x="525" y="400" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="498" y="432" width="86" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwRuta" bpmnElement="Gw_Ruta" isMarkerVisible="true">
+        <dc:Bounds x="620" y="300" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="598" y="263" width="86" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndSinRuta" bpmnElement="End_SinRuta">
+        <dc:Bounds x="625" y="400" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="598" y="432" width="86" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwVerTxt" bpmnElement="Gw_VerTxt" isMarkerVisible="true">
+        <dc:Bounds x="720" y="300" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="698" y="263" width="86" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndSinVer" bpmnElement="End_SinVer">
+        <dc:Bounds x="725" y="400" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="698" y="432" width="86" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TComparar" bpmnElement="T_Comparar">
-        <dc:Bounds x="680" y="150" width="150" height="60"/>
+        <dc:Bounds x="820" y="290" width="160" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwDetallado" bpmnElement="Gw_Detallado" isMarkerVisible="true">
+        <dc:Bounds x="1030" y="300" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1010" y="263" width="82" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TDetalle" bpmnElement="T_Detalle">
-        <dc:Bounds x="880" y="150" width="170" height="60"/>
+        <dc:Bounds x="1130" y="160" width="180" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_GwDiv" bpmnElement="Gw_Div" isMarkerVisible="true">
-        <dc:Bounds x="1090" y="160" width="40" height="40"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="1075" y="123" width="72" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="1370" y="300" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1352" y="263" width="78" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TRecomendar" bpmnElement="T_Recomendar">
-        <dc:Bounds x="1180" y="150" width="180" height="60"/>
+        <dc:Bounds x="1470" y="290" width="200" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_End" bpmnElement="End">
-        <dc:Bounds x="1420" y="165" width="30" height="30"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="1395" y="198" width="82" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="1730" y="305" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1705" y="338" width="82" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_EndAlDia" bpmnElement="End_AlDia">
-        <dc:Bounds x="1095" y="260" width="30" height="30"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="1075" y="292" width="72" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="1375" y="400" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1350" y="432" width="82" height="14"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
-        <di:waypoint x="240" y="180"/>
-        <di:waypoint x="280" y="180"/>
+        <di:waypoint x="240" y="320"/>
+        <di:waypoint x="280" y="320"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
-        <di:waypoint x="440" y="180"/>
-        <di:waypoint x="490" y="180"/>
+        <di:waypoint x="470" y="320"/>
+        <di:waypoint x="520" y="320"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
-        <di:waypoint x="630" y="180"/>
-        <di:waypoint x="680" y="180"/>
+      <bpmndi:BPMNEdge id="E_f_sin_sello" bpmnElement="f_sin_sello">
+        <di:waypoint x="540" y="340"/>
+        <di:waypoint x="540" y="400"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="E_f4" bpmnElement="f4">
-        <di:waypoint x="830" y="180"/>
-        <di:waypoint x="880" y="180"/>
+      <bpmndi:BPMNEdge id="E_f_con_sello" bpmnElement="f_con_sello">
+        <di:waypoint x="560" y="320"/>
+        <di:waypoint x="620" y="320"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="E_f5" bpmnElement="f5">
-        <di:waypoint x="1050" y="180"/>
-        <di:waypoint x="1090" y="180"/>
+      <bpmndi:BPMNEdge id="E_f_sin_ruta" bpmnElement="f_sin_ruta">
+        <di:waypoint x="640" y="340"/>
+        <di:waypoint x="640" y="400"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_con_ruta" bpmnElement="f_con_ruta">
+        <di:waypoint x="660" y="320"/>
+        <di:waypoint x="720" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_sin_ver" bpmnElement="f_sin_ver">
+        <di:waypoint x="740" y="340"/>
+        <di:waypoint x="740" y="400"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_con_ver" bpmnElement="f_con_ver">
+        <di:waypoint x="760" y="320"/>
+        <di:waypoint x="820" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_comp_det" bpmnElement="f_comp_det">
+        <di:waypoint x="980" y="320"/>
+        <di:waypoint x="1030" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_det_si" bpmnElement="f_det_si">
+        <di:waypoint x="1050" y="300"/>
+        <di:waypoint x="1050" y="190"/>
+        <di:waypoint x="1130" y="190"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_det_no" bpmnElement="f_det_no">
+        <di:waypoint x="1070" y="320"/>
+        <di:waypoint x="1370" y="320"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_det_gw" bpmnElement="f_det_gw">
+        <di:waypoint x="1310" y="190"/>
+        <di:waypoint x="1390" y="190"/>
+        <di:waypoint x="1390" y="300"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_si" bpmnElement="f_si">
-        <di:waypoint x="1130" y="180"/>
-        <di:waypoint x="1180" y="180"/>
+        <di:waypoint x="1410" y="320"/>
+        <di:waypoint x="1470" y="320"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_no" bpmnElement="f_no">
-        <di:waypoint x="1110" y="200"/>
-        <di:waypoint x="1110" y="260"/>
+        <di:waypoint x="1390" y="340"/>
+        <di:waypoint x="1390" y="400"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_rec_end" bpmnElement="f_rec_end">
-        <di:waypoint x="1360" y="180"/>
-        <di:waypoint x="1420" y="180"/>
+        <di:waypoint x="1670" y="320"/>
+        <di:waypoint x="1730" y="320"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

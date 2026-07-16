@@ -89,6 +89,10 @@
     <bpmn:sequenceFlow id="f_prep" sourceRef="T_PrepRelease" targetRef="U_Autorizar"/>
     <bpmn:sequenceFlow id="f_auth" sourceRef="U_Autorizar" targetRef="T_Publicar"/>
     <bpmn:sequenceFlow id="f_pub" sourceRef="T_Publicar" targetRef="End_Publicada"/>
+    <bpmn:textAnnotation id="Ann_Kaizen">
+      <bpmn:text>T_Registrar incluye el paso Kaizen: al repartir por caducidad, si identificas una mejora sistémica (no puntual) la registras como ADR o issue — no la ejecutas en el cierre.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Kaizen" sourceRef="Ann_Kaizen" targetRef="T_Registrar"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_16_Cierra">
     <bpmndi:BPMNPlane id="Plane_16_Cierra" bpmnElement="Collab_Cierra">
@@ -198,6 +202,13 @@
       <bpmndi:BPMNEdge id="E_f_pub" bpmnElement="f_pub">
         <di:waypoint x="1570" y="190"/>
         <di:waypoint x="1620" y="190"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="S_AnnKaizen" bpmnElement="Ann_Kaizen">
+        <dc:Bounds x="250" y="90" width="340" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_Assoc_Kaizen" bpmnElement="Assoc_Kaizen">
+        <di:waypoint x="325" y="140"/>
+        <di:waypoint x="325" y="150"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

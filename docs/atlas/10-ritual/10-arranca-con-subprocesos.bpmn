@@ -163,6 +163,10 @@
       <bpmn:text>Subprocesos EXPANDIDOS: el detalle se ve aquí mismo, sin drill-down.</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:association id="Association_Annotation_Legend" sourceRef="Annotation_Legend" targetRef="Sub_RecuperarContexto"/>
+    <bpmn:textAnnotation id="Ann_Compactacion">
+      <bpmn:text>GUARDA: desconfía de la compactación. Si el HANDOFF o el plan activo parece "listo" o "vacío" sin haberlo revisado tú, lee la fuente antes de concluir. La compactación de contexto puede borrar pistas activas.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Compactacion" sourceRef="Ann_Compactacion" targetRef="Sub_RecuperarContexto"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_10_Arranca">
     <bpmndi:BPMNPlane id="Plane_Diagram_10_Arranca" bpmnElement="Collaboration_10_Arranca">
@@ -395,6 +399,13 @@
       <bpmndi:BPMNEdge id="Edge_Association_Annotation_Legend" bpmnElement="Association_Annotation_Legend">
         <di:waypoint x="570" y="195"/>
         <di:waypoint x="600" y="210"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_Compactacion" bpmnElement="Ann_Compactacion">
+        <dc:Bounds x="360" y="470" width="500" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_Compactacion" bpmnElement="Assoc_Compactacion">
+        <di:waypoint x="570" y="470"/>
+        <di:waypoint x="570" y="460"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

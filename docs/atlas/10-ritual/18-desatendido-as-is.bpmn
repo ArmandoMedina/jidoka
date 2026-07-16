@@ -35,6 +35,10 @@
       <bpmn:incoming>f3</bpmn:incoming>
       <bpmn:outgoing>f4</bpmn:outgoing>
     </bpmn:task>
+    <bpmn:textAnnotation id="Ann_NoGates">
+      <bpmn:text>REGLA DURA: NO edites tus propios gates (blast-radius.json, hooks, CI). Un cambio a estos va siempre a la lane [humano] como borrador, nunca al [agente].</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_NoGates" sourceRef="Ann_NoGates" targetRef="T_Repartir"/>
     <bpmn:task id="T_Ejecutar" name="Ejecutar lo mecánico/reversible/autorizado (cada uno verde)">
       <bpmn:incoming>f4</bpmn:incoming>
       <bpmn:outgoing>f5</bpmn:outgoing>
@@ -143,6 +147,13 @@
       <bpmndi:BPMNEdge id="E_f_cierre_end" bpmnElement="f_cierre_end">
         <di:waypoint x="1420" y="200"/>
         <di:waypoint x="1500" y="200"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="S_AnnNoGates" bpmnElement="Ann_NoGates">
+        <dc:Bounds x="650" y="90" width="310" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_Assoc_NoGates" bpmnElement="Assoc_NoGates">
+        <di:waypoint x="770" y="150"/>
+        <di:waypoint x="770" y="170"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
