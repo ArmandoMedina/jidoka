@@ -8,13 +8,19 @@ Estás **abriendo una sesión de trabajo** en este proyecto. Antes de tocar nada
 
 ## 1. Lee el estado en vuelo (el relevo)
 
-El estado del proyecto vive en artefactos, no en la memoria de nadie:
+El estado del proyecto vive en artefactos, no en la memoria de nadie. Lo que sigue no son punteros a criterio tuyo de seguir o no —cada `@` es una **inyección directa**: el contenido ya está en tu contexto al abrir esta sesión, no una lectura que queda pendiente (un puntero es una esperanza; un `@` es un hecho — ADR 0034):
 
 - **Estado en vuelo y pendientes** — se lee y **se limpia** al abrir:
 @HANDOFF.md
 
-- **Recursos del proyecto** (lo que no debes preguntar: material, identidades, máquinas/ambientes, convenciones):
-@product/recursos-del-proyecto.md
+- **El QUÉ del proyecto** (el brief: caso concreto, métrica, autoridad del dominio, criterio de "hecho"):
+@product/PRODUCT_BRIEF.md
+
+- **El CÓMO del proyecto** (infraestructura, identidades, máquinas/ambientes, el roster con nombres si el repo lo declaró):
+@product/infra.md
+
+- **Cómo se contribuye aquí** (el flujo, quién es dueño de qué doc, el ritual de versión):
+@CONTRIBUTING.md
 
 - **Plan de trabajo del día**, si una sesión anterior lo dejó a medias (efímero, fuera de git — ADR 0006):
 !`test -f .jidoka/plan-actual.md && cat .jidoka/plan-actual.md || echo "(no hay plan de trabajo activo — empezamos limpio)"`
@@ -22,21 +28,34 @@ El estado del proyecto vive en artefactos, no en la memoria de nadie:
 - **Dónde está git ahora mismo**:
 !`git branch --show-current && git status --short && git log --oneline -5`
 
-## 2. Siéntate y rutea (el casting y el router)
+## 2. El roster y el router
 
-Antes de construir, la sesión **se sienta en un asiento** y adopta la **tabla de ruteo** de la ley — nada de esto se deduce sobre la marcha ni depende de tu iniciativa:
+Antes de construir, ubica dos tablas de la ley — ninguna se deduce sobre la marcha ni depende de tu iniciativa:
 
-- **Adopta el casting.** `product/recursos-del-proyecto.md` (ya leído arriba) trae la sección **## El casting**: quién ocupa cada asiento del método, por nombre. **Anúncialo en voz alta** (`🎭 Asiento: <rol> — <nombre>`). Si no hay casting, usa los roles neutrales de `kanban/roles.md` y sugiere sembrar uno.
-- **Lee el router** — la ley (`tools/blast-radius.json`) dice qué área se rutea a qué asiento, qué gate la vigila, y qué Stop hooks están **vivos o dormidos** (con la razón de cada dormido):
+- **El roster** es la **tabla de responsables**: quién responde por cada asiento del método — no un asiento que el hilo principal "ocupa". Si el repo declaró un casting con nombres, vive en la sección `## El casting` de su instancia de recursos (`product/recursos-del-proyecto.md` en los hijos; su plantilla viaja en `kit/.jidoka/templates/`). Si no hay casting declarado, usa los roles **neutrales** de `kanban/roles.md` — esta nave nodriza usa los neutrales a propósito (decisión del cliente, 2026-07-14) — y sugiere sembrar uno si el repo lo amerita.
+- **El router** (`tools/rutear.ps1`) es el **preview de gates** de esta sesión: según lo que toques, ESTOS gates te van a vigilar al cerrar — no una tabla en la que "te sientas".
 !`powershell -NoProfile -File tools/rutear.ps1 || echo "(no hay router: tools/rutear.ps1 no esta sembrado -- actualiza el motor)"`
 
-> **Adopta, no resumas.** Esa tabla ES la ley de ruteo de la sesión: si tocas la `fuente` de un área, te sientas en su rol y su gate te va a vigilar al cerrar. Un gate **DORMIDO** no es un permiso — es un área que la ley aún no declara; si tu trabajo la necesita, se declara en la ley (no se improvisa).
+> **Previsualiza, no resumas.** Esa tabla ES la ley de ruteo de la sesión: si tocas la `fuente` de un área, ESE gate va a medir tu diff al cerrar — mide el artefacto, no si alguien "se sentó" en el rol. Un gate **DORMIDO** no es un permiso — es un área que la ley aún no declara; si tu trabajo la necesita, se declara en la ley (no se improvisa).
 
-## 3. Desconfía de la compactación
+## 3. El asiento lo ocupa el subagente
+
+El roster de arriba dice **quién responde**; el asiento con dientes —el que de verdad ejecuta, con un tier de modelo ya fijo— lo ocupa el **subagente** al que delegas, no el hilo principal "sentado" en un rol:
+
+- **`explorador`** (haiku) — barridos de lectura: localizar archivos, símbolos, referencias cruzadas.
+- **`mecanico`** (haiku) — edits mecánicos: renombres, aplicar un patrón ya dado, cambios repetitivos.
+- **`auditor`** (sonnet) — juicio acotado: veredicto contra una spec dada, correr un test puntual y leer su salida.
+- **`arquitecto`** (opus) — trade-offs: diseño, alternativas, riesgos.
+
+**El tier ya está fijado en el agente** (`.claude/agents/`, ADR 0033): elige el asiento, no el modelo. Al delegar, anuncia **qué se delegó a quién** ("delegado a `explorador`: localizar todas las referencias a X") — no un ritual de "sentarse" en el hilo principal.
+
+Si el hilo principal hace **excepcionalmente** el trabajo de un asiento (edición acoplada con bucle TDD sobre los mismos archivos, contexto que ya vive en el hilo), acúsalo como **excepción**, no como rito: `🎭 Asiento: <rol> (en sesión) — <por qué>` (criterio completo en `kanban/roles.md`).
+
+## 4. Desconfía de la compactación
 
 > **Los resúmenes de compactación pueden mentir** (disparo `desconfia-de-la-compactacion`). Si esta sesión viene de un resumen (compactación o cierre anterior), antes de retomar algo verifica contra el **artefacto real** —el código, el archivo, este HANDOFF— no contra el resumen. Un plan de trabajo o un HANDOFF en disco es fuente primaria; tu recuerdo de la conversación, no.
 
-## 4. Fija las reglas duras de la sesión
+## 5. Fija las reglas duras de la sesión
 
 Enúncialas en voz alta para que rijan lo que sigue (detalle en `kanban/roles.md`):
 
@@ -46,7 +65,7 @@ Enúncialas en voz alta para que rijan lo que sigue (detalle en `kanban/roles.md
 - **La disciplina escala con el riesgo.** Menú, no molde: enciende solo la ceremonia que este cambio merece.
 - **Nada de memorias de la IA**: todo va al repo (HANDOFF, ADR, docs del dominio). El hook `no-memorias` lo hace cumplir.
 
-## 5. Orienta y propón
+## 6. Orienta y propón
 
 Con el estado ya leído, resume en pocas líneas **dónde estamos** y **qué sigue en orden de valor** (si el HANDOFF o el ROADMAP lo dicen, cítalos; si quieres el detalle priorizado, usa `/jidoka:que-sigue`).
 
