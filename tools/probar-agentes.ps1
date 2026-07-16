@@ -45,6 +45,18 @@ function Get-Frontmatter($text) {
 $aliasReales = @('haiku', 'sonnet', 'opus')
 $asientosEsperados = @('explorador', 'mecanico', 'auditor', 'arquitecto')
 
+# Lista cerrada de herramientas validas del harness (issue #82). Derivada de los 4 agentes
+# reales (.claude/agents/) + herramientas estandar documentadas del SDK. EDITABLE: si el
+# harness suma una herramienta nueva, agregarla aqui antes de declararla en un agente.
+# Herramientas de los asientos actuales: Read, Glob, Grep, Bash, Edit
+# Herramientas estandar del harness: Read, Write, Edit, Glob, Grep, Bash, WebFetch,
+#   WebSearch, Agent, AskUserQuestion, Skill, NotebookEdit, TodoWrite, Task
+$toolsValidas = @(
+  'Read', 'Write', 'Edit', 'Glob', 'Grep', 'Bash',
+  'WebFetch', 'WebSearch', 'Agent', 'AskUserQuestion',
+  'Skill', 'NotebookEdit', 'TodoWrite', 'Task'
+)
+
 Write-Host "== Lint de agentes-asiento ($Dir) =="
 
 if (-not (Test-Path -LiteralPath $Dir)) {
@@ -88,6 +100,16 @@ foreach ($f in $archivos) {
     Check "$($f.Name): name: coincide con el nombre del archivo" `
       ($fm['name'] -eq $f.BaseName) `
       "name: '$($fm['name'])' no coincide con '$($f.BaseName)'"
+  }
+
+  if ($fm.ContainsKey('tools') -and $fm['tools']) {
+    $nombresDeclarados = @($fm['tools'] -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    # -cnotcontains: case-sensitive a proposito -- el harness distingue 'Read' de 'read';
+    # el -notcontains default de PS 5.1 dejaria pasar un casing roto.
+    $toolsInvalidas = @($nombresDeclarados | Where-Object { $toolsValidas -cnotcontains $_ })
+    Check "$($f.Name): tools: solo usa herramientas de la lista cerrada del harness" `
+      ($toolsInvalidas.Count -eq 0) `
+      "herramienta(s) no reconocida(s): $($toolsInvalidas -join ', ') -- un typo silencioso rompe el agente; lista valida: $($toolsValidas -join ', ')"
   }
 }
 

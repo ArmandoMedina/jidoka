@@ -3,8 +3,8 @@
   <bpmn:collaboration id="Collab_Publicar">
     <bpmn:participant id="Pool_Publicar" name="publicar — release derivado del SSOT con OK del dueño" processRef="Process_PublicarRelease"/>
   </bpmn:collaboration>
-  <bpmn:process id="Process_PublicarRelease" name="publicar el release: derivar del SSOT, guardas y OK del dueño" isExecutable="false">
-    <bpmn:documentation>Fuente: tools/publicar.ps1. Carriles: el Agente deriva y corta el release; el push a GitHub espera el OK nombrado del Humano.</bpmn:documentation>
+  <bpmn:process id="Process_PublicarRelease" name="publicar el release: derivar del SSOT, suite de tests, guardas y OK del dueño" isExecutable="false">
+    <bpmn:documentation>Fuente: tools/publicar.ps1. Secciones: 1-leer version SSOT, 2-derivar notas, 3-guardas, 4-suite de self-tests (probar-* + auditar.ps1 con Test-Path guard), 5-crear release. El OK del humano es la invocacion del script, no un paso separado en la secuencia.</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_Publicar">
       <bpmn:lane id="Lane_Agente" name="Agente (publicador)">
         <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
@@ -12,15 +12,20 @@
         <bpmn:flowNodeRef>T_Notas</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Guardas</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gw_Guardas</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_TestPath</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_TestPath</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Suite</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Suite</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Release</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_Abort</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Die</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_Humano" name="Humano (dueño)">
-        <bpmn:flowNodeRef>U_Confirmar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Ann_OkHumano</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:startEvent id="Start" name="Release solicitado">
+    <bpmn:startEvent id="Start" name="Release solicitado (humano invoca el script)">
       <bpmn:outgoing>f1</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:serviceTask id="T_LeerVersion" name="Leer la versión del SSOT (version.txt)">
@@ -43,101 +48,171 @@
     <bpmn:endEvent id="End_Abort" name="Aborta (no publica)">
       <bpmn:incoming>f_no</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:userTask id="U_Confirmar" name="OK nombrado del dueño para publicar">
+    <bpmn:serviceTask id="T_TestPath" name="Test-Path guard: verificar que cada probar-*.ps1 y auditar.ps1 existen en disco">
+      <bpmn:documentation>Guarda ADR 0032 / issue #78: si el archivo del test no existe (AV quarantine, falta) Die inmediato. El juez que no midio no aprueba. LASTEXITCODE se resetea a 0 antes de cada test.</bpmn:documentation>
       <bpmn:incoming>f_si</bpmn:incoming>
-      <bpmn:outgoing>f_conf_rel</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:serviceTask id="T_Release" name="Crear tag anotado y GitHub release">
-      <bpmn:incoming>f_conf_rel</bpmn:incoming>
+      <bpmn:outgoing>f5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_TestPath" name="¿Todos los archivos de test en disco?">
+      <bpmn:incoming>f5</bpmn:incoming>
+      <bpmn:outgoing>f_tp_no</bpmn:outgoing>
+      <bpmn:outgoing>f_tp_si</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_Die" name="Die: test no existe en disco (AV? no se publica a ciegas)">
+      <bpmn:incoming>f_tp_no</bpmn:incoming>
+      <bpmn:incoming>f_suite_no</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="T_Suite" name="Suite de self-tests: probar-version, probar-gate, probar-hooks, probar-auditor, probar-disparos, probar-instalador, probar-sembrar, probar-agentes, auditar.ps1">
+      <bpmn:documentation>Seccion 4 de publicar.ps1. Cada test corre con ErrorActionPreference=Continue; LASTEXITCODE != 0 llama Die. Todos deben estar en disco (verificado por T_TestPath).</bpmn:documentation>
+      <bpmn:incoming>f_tp_si</bpmn:incoming>
+      <bpmn:outgoing>f6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Suite" name="¿Suite verde?">
+      <bpmn:incoming>f6</bpmn:incoming>
+      <bpmn:outgoing>f_suite_no</bpmn:outgoing>
+      <bpmn:outgoing>f_suite_si</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="T_Release" name="Crear tag anotado y GitHub release (gh release create)">
+      <bpmn:incoming>f_suite_si</bpmn:incoming>
       <bpmn:outgoing>f_rel_end</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="End" name="Release publicado">
       <bpmn:incoming>f_rel_end</bpmn:incoming>
     </bpmn:endEvent>
+    <bpmn:textAnnotation id="Ann_OkHumano">
+      <bpmn:text>El OK del dueño ES la invocacion del script. No hay userTask separado: quien corre publicar.ps1 desde main ya autorizó.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_OkHumano" sourceRef="Ann_OkHumano" targetRef="Start"/>
     <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_LeerVersion"/>
     <bpmn:sequenceFlow id="f2" sourceRef="T_LeerVersion" targetRef="T_Notas"/>
     <bpmn:sequenceFlow id="f3" sourceRef="T_Notas" targetRef="T_Guardas"/>
     <bpmn:sequenceFlow id="f4" sourceRef="T_Guardas" targetRef="Gw_Guardas"/>
     <bpmn:sequenceFlow id="f_no" name="no" sourceRef="Gw_Guardas" targetRef="End_Abort"/>
-    <bpmn:sequenceFlow id="f_si" name="sí" sourceRef="Gw_Guardas" targetRef="U_Confirmar"/>
-    <bpmn:sequenceFlow id="f_conf_rel" sourceRef="U_Confirmar" targetRef="T_Release"/>
+    <bpmn:sequenceFlow id="f_si" name="sí" sourceRef="Gw_Guardas" targetRef="T_TestPath"/>
+    <bpmn:sequenceFlow id="f5" sourceRef="T_TestPath" targetRef="Gw_TestPath"/>
+    <bpmn:sequenceFlow id="f_tp_no" name="falta alguno (Die)" sourceRef="Gw_TestPath" targetRef="End_Die"/>
+    <bpmn:sequenceFlow id="f_tp_si" name="todos en disco" sourceRef="Gw_TestPath" targetRef="T_Suite"/>
+    <bpmn:sequenceFlow id="f6" sourceRef="T_Suite" targetRef="Gw_Suite"/>
+    <bpmn:sequenceFlow id="f_suite_no" name="rojo (Die)" sourceRef="Gw_Suite" targetRef="End_Die"/>
+    <bpmn:sequenceFlow id="f_suite_si" name="verde" sourceRef="Gw_Suite" targetRef="T_Release"/>
     <bpmn:sequenceFlow id="f_rel_end" sourceRef="T_Release" targetRef="End"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_80_Publicar">
     <bpmndi:BPMNPlane id="Plane_80_Publicar" bpmnElement="Collab_Publicar">
       <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Publicar" isHorizontal="true">
-        <dc:Bounds x="160" y="80" width="1520" height="400"/>
+        <dc:Bounds x="160" y="80" width="1960" height="430"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_LaneA" bpmnElement="Lane_Agente" isHorizontal="true">
-        <dc:Bounds x="190" y="80" width="1490" height="250"/>
+        <dc:Bounds x="190" y="80" width="1930" height="280"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_LaneH" bpmnElement="Lane_Humano" isHorizontal="true">
-        <dc:Bounds x="190" y="330" width="1490" height="150"/>
+        <dc:Bounds x="190" y="360" width="1930" height="150"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
-        <dc:Bounds x="210" y="185" width="30" height="30"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="194" y="218" width="64" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="210" y="205" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="185" y="238" width="84" height="40"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TLeerVersion" bpmnElement="T_LeerVersion">
-        <dc:Bounds x="280" y="170" width="160" height="60"/>
+        <dc:Bounds x="280" y="190" width="160" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TNotas" bpmnElement="T_Notas">
-        <dc:Bounds x="490" y="170" width="170" height="60"/>
+        <dc:Bounds x="490" y="190" width="170" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TGuardas" bpmnElement="T_Guardas">
-        <dc:Bounds x="710" y="170" width="170" height="60"/>
+        <dc:Bounds x="710" y="190" width="170" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_GwGuardas" bpmnElement="Gw_Guardas" isMarkerVisible="true">
-        <dc:Bounds x="930" y="180" width="40" height="40"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="918" y="143" width="66" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="930" y="200" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="918" y="163" width="66" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_EndAbort" bpmnElement="End_Abort">
-        <dc:Bounds x="935" y="270" width="30" height="30"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="910" y="302" width="82" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="935" y="290" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="910" y="322" width="82" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="S_UConfirmar" bpmnElement="U_Confirmar">
-        <dc:Bounds x="1010" y="375" width="170" height="60"/>
+      <bpmndi:BPMNShape id="S_TTestPath" bpmnElement="T_TestPath">
+        <dc:Bounds x="1020" y="190" width="190" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwTestPath" bpmnElement="Gw_TestPath" isMarkerVisible="true">
+        <dc:Bounds x="1260" y="200" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1242" y="163" width="78" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndDie" bpmnElement="End_Die">
+        <dc:Bounds x="1265" y="295" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1230" y="328" width="104" height="40"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TSuite" bpmnElement="T_Suite">
+        <dc:Bounds x="1350" y="185" width="250" height="70"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwSuite" bpmnElement="Gw_Suite" isMarkerVisible="true">
+        <dc:Bounds x="1650" y="200" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1638" y="163" width="66" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TRelease" bpmnElement="T_Release">
-        <dc:Bounds x="1240" y="170" width="170" height="60"/>
+        <dc:Bounds x="1750" y="190" width="200" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_End" bpmnElement="End">
-        <dc:Bounds x="1470" y="185" width="30" height="30"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="1448" y="218" width="76" height="14"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="2010" y="205" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1988" y="238" width="76" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_AnnOkHumano" bpmnElement="Ann_OkHumano">
+        <dc:Bounds x="150" y="390" width="290" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
-        <di:waypoint x="240" y="200"/>
-        <di:waypoint x="280" y="200"/>
+        <di:waypoint x="240" y="220"/>
+        <di:waypoint x="280" y="220"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
-        <di:waypoint x="440" y="200"/>
-        <di:waypoint x="490" y="200"/>
+        <di:waypoint x="440" y="220"/>
+        <di:waypoint x="490" y="220"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f3" bpmnElement="f3">
-        <di:waypoint x="660" y="200"/>
-        <di:waypoint x="710" y="200"/>
+        <di:waypoint x="660" y="220"/>
+        <di:waypoint x="710" y="220"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f4" bpmnElement="f4">
-        <di:waypoint x="880" y="200"/>
-        <di:waypoint x="930" y="200"/>
+        <di:waypoint x="880" y="220"/>
+        <di:waypoint x="930" y="220"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_no" bpmnElement="f_no">
-        <di:waypoint x="950" y="220"/>
-        <di:waypoint x="950" y="270"/>
+        <di:waypoint x="950" y="240"/>
+        <di:waypoint x="950" y="290"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_si" bpmnElement="f_si">
-        <di:waypoint x="970" y="200"/>
-        <di:waypoint x="1095" y="200"/>
-        <di:waypoint x="1095" y="375"/>
+        <di:waypoint x="970" y="220"/>
+        <di:waypoint x="1020" y="220"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="E_f_conf_rel" bpmnElement="f_conf_rel">
-        <di:waypoint x="1180" y="405"/>
-        <di:waypoint x="1325" y="405"/>
-        <di:waypoint x="1325" y="230"/>
+      <bpmndi:BPMNEdge id="E_f5" bpmnElement="f5">
+        <di:waypoint x="1210" y="220"/>
+        <di:waypoint x="1260" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_tp_no" bpmnElement="f_tp_no">
+        <di:waypoint x="1280" y="240"/>
+        <di:waypoint x="1280" y="295"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_tp_si" bpmnElement="f_tp_si">
+        <di:waypoint x="1300" y="220"/>
+        <di:waypoint x="1350" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f6" bpmnElement="f6">
+        <di:waypoint x="1600" y="220"/>
+        <di:waypoint x="1650" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_suite_no" bpmnElement="f_suite_no">
+        <di:waypoint x="1670" y="240"/>
+        <di:waypoint x="1670" y="310"/>
+        <di:waypoint x="1295" y="310"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_suite_si" bpmnElement="f_suite_si">
+        <di:waypoint x="1690" y="220"/>
+        <di:waypoint x="1750" y="220"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_rel_end" bpmnElement="f_rel_end">
-        <di:waypoint x="1410" y="200"/>
-        <di:waypoint x="1470" y="200"/>
+        <di:waypoint x="1950" y="220"/>
+        <di:waypoint x="2010" y="220"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_Assoc_OkHumano" bpmnElement="Assoc_OkHumano">
+        <di:waypoint x="295" y="390"/>
+        <di:waypoint x="225" y="235"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

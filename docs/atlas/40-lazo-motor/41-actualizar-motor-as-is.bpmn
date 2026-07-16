@@ -4,10 +4,12 @@
     <bpmn:participant id="Pool_Actualizar" name="actualizar (-Actualizar) — re-sembrar el motor sin pisar al hijo" processRef="Process_ActualizarMotor"/>
   </bpmn:collaboration>
   <bpmn:process id="Process_ActualizarMotor" name="actualizar el motor: tres vías por pieza (no pisar lo customizado)" isExecutable="false">
-    <bpmn:documentation>Fuente: tools/instalar.ps1 -Actualizar. Proceso de puro motor: recorre cada pieza y decide por su estado (ausente / al día / actualizar / diverge).</bpmn:documentation>
+    <bpmn:documentation>Fuente: tools/instalar.ps1 -Actualizar (funcion Invoke-Actualizar). Guardas al inicio: Die si no hay sello (tools/jidoka-motor.json). Lista de exclusion en sello.excluir (ADR 0022): piezas que el hijo declaro fuera nunca se re-agregan. Stubs [MIGRA] sembrados en la misma pasada (no-clobber: no pisa instancia existente).</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_Actualizar">
       <bpmn:lane id="Lane_Motor" name="Motor Jidoka (-Actualizar)">
         <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Sello</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Die</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Leer</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Pieza</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gw_Estado</bpmn:flowNodeRef>
@@ -15,17 +17,28 @@
         <bpmn:flowNodeRef>T_AlDia</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Actualizar</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Diverge</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Excluida</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gw_Join</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gw_Mas</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Migra</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Sello</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:startEvent id="Start" name="Actualización solicitada">
-      <bpmn:outgoing>f1</bpmn:outgoing>
+      <bpmn:outgoing>f_check_sello</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="T_Leer" name="Leer manifiesto, sello y exclusiones">
-      <bpmn:incoming>f1</bpmn:incoming>
+    <bpmn:exclusiveGateway id="Gw_Sello" name="¿Existe tools/jidoka-motor.json?">
+      <bpmn:incoming>f_check_sello</bpmn:incoming>
+      <bpmn:outgoing>f_sello_no</bpmn:outgoing>
+      <bpmn:outgoing>f_sello_si</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_Die" name="Die: no hay sello — usar instalacion normal (sin -Actualizar)">
+      <bpmn:incoming>f_sello_no</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="T_Leer" name="Leer manifiesto, sello y lista de exclusiones (sello.excluir)">
+      <bpmn:documentation>Carga manifiesto.json, lee sello.version, sello.sembrado_hashes y sello.excluir (ADR 0022). Las excluidas no se tocan ni re-agregan.</bpmn:documentation>
+      <bpmn:incoming>f_sello_si</bpmn:incoming>
       <bpmn:outgoing>f2</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="T_Pieza" name="Tomar la siguiente pieza de mecánica">
@@ -35,12 +48,18 @@
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Gw_Estado" name="¿Estado de la pieza?">
       <bpmn:incoming>f_pieza_gw</bpmn:incoming>
+      <bpmn:outgoing>f_excl</bpmn:outgoing>
       <bpmn:outgoing>f_aus</bpmn:outgoing>
       <bpmn:outgoing>f_dia</bpmn:outgoing>
       <bpmn:outgoing>f_mod</bpmn:outgoing>
       <bpmn:outgoing>f_div</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:serviceTask id="T_Agregar" name="Agregar la pieza ausente">
+    <bpmn:serviceTask id="T_Excluida" name="[EXCLUIDA] — saltar (sello.excluir la declaró fuera)">
+      <bpmn:documentation>ADR 0022: piezas en sello.excluir nunca se re-agregan ni se pisan. El hijo las salio del motor voluntariamente.</bpmn:documentation>
+      <bpmn:incoming>f_excl</bpmn:incoming>
+      <bpmn:outgoing>f_excl_join</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_Agregar" name="[NUEVO] Agregar la pieza ausente">
       <bpmn:incoming>f_aus</bpmn:incoming>
       <bpmn:outgoing>f_agg_join</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -48,15 +67,16 @@
       <bpmn:incoming>f_dia</bpmn:incoming>
       <bpmn:outgoing>f_dia_join</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="T_Actualizar" name="Actualizar pieza no modificada por el hijo">
+    <bpmn:serviceTask id="T_Actualizar" name="[ACTUALIZA] Actualizar pieza no modificada por el hijo">
       <bpmn:incoming>f_mod</bpmn:incoming>
       <bpmn:outgoing>f_mod_join</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="T_Diverge" name="Preservar personalización y dejar .jidoka-nuevo">
+    <bpmn:serviceTask id="T_Diverge" name="[DIVERGE] Preservar personalización y dejar .jidoka-nuevo">
       <bpmn:incoming>f_div</bpmn:incoming>
       <bpmn:outgoing>f_div_join</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Gw_Join">
+      <bpmn:incoming>f_excl_join</bpmn:incoming>
       <bpmn:incoming>f_agg_join</bpmn:incoming>
       <bpmn:incoming>f_dia_join</bpmn:incoming>
       <bpmn:incoming>f_mod_join</bpmn:incoming>
@@ -68,150 +88,195 @@
       <bpmn:outgoing>f_mas_si</bpmn:outgoing>
       <bpmn:outgoing>f_mas_no</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:serviceTask id="T_Sello" name="Actualizar el sello y resumir las divergencias">
+    <bpmn:serviceTask id="T_Migra" name="[MIGRA] Sembrar stubs de instancia nuevos (no-clobber)">
+      <bpmn:documentation>Cosecha issue #86: stubs de instancia (manifiesto.stubs + stubs_arquetipo) que el hijo no tiene se siembran en la misma pasada. Nunca pisa lo existente.</bpmn:documentation>
       <bpmn:incoming>f_mas_no</bpmn:incoming>
+      <bpmn:outgoing>f_migra_sello</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="T_Sello" name="Actualizar el sello y resumir las divergencias">
+      <bpmn:incoming>f_migra_sello</bpmn:incoming>
       <bpmn:outgoing>f_sello_end</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="End" name="Motor actualizado; instancia intacta">
       <bpmn:incoming>f_sello_end</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="f1" sourceRef="Start" targetRef="T_Leer"/>
+    <bpmn:sequenceFlow id="f_check_sello" sourceRef="Start" targetRef="Gw_Sello"/>
+    <bpmn:sequenceFlow id="f_sello_no" name="no (Die)" sourceRef="Gw_Sello" targetRef="End_Die"/>
+    <bpmn:sequenceFlow id="f_sello_si" name="sí" sourceRef="Gw_Sello" targetRef="T_Leer"/>
     <bpmn:sequenceFlow id="f2" sourceRef="T_Leer" targetRef="T_Pieza"/>
     <bpmn:sequenceFlow id="f_pieza_gw" sourceRef="T_Pieza" targetRef="Gw_Estado"/>
+    <bpmn:sequenceFlow id="f_excl" name="excluida" sourceRef="Gw_Estado" targetRef="T_Excluida"/>
     <bpmn:sequenceFlow id="f_aus" name="ausente" sourceRef="Gw_Estado" targetRef="T_Agregar"/>
     <bpmn:sequenceFlow id="f_dia" name="al día" sourceRef="Gw_Estado" targetRef="T_AlDia"/>
     <bpmn:sequenceFlow id="f_mod" name="no modificada" sourceRef="Gw_Estado" targetRef="T_Actualizar"/>
     <bpmn:sequenceFlow id="f_div" name="diverge" sourceRef="Gw_Estado" targetRef="T_Diverge"/>
+    <bpmn:sequenceFlow id="f_excl_join" sourceRef="T_Excluida" targetRef="Gw_Join"/>
     <bpmn:sequenceFlow id="f_agg_join" sourceRef="T_Agregar" targetRef="Gw_Join"/>
     <bpmn:sequenceFlow id="f_dia_join" sourceRef="T_AlDia" targetRef="Gw_Join"/>
     <bpmn:sequenceFlow id="f_mod_join" sourceRef="T_Actualizar" targetRef="Gw_Join"/>
     <bpmn:sequenceFlow id="f_div_join" sourceRef="T_Diverge" targetRef="Gw_Join"/>
     <bpmn:sequenceFlow id="f_join_mas" sourceRef="Gw_Join" targetRef="Gw_Mas"/>
     <bpmn:sequenceFlow id="f_mas_si" name="sí: quedan" sourceRef="Gw_Mas" targetRef="T_Pieza"/>
-    <bpmn:sequenceFlow id="f_mas_no" name="no" sourceRef="Gw_Mas" targetRef="T_Sello"/>
+    <bpmn:sequenceFlow id="f_mas_no" name="no" sourceRef="Gw_Mas" targetRef="T_Migra"/>
+    <bpmn:sequenceFlow id="f_migra_sello" sourceRef="T_Migra" targetRef="T_Sello"/>
     <bpmn:sequenceFlow id="f_sello_end" sourceRef="T_Sello" targetRef="End"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_41_Actualizar">
     <bpmndi:BPMNPlane id="Plane_41_Actualizar" bpmnElement="Collab_Actualizar">
       <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Actualizar" isHorizontal="true">
-        <dc:Bounds x="160" y="60" width="1520" height="470"/>
+        <dc:Bounds x="160" y="60" width="1820" height="510"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_LaneM" bpmnElement="Lane_Motor" isHorizontal="true">
-        <dc:Bounds x="190" y="60" width="1490" height="470"/>
+        <dc:Bounds x="190" y="60" width="1790" height="510"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
-        <dc:Bounds x="210" y="105" width="30" height="30"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="192" y="138" width="70" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="210" y="255" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="192" y="288" width="70" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwSello" bpmnElement="Gw_Sello" isMarkerVisible="true">
+        <dc:Bounds x="280" y="250" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="260" y="213" width="82" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_EndDie" bpmnElement="End_Die">
+        <dc:Bounds x="285" y="350" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="250" y="383" width="102" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TLeer" bpmnElement="T_Leer">
-        <dc:Bounds x="280" y="90" width="160" height="60"/>
+        <dc:Bounds x="370" y="240" width="180" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TPieza" bpmnElement="T_Pieza">
-        <dc:Bounds x="490" y="90" width="150" height="60"/>
+        <dc:Bounds x="600" y="240" width="150" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_GwEstado" bpmnElement="Gw_Estado" isMarkerVisible="true">
-        <dc:Bounds x="690" y="100" width="40" height="40"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="675" y="63" width="72" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="800" y="250" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="785" y="213" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TExcluida" bpmnElement="T_Excluida">
+        <dc:Bounds x="900" y="80" width="200" height="52"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TAgregar" bpmnElement="T_Agregar">
-        <dc:Bounds x="800" y="70" width="180" height="52"/>
+        <dc:Bounds x="900" y="155" width="200" height="52"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TAlDia" bpmnElement="T_AlDia">
-        <dc:Bounds x="800" y="150" width="180" height="52"/>
+        <dc:Bounds x="900" y="230" width="200" height="52"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TActualizar" bpmnElement="T_Actualizar">
-        <dc:Bounds x="800" y="230" width="180" height="52"/>
+        <dc:Bounds x="900" y="305" width="200" height="52"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TDiverge" bpmnElement="T_Diverge">
-        <dc:Bounds x="800" y="310" width="200" height="52"/>
+        <dc:Bounds x="900" y="380" width="210" height="52"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_GwJoin" bpmnElement="Gw_Join" isMarkerVisible="true">
-        <dc:Bounds x="1050" y="196" width="40" height="40"/>
+        <dc:Bounds x="1170" y="246" width="40" height="40"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_GwMas" bpmnElement="Gw_Mas" isMarkerVisible="true">
-        <dc:Bounds x="1150" y="196" width="40" height="40"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="1135" y="159" width="72" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="1270" y="246" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1255" y="209" width="72" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TMigra" bpmnElement="T_Migra">
+        <dc:Bounds x="1370" y="236" width="200" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TSello" bpmnElement="T_Sello">
-        <dc:Bounds x="1250" y="186" width="170" height="60"/>
+        <dc:Bounds x="1620" y="236" width="200" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_End" bpmnElement="End">
-        <dc:Bounds x="1470" y="201" width="30" height="30"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="1445" y="234" width="82" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="1870" y="251" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1845" y="284" width="82" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
-        <di:waypoint x="240" y="120"/>
-        <di:waypoint x="280" y="120"/>
+      <bpmndi:BPMNEdge id="E_f_check_sello" bpmnElement="f_check_sello">
+        <di:waypoint x="240" y="270"/>
+        <di:waypoint x="280" y="270"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_sello_no" bpmnElement="f_sello_no">
+        <di:waypoint x="300" y="290"/>
+        <di:waypoint x="300" y="350"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_sello_si" bpmnElement="f_sello_si">
+        <di:waypoint x="320" y="270"/>
+        <di:waypoint x="370" y="270"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f2" bpmnElement="f2">
-        <di:waypoint x="440" y="120"/>
-        <di:waypoint x="490" y="120"/>
+        <di:waypoint x="550" y="270"/>
+        <di:waypoint x="600" y="270"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_pieza_gw" bpmnElement="f_pieza_gw">
-        <di:waypoint x="640" y="120"/>
-        <di:waypoint x="690" y="120"/>
+        <di:waypoint x="750" y="270"/>
+        <di:waypoint x="800" y="270"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_excl" bpmnElement="f_excl">
+        <di:waypoint x="820" y="250"/>
+        <di:waypoint x="820" y="106"/>
+        <di:waypoint x="900" y="106"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_aus" bpmnElement="f_aus">
-        <di:waypoint x="730" y="120"/>
-        <di:waypoint x="770" y="120"/>
-        <di:waypoint x="770" y="96"/>
-        <di:waypoint x="800" y="96"/>
+        <di:waypoint x="820" y="270"/>
+        <di:waypoint x="860" y="270"/>
+        <di:waypoint x="860" y="181"/>
+        <di:waypoint x="900" y="181"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_dia" bpmnElement="f_dia">
-        <di:waypoint x="730" y="120"/>
-        <di:waypoint x="770" y="120"/>
-        <di:waypoint x="770" y="176"/>
-        <di:waypoint x="800" y="176"/>
+        <di:waypoint x="840" y="270"/>
+        <di:waypoint x="870" y="270"/>
+        <di:waypoint x="870" y="256"/>
+        <di:waypoint x="900" y="256"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_mod" bpmnElement="f_mod">
-        <di:waypoint x="730" y="120"/>
-        <di:waypoint x="770" y="120"/>
-        <di:waypoint x="770" y="256"/>
-        <di:waypoint x="800" y="256"/>
+        <di:waypoint x="820" y="290"/>
+        <di:waypoint x="860" y="290"/>
+        <di:waypoint x="860" y="331"/>
+        <di:waypoint x="900" y="331"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_div" bpmnElement="f_div">
-        <di:waypoint x="730" y="120"/>
-        <di:waypoint x="770" y="120"/>
-        <di:waypoint x="770" y="336"/>
-        <di:waypoint x="800" y="336"/>
+        <di:waypoint x="820" y="290"/>
+        <di:waypoint x="860" y="290"/>
+        <di:waypoint x="860" y="406"/>
+        <di:waypoint x="900" y="406"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_excl_join" bpmnElement="f_excl_join">
+        <di:waypoint x="1100" y="106"/>
+        <di:waypoint x="1190" y="106"/>
+        <di:waypoint x="1190" y="246"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_agg_join" bpmnElement="f_agg_join">
-        <di:waypoint x="980" y="96"/>
-        <di:waypoint x="1070" y="96"/>
-        <di:waypoint x="1070" y="196"/>
+        <di:waypoint x="1100" y="181"/>
+        <di:waypoint x="1190" y="181"/>
+        <di:waypoint x="1190" y="246"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_dia_join" bpmnElement="f_dia_join">
-        <di:waypoint x="980" y="176"/>
-        <di:waypoint x="1070" y="176"/>
-        <di:waypoint x="1070" y="196"/>
+        <di:waypoint x="1100" y="256"/>
+        <di:waypoint x="1170" y="256"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_mod_join" bpmnElement="f_mod_join">
-        <di:waypoint x="980" y="256"/>
-        <di:waypoint x="1070" y="256"/>
-        <di:waypoint x="1070" y="236"/>
+        <di:waypoint x="1100" y="331"/>
+        <di:waypoint x="1190" y="331"/>
+        <di:waypoint x="1190" y="286"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_div_join" bpmnElement="f_div_join">
-        <di:waypoint x="1000" y="336"/>
-        <di:waypoint x="1070" y="336"/>
-        <di:waypoint x="1070" y="236"/>
+        <di:waypoint x="1110" y="406"/>
+        <di:waypoint x="1190" y="406"/>
+        <di:waypoint x="1190" y="286"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_join_mas" bpmnElement="f_join_mas">
-        <di:waypoint x="1090" y="216"/>
-        <di:waypoint x="1150" y="216"/>
+        <di:waypoint x="1210" y="266"/>
+        <di:waypoint x="1270" y="266"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_mas_no" bpmnElement="f_mas_no">
-        <di:waypoint x="1190" y="216"/>
-        <di:waypoint x="1250" y="216"/>
+        <di:waypoint x="1310" y="266"/>
+        <di:waypoint x="1370" y="266"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_mas_si" bpmnElement="f_mas_si">
-        <di:waypoint x="1170" y="236"/>
-        <di:waypoint x="1170" y="470"/>
-        <di:waypoint x="565" y="470"/>
-        <di:waypoint x="565" y="150"/>
+        <di:waypoint x="1290" y="286"/>
+        <di:waypoint x="1290" y="500"/>
+        <di:waypoint x="675" y="500"/>
+        <di:waypoint x="675" y="300"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_migra_sello" bpmnElement="f_migra_sello">
+        <di:waypoint x="1570" y="266"/>
+        <di:waypoint x="1620" y="266"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_sello_end" bpmnElement="f_sello_end">
-        <di:waypoint x="1420" y="216"/>
-        <di:waypoint x="1470" y="216"/>
+        <di:waypoint x="1820" y="266"/>
+        <di:waypoint x="1870" y="266"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -77,6 +77,23 @@ try {
   Check 'sello: version == tools/version.txt' $selloVerOk "sello.version != $verTxt"
   Check 'sello: registra al menos una pieza de motor' $countOk "sembrado_hashes vacio"
   Check 'sello: cada hash casa con el archivo sembrado' $hashesOk "algun hash no coincide"
+  # 1d. SELLO.PRODUCTO: la siembra fresca docs-as-code debe escribir producto='grafo'.
+  #     Reusa $sello ya parseado en 1b: una sola lectura, y si el JSON no parseo la causa ya es visible ahi.
+  $prodOk = [bool]($sello -and $sello.producto -eq 'grafo')
+  Check 'sello: producto == grafo (arquetipo docs-as-code)' $prodOk "sello.producto no es 'grafo' (docs-as-code)"
+
+  # 1e. SELLO.PRODUCTO para code-first: producto debe ser 'brief'.
+  $tmpCF = Join-Path $env:TEMP ("jidoka-sembrarCF-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+  try {
+    Run-PS $sembrar -Destino $tmpCF -Jidoka $jidoka -Arquetipo code-first | Out-Null
+    $selloCFPath = Join-Path $tmpCF 'tools/jidoka-motor.json'
+    $prodCFOk = $false
+    if (Test-Path $selloCFPath) {
+      try { $sc = Get-Content $selloCFPath -Raw | ConvertFrom-Json; $prodCFOk = ($sc.producto -eq 'brief') } catch {}
+    }
+    Check 'sello: producto == brief (arquetipo code-first)' $prodCFOk "sello.producto no es 'brief' (code-first)"
+  }
+  finally { Remove-Item $tmpCF -Recurse -Force -ErrorAction SilentlyContinue }
 
   # 1c. ESTADO-MOTOR contra el Jidoka real: debe decir [OK] al dia (criterio de aceptacion).
   $em = Join-Path $tmp 'tools/estado-motor.ps1'

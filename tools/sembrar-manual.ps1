@@ -195,10 +195,16 @@ $stubsCreados = 0
 $stubs = @($manif.stubs | Where-Object { $_ })
 if (-not $Actualizar) {
   if ($arq.producto -and $manif.stubs_arquetipo.($arq.producto)) { $stubs += $manif.stubs_arquetipo.($arq.producto) }
-  if ($arq.gobernanza -and $manif.stubs_arquetipo.gobernanza) { $stubs += $manif.stubs_arquetipo.gobernanza }
+  if ($arq.gobernanza) {
+    if ($manif.stubs_arquetipo.gobernanza) { $stubs += $manif.stubs_arquetipo.gobernanza }
+    else { Write-Host "  [AVISO] el arquetipo '$Arquetipo' pide gobernanza=true pero el manifiesto no trae stubs_arquetipo.gobernanza -- los stubs de gobernanza no se sembraron; anade la clave al manifiesto cuando esten listos." -ForegroundColor Yellow }
+  }
 } else {
   if ($selloViejo.producto -and $manif.stubs_arquetipo.($selloViejo.producto)) { $stubs += $manif.stubs_arquetipo.($selloViejo.producto) }
-  if ($selloViejo.gobernanza -and $manif.stubs_arquetipo.gobernanza) { $stubs += $manif.stubs_arquetipo.gobernanza }
+  if ($selloViejo.gobernanza) {
+    if ($manif.stubs_arquetipo.gobernanza) { $stubs += $manif.stubs_arquetipo.gobernanza }
+    else { Write-Host "  [AVISO] el sello registra gobernanza=true pero el manifiesto no trae stubs_arquetipo.gobernanza -- los stubs de gobernanza no se migraron; anade la clave al manifiesto cuando esten listos." -ForegroundColor Yellow }
+  }
 }
 $tagStub = if ($Actualizar) { '[MIGRA]' } else { '[STUB]' }
 foreach ($s in $stubs) {

@@ -6,7 +6,23 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-16 noche — CERRADO Y LIBERADO · `v1.18.0` · cosecha #7 "La bajada que dolió")
+## Dónde estamos (2026-07-16 — la nave se audita a sí misma · `v1.19.0` · auditoría + curas en el mismo día)
+
+**Sesión de auditoría pedida por el cliente ("¿es real o es teatro?") con curas ordenadas y liberadas el mismo día.** Dos PRs: los 5 informes (PR #94, `docs/analisis/`) y las curas (`v1.19.0`, ADR 0038, rama `fixes-auditoria-20260716`). Evidencia: `qa_runs/fixes-auditoria-20260716/LOG.md` (suite local completa verde; instalador en CI).
+
+1. **Las 5 auditorías** (subagentes en paralelo + verificación en sesión de cada hallazgo): documentos y ley · atlas (25 diagramas contra sus fuentes) · kit/bajada (verificación independiente de la cosecha #7: **APTO** fresco y migrado) · prueba de vida de la nodriza · **veredicto teatro-vs-real** (`docs/analisis/veredicto-teatro-vs-real-202607.md` — la lectura que importa: el núcleo Toyota es maquinaria real con mordidas; la pata Scrum es conductual y se dobla — los demos del cliente se difieren; el teatro se acumula en los bordes). 3 hallazgos de subagente descartados al verificar, acusados en el informe.
+2. **Las curas (issues #95–#98):** la ley gana cobertura (ADR 0038: atlas bidireccional `tools/*.ps1`→diagrama, `metodo` vigila `docs/atlas/*`, `bin/*` a barreras, área `guias`, raíz sin falsos avisos — `package.json` queda sin área a propósito, su invariante la cubre `probar-version`) · 11 diagramas del atlas reconciliados con el motor real y re-renderizados (`atlas:validate` sin huecos) · tests del kit muerden más (`probar-sembrar` 38, `probar-agentes` 32 con `tools:` case-sensitive; espejos de `instalar.ps1` diferidos por AV — vivo en #98) · **primera mordida real de `auditar.ps1`** (wikilink roto → 5 BLOQUEA → verde).
+3. **El gate `review-stop` mordió en vivo** y el code-review de 7 ángulos curó 3 hallazgos en el diff antes del cierre (reuso del sello en 1d, aviso de gobernanza en `-Actualizar`, `-cnotcontains`). El método sobre sí mismo, otra vez.
+4. **Las 4 decisiones de poda del cliente REGISTRADAS en #99** (contrato de la próxima cosecha): `sprint-entrega` NO se poda — se cura el proceso (cierra la llena como paso duro) · `que-sigue` se funde en el arranca · `reportar-leccion` prueba de vida en la sesión del repo real · `desatendido` plazo 2026-08-16 · `jerarquia.md`/`verificacion.md` se podan.
+
+**Pendiente (humano — nada bloquea al agente):**
+1. **Leer los informes del PR #94** (el Gemba de la auditoría; empezar por el veredicto) — alimenta la próxima cosecha junto con #99.
+2. **La sesión en el repo real "endi"** (siguiente paso acordado): sembrar v1.19.0 ahí cubre de un tiro el demo de la cosecha #7, el de v1.16.0, y —si endi tiene niebla real— el de `descubre`; ahí también la prueba de vida pactada de `reportar-leccion`.
+3. Heredados: bajada `v1.12.1`–`v1.19.0` a los labs (SGI/TF) · Gemba del análisis de costo neto (#72) · 2 huecos del brief (métrica y apetito) · certificado Authenticode · npm publish.
+
+---
+
+## Dónde estuvimos (2026-07-16 noche — CERRADO Y LIBERADO · `v1.18.0` · cosecha #7 "La bajada que dolió")
 
 **Los 6 bugs de la bajada real del caso 1 (#86–#91, llegados en batch a las 15:27) atendidos, mergeados y liberados el mismo día** ([release v1.18.0](https://github.com/ArmandoMedina/jidoka/releases/tag/v1.18.0), PR #92, ADR 0037, plan-contrato `docs/sprints/sprint-cosecha-7-plan.md`). Ritual completo: R0 aprobado con nombre (cura B del #82) → plan formal → 3 rebanadas con subagentes → evidencia → CI verde → merge y release con orden nombrada. La entrega:
 

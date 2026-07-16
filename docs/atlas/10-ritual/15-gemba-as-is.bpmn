@@ -12,6 +12,7 @@
         <bpmn:flowNodeRef>T_Artefactos</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gw_Tipo</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Veredicto</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Corregir</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Citar</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End</bpmn:flowNodeRef>
       </bpmn:lane>
@@ -41,11 +42,17 @@
     </bpmn:task>
     <bpmn:userTask id="U_Cliente" name="STOP: ¿se ve bien? lo responde el cliente con sus ojos">
       <bpmn:incoming>f_subj</bpmn:incoming>
-      <bpmn:outgoing>f_cli_citar</bpmn:outgoing>
+      <bpmn:outgoing>f_cli_si</bpmn:outgoing>
+      <bpmn:outgoing>f_cli_no</bpmn:outgoing>
     </bpmn:userTask>
+    <bpmn:task id="T_Corregir" name="Corregir y volver a correr el demo (reiterar)">
+      <bpmn:documentation>Si el cliente dice no se ve bien: el agente corrige y el ciclo vuelve a T_CorrerDemo. Consistente con el loop de Gateway_Aceptado en 01-operar.</bpmn:documentation>
+      <bpmn:incoming>f_cli_no</bpmn:incoming>
+      <bpmn:outgoing>f_loop</bpmn:outgoing>
+    </bpmn:task>
     <bpmn:task id="T_Citar" name="Citar la corrida en HANDOFF/CHANGELOG y git add -f (obligatorio)">
       <bpmn:incoming>f_ver_citar</bpmn:incoming>
-      <bpmn:incoming>f_cli_citar</bpmn:incoming>
+      <bpmn:incoming>f_cli_si</bpmn:incoming>
       <bpmn:outgoing>f_citar_end</bpmn:outgoing>
     </bpmn:task>
     <bpmn:endEvent id="End" name="Incremento verificado con evidencia">
@@ -57,19 +64,21 @@
     <bpmn:sequenceFlow id="f_obj" name="objetivo" sourceRef="Gw_Tipo" targetRef="T_Veredicto"/>
     <bpmn:sequenceFlow id="f_subj" name="subjetivo" sourceRef="Gw_Tipo" targetRef="U_Cliente"/>
     <bpmn:sequenceFlow id="f_ver_citar" sourceRef="T_Veredicto" targetRef="T_Citar"/>
-    <bpmn:sequenceFlow id="f_cli_citar" sourceRef="U_Cliente" targetRef="T_Citar"/>
+    <bpmn:sequenceFlow id="f_cli_si" name="sí: se ve bien" sourceRef="U_Cliente" targetRef="T_Citar"/>
+    <bpmn:sequenceFlow id="f_cli_no" name="no: corregir" sourceRef="U_Cliente" targetRef="T_Corregir"/>
+    <bpmn:sequenceFlow id="f_loop" sourceRef="T_Corregir" targetRef="T_CorrerDemo"/>
     <bpmn:sequenceFlow id="f_citar_end" sourceRef="T_Citar" targetRef="End"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_15_Gemba">
     <bpmndi:BPMNPlane id="Plane_15_Gemba" bpmnElement="Collab_Gemba">
       <bpmndi:BPMNShape id="S_Pool" bpmnElement="Pool_Gemba" isHorizontal="true">
-        <dc:Bounds x="160" y="80" width="1180" height="400"/>
+        <dc:Bounds x="160" y="80" width="1400" height="420"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_LaneA" bpmnElement="Lane_Agente" isHorizontal="true">
-        <dc:Bounds x="190" y="80" width="1150" height="250"/>
+        <dc:Bounds x="190" y="80" width="1370" height="260"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_LaneH" bpmnElement="Lane_Humano" isHorizontal="true">
-        <dc:Bounds x="190" y="330" width="1150" height="150"/>
+        <dc:Bounds x="190" y="340" width="1370" height="160"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_Start" bpmnElement="Start">
         <dc:Bounds x="210" y="185" width="30" height="30"/>
@@ -89,14 +98,17 @@
         <dc:Bounds x="800" y="170" width="160" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_UCliente" bpmnElement="U_Cliente">
-        <dc:Bounds x="625" y="375" width="190" height="60"/>
+        <dc:Bounds x="625" y="385" width="190" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_TCorregir" bpmnElement="T_Corregir">
+        <dc:Bounds x="870" y="170" width="160" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TCitar" bpmnElement="T_Citar">
-        <dc:Bounds x="1010" y="170" width="160" height="60"/>
+        <dc:Bounds x="1100" y="170" width="170" height="60"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_End" bpmnElement="End">
-        <dc:Bounds x="1230" y="185" width="30" height="30"/>
-        <bpmndi:BPMNLabel><dc:Bounds x="1205" y="218" width="82" height="27"/></bpmndi:BPMNLabel>
+        <dc:Bounds x="1330" y="185" width="30" height="30"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1305" y="218" width="82" height="27"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="E_f1" bpmnElement="f1">
         <di:waypoint x="240" y="200"/>
@@ -116,20 +128,30 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_subj" bpmnElement="f_subj">
         <di:waypoint x="720" y="220"/>
-        <di:waypoint x="720" y="375"/>
+        <di:waypoint x="720" y="385"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_ver_citar" bpmnElement="f_ver_citar">
         <di:waypoint x="960" y="200"/>
-        <di:waypoint x="1010" y="200"/>
+        <di:waypoint x="1100" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="E_f_cli_citar" bpmnElement="f_cli_citar">
-        <di:waypoint x="815" y="405"/>
-        <di:waypoint x="1090" y="405"/>
-        <di:waypoint x="1090" y="230"/>
+      <bpmndi:BPMNEdge id="E_f_cli_si" bpmnElement="f_cli_si">
+        <di:waypoint x="815" y="415"/>
+        <di:waypoint x="1185" y="415"/>
+        <di:waypoint x="1185" y="230"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_cli_no" bpmnElement="f_cli_no">
+        <di:waypoint x="720" y="385"/>
+        <di:waypoint x="720" y="135"/>
+        <di:waypoint x="950" y="135"/>
+        <di:waypoint x="950" y="170"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_loop" bpmnElement="f_loop">
+        <di:waypoint x="870" y="200"/>
+        <di:waypoint x="360" y="200"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_citar_end" bpmnElement="f_citar_end">
-        <di:waypoint x="1170" y="200"/>
-        <di:waypoint x="1230" y="200"/>
+        <di:waypoint x="1270" y="200"/>
+        <di:waypoint x="1330" y="200"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

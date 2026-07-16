@@ -29,11 +29,11 @@
   },
   {
     "nombre": "metodo",
-    "desc": "el metodo de Jidoka: el ritual Kanban y la doctrina de gates Andon",
-    "fuente": ["kanban/*", "andon/*"],
+    "desc": "el metodo de Jidoka: el ritual Kanban, la doctrina de gates Andon y el atlas de procesos (su vista visual y su toolchain)",
+    "fuente": ["kanban/*", "andon/*", "docs/atlas/*"],
     "doc_bloquea": [],
     "doc_avisa": ["CHANGELOG.md"],
-    "mensaje": "cambiaste el metodo (ritual o doctrina de gates): registra el cambio en CHANGELOG.md para que la beta tenga historia legible. Si solo corregiste typos o formato, este aviso no es para ti",
+    "mensaje": "cambiaste el metodo (ritual, doctrina de gates o atlas): registra el cambio en CHANGELOG.md para que la beta tenga historia legible. Si solo corregiste typos o formato, este aviso no es para ti",
     "rol": "escribano"
   },
   {
@@ -48,11 +48,11 @@
   },
   {
     "nombre": "atlas",
-    "desc": "el atlas de procesos (docs/atlas/): la vista visual del metodo; un diagrama que no refleja su comando es doc-drift visual (ADR 0036)",
-    "fuente": [".claude/commands/jidoka/*"],
+    "desc": "el atlas de procesos (docs/atlas/): la vista visual del metodo; un diagrama que no refleja su comando o su script es doc-drift visual (ADR 0036; ampliado a los scripts del motor por ADR 0038)",
+    "fuente": [".claude/commands/jidoka/*", "tools/*.ps1"],
     "doc_bloquea": [],
     "doc_avisa": ["docs/atlas/*"],
-    "mensaje": "cambiaste un comando /jidoka:*: si cambiaste el PROCESO (pasos, decisiones, quien hace que), su diagrama en docs/atlas/ que lo declara como Fuente quedo atras. Actualizalo y re-renderiza (npm run atlas:render). Si fue redaccion, formato o un detalle que no cambia el flujo, este aviso no es para ti",
+    "mensaje": "cambiaste un comando /jidoka:* o un script del motor: si cambiaste el PROCESO (pasos, decisiones, ramas de fallo, quien hace que), su diagrama en docs/atlas/ que lo declara como Fuente quedo atras. Actualizalo y re-renderiza (npm run atlas:render). Si fue redaccion, formato o un detalle que no cambia el flujo, este aviso no es para ti",
     "rol": "escribano"
   },
   {
@@ -67,9 +67,10 @@
   },
   {
     "nombre": "barreras",
-    "desc": "el motor Andon de este repo: la ley, el verificador, el self-test, los hooks, el pre-push y el CI. Jidoka corre sus propios gates (dogfooding)",
+    "desc": "el motor Andon de este repo: la ley, el verificador, el self-test, los hooks, el pre-push, el CI y el CLI npx (bin/). Jidoka corre sus propios gates (dogfooding)",
     "fuente": [
       "tools/*",
+      "bin/*",
       ".githooks/*",
       ".github/workflows/*",
       ".claude/hooks/*",
@@ -84,6 +85,15 @@
     "rol": "escribano"
   },
   {
+    "nombre": "guias",
+    "desc": "las guias operativas (docs/guias/): tres viajan como motor a los hijos via el manifiesto; una guia desactualizada se propaga en cada siembra",
+    "fuente": ["docs/guias/*"],
+    "doc_bloquea": [],
+    "doc_avisa": ["CHANGELOG.md"],
+    "mensaje": "cambiaste una guia operativa: registra el cambio en CHANGELOG.md (tres guias viajan a los hijos con el instalador; la proxima bajada lleva tu cambio). Si solo corregiste typos o formato, este aviso no es para ti",
+    "rol": "escribano"
+  },
+  {
     "nombre": "raiz",
     "desc": "tierra de nadie: un archivo suelto en la raiz casi siempre tiene un lugar con dueno en otra parte (patron heredado del laboratorio de campo)",
     "fuente": ["*"],
@@ -93,7 +103,11 @@
       "HANDOFF.md",
       "ROADMAP.md",
       "CONTRIBUTING.md",
+      "CODE_OF_CONDUCT.md",
       "LICENSE",
+      "package.json",
+      "package-lock.json",
+      "jidoka.code-workspace",
       ".gitattributes",
       ".editorconfig",
       ".gitignore"
