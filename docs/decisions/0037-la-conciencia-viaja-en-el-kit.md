@@ -1,4 +1,4 @@
-# ADR 0035 — La conciencia viaja en el kit: los agentes se siembran, `-Actualizar` migra la instancia que el motor asume, y el roster vive donde se inyecta
+# ADR 0037 — La conciencia viaja en el kit: los agentes se siembran, `-Actualizar` migra la instancia que el motor asume, y el roster vive donde se inyecta
 
 - **Estado:** aceptado
 - **Fecha:** 2026-07-16
