@@ -85,6 +85,9 @@ try {
   Check 'sello: version == tools/version.txt' $selloVerOk "sello.version != $verTxt"
   Check 'sello: registra al menos una pieza de motor' $countOk "sembrado_hashes vacio"
   Check 'sello: cada hash casa con el archivo sembrado' $hashesOk "algun hash no coincide con lo sembrado"
+  # Issue #91 (cosecha #7): el sello se escribe CON newline final -- sin el, todo diff
+  # futuro del hijo arrastra el marcador "No newline at end of file".
+  Check 'sello: termina con newline final (#91)' ((Test-Path $selloPath) -and ([System.IO.File]::ReadAllText($selloPath)).EndsWith("`n")) "el sello no termina en newline"
 
   # 1f. ENLACES DE METODO: ningun doc sembrado debe citar un doc de metodo ausente
   #     (kanban/ andon/ doctrina/ docs/guias/) -- cierra los "enlaces muertos en un repo

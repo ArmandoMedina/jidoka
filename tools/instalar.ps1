@@ -238,7 +238,7 @@ function Invoke-Actualizar($jidoka, $manif, $Destino, $utf8) {
   if ($sello.producto) { $selloNuevo.producto = $sello.producto }
   if ($sello.gobernanza) { $selloNuevo.gobernanza = $true }
   if ($excluir.Count) { $selloNuevo.excluir = $excluir }
-  [System.IO.File]::WriteAllText($selloDst, ($selloNuevo | ConvertTo-Json -Depth 5), $utf8)
+  [System.IO.File]::WriteAllText($selloDst, (($selloNuevo | ConvertTo-Json -Depth 5) + "`n"), $utf8)
 
   Write-Host ""
   $resumen = "== Motor: $alDia al dia | $actualizados actualizado(s) | $agregados nuevo(s) | $($divergen.Count) divergen"
@@ -290,7 +290,7 @@ function Invoke-Sellar($jidoka, $manif, $Destino, $utf8) {
   if ($excluir.Count) { $selloNuevo.excluir = $excluir }
   $parent = Split-Path -Parent $selloDst
   if ($parent -and -not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
-  [System.IO.File]::WriteAllText($selloDst, ($selloNuevo | ConvertTo-Json -Depth 5), $utf8)
+  [System.IO.File]::WriteAllText($selloDst, (($selloNuevo | ConvertTo-Json -Depth 5) + "`n"), $utf8)
 
   Write-Host ""
   Write-Host "== Sello escrito: $pristinas pristina(s) registrada(s) | $($divergen.Count) divergen (se preservaran) | $ausentes ausente(s) ==" -ForegroundColor Green
@@ -464,7 +464,7 @@ else {
   if ($arq.producto) { $sello.producto = $arq.producto }
   if ($arq.gobernanza) { $sello.gobernanza = $true }
   if ($excluirMotor.Count) { $sello.excluir = @($excluirMotor) }
-  [System.IO.File]::WriteAllText($selloDst, ($sello | ConvertTo-Json -Depth 5), $utf8)
+  [System.IO.File]::WriteAllText($selloDst, (($sello | ConvertTo-Json -Depth 5) + "`n"), $utf8)
   $extra = ""
   if ($clasif.divergen.Count) { $extra = ", $($clasif.divergen.Count) customizada(s) preservada(s)" }
   if ($excluirMotor.Count) { $extra += ", $($excluirMotor.Count) excluida(s) por arquetipo" }

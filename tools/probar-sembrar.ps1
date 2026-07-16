@@ -158,6 +158,30 @@ try {
   $out6b = Run-PS-Out $em -Jidoka $fakeSinInst
   Check 'degradacion: sin instalar.ps1 legible, apunta al fallback sembrar-manual.ps1' (($out6b -match 'AVISO') -and ($out6b -match 'sembrar-manual\.ps1')) "no apunto al fallback: $out6b"
   Remove-Item $fakeSinInst -Recurse -Force -ErrorAction SilentlyContinue
+
+  # 7. GUARD del manifiesto sin 'stubs' (cosecha #7, issue #89): un checkout de Jidoka
+  #    viejo (o un manifiesto parcial) sin el campo 'stubs' NO revienta la siembra a
+  #    medias -- en PS 5.1 @($null) no es vacio y el foreach llegaba a Join-Path con
+  #    $null.ruta, dejando mecanica copiada pero sin sello (el estado a-medias de #40/#43).
+  $fakeSinStubs = Join-Path $env:TEMP ("jidoka-fakeSinStubs-" + [guid]::NewGuid().ToString('N').Substring(0,6))
+  $tmpSinStubs  = Join-Path $env:TEMP ("jidoka-sembrarSS-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+  try {
+    New-Item -ItemType Directory -Path (Join-Path $fakeSinStubs 'kit/.jidoka/instalar') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $fakeSinStubs 'kit/.jidoka/leyes') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $fakeSinStubs 'tools') -Force | Out-Null
+    Set-Content -Path (Join-Path $fakeSinStubs 'tools/version.txt') -Value '9.9.9-sinstubs' -Encoding ASCII
+    Copy-Item (Join-Path $jidoka 'kit/.jidoka/leyes/blast-radius.docs-as-code.json') (Join-Path $fakeSinStubs 'kit/.jidoka/leyes/blast-radius.docs-as-code.json') -Force
+    $manifSin = Get-Content (Join-Path $jidoka 'kit/.jidoka/instalar/manifiesto.json') -Raw | ConvertFrom-Json
+    $manifSin.PSObject.Properties.Remove('stubs')
+    [System.IO.File]::WriteAllText((Join-Path $fakeSinStubs 'kit/.jidoka/instalar/manifiesto.json'), ($manifSin | ConvertTo-Json -Depth 10), (New-Object System.Text.UTF8Encoding($false)))
+    $codeSin = Run-PS $sembrar -Destino $tmpSinStubs -Jidoka $fakeSinStubs
+    Check 'guard #89: manifiesto sin stubs NO revienta la siembra (exit 0)' ($codeSin -eq 0) "exit $codeSin (esperaba 0)"
+    Check 'guard #89: la siembra llega hasta el sello (no quedo a medias)' (Test-Path (Join-Path $tmpSinStubs 'tools/jidoka-motor.json')) "no aparecio el sello"
+  }
+  finally {
+    Remove-Item $fakeSinStubs -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item $tmpSinStubs -Recurse -Force -ErrorAction SilentlyContinue
+  }
 }
 finally {
   Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue

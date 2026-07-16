@@ -230,7 +230,7 @@ if ($Actualizar) {
 if ($excluir.Count) { $selloNuevo.excluir = @($excluir) }
 $parent = Split-Path -Parent $selloDst
 if ($parent -and -not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
-[System.IO.File]::WriteAllText($selloDst, ($selloNuevo | ConvertTo-Json -Depth 5), $utf8)
+[System.IO.File]::WriteAllText($selloDst, (($selloNuevo | ConvertTo-Json -Depth 5) + "`n"), $utf8)
 
 # --- 7. Encender core.hooksPath -------------------------------------------------
 if ($manif.post.hooksPath) {
