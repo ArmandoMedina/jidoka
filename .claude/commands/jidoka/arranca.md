@@ -19,6 +19,14 @@ La lupa de todo lo demás; léela primero:
 
 ### §1b — Carga el contexto (`@`), en orden qué → cómo → dónde
 
+> **Preflight — los `@` de abajo NO avisan si faltan.** Un `@` a un archivo ausente inyecta
+> **vacío en silencio**: el ritual seguiría hasta el paso 6 y te daría la **sensación de estar
+> preparado** con el agente sin el QUÉ/CÓMO/DÓNDE. La siembra es best-effort en tiempo de
+> instalación; este preflight es la última defensa, y corre en cada sesión. Si algo sale
+> `[FALTA]`, **detente a sembrar la instancia antes de confiar en la sesión** (regla dura del §5)
+> — no propongas trabajo sobre contexto vacío (jidoka#104).
+!`m=""; for f in product/PRODUCT_BRIEF.md CONTRIBUTING.md product/infra.md HANDOFF.md; do [ -f "$f" ] || m="$m $f"; done; if [ -n "$m" ]; then echo "[FALTA]$m"; echo ">> arranca inyectara VACIO para esos @: el agente NO recibe ese contexto aunque el ritual siga."; echo ">> Siembra la instancia ANTES de confiar en la sesion: instalar.ps1 -Actualizar (o sembrar-manual.ps1 -Actualizar) desde Jidoka."; else echo "[preflight @] ok -- los 4 documentos de contexto existen"; fi`
+
 - **El QUÉ** (el brief: caso concreto, métrica, autoridad del dominio, criterio de "hecho"):
 @product/PRODUCT_BRIEF.md
 

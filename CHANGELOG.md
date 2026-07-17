@@ -2,6 +2,16 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.21.1] — 2026-07-17
+
+### Preflight de inyección: los `@` del ritual dejan de fallar en silencio (jidoka#104)
+
+Nace de un lab: `arranca` y `planea` inyectan documentos de instancia con `@archivo`, y un `@` a un archivo ausente inyecta **vacío en silencio** — el ritual seguía hasta "qué sigue" y le daba al operador la **sensación de estar preparado** con el agente sin el QUÉ/CÓMO/DÓNDE. La siembra (cosecha #7) es best-effort en tiempo de instalación; faltaba la defensa en cada sesión.
+
+- **`arranca.md` §1b y `planea.md`** ganan un **preflight** `!` ANTES del bloque `@`: verifica que cada archivo a inyectar existe y, si falta alguno, lo grita con remediación (`[FALTA] … instalar.ps1 -Actualizar`) — mismo patrón defensivo que las guardias de `rutear`/`asientos`. No reemplaza el `@` (se conserva ADR 0034: "un `@` es un hecho ya inyectado"); solo antecede la precondición.
+- **`tools/probar-preflight.ps1`** (nuevo, mecánica): guardián de regresión. Invariante — todo `@` de instancia que un comando inyecta debe estar cubierto por un preflight que teste su existencia. Falla rojo si un comando gana un `@` nuevo sin extender su preflight. Cableado en `publicar.ps1`, `andon.yml` y el manifiesto (baja a los labs con `-Actualizar`).
+- La inconsistencia que lo delató: `descubre.md` ya cargaba el mismo `PRODUCT_BRIEF.md` **con** guardia (`test -f && cat || echo`), mientras `arranca`/`planea` lo inyectaban **sin** guardia vía `@`.
+
 ## [1.21.0] — 2026-07-17
 
 ### El ritual se vuelve determinista — sin punteros, atlas Method & Style y el cuadro de cierre
