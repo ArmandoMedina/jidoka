@@ -12,10 +12,16 @@ Cada sesión abre como una **mente nueva** —no recuerdas nada de antes; esa es
 
 **git primero es el filtro de frescura: nada de lo que leas abajo sirve si el repo ya no está donde el documento cree.** Si el HANDOFF describe un estado que git contradice —ramas ya mergeadas, cambios ya en `main`, "pendiente" que ya se hizo—, **git gana**: el relevo se lee con esa lupa, no al revés.
 
-- **Dónde está git ahora mismo** (la frescura — léela primero, es la lupa de todo lo demás):
+Son **dos movimientos** (así lo modela el atlas, §1a/§1b): primero revisas la frescura, luego cargas el contexto **por encima de esa lupa**.
+
+### §1a — Revisa la frescura en git
+
+La lupa de todo lo demás; léela primero:
 !`git branch --show-current && git status --short && git log --oneline -5`
 
-- **El QUÉ del proyecto** (el brief: caso concreto, métrica, autoridad del dominio, criterio de "hecho"):
+### §1b — Carga el contexto (`@`), en orden qué → cómo → dónde
+
+- **El QUÉ** (el brief: caso concreto, métrica, autoridad del dominio, criterio de "hecho"):
 @product/PRODUCT_BRIEF.md
 
 - **El CÓMO — cómo se trabaja aquí** (el flujo, quién es dueño de qué doc, el ritual de versión):
@@ -24,10 +30,10 @@ Cada sesión abre como una **mente nueva** —no recuerdas nada de antes; esa es
 - **El CÓMO — la infraestructura** (identidades, máquinas/ambientes, el roster con nombres si el repo lo declaró):
 @product/infra.md
 
-- **Dónde se quedó la última sesión** — el relevo: se lee y **se limpia** al abrir; interprétalo contra git (arriba), no al revés:
+- **El DÓNDE — dónde se quedó la última sesión**: el relevo se lee y **se limpia** al abrir; interprétalo contra git (§1a), no al revés:
 @HANDOFF.md
 
-- **Plan de trabajo del día**, si una sesión anterior lo dejó a medias (efímero, fuera de git — ADR 0006):
+- **El plan de trabajo del día**, si una sesión anterior lo dejó a medias (efímero, fuera de git — ADR 0006):
 !`test -f .jidoka/plan-actual.md && cat .jidoka/plan-actual.md || echo "(no hay plan de trabajo activo — empezamos limpio)"`
 
 ## 2. El roster y el router
