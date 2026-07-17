@@ -6,27 +6,29 @@ allowed-tools: Read, Bash(git status:*), Bash(git log:*), Bash(git branch:*), Ba
 
 Estás **abriendo una sesión de trabajo** en este proyecto. Antes de tocar nada, orienta la sesión con el estado real —no con tu memoria ni con un resumen— y fija las reglas del ritual. Este es el `/jidoka:arranca` del método (ver `kanban/lazo.md`, `kanban/roles.md`).
 
-## 1. Lee el estado en vuelo (el relevo)
+## 1. Lee el estado real, en orden de onboarding: git → qué → cómo → dónde
 
-El estado del proyecto vive en artefactos, no en la memoria de nadie. Lo que sigue no son punteros a criterio tuyo de seguir o no —cada `@` es una **inyección directa**: el contenido ya está en tu contexto al abrir esta sesión, no una lectura que queda pendiente (un puntero es una esperanza; un `@` es un hecho — ADR 0034):
+Cada sesión abre como una **mente nueva** —no recuerdas nada de antes; esa es la tesis del método— así que te orientas como se onboardea a un colega, y en un orden que tiene lógica: **primero si esto está fresco, luego qué es, luego cómo se trabaja aquí, y al final dónde se quedó la última sesión.** Lo que sigue no son punteros a criterio tuyo de seguir o no —cada `@` es una **inyección directa**: el contenido ya está en tu contexto al abrir esta sesión, no una lectura que queda pendiente (un puntero es una esperanza; un `@` es un hecho — ADR 0034).
 
-- **Estado en vuelo y pendientes** — se lee y **se limpia** al abrir:
-@HANDOFF.md
+**git primero es el filtro de frescura: nada de lo que leas abajo sirve si el repo ya no está donde el documento cree.** Si el HANDOFF describe un estado que git contradice —ramas ya mergeadas, cambios ya en `main`, "pendiente" que ya se hizo—, **git gana**: el relevo se lee con esa lupa, no al revés.
+
+- **Dónde está git ahora mismo** (la frescura — léela primero, es la lupa de todo lo demás):
+!`git branch --show-current && git status --short && git log --oneline -5`
 
 - **El QUÉ del proyecto** (el brief: caso concreto, métrica, autoridad del dominio, criterio de "hecho"):
 @product/PRODUCT_BRIEF.md
 
-- **El CÓMO del proyecto** (infraestructura, identidades, máquinas/ambientes, el roster con nombres si el repo lo declaró):
+- **El CÓMO — cómo se trabaja aquí** (el flujo, quién es dueño de qué doc, el ritual de versión):
+@CONTRIBUTING.md
+
+- **El CÓMO — la infraestructura** (identidades, máquinas/ambientes, el roster con nombres si el repo lo declaró):
 @product/infra.md
 
-- **Cómo se contribuye aquí** (el flujo, quién es dueño de qué doc, el ritual de versión):
-@CONTRIBUTING.md
+- **Dónde se quedó la última sesión** — el relevo: se lee y **se limpia** al abrir; interprétalo contra git (arriba), no al revés:
+@HANDOFF.md
 
 - **Plan de trabajo del día**, si una sesión anterior lo dejó a medias (efímero, fuera de git — ADR 0006):
 !`test -f .jidoka/plan-actual.md && cat .jidoka/plan-actual.md || echo "(no hay plan de trabajo activo — empezamos limpio)"`
-
-- **Dónde está git ahora mismo**:
-!`git branch --show-current && git status --short && git log --oneline -5`
 
 ## 2. El roster y el router
 

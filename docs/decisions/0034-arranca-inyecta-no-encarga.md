@@ -37,6 +37,21 @@ Tres curas entrelazadas, un solo reframe — **el arranca inyecta, no encarga; e
 - **Más fácil:** delegar por asiento deja de ser una decisión de "a qué modelo le pido esto" — el tier ya viene fijado en `.claude/agents/*.md`; el orquestador solo elige el rol. La lectura de estado al abrir sesión (HANDOFF, brief, infra, contribuir) ya no depende de que el agente decida seguir un puntero.
 - **Más difícil / deuda:** el payload inyectado en cada apertura crece (cuatro `@` en vez de dos) — más tokens consumidos por sesión abierta, incluso en sesiones cortas que no los necesitan todos. Se acepta a propósito: la lectura del estado no es opcional, y el costo de un `@` de más es barato comparado con el costo de un HANDOFF no leído o un brief ignorado. Además, repos que no adoptaron el split `PRODUCT_BRIEF.md`/`infra.md` verán un `@` a un archivo ausente hasta que lo siembren.
 
+## Enmienda 2026-07-17 — el orden de lectura: git → qué → cómo → dónde
+
+El payload de §1 se inyectaba en orden **HANDOFF → brief → infra → CONTRIBUTING → plan → git** (el relevo primero, git al final). Trabajando el atlas del ritual (sesión 2026-07-17), el cliente cuestionó ese orden con lógica de **onboarding humano**: cada sesión abre como una **mente nueva** —la tesis del propio método— así que se orienta como se onboardea a un colega, y **git va primero** porque es el **filtro de frescura**: nada de lo que se lea sirve si el repo ya no está donde el documento cree.
+
+Evidencia en vivo: esa misma sesión abrió con un HANDOFF que juraba "3 cambios sin commitear" mientras git mostraba que ya estaban en `main` (#102). Leer git primero convierte esa contradicción en la **lupa** con la que se lee el relevo, en vez de un dato enterrado al final.
+
+**Se reafirma la inyección (no se revierte 0034):** todo sigue entrando con `@`/`!` — un puntero sigue siendo esperanza. Solo cambia el **orden** y se agrega el **principio de frescura**:
+
+1. **git** — la frescura, la lupa de todo lo demás (si el HANDOFF contradice a git, **git gana**).
+2. **qué** — `PRODUCT_BRIEF.md`.
+3. **cómo** — `CONTRIBUTING.md` (cómo se trabaja) + `infra.md` (la infraestructura).
+4. **dónde** — `HANDOFF.md` (dónde se quedó la última sesión) + el plan del día.
+
+Tocado: `.claude/commands/jidoka/arranca.md` §1 (encabezado + orden de los bloques) y su espejo en el atlas (`docs/atlas/10-ritual/10-arranca-con-subprocesos.bpmn`: `documentation` + nodo `T_Leer`, re-renderizado). El diagrama de referencia `arranca-propuesta-usuario.bpmn` —un boceto alterno que proponía lectura perezosa "solo lo activado", **contrario** a la inyección de 0034— se **borró** para no dejar ruido de una ruta no tomada.
+
 ---
 
 > Reglas del registro: una decisión = un archivo · al agregarlo, **listalo en el [índice](README.md) en el mismo commit** (el gate lo exige) · nunca borres una decisión: márcala *reemplazada* y enlaza la nueva.

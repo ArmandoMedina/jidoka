@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_10_Arranca" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_10_Arranca" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" xmlns:modeler="http://camunda.org/schema/modeler/1.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
   <bpmn:collaboration id="Collaboration_10_Arranca">
     <bpmn:participant id="Participant_Usuario" name="Usuario"/>
     <bpmn:participant id="Participant_Proyecto" name="/jidoka:arranca — abrir y orientar la sesión (sin construir)" processRef="Process_Arranca"/>
@@ -7,7 +7,7 @@
     <bpmn:messageFlow id="MF_Orient" sourceRef="Send_Orientar" targetRef="Participant_Usuario" name="Orientación" messageRef="Message_Orientacion"/>
   </bpmn:collaboration>
   <bpmn:process id="Process_Arranca" name="/jidoka:arranca — abrir y orientar la sesión" isExecutable="false">
-    <bpmn:documentation>Fuente: .claude/commands/jidoka/arranca.md. Las 6 secciones del comando en orden: §1 leer el estado en vuelo (HANDOFF, PRODUCT_BRIEF, infra/roster, CONTRIBUTING, plan del día, git), §2 roster + router (rutear.ps1), §3 el asiento lo ocupa el subagente, §4 desconfía de la compactación (guarda transversal, anotación), §5 fija las reglas duras, §6 orienta y espera la señal del cliente. El STOP final es la señal del cliente antes de construir.</bpmn:documentation>
+    <bpmn:documentation>Fuente: .claude/commands/jidoka/arranca.md. Las 6 secciones del comando en orden: §1 leer el estado real en orden de onboarding git→qué→cómo→dónde (git primero como filtro de frescura, luego PRODUCT_BRIEF, CONTRIBUTING, infra/roster, HANDOFF, plan del día), §2 roster + router (rutear.ps1), §3 el asiento lo ocupa el subagente, §4 desconfía de la compactación (guarda transversal, anotación), §5 fija las reglas duras, §6 orienta y espera la señal del cliente. El STOP final es la señal del cliente antes de construir.</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_10_Arranca">
       <bpmn:lane id="Lane_Agente" name="Agente orquestador">
         <bpmn:flowNodeRef>Start_Arranque</bpmn:flowNodeRef>
@@ -31,7 +31,7 @@
       <bpmn:messageEventDefinition id="MED_Start_Arranque" messageRef="Message_Arranque"/>
       <bpmn:outgoing>F_Start_Leer</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:serviceTask id="T_Leer" name="1. Leer el estado en vuelo: HANDOFF, PRODUCT_BRIEF, infra (roster/casting), CONTRIBUTING, plan del día, git">
+    <bpmn:serviceTask id="T_Leer" name="1. Leer el estado real (git → qué → cómo → dónde): git, PRODUCT_BRIEF, CONTRIBUTING, infra (roster/casting), HANDOFF, plan del día">
       <bpmn:incoming>F_Start_Leer</bpmn:incoming>
       <bpmn:outgoing>F_Leer_Router</bpmn:outgoing>
     </bpmn:serviceTask>

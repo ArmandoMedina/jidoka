@@ -2,6 +2,16 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [Unreleased]
+
+### El arranca onboardea como a una mente nueva — git → qué → cómo → dónde
+
+Nace de que el cliente, viendo los flujos del atlas, cuestionó el **orden de lectura** del `/jidoka:arranca`. Enmienda a ADR 0034 (reafirma la inyección, refina el orden).
+
+- **`feat` — §1 del arranca reordenada a `git → qué → cómo → dónde`:** git **primero** como filtro de frescura (si el HANDOFF contradice a git, git gana — cazaría el doc-drift que abrió esta misma sesión); luego el QUÉ (`PRODUCT_BRIEF`), el CÓMO (`CONTRIBUTING` + `infra`), y al final el relevo (`HANDOFF` + plan del día). Cada sesión abre como una mente nueva, así que se orienta como se onboardea a un colega. Sigue siendo inyección `@`/`!` — no se revierte 0034. Fuente: `.claude/commands/jidoka/arranca.md`.
+- **`docs` — el atlas sigue fiel:** `10-arranca-con-subprocesos.bpmn` (`documentation` + nodo `T_Leer`) refleja el nuevo orden, re-renderizado. Se **borró** `referencia/arranca-propuesta-usuario.bpmn` (boceto alterno de lectura perezosa "solo lo activado", contrario a la inyección de 0034 — ruido de una ruta no tomada).
+- **`fix` — sellados los 2 diagramas que quedaron sin sellar en v1.20.0** (`10-arranca-con-subprocesos.bpmn`, `31-sembrar-manual-as-is.bpmn`): les faltaba el atributo `modeler:executionPlatformVersion`, así que Miragon (VS Code) preguntaba "Camunda 7 u 8" cada vez que se abrían. `atlas:sellar` los normaliza; los otros 23 ya lo tenían.
+
 ## [1.20.0] — 2026-07-16
 
 ### El atlas dice la verdad — fidelidad de los 24 diagramas contra su fuente real
