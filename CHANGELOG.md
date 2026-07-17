@@ -2,6 +2,17 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.22.0] — 2026-07-17
+
+### El repo público deja de filtrar dato de entorno — un gate lo hace cumplir (ADR 0041)
+
+Nace de que el cliente cazó datos personales suyos en este repo público: una cuenta gh **secundaria** nombrada en `product/infra.md` y `HANDOFF.md` (vinculaba dos identidades), violando la "Frontera de confidencialidad" del `CONTRIBUTING`. Se limpió del HEAD; faltaba el muro que impidiera la recaída. La "Frontera" era prosa — ahora es maquinaria.
+
+- **`feat` — `tools/anti-pii.ps1` (nuevo, mecánica) + `tools/probar-anti-pii.ps1` (11 casos, ROJO→VERDE):** detector anti-fuga de PII de entorno en docs rastreados. Busca **formas**, no instancias (un gate que contiene la PII que busca la re-publica): email con dominio real y rutas de perfil de usuario nombradas (`C:\Users\<x>`, `/home/<x>`) que no sean placeholders. **BLOQUEA** (exit 1); **FALLA CERRADO** (exit 2) si no puede listar el árbol. Cero falsos positivos medidos contra los 206 archivos del repo (el handle `@ArmandoMedina`, los `@jidoka.local`, los `C:\Users\x` y `C:\ruta\a\` pasan por allowlist).
+- **Se parte en dos por diseño (ADR 0041):** el detector estructural es el muro **público server-side** (corre en el check `andon` con el patrón "detector de la base"); una **denylist local** (`tools/anti-pii.denylist.txt`, gitignoreada, nunca committeada; plantilla `.example.txt`) es el cinturón pre-push para cadenas literales del entorno. Modelo de amenaza: el accidente, no el adversario.
+- **Cableado:** step nuevo en `.github/workflows/andon.yml` (el muro) + self-test en el humo; invocación en `.githooks/pre-push` (aviso local); disparo 16.º `sin-pii-en-el-repo`; baja a los hijos por el manifiesto (`-Actualizar`).
+- **Limpieza asociada:** el nombre de la cuenta secundaria quitado de `infra.md` y `HANDOFF` (PR previo); email de commits de este repo fijado al `noreply` de GitHub (config local).
+
 ## [1.21.1] — 2026-07-17
 
 ### Preflight de inyección: los `@` del ritual dejan de fallar en silencio (jidoka#104)

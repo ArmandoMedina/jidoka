@@ -38,6 +38,7 @@ jobs:
           .\tools\probar-auditor.ps1;  if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-disparos.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-preflight.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-anti-pii.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           # Self-tests Jidoka-only (no sembrados): corren solo si estan presentes
           # (un hijo instalado no los tiene, y este mismo workflow se siembra).
           # probar-instalador y probar-sembrar corren AQUI a proposito: en Windows
@@ -80,6 +81,33 @@ jobs:
             foreach ($h in $hallazgos) { "- " + $h.Trim() | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8 }
           } else {
             "Sin hallazgos: blast-radius al dia." | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
+          exit $code
+
+      - name: anti-PII (fuga de dato de entorno) sobre el arbol del PR
+        shell: powershell
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $ref = "origin/$env:BASE_REF"
+          git cat-file -e "${ref}:tools/anti-pii.ps1"; $okPii = ($LASTEXITCODE -eq 0)
+          if ($okPii) {
+            $piiBase = Join-Path $env:TEMP 'anti-pii-base.ps1'
+            git show "${ref}:tools/anti-pii.ps1" | Out-File $piiBase -Encoding ascii
+            $out = (& $piiBase -Repo "$env:GITHUB_WORKSPACE" 6>&1 | Out-String)
+          } else {
+            Write-Host "##[warning] La base $ref aun no trae el gate anti-PII; fallback al del PR (PR fundacional)."
+            $out = (.\tools\anti-pii.ps1 6>&1 | Out-String)
+          }
+          $code = $LASTEXITCODE
+          Write-Host $out
+          $hallazgos = @($out -split "`r?`n" | Where-Object { $_ -match '\[BLOQUEA\]' })
+          "## Andon - anti-PII (fuga de dato de entorno)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          if ($hallazgos.Count -gt 0) {
+            foreach ($h in $hallazgos) { "- " + $h.Trim() | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8 }
+          } else {
+            "Sin fugas: docs de entorno limpios." | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           }
           exit $code
 

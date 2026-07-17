@@ -126,3 +126,14 @@ el mensaje llega en el momento del disparo y no puede asumir que la IA leyó nad
 > self-test, y el review pasó verde encima.
 
 **Cableado en:** `tools/verificar.ps1`
+
+### sin-pii-en-el-repo
+> Un repo público no debe filtrar dato de entorno personal (un correo real, una ruta
+> `C:\Users\<nombre>`, una cuenta secundaria). La "Frontera de confidencialidad" del
+> `CONTRIBUTING` era prosa; ahora un gate lo hace cumplir. El detector busca *formas* de PII,
+> nunca instancias hardcodeadas (un gate que contiene la PII que busca la re-publica): email con
+> dominio real y rutas de usuario nombradas. Una denylist local (gitignoreada, nunca committeada)
+> añade cadenas literales del entorno. Modelo de amenaza: el accidente, no el adversario. Caso de
+> campo: la cuenta gh secundaria del autor se coló en `infra.md` y el `HANDOFF` (ADR 0041).
+
+**Cableado en:** `tools/anti-pii.ps1`
