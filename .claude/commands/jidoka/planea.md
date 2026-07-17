@@ -16,7 +16,7 @@ El estado que el plan necesita queda inyectado **aquí mismo** — la garantía 
 > **Preflight — los `@` NO avisan si faltan.** Un `@` a un archivo ausente inyecta vacío en
 > silencio y `planea` planearía a ciegas. Si algo sale `[FALTA]`, siembra la instancia antes de
 > redactar R0 (o corre `/jidoka:descubre` si el brief está vacío — jidoka#104).
-!`m=""; for f in HANDOFF.md ROADMAP.md product/PRODUCT_BRIEF.md; do [ -f "$f" ] || m="$m $f"; done; if [ -n "$m" ]; then echo "[FALTA]$m"; echo ">> planea inyectara VACIO para esos @: el plan saldria a ciegas. Siembra la instancia (instalar.ps1 -Actualizar) antes de R0."; else echo "[preflight @] ok -- relevo, backlog y brief existen"; fi`
+!`test -f HANDOFF.md || echo "[FALTA] HANDOFF.md"; test -f ROADMAP.md || echo "[FALTA] ROADMAP.md"; test -f product/PRODUCT_BRIEF.md || echo "[FALTA] product/PRODUCT_BRIEF.md"; echo "[preflight @] revisado -- cada [FALTA] de arriba inyecta VACIO ese @ (el plan saldria a ciegas). Siembra la instancia (instalar.ps1 -Actualizar) antes de R0. Sin [FALTA] = relevo, backlog y brief existen."`
 
 - **El relevo** (pendientes y cola de decisiones del cliente — insumo directo del plan):
 @HANDOFF.md

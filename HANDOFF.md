@@ -6,7 +6,20 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-17 tarde — El ritual determinista · **PR #103 ABIERTO**, merge y release pendientes de orden)
+## Dónde estamos (2026-07-17 noche — preflight `!` desbloqueado · **git gana: #103/#104/#105 YA mergeados**)
+
+**`main` = `904c05e`.** La "cola de decisiones `[PENDIENTE]`" del relevo de abajo **ya se resolvió sola**: PR #103 mergeado, **`v1.21.0` liberado** (tag `v1.21.0`), y encima entraron **#104** (preflight de inyección) y **#105**. `tools/version.txt` = **1.21.1** con su sección de CHANGELOG, pero **1.21.1 NO tiene tag — está SIN liberar** (la SSOT va un PATCH adelante del último release).
+
+**Esta sesión (soporte, no sprint) — rama `fix/preflight-classificador-20260717`, SIN mergear (pendiente de orden nombrada):**
+- **El preflight `!` de #104 tronaba `/jidoka:arranca` al abrir.** Usaba `for f in …; do [ -f "$f" ] …`; el **clasificador de permisos** de Claude Code marca esa expansión de shell (`simple_expansion`) y se niega a auto-correrla → abortaba en el primer paso. Reescrito en `arranca.md` §1b y `planea.md` al idioma que SÍ auto-corre (el mismo de la guardia del plan-de-trabajo, línea 43): `test -f X || echo "[FALTA] X"` por archivo — nombra el que falta. `probar-preflight.ps1` ampliado para aceptar `test -f` además de `[ -f`. Corrección **plegada en el CHANGELOG de 1.21.1** (aún sin release).
+- **Evidencia:** el nuevo preflight corre **sin bloqueo** del portero (probado con archivo inexistente → sale solo el `[FALTA]` del que falta); guardián `probar-preflight.ps1` **7/7 verde**. `/code-review` (high) corrió: 2 hallazgos — #1 (no nombraba el archivo faltante) **ATENDIDO**; #2 (el matcher del guardián se afloja al incluir `test -f`) **anotado/aceptado** (el blob por-substring ya era impreciso antes de #104; escenario hipotético). Diff marcado revisado.
+- **Falta para cerrar del todo:** merge de esta rama (orden nombrada) + decidir si se corta **release 1.21.1** o se pliega en el siguiente.
+
+**El tema de fondo que abrió la sesión (diagnosticado, SIN empezar a construir):** *documentos gobernados* — la lógica del ritual (`arranca`/`planea`/`cierra`) **diverge en los hijos** aunque se corra `-Actualizar`, y se quedan sin las curas del motor (p.ej. este mismo preflight). Diagnóstico + los 3 mecanismos de diseño (forzar · partir · marcar+avisar — "no se pueda **o no se recomiende** desviar") **registrados en `ROADMAP.md` → Backlog → Follow-ups sueltos**. Candidato a `/jidoka:planea` tras medir el drift real. **Coordinación:** el lab de rescate ("enti", `C:\Repositorios\entisoft-rescate`) lo trabaja **otro agente** → ahí se entra **solo-lectura** o con **rama propia**.
+
+---
+
+## Dónde estuvimos (2026-07-17 tarde — El ritual determinista · PR #103 · `v1.21.0` — ✅ MERGEADO Y LIBERADO)
 
 **Dos sesiones encadenadas en la rama `refina-arranca-orden-20260717` (16 commits, cuadro completo en `docs/sprints/cierre-20260717.md` — estrena el cuadro de cierre que esta misma sesión cableó).** La entrega:
 
@@ -16,9 +29,9 @@
 4. **`cierra` gana el cuadro de cierre** (23 filas de hechos medibles, se **versiona** con los planes) — pedido del cliente con sus métricas de siempre + delegaciones, aprobaciones nombradas, compactación, fricción/errores (Kaizen crudo), motor al día.
 5. **Censo de documentos** (161 md): núcleo traqueado; `docs/analisis/` era la única carpeta sin índice (creado). Índice de sprints podado (atlas-fiel ya estaba liberado).
 
-**Cola de decisiones del cliente `[PENDIENTE]` (no son de código — nada está bloqueado):**
-- **Merge del PR #103 + release `v1.21.0` (MINOR)** — orden nombrada, cuenta `ArmandoMedina`.
-- **Del censo, 2 knobs de ley:** ¿`product/**` como `fuente` de un área? · ¿vigilar los planes de sprint post-aprobación?
+**Cola de decisiones del cliente (actualizada — git gana):**
+- ✅ **Merge del PR #103 + release `v1.21.0`** — HECHO (tag `v1.21.0`; luego #104/#105 encima).
+- **Del censo, 2 knobs de ley `[PENDIENTE]`:** ¿`product/**` como `fuente` de un área? · ¿vigilar los planes de sprint post-aprobación?
 
 **Pendiente registrado (backlog del ROADMAP):** el cuadro de cierre como plantilla sembrable (`kit/.jidoka/templates/cierre-cuadro.md` inyectada con `@`; el diagrama solo la referencia).
 

@@ -25,7 +25,7 @@ La lupa de todo lo demás; léela primero:
 > instalación; este preflight es la última defensa, y corre en cada sesión. Si algo sale
 > `[FALTA]`, **detente a sembrar la instancia antes de confiar en la sesión** (regla dura del §5)
 > — no propongas trabajo sobre contexto vacío (jidoka#104).
-!`m=""; for f in product/PRODUCT_BRIEF.md CONTRIBUTING.md product/infra.md HANDOFF.md; do [ -f "$f" ] || m="$m $f"; done; if [ -n "$m" ]; then echo "[FALTA]$m"; echo ">> arranca inyectara VACIO para esos @: el agente NO recibe ese contexto aunque el ritual siga."; echo ">> Siembra la instancia ANTES de confiar en la sesion: instalar.ps1 -Actualizar (o sembrar-manual.ps1 -Actualizar) desde Jidoka."; else echo "[preflight @] ok -- los 4 documentos de contexto existen"; fi`
+!`test -f product/PRODUCT_BRIEF.md || echo "[FALTA] product/PRODUCT_BRIEF.md"; test -f CONTRIBUTING.md || echo "[FALTA] CONTRIBUTING.md"; test -f product/infra.md || echo "[FALTA] product/infra.md"; test -f HANDOFF.md || echo "[FALTA] HANDOFF.md"; echo "[preflight @] revisado -- cada [FALTA] de arriba inyecta VACIO ese @ (el agente NO recibe ese contexto). Siembra la instancia antes de confiar en la sesion: instalar.ps1 -Actualizar (o sembrar-manual.ps1 -Actualizar) desde Jidoka. Sin [FALTA] = los 4 @ existen."`
 
 - **El QUÉ** (el brief: caso concreto, métrica, autoridad del dominio, criterio de "hecho"):
 @product/PRODUCT_BRIEF.md

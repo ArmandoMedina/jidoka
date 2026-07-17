@@ -1,7 +1,7 @@
 #Requires -Version 5
 # probar-preflight.ps1 - self-test del preflight de inyeccion. Invariante: todo @archivo
 # de instancia que un comando del ritual inyecta debe estar cubierto por un preflight ! que
-# verifique su existencia ([ -f ...]) en el MISMO archivo. Un @ ausente inyecta vacio EN
+# verifique su existencia ([ -f ...] o test -f ...) en el MISMO archivo. Un @ ausente inyecta vacio EN
 # SILENCIO (jidoka#104): el ritual sigue de largo y le da al operador la sensacion de estar
 # preparado con el agente sin el QUE/COMO/DONDE. Este test es el guardian de regresion de esa
 # clase - falla ROJO si un comando gana un @ nuevo sin extender su preflight. Se siembra
@@ -29,8 +29,10 @@ foreach ($rel in $comandos) {
   $inyectados = @()
   foreach ($l in $lineas) { if ($l -match '^@(\S+)') { $inyectados += $matches[1] } }
 
-  # 2. preflight: lineas ! que traen un test de existencia [ -f ... ].
-  $preflight = ($lineas | Where-Object { $_ -match '^!' -and $_ -match '\[ -f' }) -join "`n"
+  # 2. preflight: lineas ! que traen un test de existencia ([ -f ... ] o test -f ...).
+  #    El idioma 'test -f' es el que el clasificador de permisos auto-corre (mismo que la
+  #    guardia del plan-de-trabajo en arranca.md); '[ -f' se acepta por compatibilidad.
+  $preflight = ($lineas | Where-Object { $_ -match '^!' -and ($_ -match '\[ -f' -or $_ -match 'test -f') }) -join "`n"
 
   if ($inyectados.Count -eq 0) { No "$rel : no se hallo ningun @ inyectado (parser roto?)"; continue }
 
