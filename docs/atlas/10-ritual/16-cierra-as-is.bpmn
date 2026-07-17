@@ -93,6 +93,10 @@
       <bpmn:text>T_Registrar incluye el paso Kaizen: al repartir por caducidad, si identificas una mejora sistémica (no puntual) la registras como ADR o issue — no la ejecutas en el cierre.</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:association id="Assoc_Kaizen" sourceRef="Ann_Kaizen" targetRef="T_Registrar"/>
+    <bpmn:textAnnotation id="Ann_Cuadro">
+      <bpmn:text>El cuadro de cierre: los hechos medibles (rama, commits, PR, pruebas altas/bajas, E2E, evidencia en qa_runs, gates y avisos, ritual corrido, sprint terminado o en curso) se llenan con verdad — un hueco se declara, no se rellena bonito — y se VERSIONA con los planes (en la entrega del sprint, o docs/sprints/cierre-AAAAMMDD.md).</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Cuadro" sourceRef="Ann_Cuadro" targetRef="T_Registrar"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_16_Cierra">
     <bpmndi:BPMNPlane id="Plane_16_Cierra" bpmnElement="Collab_Cierra">
@@ -209,6 +213,13 @@
       <bpmndi:BPMNEdge id="E_Assoc_Kaizen" bpmnElement="Assoc_Kaizen">
         <di:waypoint x="325" y="140"/>
         <di:waypoint x="325" y="150"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="S_AnnCuadro" bpmnElement="Ann_Cuadro">
+        <dc:Bounds x="200" y="248" width="290" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="E_Assoc_Cuadro" bpmnElement="Assoc_Cuadro">
+        <di:waypoint x="330" y="248"/>
+        <di:waypoint x="325" y="230"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
