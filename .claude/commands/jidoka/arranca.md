@@ -27,6 +27,13 @@ La lupa de todo lo demás; léela primero:
 > — no propongas trabajo sobre contexto vacío (jidoka#104).
 !`test -f product/PRODUCT_BRIEF.md || echo "[FALTA] product/PRODUCT_BRIEF.md"; test -f CONTRIBUTING.md || echo "[FALTA] CONTRIBUTING.md"; test -f product/infra.md || echo "[FALTA] product/infra.md"; test -f HANDOFF.md || echo "[FALTA] HANDOFF.md"; echo "[preflight @] revisado -- cada [FALTA] de arriba inyecta VACIO ese @ (el agente NO recibe ese contexto). Siembra la instancia antes de confiar en la sesion: instalar.ps1 -Actualizar (o sembrar-manual.ps1 -Actualizar) desde Jidoka. Sin [FALTA] = los 4 @ existen."`
 
+> **El `@` existe, ¿pero tiene las secciones?** El preflight de arriba verifica que el archivo **esté**;
+> este verifica que su **estructura** siga el molde gobernado. Un `CONTRIBUTING`/`brief`/`infra` presente
+> pero **destripado o reestructurado** pasa el `[FALTA]` y aun así **inyecta basura** al `@`. Modelo SAP:
+> el contenido varía libre, las **secciones** no — `DESVIADO` = *garantía nula* sobre ese doc. Aviso, no
+> muro (jidoka KIT-2; el muro es opt-in en CI).
+!`test -f tools/estado-docs.ps1 && powershell -File tools/estado-docs.ps1 || echo "[docs] sin detector de conformidad estructural -- corre instalar.ps1 -Actualizar (o sembrar-manual) para gobernar la estructura de brief/infra/CONTRIBUTING."`
+
 - **El QUÉ** (el brief: caso concreto, métrica, autoridad del dominio, criterio de "hecho"):
 @product/PRODUCT_BRIEF.md
 
