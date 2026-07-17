@@ -1,0 +1,24 @@
+{
+  "descripcion": "Ledger de gobierno documental por ESTRUCTURA (capa-2), el hermano estructural del sello tools/jidoka-motor.json (que gobierna el motor por HASH). Lo lee tools/estado-docs.ps1. Tres capas: capa-1 = motor (invariante, gobernado por hash via el sello; NO se re-lista aqui). capa-2 = instancia-de-template (contenido varia por proyecto, pero las SECCIONES 'requeridas' deben estar). capa-3 = libre (fuera del blast-radius; se declara para dejar constancia de que NO se gobierna). Regla dura de KIT-1: la instancia NUNCA se sobrescribe; este ledger DECLARA la conformidad, no muta. 'requeridas' es el contrato CONGELADO y MINIMO -- el molde (template) puede mostrar mas secciones como opcionales; requeridas solo lista las que arranca/planea de verdad consumen, para no marcar DESVIADO a un hijo con el stub viejo. El match es por PREFIJO NORMALIZADO (trim, minuscula, fold de acentos): una requerida se satisface si algun encabezado '## ' del doc, normalizado, EMPIEZA con ella -- asi 'Que hace' (stub ASCII) y 'Que hace (capacidades ancla)' (maduro) ambos cuentan, pero una seccion renumerada/renombrada ('2. El flujo (el lazo)') NO. 'estricto' nace en false (aviso): ponerlo en true enciende el muro opt-in (estado-docs -Estricto en CI). Ver ADR 0042.",
+  "capa2": [
+    {
+      "doc": "CONTRIBUTING.md",
+      "molde": "kit/.jidoka/templates/CONTRIBUTING.md",
+      "requeridas": ["El flujo"],
+      "estricto": false
+    },
+    {
+      "doc": "product/PRODUCT_BRIEF.md",
+      "molde": "kit/.jidoka/templates/PRODUCT_BRIEF.md",
+      "requeridas": ["En una frase", "El problema", "Que hace", "Landscape"],
+      "estricto": false
+    },
+    {
+      "doc": "product/infra.md",
+      "molde": "kit/.jidoka/templates/infra.md",
+      "requeridas": ["Material de referencia", "Identidades por servicio", "Maquinas y ambientes", "Convenciones que no se re-preguntan"],
+      "estricto": false
+    }
+  ],
+  "capa3": ["CODE_OF_CONDUCT.md", "LICENSE"]
+}

@@ -2,6 +2,20 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.23.0] — 2026-07-17
+
+### Documentos gobernados — el motor gobierna la *estructura* de los documentos de instancia, no solo el hash (modelo SAP)
+
+Nace de que el cliente, haciendo análisis de flujos en un lab de rescate, sintió que "los documentos de los hijos están super diferentes". La medición (solo-lectura) desmintió la premisa inicial —los `.md` del ritual NO divergen, son motor gobernado por hash— y encontró la real: los documentos **instancia-de-template** que el ritual inyecta con `@` (`PRODUCT_BRIEF`, `infra`, `CONTRIBUTING`) no los cubría nada, porque su contenido varía a propósito y el hash es la herramienta equivocada. Donde había template el hijo conformó; donde no (`CONTRIBUTING`, un stub de 4 líneas) cada repo inventó su estructura. Modelo mental del cliente: SAP — puedes llenar, pero si alteras la **estructura** gobernada, *garantía nula*.
+
+- **`feat` — el ledger `tools/docs-gobernados.json` (nuevo, mecánica):** declara la taxonomía de tres capas — capa-1 (motor, hash, ya existe), capa-2 (instancia-de-template, gobernada por **secciones**: brief, infra, CONTRIBUTING), capa-3 (libre: `CODE_OF_CONDUCT`, `LICENSE`, fuera del blast-radius, declarado para dejar constancia). Para cada capa-2, su molde y su lista **congelada** de secciones requeridas. El contrato vive en el ledger, no en el template vivo — así una edición de molde no marca DESVIADO a todos los hijos de golpe.
+- **`feat` — el detector `tools/estado-docs.ps1` (nuevo, mecánica), hermano estructural de `estado-motor.ps1`:** verifica que cada doc capa-2 conserve sus secciones requeridas (match por prefijo normalizado con fold de acentos). Faltante → **DESVIADO** (*garantía nula*); aditiva → OK (el contenido varía libre); reordenada → no bloquea. Aviso por defecto (exit 0), surtido en `/jidoka:arranca` §1b con el idioma classifier-safe `test -f X && powershell -File … || echo` (ya probado en la guardia del plan-de-trabajo).
+- **`feat` — el muro estricto es OPT-IN y nace APAGADO:** `estado-docs.ps1 -Estricto` sale 1 solo si un doc marcado `estricto:true` pierde una requerida, cableado en el required-check de CI (`andon.yml`), **nunca** en `verificar.ps1` (no clobbea el verificar customizado del hijo). Todos los docs nacen `estricto:false`: el "no se pueda" del cliente llega como palanca que él enciende en su ledger, no como muro impuesto.
+- **`feat` — `CONTRIBUTING` gana template real** (`kit/.jidoka/templates/CONTRIBUTING.md`) y stub estructurado en el manifiesto (antes: un stub inline de 4 líneas sin molde — la causa raíz de su divergencia). Un hijo nuevo nace CONFORME. `CODE_OF_CONDUCT` confirmado capa-3, fuera del blast-radius.
+- **`test` — `tools/probar-docs.ps1` (nuevo, mecánica):** casos ROJO→VERDE del detector (conforme, faltante, aditiva, fold de acentos, muro opt-in) + integridad del ledger (cada molde existe, cada requerida es prefijo de una sección del molde, los 3 docs inyectados están gobernados). En el smoke local (`andon.yml`) y en el preflight de `publicar.ps1`.
+- **ADR 0042** — Gobierno documental por estructura (capa-2): el hermano estructural del sello · aceptado. Capacidad **[[KIT-2-gobierno-documental]]** (extiende KIT-1).
+- **Nota de coordinación:** esta versión incluye el preflight `!` de la 1.21.1 (su rama se plegó aquí). El PR #108 (`gate-anti-pii`) cortó `1.22.0` primero, así que este sprint rebumpó a `1.23.0` al mergear.
+
 ## [1.22.0] — 2026-07-17
 
 ### El repo público deja de filtrar dato de entorno — un gate lo hace cumplir (ADR 0041)
@@ -22,6 +36,7 @@ Nace de un lab: `arranca` y `planea` inyectan documentos de instancia con `@arch
 - **`arranca.md` §1b y `planea.md`** ganan un **preflight** `!` ANTES del bloque `@`: verifica que cada archivo a inyectar existe y, si falta alguno, lo grita con remediación (`[FALTA] … instalar.ps1 -Actualizar`) — mismo patrón defensivo que las guardias de `rutear`/`asientos`. No reemplaza el `@` (se conserva ADR 0034: "un `@` es un hecho ya inyectado"); solo antecede la precondición.
 - **`tools/probar-preflight.ps1`** (nuevo, mecánica): guardián de regresión. Invariante — todo `@` de instancia que un comando inyecta debe estar cubierto por un preflight que teste su existencia. Falla rojo si un comando gana un `@` nuevo sin extender su preflight. Cableado en `publicar.ps1`, `andon.yml` y el manifiesto (baja a los labs con `-Actualizar`).
 - La inconsistencia que lo delató: `descubre.md` ya cargaba el mismo `PRODUCT_BRIEF.md` **con** guardia (`test -f && cat || echo`), mientras `arranca`/`planea` lo inyectaban **sin** guardia vía `@`.
+- **Corrección antes de release (mismo 1.21.1):** el primer preflight usaba `for f in …; do [ -f "$f" ] …` — el **clasificador de permisos** de Claude Code marca esa expansión de shell (`simple_expansion`) y **se niega a auto-correrla**, tronando el comando entero al abrir. Reescrito al idioma que el clasificador SÍ auto-corre (el mismo que la guardia del plan-de-trabajo en `arranca.md`): `test -f X || echo "[FALTA] X"` por archivo — sin variables ni `for`, y **nombra** el archivo que falta. `probar-preflight.ps1` se amplió para reconocer `test -f` además de `[ -f`. Lección durable en `ROADMAP.md`: todo `!`-inline sembrado evita variables/`for` de shell.
 
 ## [1.21.0] — 2026-07-17
 

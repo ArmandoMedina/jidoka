@@ -38,6 +38,7 @@ jobs:
           .\tools\probar-auditor.ps1;  if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-disparos.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-preflight.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-docs.ps1;     if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-anti-pii.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           # Self-tests Jidoka-only (no sembrados): corren solo si estan presentes
           # (un hijo instalado no los tiene, y este mismo workflow se siembra).
@@ -83,6 +84,26 @@ jobs:
             "Sin hallazgos: blast-radius al dia." | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           }
           exit $code
+
+      # Conformidad estructural de los documentos gobernados (capa-2) - MURO OPT-IN.
+      # estado-docs.ps1 -Estricto sale 1 SOLO si un doc marcado 'estricto:true' en el
+      # ledger tools/docs-gobernados.json perdio una seccion requerida. Nace APAGADO:
+      # todos los docs nacen estricto:false, asi que este step es verde por defecto
+      # (el aviso vive en /jidoka:arranca). El cliente enciende el "no se pueda"
+      # flipando estricto:true en su ledger -- la palanca es suya, no impuesta (ADR 0042).
+      - name: conformidad estructural de docs gobernados (muro opt-in, capa-2)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Continue'
+          if (Test-Path '.\tools\estado-docs.ps1') {
+            .\tools\estado-docs.ps1 -Estricto
+            if ($LASTEXITCODE -ne 0) {
+              "## Andon - conformidad estructural (docs gobernados)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+              "- Un documento gobernado ESTRICTO altero su estructura: garantia nula. Restaura las secciones requeridas o revierte estricto:true en tools/docs-gobernados.json." | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+              exit 1
+            }
+          }
+          exit 0
 
       - name: anti-PII (fuga de dato de entorno) sobre el arbol del PR
         shell: powershell

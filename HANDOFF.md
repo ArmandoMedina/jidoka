@@ -6,6 +6,24 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
+## Dónde estamos (2026-07-17 — Documentos gobernados · KIT-2 · `v1.23.0` — ✅ MERGEADO Y LIBERADO)
+
+**Sprint "Documentos gobernados" cerrado, mergeado y liberado (`v1.23.0`, ADR 0042).** El **hermano estructural del sello**: el motor se gobierna por hash; los documentos **instancia-de-template** que el ritual inyecta con `@` (`brief`/`infra`/`CONTRIBUTING`) por **secciones** (modelo SAP del cliente — alterar la estructura gobernada = *garantía nula*). Nació de que el cliente sintió "los docs de los hijos están super diferentes"; la medición desmintió la premisa (el ritual NO diverge, es motor por-hash) y encontró el hueco real: los docs de instancia sin gobierno de estructura, con `CONTRIBUTING` como el peor caso (un stub de 4 líneas sin template). Piezas: `tools/docs-gobernados.json` (ledger capa-1/2/3 + secciones requeridas congeladas), `tools/estado-docs.ps1` (detector — **aviso** en `/jidoka:arranca`, **muro opt-in** `-Estricto` en CI apagado por defecto), template real de `CONTRIBUTING`. Contrato+récord: `docs/sprints/sprint-documentos-gobernados-{plan,entrega}.md`. Evidencia: `qa_runs/documentos-gobernados-20260717/LOG.md` (suite verde + demos + caso enti confirmado con máquina).
+
+**La rama del sprint subsumió el preflight `!` de la 1.21.1** (que nunca se tagueó): su fix viaja en `v1.23.0`. La 1.21.1 ya no queda suelta.
+
+**Pendientes / follow-ups (nada bloquea al agente):**
+1. **Gemba del cliente (owner: cliente) — PENDIENTE:** sembrar un hijo-fixture desechable, destripar su `CONTRIBUTING.md`, correr `/jidoka:arranca` → ver `[DESVIADO] CONTRIBUTING.md -- falta(n): El flujo`. Sin código ni terminal. (enti NO se usa: lo trabaja otro agente.)
+2. **El muro CI lee el ledger del PR, no de la base** (a diferencia del blast-radius, ADR 0003): un PR podría flipear `estricto:true→false` en el mismo PR para pasar. Mitigado (opt-in, config de instancia del cliente, no la ley compartida). Endurecer a lectura-desde-base si madura (regla 2-3). Hallazgo del `/code-review`.
+3. **El atlas `10-arranca` no refleja** el sub-paso de conformidad estructural ni `estado-docs.ps1` (aviso `atlas` aceptado — pulido visual, terreno del cliente).
+4. **Bajar KIT-2 a los labs** con `-Actualizar` (siembra ledger/detector/test + el template de CONTRIBUTING; migra el stub de CONTRIBUTING). Nota: los hijos con un CONTRIBUTING viejo verán **aviso** (no muro) — el nudge honesto.
+5. **Colisión de versión con #108 — RESUELTA:** `main` se movió durante la sesión (#108 `gate-anti-pii` y #109 privacidad ya mergeados, **`v1.22.0` tagueada**). Este sprint rebasó sobre el main nuevo y **rebumpó a `v1.23.0`**; el ADR 0042 no colisiona (main llega a 0041). El merge reconció `andon.yml`/`publicar.ps1`/CHANGELOG/etc. conservando ambos gates (anti-pii + docs).
+
+**Coordinación:** el lab de rescate ("enti", `C:\Repositorios\entisoft-rescate`) lo trabaja **otro agente** — esta sesión entró **solo-lectura** (medición del drift), sin tocar su working tree.
+
+---
+
+## Dónde estuvimos (2026-07-17 tarde — El ritual determinista · PR #103 · `v1.21.0` — ✅ MERGEADO Y LIBERADO)
 ## Dónde estamos (2026-07-17 noche — privacidad del repo público · **v1.22.0 LIBERADO**)
 
 Sesión de soporte pedida por el cliente ("¿por qué hay info personal mía en el repo si es público?"). Verificado con evidencia y atendido de raíz:
@@ -30,9 +48,9 @@ Sesión de soporte pedida por el cliente ("¿por qué hay info personal mía en 
 4. **`cierra` gana el cuadro de cierre** (23 filas de hechos medibles, se **versiona** con los planes) — pedido del cliente con sus métricas de siempre + delegaciones, aprobaciones nombradas, compactación, fricción/errores (Kaizen crudo), motor al día.
 5. **Censo de documentos** (161 md): núcleo traqueado; `docs/analisis/` era la única carpeta sin índice (creado). Índice de sprints podado (atlas-fiel ya estaba liberado).
 
-**Cola de decisiones del cliente `[PENDIENTE]` (no son de código — nada está bloqueado):**
-- **Merge del PR #103 + release `v1.21.0` (MINOR)** — orden nombrada, cuenta `ArmandoMedina`.
-- **Del censo, 2 knobs de ley:** ¿`product/**` como `fuente` de un área? · ¿vigilar los planes de sprint post-aprobación?
+**Cola de decisiones del cliente (actualizada — git gana):**
+- ✅ **Merge del PR #103 + release `v1.21.0`** — HECHO (tag `v1.21.0`; luego #104/#105 encima).
+- **Del censo, 2 knobs de ley `[PENDIENTE]`:** ¿`product/**` como `fuente` de un área? · ¿vigilar los planes de sprint post-aprobación?
 
 **Pendiente registrado (backlog del ROADMAP):** el cuadro de cierre como plantilla sembrable (`kit/.jidoka/templates/cierre-cuadro.md` inyectada con `@`; el diagrama solo la referencia).
 
