@@ -26,6 +26,7 @@ estado: vigente
 - **Desarrollo**: Windows 11 / PowerShell 5.1. El recetario de entorno (BOM, acentos, `$LASTEXITCODE`, "los subagentes no leen la config global") vive en `docs/guias/entorno-windows-powershell51.md`. El motor (`*.ps1`) es ASCII a propósito y el CI corre en `windows-latest` con el mismo intérprete.
 - **Ambientes de prueba disponibles** (en la máquina del autor):
   - **Máquinas virtuales** en este equipo — el ambiente ideal para el **smoke del instalador del Sprint 3** (`npx jidoka-method init` sobre un repo/entorno limpio, aislado del dev): permiten verificar la instalación desde cero sin ensuciar el equipo real. Es la pieza que vuelve verificable "corre en un repo ajeno" (el criterio de la 1.0).
+
 ## Convenciones que no se re-preguntan
 
 - **Los commits públicos no llevan trailer de sesión** (`Claude-Session:` ni `Co-Authored-By` de IA) — ADR 0003 #5: identificadores privados del operador fuera de un repo público.
