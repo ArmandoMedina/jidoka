@@ -37,6 +37,7 @@ jobs:
           .\tools\probar-hooks.ps1;    if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-auditor.ps1;  if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-disparos.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-preflight.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           # Self-tests Jidoka-only (no sembrados): corren solo si estan presentes
           # (un hijo instalado no los tiene, y este mismo workflow se siembra).
           # probar-instalador y probar-sembrar corren AQUI a proposito: en Windows
