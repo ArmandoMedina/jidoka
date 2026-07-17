@@ -116,6 +116,7 @@ Siete issues (#40–#46) de dos despliegues reales: un repo de conocimiento **re
 
 ### Follow-ups sueltos — a la espera de que se acumulen más issues (2026-07-13)
 Modo deliberado: **dejar que se junten más lecciones antes de la próxima cosecha** (batch, no goteo). Registrados para no perderlos:
+- **El cuadro de cierre como plantilla sembrable** (2026-07-17): el detalle del cuadro (las ~23 filas) hoy vive inline en `cierra.md` y su annotation en `16-cierra` quedó cargada de texto. Mover el detalle a una plantilla `kit/.jidoka/templates/cierre-cuadro.md` que `cierra.md` **inyecte con `@`** (mismo patrón que `sprint-plan.md` en el planea — cumple ADR 0040: inyección, no puntero) y que el diagrama solo **referencie por nombre**. De paso viaja a los hijos como plantilla, no como prosa del comando.
 - **`publicar.ps1` no incluye `probar-sembrar` en su preflight** — el próximo release no auto-probaría el fallback anti-AV. Arreglo de una línea (agregarlo a la suite); cazado al cortar `v1.10.0`. Bajo riesgo (el test corre a mano verde), pero el gate de release debería ejercerlo.
 - **[#47] El pre-push del motor gatea el contenido pero no protege la rama default** — lección nueva, etiquetada `leccion`, **sin triar** (¿construir o regla 2-3?). Se decide en la próxima cosecha.
 
