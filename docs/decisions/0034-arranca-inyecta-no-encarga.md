@@ -52,6 +52,10 @@ Evidencia en vivo: esa misma sesión abrió con un HANDOFF que juraba "3 cambios
 
 Tocado: `.claude/commands/jidoka/arranca.md` §1 (encabezado + orden de los bloques) y su espejo en el atlas (`docs/atlas/10-ritual/10-arranca-con-subprocesos.bpmn`: `documentation` + nodo `T_Leer`, re-renderizado). El diagrama de referencia `arranca-propuesta-usuario.bpmn` —un boceto alterno que proponía lectura perezosa "solo lo activado", **contrario** a la inyección de 0034— se **borró** para no dejar ruido de una ruta no tomada.
 
+## Extendido por → [ADR 0040](0040-ritual-sin-punteros-arroba-bang-o-inline.md)
+
+La razón de este ADR ("un puntero es una esperanza, un `@` es un hecho") se extiende de la §1 del arranca al **ritual completo** (2026-07-17): los punteros de lectura se prohíben en todos los comandos `/jidoka:*`, y lo que vive en un artefacto con dientes se imprime con un `!` en vez de copiarse en prosa.
+
 ---
 
 > Reglas del registro: una decisión = un archivo · al agregarlo, **listalo en el [índice](README.md) en el mismo commit** (el gate lo exige) · nunca borres una decisión: márcala *reemplazada* y enlaza la nueva.
