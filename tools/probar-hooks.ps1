@@ -261,6 +261,30 @@ try {
 }
 finally { Remove-Item $tmpLeyes -Recurse -Force -ErrorAction SilentlyContinue }
 
+# --- asientos.ps1: el casting vivo (asiento + tier leidos de .claude/agents/) ---
+# asientos no bloquea nada -- reporta -- pero su tabla ES la que arranca imprime en vez
+# de una copia en prosa, asi que se prueba de vida igual: agentes sinteticos de resultado
+# conocido + la degradacion acusada sin agentes. Vive en tools/ (hermano de este self-test).
+$asientos = Join-Path $PSScriptRoot 'asientos.ps1'
+$tmpAgentes = Join-Path $env:TEMP ("jidoka-asientos-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+New-Item -ItemType Directory -Path $tmpAgentes -Force | Out-Null
+try {
+  # Agente sintetico con frontmatter conocido: debe salir su fila asiento + tier.
+  Set-Content (Join-Path $tmpAgentes 'probador.md') "---`nname: probador`ndescription: caso sintetico del self-test`nmodel: haiku`n---`n# Asiento" -Encoding Ascii
+  $aOk = Invoke-Ps $asientos @('-Dir', $tmpAgentes)
+  Check 'asientos: imprime la fila asiento+tier leida del frontmatter' ($aOk.out -match 'probador\s+haiku' -and $aOk.code -eq 0) "no imprimio la fila (code=$($aOk.code)): $($aOk.out)"
+
+  # Un .md sin frontmatter (p.ej. un README) NO es un agente: no aparece en la tabla.
+  Set-Content (Join-Path $tmpAgentes 'README.md') "# no soy un agente" -Encoding Ascii
+  $aFantasma = Invoke-Ps $asientos @('-Dir', $tmpAgentes)
+  Check 'asientos: un .md sin frontmatter no aparece como fila fantasma' ($aFantasma.out -notmatch 'README' -and $aFantasma.out -match 'probador\s+haiku') "el README aparecio en la tabla: $($aFantasma.out)"
+
+  # Sin agentes: degrada con gracia (exit 0) y ACUSA la degradacion, no la finge.
+  $aDeg = Invoke-Ps $asientos @('-Dir', (Join-Path $tmpAgentes 'no-existe'))
+  Check 'asientos: sin agentes degrada acusado ([DEGRADADO], exit 0)' ($aDeg.out -match 'DEGRADADO' -and $aDeg.code -eq 0) "no acuso la degradacion (code=$($aDeg.code)): $($aDeg.out)"
+}
+finally { Remove-Item $tmpAgentes -Recurse -Force -ErrorAction SilentlyContinue }
+
 Write-Host ""
 if ($script:fallos -gt 0) {
   Write-Host "== $($script:fallos) de $($script:casos) caso(s) fallidos. Un hook tiene un bug: no lo estrenes. ==" -ForegroundColor Red
