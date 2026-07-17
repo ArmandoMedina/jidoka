@@ -2,6 +2,20 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.22.0] — 2026-07-17
+
+### Documentos gobernados — el motor gobierna la *estructura* de los documentos de instancia, no solo el hash (modelo SAP)
+
+Nace de que el cliente, haciendo análisis de flujos en un lab de rescate, sintió que "los documentos de los hijos están super diferentes". La medición (solo-lectura) desmintió la premisa inicial —los `.md` del ritual NO divergen, son motor gobernado por hash— y encontró la real: los documentos **instancia-de-template** que el ritual inyecta con `@` (`PRODUCT_BRIEF`, `infra`, `CONTRIBUTING`) no los cubría nada, porque su contenido varía a propósito y el hash es la herramienta equivocada. Donde había template el hijo conformó; donde no (`CONTRIBUTING`, un stub de 4 líneas) cada repo inventó su estructura. Modelo mental del cliente: SAP — puedes llenar, pero si alteras la **estructura** gobernada, *garantía nula*.
+
+- **`feat` — el ledger `tools/docs-gobernados.json` (nuevo, mecánica):** declara la taxonomía de tres capas — capa-1 (motor, hash, ya existe), capa-2 (instancia-de-template, gobernada por **secciones**: brief, infra, CONTRIBUTING), capa-3 (libre: `CODE_OF_CONDUCT`, `LICENSE`, fuera del blast-radius, declarado para dejar constancia). Para cada capa-2, su molde y su lista **congelada** de secciones requeridas. El contrato vive en el ledger, no en el template vivo — así una edición de molde no marca DESVIADO a todos los hijos de golpe.
+- **`feat` — el detector `tools/estado-docs.ps1` (nuevo, mecánica), hermano estructural de `estado-motor.ps1`:** verifica que cada doc capa-2 conserve sus secciones requeridas (match por prefijo normalizado con fold de acentos). Faltante → **DESVIADO** (*garantía nula*); aditiva → OK (el contenido varía libre); reordenada → no bloquea. Aviso por defecto (exit 0), surtido en `/jidoka:arranca` §1b con el idioma classifier-safe `test -f X && powershell -File … || echo` (ya probado en la guardia del plan-de-trabajo).
+- **`feat` — el muro estricto es OPT-IN y nace APAGADO:** `estado-docs.ps1 -Estricto` sale 1 solo si un doc marcado `estricto:true` pierde una requerida, cableado en el required-check de CI (`andon.yml`), **nunca** en `verificar.ps1` (no clobbea el verificar customizado del hijo). Todos los docs nacen `estricto:false`: el "no se pueda" del cliente llega como palanca que él enciende en su ledger, no como muro impuesto.
+- **`feat` — `CONTRIBUTING` gana template real** (`kit/.jidoka/templates/CONTRIBUTING.md`) y stub estructurado en el manifiesto (antes: un stub inline de 4 líneas sin molde — la causa raíz de su divergencia). Un hijo nuevo nace CONFORME. `CODE_OF_CONDUCT` confirmado capa-3, fuera del blast-radius.
+- **`test` — `tools/probar-docs.ps1` (nuevo, mecánica):** casos ROJO→VERDE del detector (conforme, faltante, aditiva, fold de acentos, muro opt-in) + integridad del ledger (cada molde existe, cada requerida es prefijo de una sección del molde, los 3 docs inyectados están gobernados). En el smoke local (`andon.yml`) y en el preflight de `publicar.ps1`.
+- **ADR 0042** — Gobierno documental por estructura (capa-2): el hermano estructural del sello · aceptado. Capacidad **[[KIT-2-gobierno-documental]]** (extiende KIT-1).
+- **Nota de coordinación:** esta versión incluye el preflight `!` de la 1.21.1 (su rama se plegó aquí). El número `1.22.0` colisiona con el PR #108 (`gate-anti-pii`) — quien mergee segundo rebumpa.
+
 ## [1.21.1] — 2026-07-17
 
 ### Preflight de inyección: los `@` del ritual dejan de fallar en silencio (jidoka#104)
