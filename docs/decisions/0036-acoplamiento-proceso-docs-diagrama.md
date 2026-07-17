@@ -60,6 +60,14 @@ El acoplamiento es **asimétrico**, y se cablea como **aviso, no bloqueo**:
 - **Aviso de ley:** editar `tools/blast-radius.json` toca el área `barreras` → se actualiza `andon/README.md`
   y se corre `tools/probar-gate.ps1` en el mismo cambio (dogfooding).
 
+## Reafirmado por
+
+- **ADR 0039 (2026-07-17)** — reafirma que el comando es la fuente *forzada* (el `.md` es el ejecutable; el
+  `.bpmn` es `isExecutable=false` y no hay generador `bpmn→md`). Añade tres matices: se separa la *autoría*
+  (dibujar el BPMN primero es un hábito sano) del *enforcement* (la dirección que vigila el gate); la dirección
+  es un **knob por-lab** en `blast-radius.json` (un lab model-driven puede voltearla); y voltearla para hacer del
+  BPMN la fuente mecánica exige un generador o un validador de conformidad — re-etiquetar sin mecanismo es muro falso.
+
 ---
 
 > Reglas del registro: una decisión = un archivo · al agregarlo, **listalo en el [índice](README.md) en el mismo commit** (el gate lo exige) · nunca borres una decisión: márcala *reemplazada* y enlaza la nueva.
