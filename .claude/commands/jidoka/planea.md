@@ -4,15 +4,29 @@ argument-hint: "[nombre corto del sprint o la capacidad a planear]"
 allowed-tools: Read, Bash(git status:*)
 ---
 
-Vas a **planear un sprint**, no a construirlo. El entregable de este comando es un plan aprobado —el contrato del sprint—, no código. Sigue el lazo de `kanban/lazo.md`: la **Intención (el QUÉ)** se escribe y se aprueba antes que la Construcción.
+Vas a **planear un sprint**, no a construirlo. El entregable de este comando es un plan aprobado —el contrato del sprint—, no código. La **Intención (el QUÉ)** se escribe y se aprueba antes que la Construcción.
 
 Enfoque pedido por el cliente: **$ARGUMENTS**
+
+Frescura primero — el estado pudo moverse desde el arranca; si algo de abajo lo contradice, git gana:
+!`git status --short`
+
+El estado que el plan necesita queda inyectado **aquí mismo** — la garantía de que correr `planea` directo, sin pasar por `arranca`, no planea a ciegas (si vienes del arranca lo verás repetido: costo aceptado, es la póliza):
+
+- **El relevo** (pendientes y cola de decisiones del cliente — insumo directo del plan):
+@HANDOFF.md
+
+- **El backlog** (hacia dónde va el proyecto; el orden de valor se defiende contra esto):
+@ROADMAP.md
 
 ## R0 — el QUÉ, con STOP (lo primero, sin excepción)
 
 > **La lección más cara del linaje: sprints construidos sin criterios aprobados entregaron cosas que el cliente no pidió.** La primera rebanada de todo sprint es **R0**: el QUÉ aprobado por el cliente, leyendo lo que el producto ya definió, **antes de la primera línea de código**.
 
-1. **Lee el encuadre de producto.** Revisa `product/` (brief, capacidades, recursos) y `ROADMAP.md` para entender qué se pide y por qué. Si `product/` está vacío o el QUÉ es ambiguo, eso es un hallazgo, no un permiso para inventar: **→ corre `/jidoka:descubre` primero** — la entrevista de descubrimiento disuelve la niebla y deja el brief lleno; lo que ni el descubrimiento resuelva **se marca como pendiente del cliente, no se rellena** (`kanban/estados.md`).
+1. **Lee el encuadre de producto.** El brief ya está inyectado aquí (un `@` es un hecho, no un encargo — ADR 0034):
+@product/PRODUCT_BRIEF.md
+
+   Las **capacidades** de `product/` se exploran **dirigido al sprint** (solo lo que este QUÉ toca — leerlas es el trabajo de este paso, no un relevo); el ROADMAP ya quedó inyectado arriba. Si el brief está vacío o el QUÉ es ambiguo, eso es un hallazgo, no un permiso para inventar: **→ corre `/jidoka:descubre` primero** — la entrevista de descubrimiento disuelve la niebla y deja el brief lleno; lo que ni el descubrimiento resuelva **se marca como pendiente del cliente, no se rellena**.
 2. **Redacta la capacidad con criterios de aceptación** en lenguaje llano: `Dado que… cuando… entonces…`. Esta es la mitad que casi todos se saltan. Cada criterio debe poder demostrarse **sin código ni terminal** (disparo `demo-que-corre-el-cliente`): si la única forma de verlo funcionar es corriendo un script, la rebanada no es vertical todavía.
 3. **STOP — checkpoint humano.** Presenta el QUÉ y **espera la aprobación explícita del cliente** antes de diseñar el CÓMO. Automatiza alto la propuesta; mantén baja la decisión (disparo `decision-queda-en-humano`): tú propones, el cliente elige y firma. Y la aprobación **nombra lo que aprueba** (disparo `aprobacion-nombrada`): un "dale" o un "a tu criterio" no cierran un R0 — pide que el cliente diga con nombre qué aprueba. No es un muro determinista —es un checkpoint— pero es la regla: nada irreversible se construye sin el QUÉ aprobado.
 
@@ -28,7 +42,8 @@ Copia la plantilla `@kit/.jidoka/templates/sprint-plan.md` y llénala con:
 
 ## Cómo cierra este comando
 
-- Si estás en un cliente con **plan mode**, presenta el plan ahí para su aprobación formal.
+- **STOP 2 — la aprobación formal del plan, SIEMPRE en plan mode.** El plan se entrega en **plan mode**; si no estás en plan mode, **entra** para entregarlo — la conversación no es canal formal de aprobación. Un plan rechazado **se ajusta y se re-presenta** — no se archiva.
 - Al aprobarse, el plan se archiva como `docs/sprints/sprint-N-plan.md` (se versiona: es el contrato permanente). **No lo confundas con el plan de trabajo del día** (`/.jidoka/plan-actual.md`, efímero — ADR 0006).
 - Registra el sprint en `docs/sprints/README.md`.
+- **Ancla el plan a la vista.** Registra las rebanadas aprobadas como **lista de tareas del harness** (la que se ve en la UI del chat) y márcalas conforme avanzan — el cliente ve el progreso en vivo, sin preguntar.
 - Recién entonces se construye — rebanada por rebanada, cada una verde.

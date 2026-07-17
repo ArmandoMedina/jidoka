@@ -6,7 +6,27 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-17 — el fantasma del 10-arranca: NO era el diagrama, era la ventana)
+## Dónde estamos (2026-07-17 tarde — El ritual determinista · **PR #103 ABIERTO**, merge y release pendientes de orden)
+
+**Dos sesiones encadenadas en la rama `refina-arranca-orden-20260717` (16 commits, cuadro completo en `docs/sprints/cierre-20260717.md` — estrena el cuadro de cierre que esta misma sesión cableó).** La entrega:
+
+1. **El ritual sin punteros (ADR 0040, extiende 0034):** en los comandos todo es `@`, `!` o inline — "entre puntero y nada, nada". Lo que vive en un artefacto con dientes se **imprime**, no se copia: `tools/asientos.ps1` (gemelo de `rutear.ps1`) imprime el casting desde `.claude/agents/` (motor, sembrado, prueba de vida en `probar-hooks`). ADR 0039: el comando es la fuente forzada; diagrama-primero es hábito de autoría; la dirección del acoplamiento es knob por-lab.
+2. **El atlas cumple Method & Style:** los hijos 10/12/15/17 cierran en **end states** que el `01-operar-sesion` lee directo (regla Bruce Silver). El `12-planea` ganó el **segundo STOP** (aprobación formal del plan) que el comando exigía y el diagrama omitía; el `01` ya no construía con el plan en espera; el `15-gemba` dejó de duplicar el loop de rework del padre; *¿Humano presente?* → *¿El usuario pidió /jidoka:desatendido?* (la pregunta honesta).
+3. **`planea` blindado (comentarios del cliente):** plan mode SIEMPRE (si no está, entra); póliza `@HANDOFF`+`@ROADMAP` (correr planea sin arranca no planea a ciegas); frescura `!git status`; el plan aprobado se **ancla como lista de tareas** visible en la UI.
+4. **`cierra` gana el cuadro de cierre** (23 filas de hechos medibles, se **versiona** con los planes) — pedido del cliente con sus métricas de siempre + delegaciones, aprobaciones nombradas, compactación, fricción/errores (Kaizen crudo), motor al día.
+5. **Censo de documentos** (161 md): núcleo traqueado; `docs/analisis/` era la única carpeta sin índice (creado). Índice de sprints podado (atlas-fiel ya estaba liberado).
+
+**Cola de decisiones del cliente `[PENDIENTE]` (no son de código — nada está bloqueado):**
+- **Merge del PR #103 + release `v1.21.0` (MINOR)** — orden nombrada, cuenta `ArmandoMedina`.
+- **Del censo, 2 knobs de ley:** ¿`product/**` como `fuente` de un área? · ¿vigilar los planes de sprint post-aprobación?
+
+**Pendiente registrado (backlog del ROADMAP):** el cuadro de cierre como plantilla sembrable (`kit/.jidoka/templates/cierre-cuadro.md` inyectada con `@`; el diagrama solo la referencia).
+
+**Hueco declarado del cierre:** esta sesión no dejó corrida en `qa_runs/` (la inspección visual fue con PNGs scratch; los SVG committeados son el render final). El Gemba del cliente: abrir PR #103, ver el `01`/`10`/`12` renderizados, y correr `/jidoka:arranca` en sesión nueva para ver el casting impreso del artefacto.
+
+---
+
+## Dónde estuvimos (2026-07-17 — el fantasma del 10-arranca: NO era el diagrama, era la ventana)
 
 **Sesión de soporte, no de sprint.** El cliente llevaba 3 chats convencido de que el `.bpmn` y el `.svg` del `10-arranca-con-subprocesos` «eran diferentes» y sin saber cuál era el real — al punto de querer borrar todo el atlas. **Tenía razón en lo que veía, y la causa NO era ningún diagrama.** Los archivos del repo siempre estuvieron bien (`atlas:validate` limpio los 26; el `.bpmn` en disco = HEAD = la versión fiel del sprint v1.20.0; cotejado contra `arranca.md`). El culpable: **el editor visual de BPMN de VS Code (Miragon) tenía un buffer viejo en memoria** — abrió el archivo antes del arreglo del 16-jul y **nunca lo recargó** cuando el merge de #101 actualizó el archivo en disco. La pestaña mostraba `●` (sin guardar) y pintaba la versión vieja («Recuperar contexto mínimo», bucle de aclaración); el `.svg` y el disco pintaban la buena. «bpmn ≠ svg» era en realidad «buffer viejo del editor ≠ disco». Se resolvió con `Revert File`. **Peligro esquivado:** un Ctrl+S en esa pestaña habría escrito la versión vieja encima de la buena.
 
@@ -18,7 +38,7 @@
 3. `HANDOFF.md` corregido (decía que atlas-fiel estaba «sin mergear» — doc-drift; ya estaba en `main`).
 4. `docs/atlas/README.md` — la gotcha del editor.
 
-**Pendiente (humano):** commitear estos 3 cambios de doc (`.gitignore`, `HANDOFF.md`, `docs/atlas/README.md`) en una rama y mergear con orden nombrada. No es release (limpieza de doc, no cambio de motor).
+**~~Pendiente (humano)~~ ✅ ATENDIDO:** los 3 cambios de doc llegaron a `main` vía el merge #102 (verificado contra git al abrir la sesión siguiente — el propio doc-drift de este HANDOFF fue el caso que motivó el "git gana" del arranca).
 
 ---
 

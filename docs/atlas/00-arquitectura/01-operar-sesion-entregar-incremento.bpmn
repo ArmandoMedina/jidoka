@@ -56,10 +56,18 @@
     <bpmn:callActivity id="Call_Planea" name="[12] Planear sprint" calledElement="Process_Planea">
       <bpmn:documentation>Proceso externo: Process_Planea | Archivo: 10-ritual/12-planea-as-is.bpmn</bpmn:documentation>
       <bpmn:incoming>F_Plan_Si</bpmn:incoming>
-      <bpmn:outgoing>F_Planea_Hum</bpmn:outgoing>
+      <bpmn:outgoing>F_Planea_PlanOk</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:exclusiveGateway id="Gateway_Humano" name="¿Humano presente?">
-      <bpmn:incoming>F_Planea_Hum</bpmn:incoming>
+    <bpmn:exclusiveGateway id="Gateway_PlanAprobado" name="¿Plan aprobado?">
+      <bpmn:incoming>F_Planea_PlanOk</bpmn:incoming>
+      <bpmn:outgoing>F_PlanOk_Si</bpmn:outgoing>
+      <bpmn:outgoing>F_PlanOk_No</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_PlanEspera" name="Sprint en espera de aprobación">
+      <bpmn:incoming>F_PlanOk_No</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Gateway_Humano" name="¿El usuario pidió /jidoka:desatendido?">
+      <bpmn:incoming>F_PlanOk_Si</bpmn:incoming>
       <bpmn:incoming>F_Plan_No</bpmn:incoming>
       <bpmn:outgoing>F_Hum_Si</bpmn:outgoing>
       <bpmn:outgoing>F_Hum_No</bpmn:outgoing>
@@ -117,10 +125,12 @@
     <bpmn:sequenceFlow id="F_Aprob_Si" name="Sí" sourceRef="Gateway_QueAprobado" targetRef="Gateway_Plan" />
     <bpmn:sequenceFlow id="F_Claro_Si" name="Sí" sourceRef="Gateway_QueClaro" targetRef="Gateway_Plan" />
     <bpmn:sequenceFlow id="F_Plan_Si" name="Sí" sourceRef="Gateway_Plan" targetRef="Call_Planea" />
-    <bpmn:sequenceFlow id="F_Planea_Hum" sourceRef="Call_Planea" targetRef="Gateway_Humano" />
+    <bpmn:sequenceFlow id="F_Planea_PlanOk" sourceRef="Call_Planea" targetRef="Gateway_PlanAprobado" />
+    <bpmn:sequenceFlow id="F_PlanOk_Si" name="Sí" sourceRef="Gateway_PlanAprobado" targetRef="Gateway_Humano" />
+    <bpmn:sequenceFlow id="F_PlanOk_No" name="No" sourceRef="Gateway_PlanAprobado" targetRef="End_PlanEspera" />
     <bpmn:sequenceFlow id="F_Plan_No" name="No" sourceRef="Gateway_Plan" targetRef="Gateway_Humano" />
-    <bpmn:sequenceFlow id="F_Hum_Si" name="Sí" sourceRef="Gateway_Humano" targetRef="Call_Construye" />
-    <bpmn:sequenceFlow id="F_Hum_No" name="No" sourceRef="Gateway_Humano" targetRef="Call_Desatendido" />
+    <bpmn:sequenceFlow id="F_Hum_Si" name="No: humano presente" sourceRef="Gateway_Humano" targetRef="Call_Construye" />
+    <bpmn:sequenceFlow id="F_Hum_No" name="Sí" sourceRef="Gateway_Humano" targetRef="Call_Desatendido" />
     <bpmn:sequenceFlow id="F_Const_Join" sourceRef="Call_Construye" targetRef="Gateway_UnirConstruccion" />
     <bpmn:sequenceFlow id="F_Des_Join" sourceRef="Call_Desatendido" targetRef="Gateway_UnirConstruccion" />
     <bpmn:sequenceFlow id="F_Join_Review" sourceRef="Gateway_UnirConstruccion" targetRef="Call_Revisar" />
@@ -129,6 +139,10 @@
     <bpmn:sequenceFlow id="F_Acept_No" name="No" sourceRef="Gateway_Aceptado" targetRef="Call_Construye" />
     <bpmn:sequenceFlow id="F_Acept_Si" name="Sí" sourceRef="Gateway_Aceptado" targetRef="Call_Cierra" />
     <bpmn:sequenceFlow id="F_Cierra_End" sourceRef="Call_Cierra" targetRef="End_Registrado" />
+    <bpmn:endEvent id="End_Abandono" name="Sesión abandonada (ciclo roto por el humano)">
+      <bpmn:incoming>F_Abandono</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F_Abandono" name="abandona" sourceRef="Gateway_Aceptado" targetRef="End_Abandono" />
     <bpmn:textAnnotation id="Annotation_Call_Arranca">
       <bpmn:text>Archivo: 10-ritual/10-arranca-con-subprocesos.bpmn</bpmn:text>
     </bpmn:textAnnotation>
@@ -173,22 +187,34 @@
       <bpmn:text>NAVEGACIÓN
 Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automáticamente archivos externos: usa el nombre visible y la tabla RELACIONES.csv.</bpmn:text>
     </bpmn:textAnnotation>
+    <bpmn:textAnnotation id="Ann_GwObjetivo">
+      <bpmn:text>Lee el end state del [10]: "Orientada: trabajo definido" → Sí · "Orientada: sin trabajo definido" → No (Method &amp; Style: el gateway tras la call activity pregunta por el fin del subproceso).</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_GwObjetivo" sourceRef="Ann_GwObjetivo" targetRef="Gateway_Objetivo" />
+    <bpmn:textAnnotation id="Ann_GwPlanOk">
+      <bpmn:text>Lee el end state del [12]: "Plan aprobado → construir" → Sí · "Espera aprobación (nada irreversible)" → No. Cierra la costura: el padre ya no construía con el plan en espera.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_GwPlanOk" sourceRef="Ann_GwPlanOk" targetRef="Gateway_PlanAprobado" />
+    <bpmn:textAnnotation id="Ann_GwQueClaro">
+      <bpmn:text>decisión conductual: la evalúa el agente en sesión (el QUÉ contra el brief que [10] cargó), ningún hook la hace cumplir</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_GwQueClaro" sourceRef="Ann_GwQueClaro" targetRef="Gateway_QueClaro" />
     <bpmn:textAnnotation id="Ann_GwPlan">
       <bpmn:text>decisión conductual: la evalúa el agente en sesión, ningún hook la hace cumplir</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="Assoc_GwPlan" sourceRef="Ann_GwPlan" targetRef="Gateway_Plan"/>
+    <bpmn:association id="Assoc_GwPlan" sourceRef="Ann_GwPlan" targetRef="Gateway_Plan" />
     <bpmn:textAnnotation id="Ann_GwQueAprobado">
       <bpmn:text>decisión conductual: la evalúa el agente en sesión, ningún hook la hace cumplir</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="Assoc_GwQueAprobado" sourceRef="Ann_GwQueAprobado" targetRef="Gateway_QueAprobado"/>
+    <bpmn:association id="Assoc_GwQueAprobado" sourceRef="Ann_GwQueAprobado" targetRef="Gateway_QueAprobado" />
     <bpmn:textAnnotation id="Ann_GwAceptado">
-      <bpmn:text>decisión conductual: la evalúa el agente en sesión, ningún hook la hace cumplir</bpmn:text>
+      <bpmn:text>Lee el end state del [15]: "Verificado: aceptado con evidencia" → Sí · "Rechazado: a corregir" → No (el rework regresa a [13]). "abandona" es del humano aquí — decisión conductual, ningún hook la hace cumplir.</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="Assoc_GwAceptado" sourceRef="Ann_GwAceptado" targetRef="Gateway_Aceptado"/>
-    <bpmn:endEvent id="End_Abandono" name="Sesión abandonada (ciclo roto por el humano)">
-      <bpmn:incoming>F_Abandono</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:sequenceFlow id="F_Abandono" name="abandona" sourceRef="Gateway_Aceptado" targetRef="End_Abandono"/>
+    <bpmn:textAnnotation id="Ann_GwContinuar">
+      <bpmn:text>Lee el end state del [17]: "Paso elegido: continuar" → Sí · "Sin continuar por hoy" → No.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_GwContinuar" sourceRef="Ann_GwContinuar" targetRef="Gateway_Continuar" />
+    <bpmn:association id="Assoc_GwAceptado" sourceRef="Ann_GwAceptado" targetRef="Gateway_Aceptado" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_01_OperarSesion">
     <bpmndi:BPMNPlane id="Plane_Diagram_01_OperarSesion" bpmnElement="Process_OperarSesion">
@@ -206,6 +232,9 @@ Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automát
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Gateway_Continuar" bpmnElement="Gateway_Continuar" isMarkerVisible="true">
         <dc:Bounds x="760" y="85" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="819.5" y="96" width="87" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_End_SoloOrientada" bpmnElement="End_SoloOrientada">
         <dc:Bounds x="930" y="35" width="36" height="36" />
@@ -225,10 +254,13 @@ Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automát
       <bpmndi:BPMNShape id="Shape_Gateway_Plan" bpmnElement="Gateway_Plan" isMarkerVisible="true">
         <dc:Bounds x="680" y="243" width="50" height="50" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Call_Planea" bpmnElement="Call_Planea">
+        <dc:Bounds x="853" y="149" width="190" height="82" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Gateway_Humano" bpmnElement="Gateway_Humano" isMarkerVisible="true">
         <dc:Bounds x="1080" y="243" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1139.5" y="254" width="49" height="27" />
+          <dc:Bounds x="1138" y="258" width="115" height="42" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Call_Construye" bpmnElement="Call_Construye">
@@ -255,19 +287,33 @@ Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automát
       <bpmndi:BPMNShape id="Shape_End_Registrado" bpmnElement="End_Registrado">
         <dc:Bounds x="2450" y="251" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Call_Planea" bpmnElement="Call_Planea">
-        <dc:Bounds x="853" y="149" width="190" height="82" />
+      <bpmndi:BPMNShape id="Shape_End_Abandono" bpmnElement="End_Abandono">
+        <dc:Bounds x="2200" y="350" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2170" y="388" width="100" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_QueSigue" bpmnElement="Association_Annotation_Call_QueSigue">
-        <di:waypoint x="620" y="50" />
-        <di:waypoint x="620" y="70" />
+      <bpmndi:BPMNEdge id="Edge_Assoc_GwPlan" bpmnElement="Assoc_GwPlan">
+        <di:waypoint x="660" y="326" />
+        <di:waypoint x="694" y="282" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Planea" bpmnElement="Association_Annotation_Call_Planea">
-        <di:waypoint x="961" y="278" />
-        <di:waypoint x="962" y="231" />
+      <bpmndi:BPMNEdge id="Edge_Assoc_GwQueAprobado" bpmnElement="Assoc_GwQueAprobado">
+        <di:waypoint x="1023" y="421" />
+        <di:waypoint x="980" y="420" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Desatendido" bpmnElement="Association_Annotation_Desatendido">
+        <di:waypoint x="1523" y="478" />
+        <di:waypoint x="1424" y="411" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_GwAceptado" bpmnElement="Assoc_GwAceptado">
+        <di:waypoint x="2140" y="215" />
+        <di:waypoint x="2097" y="255" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Annotation_Call_Arranca" bpmnElement="Annotation_Call_Arranca">
         <dc:Bounds x="160" y="326" width="220" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Call_QueSigue" bpmnElement="Annotation_Call_QueSigue">
+        <dc:Bounds x="510" y="10" width="220" height="40" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Annotation_Call_Descubre" bpmnElement="Annotation_Call_Descubre">
         <dc:Bounds x="680" y="478" width="220" height="40" />
@@ -288,10 +334,7 @@ Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automát
         <dc:Bounds x="1820" y="326" width="220" height="40" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Annotation_Call_Cierra" bpmnElement="Annotation_Call_Cierra">
-        <dc:Bounds x="2200" y="326" width="220" height="40" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Annotation_Desatendido" bpmnElement="Annotation_Desatendido">
-        <dc:Bounds x="1200" y="460" width="330" height="70" />
+        <dc:Bounds x="2290" y="326" width="130" height="43" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Annotation_Leyenda" bpmnElement="Annotation_Leyenda">
         <dc:Bounds x="1680" y="50" width="390" height="90" />
@@ -320,9 +363,12 @@ Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automát
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Cont_Si" bpmnElement="F_Cont_Si">
         <di:waypoint x="785" y="135" />
-        <di:waypoint x="785" y="160" />
-        <di:waypoint x="535" y="160" />
+        <di:waypoint x="785" y="170" />
+        <di:waypoint x="535" y="170" />
         <di:waypoint x="535" y="243" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="655" y="145" width="11" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Obj_Si" bpmnElement="F_Obj_Si">
         <di:waypoint x="450" y="268" />
@@ -360,19 +406,56 @@ Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automát
           <dc:Bounds x="715" y="191" width="11" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_F_Planea_Hum" bpmnElement="F_Planea_Hum">
+      <bpmndi:BPMNShape id="Shape_Gateway_PlanAprobado" bpmnElement="Gateway_PlanAprobado" isMarkerVisible="true">
+        <dc:Bounds x="1080" y="165" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1140" y="176" width="90" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_PlanEspera" bpmnElement="End_PlanEspera">
+        <dc:Bounds x="1150" y="92" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1192" y="100" width="110" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_F_Planea_PlanOk" bpmnElement="F_Planea_PlanOk">
         <di:waypoint x="1043" y="190" />
-        <di:waypoint x="1105" y="190" />
+        <di:waypoint x="1080" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_PlanOk_Si" bpmnElement="F_PlanOk_Si">
+        <di:waypoint x="1105" y="215" />
         <di:waypoint x="1105" y="243" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1082" y="220" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_PlanOk_No" bpmnElement="F_PlanOk_No">
+        <di:waypoint x="1105" y="165" />
+        <di:waypoint x="1105" y="110" />
+        <di:waypoint x="1150" y="110" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1112" y="132" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_GwPlanOk" bpmnElement="Ann_GwPlanOk">
+        <dc:Bounds x="1210" y="12" width="260" height="72" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_GwPlanOk" bpmnElement="Assoc_GwPlanOk">
+        <di:waypoint x="1210" y="48" />
+        <di:waypoint x="1115" y="48" />
+        <di:waypoint x="1105" y="165" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Plan_No" bpmnElement="F_Plan_No">
         <di:waypoint x="730" y="268" />
         <di:waypoint x="1080" y="268" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Hum_Si" bpmnElement="F_Hum_Si">
-        <di:waypoint x="1130" y="243" />
+        <di:waypoint x="1130" y="268" />
         <di:waypoint x="1130" y="221" />
         <di:waypoint x="1240" y="221" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1136" y="198" width="105" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Hum_No" bpmnElement="F_Hum_No">
         <di:waypoint x="1105" y="293" />
@@ -402,10 +485,13 @@ Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automát
         <di:waypoint x="2060" y="268" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Acept_No" bpmnElement="F_Acept_No">
-        <di:waypoint x="2085" y="293" />
-        <di:waypoint x="2085" y="550" />
-        <di:waypoint x="1335" y="550" />
-        <di:waypoint x="1335" y="262" />
+        <di:waypoint x="2085" y="243" />
+        <di:waypoint x="2085" y="150" />
+        <di:waypoint x="1335" y="150" />
+        <di:waypoint x="1335" y="180" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1703" y="125" width="15" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Acept_Si" bpmnElement="F_Acept_Si">
         <di:waypoint x="2110" y="268" />
@@ -415,13 +501,29 @@ Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automát
         <di:waypoint x="2390" y="269" />
         <di:waypoint x="2450" y="269" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_F_Abandono" bpmnElement="F_Abandono">
+        <di:waypoint x="2085" y="293" />
+        <di:waypoint x="2085" y="368" />
+        <di:waypoint x="2200" y="368" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2076" y="321" width="49" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Arranca" bpmnElement="Association_Annotation_Call_Arranca">
         <di:waypoint x="270" y="326" />
         <di:waypoint x="270" y="316" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_QueSigue" bpmnElement="Association_Annotation_Call_QueSigue">
+        <di:waypoint x="620" y="50" />
+        <di:waypoint x="620" y="70" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Descubre" bpmnElement="Association_Annotation_Call_Descubre">
         <di:waypoint x="790" y="478" />
         <di:waypoint x="790" y="468" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Planea" bpmnElement="Association_Annotation_Call_Planea">
+        <di:waypoint x="961" y="278" />
+        <di:waypoint x="962" y="231" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Construye" bpmnElement="Association_Annotation_Call_Construye">
         <di:waypoint x="1350" y="278" />
@@ -441,47 +543,41 @@ Cada actividad de borde grueso tiene su archivo debajo. bpmn.io no abre automát
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Association_Annotation_Call_Cierra" bpmnElement="Association_Annotation_Call_Cierra">
         <di:waypoint x="2310" y="326" />
-        <di:waypoint x="2310" y="316" />
+        <di:waypoint x="2310" y="310" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Association_Annotation_Desatendido" bpmnElement="Association_Annotation_Desatendido">
-        <di:waypoint x="1365" y="460" />
-        <di:waypoint x="1365" y="450" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Shape_Annotation_Call_QueSigue" bpmnElement="Annotation_Call_QueSigue">
-        <dc:Bounds x="510" y="10" width="220" height="40" />
+      <bpmndi:BPMNShape id="Shape_Ann_GwContinuar" bpmnElement="Ann_GwContinuar">
+        <dc:Bounds x="992" y="28" width="200" height="66" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_GwContinuar" bpmnElement="Assoc_GwContinuar">
+        <di:waypoint x="992" y="60" />
+        <di:waypoint x="812" y="108" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_GwQueClaro" bpmnElement="Ann_GwQueClaro">
+        <dc:Bounds x="360" y="320" width="165" height="85" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_GwQueClaro" bpmnElement="Assoc_GwQueClaro">
+        <di:waypoint x="480" y="320" />
+        <di:waypoint x="525" y="292" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_GwObjetivo" bpmnElement="Ann_GwObjetivo">
+        <dc:Bounds x="150" y="105" width="250" height="95" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_GwObjetivo" bpmnElement="Assoc_GwObjetivo">
+        <di:waypoint x="395" y="185" />
+        <di:waypoint x="420" y="248" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Shape_Ann_GwPlan" bpmnElement="Ann_GwPlan">
-        <dc:Bounds x="620" y="310" width="290" height="40" />
+        <dc:Bounds x="560" y="326" width="150" height="72" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Ann_GwQueAprobado" bpmnElement="Ann_GwQueAprobado">
-        <dc:Bounds x="870" y="460" width="290" height="40" />
+        <dc:Bounds x="1023" y="392" width="170" height="57" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Annotation_Desatendido" bpmnElement="Annotation_Desatendido">
+        <dc:Bounds x="1410" y="478" width="330" height="70" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Ann_GwAceptado" bpmnElement="Ann_GwAceptado">
-        <dc:Bounds x="2000" y="310" width="290" height="40" />
+        <dc:Bounds x="2100" y="95" width="195" height="120" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_End_Abandono" bpmnElement="End_Abandono">
-        <dc:Bounds x="2200" y="350" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="2170" y="388" width="100" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Edge_Assoc_GwPlan" bpmnElement="Assoc_GwPlan">
-        <di:waypoint x="705" y="310" />
-        <di:waypoint x="705" y="293" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Assoc_GwQueAprobado" bpmnElement="Assoc_GwQueAprobado">
-        <di:waypoint x="955" y="460" />
-        <di:waypoint x="955" y="445" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_Assoc_GwAceptado" bpmnElement="Assoc_GwAceptado">
-        <di:waypoint x="2085" y="310" />
-        <di:waypoint x="2085" y="293" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_F_Abandono" bpmnElement="F_Abandono">
-        <di:waypoint x="2085" y="293" />
-        <di:waypoint x="2085" y="368" />
-        <di:waypoint x="2200" y="368" />
-      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

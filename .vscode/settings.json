@@ -1,0 +1,14 @@
+{
+  "workbench.editorAssociations": {
+    "*.bpmn": "bpmn-modeler.bpmn",
+    "*.dmn": "bpmn-modeler.dmn"
+  },
+  // Hay 2 formateadores de Markdown instalados (markdownlint y Markdown All in One):
+  // se fija un default para callar el aviso, y se APAGA el formateo al guardar para
+  // que la prosa de los docs (CHANGELOG, ADRs, comandos) no se re-envuelva ni meta
+  // ruido en el diff. Formatear un .md sigue siendo posible a mano (Shift+Alt+F).
+  "[markdown]": {
+    "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+    "editor.formatOnSave": false
+  }
+}

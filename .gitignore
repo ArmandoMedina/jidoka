@@ -22,11 +22,14 @@ qa_runs/*/
 .DS_Store
 Thumbs.db
 *.swp
-# .vscode se ignora salvo la recomendacion de extensiones, que si viaja con el repo
-# (para editar el atlas BPMN con el editor visual). No se puede des-ignorar un archivo
-# si su carpeta esta excluida por completo, por eso se ignora el contenido, no la carpeta.
+# .vscode se ignora salvo la config de proyecto que SI viaja con el repo: la
+# recomendacion de extensiones y los settings de workspace (asociar los .bpmn/.dmn
+# al editor visual del atlas y fijar el default de markdown). No se puede des-ignorar
+# un archivo si su carpeta esta excluida por completo, por eso se ignora el contenido,
+# no la carpeta.
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea/
 
 # Temporales
