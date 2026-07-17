@@ -92,7 +92,7 @@
 
 **Issues:** #86–#91 **cerrados** con el release · #82 queda abierto re-alcanzado a lo único vivo (validar nombres de `tools:` en el lint) · los 7 acusados uno por uno en el tracker.
 
-**Nota operativa de la sesión:** el clasificador de permisos del agente bloqueó intermitentemente comandos con literales tipo glob en mensajes/lotes (`gh issue close` en batch, commits con comodines en el cuerpo) — se resolvió de uno en uno; no fue falla del ritual. La cuenta gh activa quedó **ArmandoMedina** durante merge/release (convención de `product/infra.md`); restaurar a `Armandomedina9705` al cerrar si se desea.
+**Nota operativa de la sesión:** el clasificador de permisos del agente bloqueó intermitentemente comandos con literales tipo glob en mensajes/lotes (`gh issue close` en batch, commits con comodines en el cuerpo) — se resolvió de uno en uno; no fue falla del ritual. La cuenta gh activa quedó **ArmandoMedina** durante merge/release (convención de `product/infra.md`); restaurar la cuenta secundaria al cerrar si se desea.
 
 **Pendiente (humano — nada bloquea al agente):**
 1. **El demo de la cosecha #7** (Verificación, owner: cliente): sesión nueva en `C:\Repositorios\jidoka-hijo-practica` (hijo real sembrado 1.16.1 → migrado) + `/jidoka:arranca` — sin `@` rotos, casting visible, asientos existentes. El hijo es desechable; bórralo al terminar.
@@ -141,7 +141,7 @@
 - [#78](https://github.com/ArmandoMedina/jidoka/issues/78) (`bug`+`leccion`) — **el preflight de `publicar.ps1` da `[OK]` a un test cuyo archivo no existe** (CommandNotFoundException tragado por `*> $null` + `$LASTEXITCODE` viciado del test anterior). Visto en vivo con `probar-instalador` en cuarentena. Cura candidata en el issue (guarda `Test-Path` que falla cerrado + caso ROJO→VERDE).
 - [#79](https://github.com/ArmandoMedina/jidoka/issues/79) (`leccion`+`regla-2-3`) — **`instalar.ps1` y `probar-instalador.ps1` tienen `skip-worktree` en el índice local** (parche de la sesión anterior contra la cuarentena): el árbol reporta "limpio" con dos piezas del motor fuera del disco y ninguna guarda lo acusa. Estado local vigente HOY en esta máquina — no te creas el "limpio" sin `git ls-files -v tools/`.
 
-**Nota operativa (ya en `recursos-del-proyecto.md`):** los merges y releases en GitHub requieren la cuenta gh **ArmandoMedina** activa (`gh auth switch`); la cuenta `Armandomedina9705` no tiene permiso de merge. Quedó activa `Armandomedina9705` al cerrar.
+**Nota operativa (ya en `recursos-del-proyecto.md`):** los merges y releases en GitHub requieren la cuenta gh **ArmandoMedina** activa (`gh auth switch`); la cuenta secundaria no tiene permiso de merge. Quedó activa la cuenta secundaria al cerrar.
 
 **Pendiente (humano) — heredado, sin cambios:**
 1. **El demo de campo de `/jidoka:descubre`** (owner: cliente): correrlo en un proyecto con niebla real; su resultado alimenta #67.
