@@ -66,7 +66,7 @@ Write-Host "== Prueba de vida del registro de disparos (kit/.jidoka/disparos) ==
 # --- El catalogo REAL: cada disparo con estado, cada Cableado presente en su punto. ---
 $r = Test-Registro $catalog $repoRoot
 Check "catalogo real: todos los disparos con estado y cada Cableado presente nombra su slug" ($r.problemas.Count -eq 0) ($r.problemas -join ' | ')
-Check "catalogo real: se leyeron los 15 disparos del catalogo v0" ($r.total -ge 15) "leidos: $($r.total)"
+Check "catalogo real: se leyeron los 16 disparos del catalogo v0" ($r.total -ge 16) "leidos: $($r.total)"
 Write-Host ("  ({0} disparos: {1} cableados, {2} catalogo-solo)" -f $r.total, $r.cableados, $r.catalogo) -ForegroundColor DarkGray
 foreach ($o in $r.omitidos) { Write-Host "  [OMITIDO] $o" -ForegroundColor Yellow }
 
