@@ -44,6 +44,7 @@ $ledgerFix = @'
     { "doc": "faltante.md",  "molde": "m.md", "requeridas": ["Alpha", "Beta"], "estricto": false },
     { "doc": "aditiva.md",   "molde": "m.md", "requeridas": ["Alpha"],         "estricto": false },
     { "doc": "acento.md",    "molde": "m.md", "requeridas": ["Que hace"],      "estricto": false },
+    { "doc": "fence.md",     "molde": "m.md", "requeridas": ["Alpha"],         "estricto": false },
     { "doc": "estricto.md",  "molde": "m.md", "requeridas": ["Alpha"],         "estricto": true }
   ],
   "capa3": ["libre.md"]
@@ -58,6 +59,18 @@ Set-Content -LiteralPath (Join-Path $fix 'faltante.md') -Value "# t`n## Alpha`ns
 Set-Content -LiteralPath (Join-Path $fix 'aditiva.md')  -Value "# t`n## Alpha`n## Seccion Extra`ncontenido propio del hijo" -Encoding UTF8
 Set-Content -LiteralPath (Join-Path $fix 'acento.md')   -Value ("# t`n## Qu" + $eAguda + " hace (capacidades ancla)`ncuerpo") -Encoding UTF8
 Set-Content -LiteralPath (Join-Path $fix 'estricto.md') -Value "# t`n## Otra cosa`nle quitaron Alpha" -Encoding UTF8
+# fence.md: 'Alpha' SOLO aparece como ejemplo dentro de un bloque de codigo cercado
+# -> no cuenta como encabezado real -> DESVIADO (cierra el falso-CONFORME del code-review).
+$fenceDoc = @'
+# t
+
+```
+## Alpha
+```
+
+sin encabezado real
+'@
+Set-Content -LiteralPath (Join-Path $fix 'fence.md') -Value $fenceDoc -Encoding UTF8
 
 $scriptFix = Join-Path $fix 'tools/estado-docs.ps1'
 
@@ -70,6 +83,7 @@ if ($out -match 'faltante\.md.*falta.*[Bb]eta') { Ok "faltante.md -> DESVIADO no
 if ($out -match '\[CONFORME\]\s+aditiva\.md') { Ok "aditiva.md -> CONFORME (aditivas OK)" } else { No "aditiva.md deberia ser CONFORME (seccion extra permitida)" }
 if ($out -match '\[CONFORME\]\s+acento\.md') { Ok "acento.md -> CONFORME (fold de acentos: 'Que hace' ~ 'Que hace (...)')" } else { No "acento.md deberia CONFORME por fold de acentos + prefijo" }
 if ($out -match 'estricto\.md.*falta.*[Aa]lpha') { Ok "estricto.md -> DESVIADO nombrando Alpha" } else { No "estricto.md deberia DESVIADO por Alpha" }
+if ($out -match 'fence\.md.*falta.*[Aa]lpha') { Ok "fence.md -> DESVIADO (## dentro de code-fence no cuenta como encabezado)" } else { No "fence.md: un ## dentro de un fence NO deberia contar como seccion (falso CONFORME)" }
 
 # corrida ESTRICTA: estricto.md desviado -> exit 1 (muro opt-in).
 & powershell -NoProfile -File $scriptFix -Estricto 2>&1 | Out-Null
@@ -93,9 +107,15 @@ else {
     $moldeAbs = Join-Path $raiz $e.molde
     if (-not (Test-Path -LiteralPath $moldeAbs)) { No "molde ausente: $($e.molde) (doc $($e.doc))"; continue }
     Ok "molde existe: $($e.molde)"
-    # requeridas subset del molde (por prefijo normalizado)
+    # requeridas subset del molde (por prefijo normalizado; misma extraccion que
+    # estado-docs.ps1: '## ' con espacio, saltando bloques de codigo cercados).
     $heads = @()
-    foreach ($ln in [System.IO.File]::ReadAllLines($moldeAbs)) { if ($ln -match '^##[^#]') { $heads += (Norm $ln) } }
+    $enFence = $false
+    foreach ($ln in [System.IO.File]::ReadAllLines($moldeAbs)) {
+      if ($ln -match '^\s*(```|~~~)') { $enFence = -not $enFence; continue }
+      if ($enFence) { continue }
+      if ($ln -match '^##\s+\S') { $heads += (Norm $ln) }
+    }
     foreach ($req in $e.requeridas) {
       $rn = Norm $req; $hit = $false
       foreach ($h in $heads) { if ($h.StartsWith($rn)) { $hit = $true; break } }

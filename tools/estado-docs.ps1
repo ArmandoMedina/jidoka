@@ -33,11 +33,17 @@ function Normaliza($s) {
   return $sb.ToString().Normalize([System.Text.NormalizationForm]::FormC)
 }
 
-# Extrae los encabezados nivel 2 ('## ' exacto, no '###') de un markdown, normalizados.
+# Extrae los encabezados nivel 2 ('## ' con espacio, no '###') de un markdown,
+# normalizados. Salta las lineas dentro de un bloque de codigo cercado (``` o ~~~):
+# un '## ejemplo' dentro de un fence es ilustracion, no un encabezado real -- contarlo
+# daria un CONFORME falso si el encabezado de verdad se borro.
 function Get-Secciones($path) {
   $out = @()
+  $enFence = $false
   foreach ($line in [System.IO.File]::ReadAllLines($path)) {
-    if ($line -match '^##[^#]') { $out += (Normaliza $line) }
+    if ($line -match '^\s*(```|~~~)') { $enFence = -not $enFence; continue }
+    if ($enFence) { continue }
+    if ($line -match '^##\s+\S') { $out += (Normaliza $line) }
   }
   return ,$out
 }
