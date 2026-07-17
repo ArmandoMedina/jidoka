@@ -39,6 +39,13 @@ renderizado y afinas la posición si hace falta.
    (`miragon-gmbh.vs-code-bpmn-modeler`). Al abrir este repo, VS Code la ofrece sola
    (ver `.vscode/extensions.json`). Abre cualquier `.bpmn`/`.dmn` como editor visual, con diff
    visual en los PRs. Cuando Claude guarda un cambio, recarga la pestaña para verlo.
+   - ⚠️ **Trampa del buffer viejo (costó 3 sesiones de confusión):** el editor visual **no
+     recarga solo** cuando git cambia el `.bpmn` por debajo (un merge, un `checkout`, un
+     `-Actualizar`). Si la pestaña muestra `●` (sin guardar) y el diagrama **no cuadra con su
+     `.svg`**, estás viendo una **copia vieja en la memoria del editor**, no lo que hay en disco.
+     **NO guardes** (un Ctrl+S escribiría la versión vieja encima de la buena) — usa **`Revert
+     File`** (Ctrl+Shift+P) para recargar del disco. El disco y su `.svg` mandan; el buffer del
+     editor, no.
    - Sin VS Code: **Camunda Modeler** (escritorio) o **demo.bpmn.io** (arrastrar y soltar, cero instalación).
 2. **Regenerar geometría sin acomodar cajas a mano** (diagramas nuevos o muy editados):
    ```
