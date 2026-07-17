@@ -2,9 +2,13 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
-## [Unreleased]
+## [1.21.0] — 2026-07-17
 
-### El arranca onboardea como a una mente nueva — git → qué → cómo → dónde
+### El ritual se vuelve determinista — sin punteros, atlas Method & Style y el cuadro de cierre
+
+Nace de que el cliente cazó la incertidumbre de los punteros ("a veces lo lee y a veces no") y la elevó a principio (ADR 0040); el resto del sprint lo despliega: el casting se imprime del artefacto, los diagramas cumplen Method & Style de punta a punta, el planea gana sus dos STOPs blindados y el cierre gana métricas versionadas.
+
+#### El arranca onboardea como a una mente nueva — git → qué → cómo → dónde
 
 Nace de que el cliente, viendo los flujos del atlas, cuestionó el **orden de lectura** del `/jidoka:arranca`. Enmienda a ADR 0034 (reafirma la inyección, refina el orden).
 
