@@ -6,7 +6,21 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-17 tarde — El ritual determinista · **PR #103 ABIERTO**, merge y release pendientes de orden)
+## Dónde estamos (2026-07-17 noche — privacidad del repo público · **v1.22.0 LIBERADO**)
+
+Sesión de soporte pedida por el cliente ("¿por qué hay info personal mía en el repo si es público?"). Verificado con evidencia y atendido de raíz:
+
+1. **Fuga limpiada (PR #107, mergeado):** el nombre de la cuenta gh **secundaria** del autor estaba en `product/infra.md` y `HANDOFF.md` (violaba la "Frontera de confidencialidad" del `CONTRIBUTING`). Quitado del HEAD (`git grep` en `origin/main` limpio); pasó a "la cuenta secundaria de solo-lectura". La historia lo conserva (el cliente eligió **limpiar-HEAD, no reescribir**). Email de commits de este repo fijado al `noreply` de GitHub (config **local**).
+2. **Gate anti-PII construido y liberado (`v1.22.0`, PR #108, ADR 0041):** `tools/anti-pii.ps1` **BLOQUEA** formas de PII de entorno (email con dominio real, ruta de usuario nombrada) en docs rastreados. Se parte en dos: detector estructural **público** (muro en el check `andon`, patrón "detector de la base") + **denylist local** privada gitignoreada (cinturón pre-push). Disparo 16.º `sin-pii-en-el-repo` con respaldo en doctrina; baja al kit por el manifiesto. Evidencia: `qa_runs/gate-anti-pii-20260717/LOG.md` (self-test 11/11, 206 archivos limpios, cero falsos positivos). Bug del detector (tragaba puntuación de cierre) cazado y curado en la corrida; `probar-publicar` cazó que faltaba el gate en el preflight del release (curado).
+
+**Pendiente del cliente (nada bloquea al agente):**
+- **Email global:** `git config --global user.email` sigue en el correo de trabajo (`arcadial`) — afecta **todos** sus repos. Cambiarlo a noreply es decisión suya (identidad de trabajo vs privacidad); no se tocó.
+- **Historia de git:** la cuenta secundaria y un Hotmail personal (`jose_joc14@…`) siguen en commits viejos y GitHub cachea; solo se borran **reescribiendo historia** (pesado). No hecho a propósito.
+- **Backlog nuevo (ROADMAP):** que `planea.md` exija declarar **qué pruebas** hará cada rebanada del plan.
+
+> **Nota git (git gana):** el cierre "2026-07-17 tarde" de abajo quedó viejo — #103 ya estaba mergeado y `v1.21.0`/`v1.21.1` liberados al abrir esta sesión.
+
+## Dónde estamos (2026-07-17 tarde — El ritual determinista · PR #103 mergeado, `v1.21.0` liberado)
 
 **Dos sesiones encadenadas en la rama `refina-arranca-orden-20260717` (16 commits, cuadro completo en `docs/sprints/cierre-20260717.md` — estrena el cuadro de cierre que esta misma sesión cableó).** La entrega:
 
