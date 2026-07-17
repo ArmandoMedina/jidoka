@@ -24,17 +24,24 @@ Llena este cuadro con **hechos** (números, nombres, sí/no — nada de "creo qu
 | Hecho | Valor |
 |---|---|
 | Sprint (número/nombre, o "sin sprint") · ¿terminó o queda **en curso**? | |
+| Rebanadas del plan: **planeadas / entregadas / desviadas** (resumen de una línea — el detalle vive en la entrega del sprint) | |
 | Rama (nombre) · commits (cantidad + lista `oneline`) | |
+| Working tree al cerrar (¿limpio? qué queda y por qué) · duración aprox (del primer al último commit) | |
 | PR (número y estado) · ¿rama mergeada eliminada? | |
 | Ritual corrido esta sesión (arranca / descubre / planea / que-sigue / gemba / desatendido / cierra) | |
+| Delegaciones: qué asiento-subagente hizo qué · qué hizo el hilo en sesión con 🎭 (excepción acusada) | |
+| Aprobaciones **nombradas** que el cliente otorgó en la sesión (qué aprobó, con qué palabras) | |
 | Pruebas automáticas: **altas / cambios / bajas** · suites corridas y resultado (N/N) | |
 | Pruebas E2E (Playwright u otro harness): ¿corrieron? resultado | |
 | Evidencia: ¿corrida en `qa_runs/` con capturas y `LOG.md`? ¿citada y commiteada (`git add -f`)? | |
 | Archivos: creados / editados / eliminados (conteo + los clave) | |
 | Gates: `verificar` / `auditar` / self-tests — resultado · avisos **atendidos** vs **no-aplicables (con su razón)** | |
+| ¿Hubo compactación/resumen de contexto? · ¿se re-verificó contra los artefactos al retomar? | |
 | ADRs creados o enmendados | |
 | CHANGELOG: ¿al día? · versión propuesta (MAJOR/MINOR/PATCH) o queda `[Unreleased]` | |
+| Motor Jidoka: ¿al día con la nave? (`estado-motor.ps1` — clave en repos hijos) | |
 | Issues/hallazgos encontrados (detalle) · ¿se abrieron issues de GitHub? | |
+| Fricción y errores (**Kaizen crudo**): correcciones del cliente al agente (cuántas, cuáles) · errores del agente cometidos y reparados | |
 | Pendientes que van al HANDOFF (incluida la cola de decisiones del cliente) | |
 | Resumen de los cambios (3-5 líneas) | |
 | Resumen de la conversación con el cliente (qué pidió, qué se decidió) | |

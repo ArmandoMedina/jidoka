@@ -94,7 +94,7 @@
     </bpmn:textAnnotation>
     <bpmn:association id="Assoc_Kaizen" sourceRef="Ann_Kaizen" targetRef="T_Registrar"/>
     <bpmn:textAnnotation id="Ann_Cuadro">
-      <bpmn:text>El cuadro de cierre: los hechos medibles (rama, commits, PR, pruebas altas/bajas, E2E, evidencia en qa_runs, gates y avisos, ritual corrido, sprint terminado o en curso) se llenan con verdad — un hueco se declara, no se rellena bonito — y se VERSIONA con los planes (en la entrega del sprint, o docs/sprints/cierre-AAAAMMDD.md).</bpmn:text>
+      <bpmn:text>El cuadro de cierre: los hechos medibles (sprint y rebanadas, rama/commits/PR, ritual corrido, delegaciones y 🎭, aprobaciones nombradas, pruebas altas/bajas, E2E, evidencia en qa_runs, gates y avisos, compactación, motor al día, fricción y errores — Kaizen crudo) se llenan con verdad — un hueco se declara, no se rellena bonito — y se VERSIONA con los planes (en la entrega del sprint, o docs/sprints/cierre-AAAAMMDD.md).</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:association id="Assoc_Cuadro" sourceRef="Ann_Cuadro" targetRef="T_Registrar"/>
   </bpmn:process>
