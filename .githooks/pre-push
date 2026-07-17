@@ -5,4 +5,9 @@
 # Se enciende una vez por clon:  git config core.hooksPath .githooks
 # Saltar a proposito:            git push --no-verify
 powershell -NoProfile -ExecutionPolicy Bypass -File "./tools/verificar.ps1"
-exit $?
+rc=$?
+# Gate anti-PII: fuga de dato de entorno en docs rastreados (disparo sin-pii-en-el-repo).
+powershell -NoProfile -ExecutionPolicy Bypass -File "./tools/anti-pii.ps1"
+ra=$?
+if [ "$rc" -ne 0 ]; then exit "$rc"; fi
+exit "$ra"

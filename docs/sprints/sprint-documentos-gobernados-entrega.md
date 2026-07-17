@@ -1,6 +1,6 @@
 # Entrega — Sprint "Documentos gobernados" (KIT-2, ADR 0042)
 
-> Récord de cierre. El contrato está en [`sprint-documentos-gobernados-plan.md`](sprint-documentos-gobernados-plan.md). Cerrado 2026-07-17, `v1.22.0`.
+> Récord de cierre. El contrato está en [`sprint-documentos-gobernados-plan.md`](sprint-documentos-gobernados-plan.md). Cerrado 2026-07-17, `v1.23.0`.
 
 ## Qué se entregó
 
@@ -31,14 +31,14 @@ El **hermano estructural del sello**: el motor se gobierna por hash; los documen
 | Delegaciones | `arquitecto` (opus, read-only): validó las 3 decisiones de arquitectura + cazó C1/C2/C3. 🎭 Hilo principal en sesión: la codificación de los `.ps1` (edición acoplada con bucle TDD sobre los mismos scripts — excepción del §5, no rito) |
 | Aprobaciones nombradas | R0 del QUÉ ("dale a /jidoka:planea con esas 3 rebanadas") + STOP 2 (plan aprobado en plan mode) + cierre ("ciérralo... autorizado, marge, con versión y borrar rama") |
 | Pruebas: altas / cambios / bajas | altas: `probar-docs.ps1` (nuevo, 24 casos) · cambios: `publicar.ps1` (probar-docs al preflight) · bajas: 0 |
-| Suites corridas | `probar-docs` 24/24 · `probar-instalador` 67/67 · `probar-sembrar` 38/38 · `probar-publicar` 7/7 · `probar-preflight` 7/7 · `probar-version` 1.22.0 · `probar-agentes` 32 · `probar-gate` 14 · `probar-hooks` 32 · `probar-disparos` 4 · `probar-auditor` 7 |
+| Suites corridas | `probar-docs` 24/24 · `probar-instalador` 67/67 · `probar-sembrar` 38/38 · `probar-publicar` 7/7 · `probar-preflight` 7/7 · `probar-version` 1.23.0 · `probar-agentes` 32 · `probar-gate` 14 · `probar-hooks` 32 · `probar-disparos` 4 · `probar-auditor` 7 |
 | E2E (Playwright u otro) | N/A (repo de método; sin harness E2E) |
 | Evidencia en `qa_runs/` | `qa_runs/documentos-gobernados-20260717/LOG.md` — suite verde + demos A/B + caso enti · citada y commiteada (`git add -f`) |
 | Archivos: creados / editados | 8 nuevos / 14 editados (clave nuevos: `estado-docs.ps1`, `docs-gobernados.json`, `probar-docs.ps1`, `templates/CONTRIBUTING.md`, ADR 0042, KIT-2, plan+entrega) |
 | Gates | `verificar -Base main` exit 0 (2 avisos: `ritual`→es KIT-2 no RIT-1; `atlas`→diagrama, follow-up registrado) · `auditar` íntegro · self-tests verdes |
 | Compactación | no hubo · N/A |
 | ADRs | **0042** creado (gobierno documental por estructura) · listado en su índice en el mismo commit |
-| CHANGELOG · versión | al día · **1.22.0** (MINOR — capacidad nueva). Colisiona con PR #108 (1.22.0) → coordinar |
+| CHANGELOG · versión | al día · **1.23.0** (MINOR — capacidad nueva; rebumpó de 1.22.0 al rebasar sobre main que ya liberó 1.22.0 con #108) |
 | Motor Jidoka | al día (es la nave nodriza) |
 | Issues/hallazgos | code-review: 1 fix aplicado (fence), 2 límites aceptados (prefijo — ADR), 1 follow-up (muro lee ledger del PR no de base). Sin issues de GitHub abiertos (al HANDOFF) |
 | Fricción / Kaizen crudo | Correcciones del cliente (colaborativas, no errores): "y el plan mode?" (aclaré los 2 STOP) · "no autorizo el QUÉ sin el CÓMO" (fusioné R0+plan en plan mode) · "capacidades es mal ejemplo" (refiné la taxonomía) · reframe SAP · "une la rama del preflight". Errores del agente reparados en sesión: 2 — el ledger requería "El casting" (falso-DESVIADO en la nave nodriza) y el falso-CONFORME por code-fence (cazado por el review) |

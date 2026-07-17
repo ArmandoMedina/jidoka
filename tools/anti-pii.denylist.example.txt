@@ -1,0 +1,18 @@
+# anti-pii.denylist.example.txt - PLANTILLA del cinturon local del gate anti-PII.
+#
+# Copia este archivo a  tools/anti-pii.denylist.txt  (gitignoreado, NUNCA se
+# commitea) y pon UNA cadena literal por linea: lo especifico de TU entorno que
+# no debe aparecer en los docs rastreados de este repo publico. Por ejemplo:
+#   - el nombre de una cuenta secundaria de GitHub
+#   - un hostname o share interno de tu red
+#   - un identificador de proyecto/cliente que no debe salir
+# Las lineas vacias y las que empiezan con # se ignoran.
+#
+# El detector estructural (email real, ruta de usuario) corre SIEMPRE, exista o
+# no la denylist. La denylist es cinturon: cadenas exactas que quieres garantizar
+# que jamas se cuelen, aunque no tengan una "forma" que el detector reconozca.
+#
+# Modelo de amenaza: el ACCIDENTE. Esto NO se commitea porque un repo publico no
+# puede tener un muro server-side de secretos-conocidos sin filtrar los secretos.
+# Por eso la denylist es aviso LOCAL (pre-push); el muro server-side es el
+# detector estructural, que busca formas y no revela ninguna instancia.

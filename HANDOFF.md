@@ -6,24 +6,39 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-17 — Documentos gobernados · KIT-2 · `v1.22.0` — ✅ MERGEADO Y LIBERADO)
+## Dónde estamos (2026-07-17 — Documentos gobernados · KIT-2 · `v1.23.0` — ✅ MERGEADO Y LIBERADO)
 
-**Sprint "Documentos gobernados" cerrado, mergeado y liberado (`v1.22.0`, ADR 0042).** El **hermano estructural del sello**: el motor se gobierna por hash; los documentos **instancia-de-template** que el ritual inyecta con `@` (`brief`/`infra`/`CONTRIBUTING`) por **secciones** (modelo SAP del cliente — alterar la estructura gobernada = *garantía nula*). Nació de que el cliente sintió "los docs de los hijos están super diferentes"; la medición desmintió la premisa (el ritual NO diverge, es motor por-hash) y encontró el hueco real: los docs de instancia sin gobierno de estructura, con `CONTRIBUTING` como el peor caso (un stub de 4 líneas sin template). Piezas: `tools/docs-gobernados.json` (ledger capa-1/2/3 + secciones requeridas congeladas), `tools/estado-docs.ps1` (detector — **aviso** en `/jidoka:arranca`, **muro opt-in** `-Estricto` en CI apagado por defecto), template real de `CONTRIBUTING`. Contrato+récord: `docs/sprints/sprint-documentos-gobernados-{plan,entrega}.md`. Evidencia: `qa_runs/documentos-gobernados-20260717/LOG.md` (suite verde + demos + caso enti confirmado con máquina).
+**Sprint "Documentos gobernados" cerrado, mergeado y liberado (`v1.23.0`, ADR 0042).** El **hermano estructural del sello**: el motor se gobierna por hash; los documentos **instancia-de-template** que el ritual inyecta con `@` (`brief`/`infra`/`CONTRIBUTING`) por **secciones** (modelo SAP del cliente — alterar la estructura gobernada = *garantía nula*). Nació de que el cliente sintió "los docs de los hijos están super diferentes"; la medición desmintió la premisa (el ritual NO diverge, es motor por-hash) y encontró el hueco real: los docs de instancia sin gobierno de estructura, con `CONTRIBUTING` como el peor caso (un stub de 4 líneas sin template). Piezas: `tools/docs-gobernados.json` (ledger capa-1/2/3 + secciones requeridas congeladas), `tools/estado-docs.ps1` (detector — **aviso** en `/jidoka:arranca`, **muro opt-in** `-Estricto` en CI apagado por defecto), template real de `CONTRIBUTING`. Contrato+récord: `docs/sprints/sprint-documentos-gobernados-{plan,entrega}.md`. Evidencia: `qa_runs/documentos-gobernados-20260717/LOG.md` (suite verde + demos + caso enti confirmado con máquina).
 
-**La rama del sprint subsumió el preflight `!` de la 1.21.1** (que nunca se tagueó): su fix viaja en `v1.22.0`. La 1.21.1 ya no queda suelta.
+**La rama del sprint subsumió el preflight `!` de la 1.21.1** (que nunca se tagueó): su fix viaja en `v1.23.0`. La 1.21.1 ya no queda suelta.
 
 **Pendientes / follow-ups (nada bloquea al agente):**
 1. **Gemba del cliente (owner: cliente) — PENDIENTE:** sembrar un hijo-fixture desechable, destripar su `CONTRIBUTING.md`, correr `/jidoka:arranca` → ver `[DESVIADO] CONTRIBUTING.md -- falta(n): El flujo`. Sin código ni terminal. (enti NO se usa: lo trabaja otro agente.)
 2. **El muro CI lee el ledger del PR, no de la base** (a diferencia del blast-radius, ADR 0003): un PR podría flipear `estricto:true→false` en el mismo PR para pasar. Mitigado (opt-in, config de instancia del cliente, no la ley compartida). Endurecer a lectura-desde-base si madura (regla 2-3). Hallazgo del `/code-review`.
 3. **El atlas `10-arranca` no refleja** el sub-paso de conformidad estructural ni `estado-docs.ps1` (aviso `atlas` aceptado — pulido visual, terreno del cliente).
 4. **Bajar KIT-2 a los labs** con `-Actualizar` (siembra ledger/detector/test + el template de CONTRIBUTING; migra el stub de CONTRIBUTING). Nota: los hijos con un CONTRIBUTING viejo verán **aviso** (no muro) — el nudge honesto.
-5. **Colisión de versión con PR #108** (`gate-anti-pii`, ADR 0041, apuntaba a 1.22.0): `v1.22.0` se cortó aquí primero → **#108 debe rebumpar a 1.23.0** (y su ADR 0041 no colisiona con el 0042 de acá).
+5. **Colisión de versión con #108 — RESUELTA:** `main` se movió durante la sesión (#108 `gate-anti-pii` y #109 privacidad ya mergeados, **`v1.22.0` tagueada**). Este sprint rebasó sobre el main nuevo y **rebumpó a `v1.23.0`**; el ADR 0042 no colisiona (main llega a 0041). El merge reconció `andon.yml`/`publicar.ps1`/CHANGELOG/etc. conservando ambos gates (anti-pii + docs).
 
 **Coordinación:** el lab de rescate ("enti", `C:\Repositorios\entisoft-rescate`) lo trabaja **otro agente** — esta sesión entró **solo-lectura** (medición del drift), sin tocar su working tree.
 
 ---
 
 ## Dónde estuvimos (2026-07-17 tarde — El ritual determinista · PR #103 · `v1.21.0` — ✅ MERGEADO Y LIBERADO)
+## Dónde estamos (2026-07-17 noche — privacidad del repo público · **v1.22.0 LIBERADO**)
+
+Sesión de soporte pedida por el cliente ("¿por qué hay info personal mía en el repo si es público?"). Verificado con evidencia y atendido de raíz:
+
+1. **Fuga limpiada (PR #107, mergeado):** el nombre de la cuenta gh **secundaria** del autor estaba en `product/infra.md` y `HANDOFF.md` (violaba la "Frontera de confidencialidad" del `CONTRIBUTING`). Quitado del HEAD (`git grep` en `origin/main` limpio); pasó a "la cuenta secundaria de solo-lectura". La historia lo conserva (el cliente eligió **limpiar-HEAD, no reescribir**). Email de commits de este repo fijado al `noreply` de GitHub (config **local**).
+2. **Gate anti-PII construido y liberado (`v1.22.0`, PR #108, ADR 0041):** `tools/anti-pii.ps1` **BLOQUEA** formas de PII de entorno (email con dominio real, ruta de usuario nombrada) en docs rastreados. Se parte en dos: detector estructural **público** (muro en el check `andon`, patrón "detector de la base") + **denylist local** privada gitignoreada (cinturón pre-push). Disparo 16.º `sin-pii-en-el-repo` con respaldo en doctrina; baja al kit por el manifiesto. Evidencia: `qa_runs/gate-anti-pii-20260717/LOG.md` (self-test 11/11, 206 archivos limpios, cero falsos positivos). Bug del detector (tragaba puntuación de cierre) cazado y curado en la corrida; `probar-publicar` cazó que faltaba el gate en el preflight del release (curado).
+
+**Pendiente del cliente (nada bloquea al agente):**
+- **Email global:** `git config --global user.email` sigue en el correo de trabajo (`arcadial`) — afecta **todos** sus repos. Cambiarlo a noreply es decisión suya (identidad de trabajo vs privacidad); no se tocó.
+- **Historia de git:** la cuenta secundaria y un Hotmail personal (`jose_joc14@…`) siguen en commits viejos y GitHub cachea; solo se borran **reescribiendo historia** (pesado). No hecho a propósito.
+- **Backlog nuevo (ROADMAP):** que `planea.md` exija declarar **qué pruebas** hará cada rebanada del plan.
+
+> **Nota git (git gana):** el cierre "2026-07-17 tarde" de abajo quedó viejo — #103 ya estaba mergeado y `v1.21.0`/`v1.21.1` liberados al abrir esta sesión.
+
+## Dónde estamos (2026-07-17 tarde — El ritual determinista · PR #103 mergeado, `v1.21.0` liberado)
 
 **Dos sesiones encadenadas en la rama `refina-arranca-orden-20260717` (16 commits, cuadro completo en `docs/sprints/cierre-20260717.md` — estrena el cuadro de cierre que esta misma sesión cableó).** La entrega:
 
@@ -109,7 +124,7 @@
 
 **Issues:** #86–#91 **cerrados** con el release · #82 queda abierto re-alcanzado a lo único vivo (validar nombres de `tools:` en el lint) · los 7 acusados uno por uno en el tracker.
 
-**Nota operativa de la sesión:** el clasificador de permisos del agente bloqueó intermitentemente comandos con literales tipo glob en mensajes/lotes (`gh issue close` en batch, commits con comodines en el cuerpo) — se resolvió de uno en uno; no fue falla del ritual. La cuenta gh activa quedó **ArmandoMedina** durante merge/release (convención de `product/infra.md`); restaurar a `Armandomedina9705` al cerrar si se desea.
+**Nota operativa de la sesión:** el clasificador de permisos del agente bloqueó intermitentemente comandos con literales tipo glob en mensajes/lotes (`gh issue close` en batch, commits con comodines en el cuerpo) — se resolvió de uno en uno; no fue falla del ritual. La cuenta gh activa quedó **ArmandoMedina** durante merge/release (convención de `product/infra.md`); restaurar la cuenta secundaria al cerrar si se desea.
 
 **Pendiente (humano — nada bloquea al agente):**
 1. **El demo de la cosecha #7** (Verificación, owner: cliente): sesión nueva en `C:\Repositorios\jidoka-hijo-practica` (hijo real sembrado 1.16.1 → migrado) + `/jidoka:arranca` — sin `@` rotos, casting visible, asientos existentes. El hijo es desechable; bórralo al terminar.
@@ -158,7 +173,7 @@
 - [#78](https://github.com/ArmandoMedina/jidoka/issues/78) (`bug`+`leccion`) — **el preflight de `publicar.ps1` da `[OK]` a un test cuyo archivo no existe** (CommandNotFoundException tragado por `*> $null` + `$LASTEXITCODE` viciado del test anterior). Visto en vivo con `probar-instalador` en cuarentena. Cura candidata en el issue (guarda `Test-Path` que falla cerrado + caso ROJO→VERDE).
 - [#79](https://github.com/ArmandoMedina/jidoka/issues/79) (`leccion`+`regla-2-3`) — **`instalar.ps1` y `probar-instalador.ps1` tienen `skip-worktree` en el índice local** (parche de la sesión anterior contra la cuarentena): el árbol reporta "limpio" con dos piezas del motor fuera del disco y ninguna guarda lo acusa. Estado local vigente HOY en esta máquina — no te creas el "limpio" sin `git ls-files -v tools/`.
 
-**Nota operativa (ya en `recursos-del-proyecto.md`):** los merges y releases en GitHub requieren la cuenta gh **ArmandoMedina** activa (`gh auth switch`); la cuenta `Armandomedina9705` no tiene permiso de merge. Quedó activa `Armandomedina9705` al cerrar.
+**Nota operativa (ya en `recursos-del-proyecto.md`):** los merges y releases en GitHub requieren la cuenta gh **ArmandoMedina** activa (`gh auth switch`); la cuenta secundaria no tiene permiso de merge. Quedó activa la cuenta secundaria al cerrar.
 
 **Pendiente (humano) — heredado, sin cambios:**
 1. **El demo de campo de `/jidoka:descubre`** (owner: cliente): correrlo en un proyecto con niebla real; su resultado alimenta #67.

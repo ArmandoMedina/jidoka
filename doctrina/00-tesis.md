@@ -72,6 +72,14 @@ modelo); nunca se lo **sustituye**.
 > mutar el propio motor (borrar una pieza, no solo tocarla sin su doc) exige la misma decisión
 > nombrada que cualquier otro cambio de gobierno. (Disparo `no-borres-el-motor`, ADR 0032.)
 
+> **Corolario de diseño (la frontera de confidencialidad también es muro, no prosa).** Una regla que
+> vive solo como texto ("no metas dato de entorno personal en un repo público") depende de que el
+> actor la recuerde y coopere — el mismo fallo que la tesis descarta. Si importa, se cablea fuera del
+> LLM: un gate determinista que **BLOQUEA** las *formas* de PII (no las instancias — un gate que
+> contiene la PII que busca la re-publica) hace cumplir lo que la "Frontera de confidencialidad" del
+> `CONTRIBUTING` solo pedía. Caso de campo: una cuenta secundaria se coló en los docs de este repo
+> público antes de que existiera el muro. (Disparo `sin-pii-en-el-repo`, ADR 0041.)
+
 ## El límite honesto
 
 Nada de esto es técnicamente nuevo — cada mecanismo tiene décadas (ver linajes en `01-` y `02-`).
