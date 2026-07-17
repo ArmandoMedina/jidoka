@@ -97,6 +97,10 @@
       <bpmn:text>Borde: lo que ni el descubrimiento resuelva se marca como pendiente del cliente, no se rellena (planea.md, kanban/estados.md).</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:association id="Assoc_Pendiente" sourceRef="Ann_Pendiente" targetRef="Call_Descubre"/>
+    <bpmn:textAnnotation id="Ann_Leer">
+      <bpmn:text>Frescura primero (git status: si algo lo contradice, git gana). El brief se inyecta (@, un hecho — ADR 0034); ROADMAP y capacidades: exploración dirigida al sprint.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Leer" sourceRef="Ann_Leer" targetRef="T_Leer"/>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="Diagram_12_Planea">
     <bpmndi:BPMNPlane id="Plane_12_Planea" bpmnElement="Collab_Planea">
@@ -221,6 +225,13 @@
       <bpmndi:BPMNShape id="Shape_Ann_Pendiente" bpmnElement="Ann_Pendiente">
         <dc:Bounds x="200" y="30" width="400" height="40"/>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ann_Leer" bpmnElement="Ann_Leer">
+        <dc:Bounds x="200" y="262" width="200" height="100"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_Leer" bpmnElement="Assoc_Leer">
+        <di:waypoint x="310" y="262"/>
+        <di:waypoint x="350" y="230"/>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Assoc_Pendiente" bpmnElement="Assoc_Pendiente">
         <di:waypoint x="400" y="70"/>
         <di:waypoint x="510" y="262"/>
