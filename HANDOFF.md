@@ -6,7 +6,23 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-16 tarde — «El atlas dice la verdad» · rama `atlas-fiel-20260716` · CONSTRUIDO, sin mergear)
+## Dónde estamos (2026-07-17 — el fantasma del 10-arranca: NO era el diagrama, era la ventana)
+
+**Sesión de soporte, no de sprint.** El cliente llevaba 3 chats convencido de que el `.bpmn` y el `.svg` del `10-arranca-con-subprocesos` «eran diferentes» y sin saber cuál era el real — al punto de querer borrar todo el atlas. **Tenía razón en lo que veía, y la causa NO era ningún diagrama.** Los archivos del repo siempre estuvieron bien (`atlas:validate` limpio los 26; el `.bpmn` en disco = HEAD = la versión fiel del sprint v1.20.0; cotejado contra `arranca.md`). El culpable: **el editor visual de BPMN de VS Code (Miragon) tenía un buffer viejo en memoria** — abrió el archivo antes del arreglo del 16-jul y **nunca lo recargó** cuando el merge de #101 actualizó el archivo en disco. La pestaña mostraba `●` (sin guardar) y pintaba la versión vieja («Recuperar contexto mínimo», bucle de aclaración); el `.svg` y el disco pintaban la buena. «bpmn ≠ svg» era en realidad «buffer viejo del editor ≠ disco». Se resolvió con `Revert File`. **Peligro esquivado:** un Ctrl+S en esa pestaña habría escrito la versión vieja encima de la buena.
+
+**Lección durable (la Kaizen):** documentada como «Trampa del buffer viejo» en `docs/atlas/README.md` (el editor no recarga solo tras un cambio de git; `●` + diagrama que no cuadra con su `.svg` = copia vieja en memoria; `Revert File`, no guardar). Es el mismo patrón que el informe de fidelidad: un hallazgo que se re-descubría a golpes, ahora durable.
+
+**Limpieza hecha en el working tree (sin commitear aún — falta rama):**
+1. Borrados **37 PNG de inspección scratch** de `docs/atlas/render/` (basura untracked que confundía cuál diagrama era el real — incluía fotos `-nuevo`/homónimas de versiones viejas).
+2. `docs/atlas/render/*.png` añadido al `.gitignore` (esas capturas no vuelven a ensuciar).
+3. `HANDOFF.md` corregido (decía que atlas-fiel estaba «sin mergear» — doc-drift; ya estaba en `main`).
+4. `docs/atlas/README.md` — la gotcha del editor.
+
+**Pendiente (humano):** commitear estos 3 cambios de doc (`.gitignore`, `HANDOFF.md`, `docs/atlas/README.md`) en una rama y mergear con orden nombrada. No es release (limpieza de doc, no cambio de motor).
+
+---
+
+## Dónde estamos (2026-07-16 — «El atlas dice la verdad» · **`v1.20.0` MERGEADO Y LIBERADO** · PR #101, merge `9ec3114`)
 
 **Sprint de fidelidad del atlas, nacido de que el cliente sintió que el 10-arranca «era diferente» — y tenía razón.** Se auditaron los 24 diagramas AS-IS contra su **fuente real** (comando `.md` / script `.ps1`): **14 fieles, 10 desviados**. Las 4 rebanadas construidas y committeadas en la rama (R0 aprobado en plan mode, plan-contrato en `docs/sprints/sprint-atlas-fiel-plan.md`). Evidencia: `atlas:validate` verde (26 diagramas), `verificar.ps1` limpio, cada diagrama tocado re-renderizado e inspeccionado a la vista. Informe durable: `docs/analisis/fidelidad-atlas-202607.md`.
 
@@ -17,11 +33,14 @@
 
 **Corrección clave cazada por el cliente:** el primer pase marcó 30/41/42 como «fuente muerta» porque `instalar.ps1` no está en disco — pero **está en git, `skip-worktree` + cuarentena AV** (#79). 41-actualizar resultó **FIEL**. Lección de tooling (issue aparte, NO en este sprint): **auditar el atlas contra el disco miente cuando hay piezas `skip-worktree`; hay que leer de git.**
 
+**Verificado 2026-07-17:** el atlas en git es la verdad — `atlas:validate` limpio (26 diagramas, 25 call activities en el CSV), y los `.svg` committeados corresponden a sus `.bpmn` fieles (marcadores cotejados en `10-arranca`). El sprint ya está en `main` (no quedó "sin mergear" — eso era doc-drift de este HANDOFF).
+
+**Limpieza 2026-07-17 (el «desmadre» que veía el cliente):** se borraron los 37 PNG de inspección *scratch* de `render/` (basura untracked, no producto — incluían fotos `-nuevo`/homónimas de versiones VIEJAS que confundían cuál era la real) y se ignoran a futuro (`docs/atlas/render/*.png` en `.gitignore`). El caos eran esas capturas, no los diagramas. El producto versionado es el `.bpmn` (fuente) + su `.svg` (render de `npm run atlas:render`).
+
 **Pendiente (humano — nada bloquea al agente):**
-1. **Gemba del cliente:** abrir los SVG en `docs/atlas/render/` (empezar por `10-arranca-con-subprocesos.svg` y `31-sembrar-manual-as-is.svg`) y confirmar a la vista.
+1. **Gemba del cliente:** abrir los `.bpmn` en `docs/atlas/` (empezar por `10-ritual/10-arranca-con-subprocesos.bpmn` y `30-instalacion/31-sembrar-manual-as-is.bpmn`) y confirmar a la vista.
 2. **El pulido visual fino** de los diagramas tocados es del cliente (su terreno declarado); el agente entregó fidelidad + layout funcional legible.
-3. **Merge de la rama `atlas-fiel-20260716` a `main`** — requiere orden nombrada del cliente (convención de `infra.md`). Sugerido: MINOR (agrega el diagrama AV y cura fidelidad). Hay ~30 PNG de inspección untracked en `render/` (scratch; no se commitean).
-4. **Abrir el issue de la lección de tooling** (`auditar`/atlas leen disco, no ven `skip-worktree`).
+3. **Abrir el issue de la lección de tooling** (`auditar`/atlas leen disco, no ven `skip-worktree`).
 
 ---
 

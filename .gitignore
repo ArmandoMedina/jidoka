@@ -32,3 +32,7 @@ Thumbs.db
 # Temporales
 *.tmp
 *.log
+
+# Capturas PNG de inspeccion del atlas: scratch para ver a ojo. El render
+# versionado es el .svg (npm run atlas:render); los PNG son desechables.
+docs/atlas/render/*.png
