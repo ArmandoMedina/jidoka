@@ -4,7 +4,7 @@
     <bpmn:participant id="Pool_Planea" name="/jidoka:planea — el QUÉ aprobado antes del código (R0)" processRef="Process_Planea"/>
   </bpmn:collaboration>
   <bpmn:process id="Process_Planea" name="/jidoka:planea — diseñar el sprint con R0 y STOP" isExecutable="false">
-    <bpmn:documentation>Fuente: .claude/commands/jidoka/planea.md. Carriles: el Agente lee, redacta y planea; el Humano aprueba el QUÉ con nombre antes del CÓMO.</bpmn:documentation>
+    <bpmn:documentation>Fuente: .claude/commands/jidoka/planea.md. Carriles: el Agente lee, redacta y planea; el Humano aprueba DOS veces — el QUÉ con nombre antes del CÓMO (R0), y el plan formal (plan mode) antes de archivarlo ("al aprobarse, el plan se archiva"). Un plan rechazado se ajusta y se re-presenta, no se archiva.</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_Planea">
       <bpmn:lane id="Lane_Agente" name="Agente (planeador)">
         <bpmn:flowNodeRef>Start</bpmn:flowNodeRef>
@@ -20,6 +20,8 @@
       </bpmn:lane>
       <bpmn:lane id="Lane_Humano" name="Humano (cliente)">
         <bpmn:flowNodeRef>U_Aprobar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>U_AprobarPlan</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_PlanAprob</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:startEvent id="Start" name="QUÉ pedido a planear">
@@ -58,10 +60,20 @@
     </bpmn:endEvent>
     <bpmn:task id="T_Plan" name="Redactar el plan: rebanadas verticales, archivos, demo, no-metas">
       <bpmn:incoming>f_si_aprob</bpmn:incoming>
-      <bpmn:outgoing>f_plan_arch</bpmn:outgoing>
+      <bpmn:incoming>f_gw2_no</bpmn:incoming>
+      <bpmn:outgoing>f_plan_uaprob</bpmn:outgoing>
     </bpmn:task>
+    <bpmn:userTask id="U_AprobarPlan" name="STOP: aprobación formal del plan (plan mode)">
+      <bpmn:incoming>f_plan_uaprob</bpmn:incoming>
+      <bpmn:outgoing>f_uaprob_gw2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_PlanAprob" name="¿Plan aprobado?">
+      <bpmn:incoming>f_uaprob_gw2</bpmn:incoming>
+      <bpmn:outgoing>f_gw2_si</bpmn:outgoing>
+      <bpmn:outgoing>f_gw2_no</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
     <bpmn:task id="T_Archivar" name="Archivar sprint-N-plan.md e índice">
-      <bpmn:incoming>f_plan_arch</bpmn:incoming>
+      <bpmn:incoming>f_gw2_si</bpmn:incoming>
       <bpmn:outgoing>f_arch_end</bpmn:outgoing>
     </bpmn:task>
     <bpmn:endEvent id="End_Construir" name="Plan aprobado → construir">
@@ -76,7 +88,10 @@
     <bpmn:sequenceFlow id="f_aprob_gw" sourceRef="U_Aprobar" targetRef="Gw_Aprob"/>
     <bpmn:sequenceFlow id="f_no_aprob" name="no" sourceRef="Gw_Aprob" targetRef="End_Espera"/>
     <bpmn:sequenceFlow id="f_si_aprob" name="sí" sourceRef="Gw_Aprob" targetRef="T_Plan"/>
-    <bpmn:sequenceFlow id="f_plan_arch" sourceRef="T_Plan" targetRef="T_Archivar"/>
+    <bpmn:sequenceFlow id="f_plan_uaprob" sourceRef="T_Plan" targetRef="U_AprobarPlan"/>
+    <bpmn:sequenceFlow id="f_uaprob_gw2" sourceRef="U_AprobarPlan" targetRef="Gw_PlanAprob"/>
+    <bpmn:sequenceFlow id="f_gw2_si" name="sí" sourceRef="Gw_PlanAprob" targetRef="T_Archivar"/>
+    <bpmn:sequenceFlow id="f_gw2_no" name="no: ajustar" sourceRef="Gw_PlanAprob" targetRef="T_Plan"/>
     <bpmn:sequenceFlow id="f_arch_end" sourceRef="T_Archivar" targetRef="End_Construir"/>
     <bpmn:textAnnotation id="Ann_Pendiente">
       <bpmn:text>Borde: lo que ni el descubrimiento resuelva se marca como pendiente del cliente, no se rellena (planea.md, kanban/estados.md).</bpmn:text>
@@ -125,6 +140,13 @@
       <bpmndi:BPMNShape id="S_TPlan" bpmnElement="T_Plan">
         <dc:Bounds x="1130" y="170" width="160" height="60"/>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_UAprobarPlan" bpmnElement="U_AprobarPlan">
+        <dc:Bounds x="1150" y="375" width="150" height="60"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="S_GwPlanAprob" bpmnElement="Gw_PlanAprob" isMarkerVisible="true">
+        <dc:Bounds x="1360" y="385" width="40" height="40"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1340" y="352" width="80" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="S_TArchivar" bpmnElement="T_Archivar">
         <dc:Bounds x="1350" y="170" width="150" height="60"/>
       </bpmndi:BPMNShape>
@@ -171,9 +193,26 @@
         <di:waypoint x="1070" y="200"/>
         <di:waypoint x="1130" y="200"/>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="E_f_plan_arch" bpmnElement="f_plan_arch">
-        <di:waypoint x="1290" y="200"/>
-        <di:waypoint x="1350" y="200"/>
+      <bpmndi:BPMNEdge id="E_f_plan_uaprob" bpmnElement="f_plan_uaprob">
+        <di:waypoint x="1210" y="230"/>
+        <di:waypoint x="1210" y="375"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_uaprob_gw2" bpmnElement="f_uaprob_gw2">
+        <di:waypoint x="1300" y="405"/>
+        <di:waypoint x="1360" y="405"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_gw2_si" bpmnElement="f_gw2_si">
+        <di:waypoint x="1380" y="385"/>
+        <di:waypoint x="1380" y="230"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1388" y="290" width="20" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="E_f_gw2_no" bpmnElement="f_gw2_no">
+        <di:waypoint x="1380" y="425"/>
+        <di:waypoint x="1380" y="455"/>
+        <di:waypoint x="1100" y="455"/>
+        <di:waypoint x="1100" y="215"/>
+        <di:waypoint x="1130" y="215"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1240" y="437" width="60" height="14"/></bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="E_f_arch_end" bpmnElement="f_arch_end">
         <di:waypoint x="1500" y="200"/>

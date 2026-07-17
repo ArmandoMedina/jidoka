@@ -1,16 +1,19 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_10_Arranca" targetNamespace="https://github.com/ArmandoMedina/jidoka/process-atlas" exporter="Jidoka Atlas" exporterVersion="0.3" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.18.0">
   <bpmn:collaboration id="Collaboration_10_Arranca">
-    <bpmn:participant id="Participant_Usuario" name="Usuario"/>
-    <bpmn:participant id="Participant_Proyecto" name="/jidoka:arranca — abrir y orientar la sesión (sin construir)" processRef="Process_Arranca"/>
-    <bpmn:messageFlow id="MF_Start" sourceRef="Participant_Usuario" targetRef="Start_Arranque" name="/jidoka:arranca" messageRef="Message_Arranque"/>
-    <bpmn:messageFlow id="MF_Orient" sourceRef="Send_Orientar" targetRef="Participant_Usuario" name="Orientación" messageRef="Message_Orientacion"/>
+    <bpmn:participant id="Participant_Usuario" name="Usuario" />
+    <bpmn:participant id="Participant_Proyecto" name="/jidoka:arranca — abrir y orientar la sesión (sin construir)" processRef="Process_Arranca" />
+    <bpmn:messageFlow id="MF_Start" name="/jidoka:arranca" sourceRef="Participant_Usuario" targetRef="Start_Arranque" messageRef="Message_Arranque" />
+    <bpmn:messageFlow id="MF_Orient" name="Orientación" sourceRef="Send_Orientar" targetRef="Participant_Usuario" messageRef="Message_Orientacion" />
+    <bpmn:textAnnotation id="Ann_Contrato">
+      <bpmn:text>Frontmatter = contrato del comando. allowed-tools es la lista blanca CON dientes: Read habilita las @ (contexto); Bash(git/test/powershell) habilita los ! (git, rutear, asientos, plan). Sin ella, ni @ ni ! corren. description/argument-hint: solo UI, no tocan permisos.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Contrato" sourceRef="Ann_Contrato" targetRef="Start_Arranque" />
   </bpmn:collaboration>
   <bpmn:process id="Process_Arranca" name="/jidoka:arranca — abrir y orientar la sesión" isExecutable="false">
-    <bpmn:documentation>Fuente: .claude/commands/jidoka/arranca.md. Estilo Method &amp; Style (Bruce Silver): etiquetas verbo+objeto, el detalle de cada sección vive en su text annotation. §1 se modela en dos pasos que trazan a la misma sección — §1a revisar frescura en git (filtro), §1b cargar el contexto inyectado (@). Luego §2 roster + router (rutear.ps1), §3 el asiento lo ocupa el subagente, §4 desconfía de la compactación (guarda transversal), §5 fija las reglas duras, §6 orienta y espera la señal del cliente. El STOP final es la señal del cliente antes de construir.</bpmn:documentation>
+    <bpmn:documentation>Fuente: .claude/commands/jidoka/arranca.md. Estilo Method &amp; Style (Bruce Silver): etiquetas verbo+objeto, el detalle de cada sección vive en su text annotation. §1 se modela en dos pasos que trazan a la misma sección — §1a revisar frescura en git (filtro), §1b cargar el contexto inyectado (@). Luego §2 roster + router (rutear.ps1), §3 el asiento lo ocupa el subagente (casting vivo vía tools/asientos.ps1), §4 desconfía de la compactación (guarda transversal), §5 fija las reglas duras, §6 orienta y espera la señal del cliente. El frontmatter (allowed-tools) se documenta como contrato en Ann_Contrato: Read habilita las @, Bash habilita los !. El STOP final es la señal del cliente antes de construir. Cierra en dos end states que el padre (01-operar-sesion) lee directo — "Orientada: trabajo definido" / "Orientada: sin trabajo definido" — regla Method &amp; Style: los fines del subproceso casan con el gateway del padre ("¿Hay un trabajo definido?").</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_10_Arranca">
       <bpmn:lane id="Lane_Agente" name="Agente orquestador">
-        <bpmn:flowNodeRef>Start_Arranque</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Git</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Contexto</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>T_Router</bpmn:flowNodeRef>
@@ -22,16 +25,15 @@
         <bpmn:flowNodeRef>T_Rebanada</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gw_Join</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Send_Orientar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Start_Arranque</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_Humano" name="Humano (cliente)">
         <bpmn:flowNodeRef>U_Senal</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>End_Orientada</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Rumbo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_ConTrabajo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_SinTrabajo</bpmn:flowNodeRef>
       </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:startEvent id="Start_Arranque" name="Solicitud /jidoka:arranca recibida">
-      <bpmn:messageEventDefinition id="MED_Start_Arranque" messageRef="Message_Arranque"/>
-      <bpmn:outgoing>F_Start_Git</bpmn:outgoing>
-    </bpmn:startEvent>
     <bpmn:serviceTask id="T_Git" name="Revisar frescura en git">
       <bpmn:incoming>F_Start_Git</bpmn:incoming>
       <bpmn:outgoing>F_Git_Contexto</bpmn:outgoing>
@@ -78,29 +80,43 @@
       <bpmn:incoming>F_Join_Orient</bpmn:incoming>
       <bpmn:outgoing>F_Orient_Senal</bpmn:outgoing>
     </bpmn:sendTask>
+    <bpmn:sequenceFlow id="F_Start_Git" sourceRef="Start_Arranque" targetRef="T_Git" />
+    <bpmn:sequenceFlow id="F_Git_Contexto" sourceRef="T_Git" targetRef="T_Contexto" />
+    <bpmn:sequenceFlow id="F_Contexto_Router" sourceRef="T_Contexto" targetRef="T_Router" />
+    <bpmn:sequenceFlow id="F_Router_Asiento" sourceRef="T_Router" targetRef="T_Asiento" />
+    <bpmn:sequenceFlow id="F_Asiento_Reglas" sourceRef="T_Asiento" targetRef="T_Reglas" />
+    <bpmn:sequenceFlow id="F_Reglas_Orientar" sourceRef="T_Reglas" targetRef="T_Orientar" />
+    <bpmn:sequenceFlow id="F_Orientar_G" sourceRef="T_Orientar" targetRef="Gw_Sprint" />
+    <bpmn:sequenceFlow id="F_G_Si" name="sí" sourceRef="Gw_Sprint" targetRef="T_Planea" />
+    <bpmn:sequenceFlow id="F_G_No" name="no" sourceRef="Gw_Sprint" targetRef="T_Rebanada" />
+    <bpmn:sequenceFlow id="F_Planea_Join" sourceRef="T_Planea" targetRef="Gw_Join" />
+    <bpmn:sequenceFlow id="F_Rebanada_Join" sourceRef="T_Rebanada" targetRef="Gw_Join" />
+    <bpmn:sequenceFlow id="F_Join_Orient" sourceRef="Gw_Join" targetRef="Send_Orientar" />
+    <bpmn:sequenceFlow id="F_Orient_Senal" sourceRef="Send_Orientar" targetRef="U_Senal" />
+    <bpmn:sequenceFlow id="F_Senal_Rumbo" sourceRef="U_Senal" targetRef="Gw_Rumbo" />
+    <bpmn:sequenceFlow id="F_Rumbo_Si" name="sí" sourceRef="Gw_Rumbo" targetRef="End_ConTrabajo" />
+    <bpmn:sequenceFlow id="F_Rumbo_No" name="no" sourceRef="Gw_Rumbo" targetRef="End_SinTrabajo" />
+    <bpmn:startEvent id="Start_Arranque" name="Solicitud /jidoka:arranca recibida">
+      <bpmn:outgoing>F_Start_Git</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_Start_Arranque" messageRef="Message_Arranque" />
+    </bpmn:startEvent>
     <bpmn:userTask id="U_Senal" name="Dar la señal">
       <bpmn:incoming>F_Orient_Senal</bpmn:incoming>
-      <bpmn:outgoing>F_Senal_End</bpmn:outgoing>
+      <bpmn:outgoing>F_Senal_Rumbo</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:endEvent id="End_Orientada" name="Sesión orientada; sin construir sin el QUÉ aprobado">
-      <bpmn:incoming>F_Senal_End</bpmn:incoming>
+    <bpmn:exclusiveGateway id="Gw_Rumbo" name="¿La señal define un trabajo?">
+      <bpmn:incoming>F_Senal_Rumbo</bpmn:incoming>
+      <bpmn:outgoing>F_Rumbo_Si</bpmn:outgoing>
+      <bpmn:outgoing>F_Rumbo_No</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_ConTrabajo" name="Orientada: trabajo definido">
+      <bpmn:incoming>F_Rumbo_Si</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="F_Start_Git" sourceRef="Start_Arranque" targetRef="T_Git"/>
-    <bpmn:sequenceFlow id="F_Git_Contexto" sourceRef="T_Git" targetRef="T_Contexto"/>
-    <bpmn:sequenceFlow id="F_Contexto_Router" sourceRef="T_Contexto" targetRef="T_Router"/>
-    <bpmn:sequenceFlow id="F_Router_Asiento" sourceRef="T_Router" targetRef="T_Asiento"/>
-    <bpmn:sequenceFlow id="F_Asiento_Reglas" sourceRef="T_Asiento" targetRef="T_Reglas"/>
-    <bpmn:sequenceFlow id="F_Reglas_Orientar" sourceRef="T_Reglas" targetRef="T_Orientar"/>
-    <bpmn:sequenceFlow id="F_Orientar_G" sourceRef="T_Orientar" targetRef="Gw_Sprint"/>
-    <bpmn:sequenceFlow id="F_G_Si" sourceRef="Gw_Sprint" targetRef="T_Planea" name="sí"/>
-    <bpmn:sequenceFlow id="F_G_No" sourceRef="Gw_Sprint" targetRef="T_Rebanada" name="no"/>
-    <bpmn:sequenceFlow id="F_Planea_Join" sourceRef="T_Planea" targetRef="Gw_Join"/>
-    <bpmn:sequenceFlow id="F_Rebanada_Join" sourceRef="T_Rebanada" targetRef="Gw_Join"/>
-    <bpmn:sequenceFlow id="F_Join_Orient" sourceRef="Gw_Join" targetRef="Send_Orientar"/>
-    <bpmn:sequenceFlow id="F_Orient_Senal" sourceRef="Send_Orientar" targetRef="U_Senal"/>
-    <bpmn:sequenceFlow id="F_Senal_End" sourceRef="U_Senal" targetRef="End_Orientada"/>
+    <bpmn:endEvent id="End_SinTrabajo" name="Orientada: sin trabajo definido">
+      <bpmn:incoming>F_Rumbo_No</bpmn:incoming>
+    </bpmn:endEvent>
     <bpmn:textAnnotation id="Ann_Compactacion">
-      <bpmn:text>§4 GUARDA — desconfía de la compactación: verifica el HANDOFF y el plan contra el artefacto real, no contra el resumen. La compactación puede mentir.</bpmn:text>
+      <bpmn:text>§4 GUARDA — desconfía de la compactación: verifica el HANDOFF y el plan (§1b) contra el artefacto real, no contra el resumen. La compactación puede mentir.</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:textAnnotation id="Ann_Git">
       <bpmn:text>§1a · git branch --show-current · git status --short · git log --oneline -5. Filtro de frescura: si el HANDOFF contradice a git, git gana. Nada sirve si el repo ya no está donde el doc cree.</bpmn:text>
@@ -109,10 +125,10 @@
       <bpmn:text>§1b · Inyección @ en orden qué → cómo → dónde: PRODUCT_BRIEF (qué), CONTRIBUTING + infra (cómo), HANDOFF + plan del día (dónde). Un @ es un hecho, no un puntero (ADR 0034).</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:textAnnotation id="Ann_Router">
-      <bpmn:text>§2 · rutear.ps1 = preview de gates: lo que toques, esos gates te vigilan al cerrar. El roster es la tabla de responsables, no un asiento que se ocupa.</bpmn:text>
+      <bpmn:text>§2 · rutear.ps1 = preview de gates: lo que toques, esos gates te vigilan al cerrar. El roster (tabla de responsables, no un asiento que se ocupa) sale del casting con nombres en infra.md §El casting, o de los roles neutrales de kanban/roles.md. Un gate DORMIDO no es permiso: es un área que la ley aún no declara.</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:textAnnotation id="Ann_Asiento">
-      <bpmn:text>§3 · El subagente ocupa el asiento; el tier ya está fijo (.claude/agents/): explorador y mecánico (haiku), auditor (sonnet), arquitecto (opus).</bpmn:text>
+      <bpmn:text>§3 · El casting vivo se imprime del artefacto: tools/asientos.ps1 lee .claude/agents/ (asiento + tier fijo, ADR 0033) — el gemelo del router, sin copia en prosa que derive. Sin agentes sembrados: [DEGRADADO] → general-purpose, acusando el asiento. Excepción (hilo principal hace el trabajo): 🎭 Asiento &lt;rol&gt; (en sesión) — por qué.</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:textAnnotation id="Ann_Reglas">
       <bpmn:text>§5 · 1 sesión escritora · el orquestador no pica en el hilo · evidencia-no-palabra · la disciplina escala con el riesgo · nada de memorias de IA.</bpmn:text>
@@ -120,204 +136,256 @@
     <bpmn:textAnnotation id="Ann_Orientar">
       <bpmn:text>§6 · Resumir dónde estamos y qué sigue en orden de valor (HANDOFF / ROADMAP) y esperar la señal del cliente.</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="Assoc_Compactacion" sourceRef="Ann_Compactacion" targetRef="T_Git"/>
-    <bpmn:association id="Assoc_Git" sourceRef="Ann_Git" targetRef="T_Git"/>
-    <bpmn:association id="Assoc_Contexto" sourceRef="Ann_Contexto" targetRef="T_Contexto"/>
-    <bpmn:association id="Assoc_Router" sourceRef="Ann_Router" targetRef="T_Router"/>
-    <bpmn:association id="Assoc_Asiento" sourceRef="Ann_Asiento" targetRef="T_Asiento"/>
-    <bpmn:association id="Assoc_Reglas" sourceRef="Ann_Reglas" targetRef="T_Reglas"/>
-    <bpmn:association id="Assoc_Orientar" sourceRef="Ann_Orientar" targetRef="T_Orientar"/>
+    <bpmn:textAnnotation id="Ann_Rumbo">
+      <bpmn:text>En ambos fines rige el STOP: sin construir sin el QUÉ aprobado. El padre (01-operar-sesion) rutea según el fin: "trabajo definido" → ¿QUÉ claro? · "sin trabajo" → /jidoka:que-sigue.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Assoc_Compactacion" sourceRef="Ann_Compactacion" targetRef="T_Contexto" />
+    <bpmn:association id="Assoc_Git" sourceRef="Ann_Git" targetRef="T_Git" />
+    <bpmn:association id="Assoc_Contexto" sourceRef="Ann_Contexto" targetRef="T_Contexto" />
+    <bpmn:association id="Assoc_Router" sourceRef="Ann_Router" targetRef="T_Router" />
+    <bpmn:association id="Assoc_Asiento" sourceRef="Ann_Asiento" targetRef="T_Asiento" />
+    <bpmn:association id="Assoc_Reglas" sourceRef="Ann_Reglas" targetRef="T_Reglas" />
+    <bpmn:association id="Assoc_Orientar" sourceRef="Ann_Orientar" targetRef="T_Orientar" />
+    <bpmn:association id="Assoc_Rumbo" sourceRef="Ann_Rumbo" targetRef="Gw_Rumbo" />
   </bpmn:process>
+  <bpmn:message id="Message_Arranque" name="Solicitud /jidoka:arranca" />
+  <bpmn:message id="Message_Orientacion" name="Orientación de sesión" />
   <bpmndi:BPMNDiagram id="Diagram_10_Arranca">
     <bpmndi:BPMNPlane id="Plane_Diagram_10_Arranca" bpmnElement="Collaboration_10_Arranca">
       <bpmndi:BPMNShape id="Shape_Participant_Usuario" bpmnElement="Participant_Usuario" isHorizontal="true">
-        <dc:Bounds x="200" y="80" width="2280" height="60"/>
+        <dc:Bounds x="40" y="80" width="2440" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Participant_Proyecto" bpmnElement="Participant_Proyecto" isHorizontal="true">
-        <dc:Bounds x="200" y="160" width="2280" height="460"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Lane_Agente" bpmnElement="Lane_Agente" isHorizontal="true">
-        <dc:Bounds x="230" y="160" width="2250" height="340"/>
+        <dc:Bounds x="40" y="160" width="2440" height="560" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Lane_Humano" bpmnElement="Lane_Humano" isHorizontal="true">
-        <dc:Bounds x="230" y="500" width="2250" height="120"/>
+        <dc:Bounds x="70" y="560" width="2410" height="160" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_Start_Arranque" bpmnElement="Start_Arranque">
-        <dc:Bounds x="250" y="295" width="30" height="30"/>
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="235" y="330" width="80" height="40"/>
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNShape id="Shape_Lane_Agente" bpmnElement="Lane_Agente" isHorizontal="true">
+        <dc:Bounds x="70" y="160" width="2410" height="400" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_T_Git" bpmnElement="T_Git">
-        <dc:Bounds x="330" y="280" width="150" height="60"/>
+        <dc:Bounds x="330" y="280" width="150" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_T_Contexto" bpmnElement="T_Contexto">
-        <dc:Bounds x="535" y="280" width="150" height="60"/>
+        <dc:Bounds x="535" y="280" width="150" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_T_Router" bpmnElement="T_Router">
-        <dc:Bounds x="740" y="280" width="150" height="60"/>
+        <dc:Bounds x="740" y="280" width="150" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_T_Asiento" bpmnElement="T_Asiento">
-        <dc:Bounds x="945" y="280" width="150" height="60"/>
+        <dc:Bounds x="945" y="280" width="150" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_T_Reglas" bpmnElement="T_Reglas">
-        <dc:Bounds x="1150" y="280" width="150" height="60"/>
+        <dc:Bounds x="1150" y="280" width="150" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_T_Orientar" bpmnElement="T_Orientar">
-        <dc:Bounds x="1355" y="280" width="150" height="60"/>
+        <dc:Bounds x="1355" y="280" width="150" height="60" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Gw_Sprint" bpmnElement="Gw_Sprint" isMarkerVisible="true">
-        <dc:Bounds x="1560" y="290" width="40" height="40"/>
+        <dc:Bounds x="1560" y="290" width="40" height="40" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1540" y="336" width="80" height="27"/>
+          <dc:Bounds x="1540" y="336" width="80" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_T_Planea" bpmnElement="T_Planea">
-        <dc:Bounds x="1660" y="200" width="170" height="55"/>
+        <dc:Bounds x="1660" y="200" width="170" height="55" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_T_Rebanada" bpmnElement="T_Rebanada">
-        <dc:Bounds x="1660" y="365" width="170" height="55"/>
+        <dc:Bounds x="1660" y="365" width="170" height="55" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Gw_Join" bpmnElement="Gw_Join" isMarkerVisible="true">
-        <dc:Bounds x="1880" y="290" width="40" height="40"/>
+        <dc:Bounds x="1880" y="290" width="40" height="40" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Send_Orientar" bpmnElement="Send_Orientar">
-        <dc:Bounds x="1980" y="280" width="160" height="60"/>
+        <dc:Bounds x="1980" y="280" width="160" height="60" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Start_Arranque" bpmnElement="Start_Arranque">
+        <dc:Bounds x="115" y="295" width="30" height="30" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="104" y="330" width="73" height="40" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_U_Senal" bpmnElement="U_Senal">
-        <dc:Bounds x="1980" y="520" width="160" height="60"/>
+        <dc:Bounds x="1980" y="610" width="160" height="60" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Shape_End_Orientada" bpmnElement="End_Orientada">
-        <dc:Bounds x="2230" y="535" width="30" height="30"/>
+      <bpmndi:BPMNShape id="Shape_Gw_Rumbo" bpmnElement="Gw_Rumbo" isMarkerVisible="true">
+        <dc:Bounds x="2200" y="620" width="40" height="40" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2208" y="568" width="80" height="40"/>
+          <dc:Bounds x="2095" y="588" width="115" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_ConTrabajo" bpmnElement="End_ConTrabajo">
+        <dc:Bounds x="2305" y="580" width="30" height="30" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2345" y="585" width="110" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_SinTrabajo" bpmnElement="End_SinTrabajo">
+        <dc:Bounds x="2290" y="670" width="30" height="30" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2330" y="675" width="120" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Ann_Compactacion" bpmnElement="Ann_Compactacion">
-        <dc:Bounds x="305" y="165" width="210" height="95"/>
+        <dc:Bounds x="553" y="163" width="192" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Ann_Git" bpmnElement="Ann_Git">
-        <dc:Bounds x="305" y="370" width="195" height="125"/>
+        <dc:Bounds x="305" y="370" width="195" height="125" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Ann_Contexto" bpmnElement="Ann_Contexto">
-        <dc:Bounds x="510" y="370" width="200" height="125"/>
+        <dc:Bounds x="510" y="370" width="200" height="125" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Ann_Router" bpmnElement="Ann_Router">
-        <dc:Bounds x="715" y="370" width="200" height="125"/>
+        <dc:Bounds x="715" y="370" width="200" height="125" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Ann_Asiento" bpmnElement="Ann_Asiento">
-        <dc:Bounds x="920" y="370" width="200" height="125"/>
+        <dc:Bounds x="920" y="370" width="200" height="160" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Ann_Reglas" bpmnElement="Ann_Reglas">
-        <dc:Bounds x="1125" y="370" width="200" height="125"/>
+        <dc:Bounds x="1125" y="370" width="200" height="125" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Shape_Ann_Orientar" bpmnElement="Ann_Orientar">
-        <dc:Bounds x="1330" y="370" width="200" height="125"/>
+        <dc:Bounds x="1330" y="370" width="200" height="125" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Edge_F_Start_Git" bpmnElement="F_Start_Git">
-        <di:waypoint x="280" y="310"/>
-        <di:waypoint x="330" y="310"/>
+        <di:waypoint x="145" y="310" />
+        <di:waypoint x="330" y="310" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Git_Contexto" bpmnElement="F_Git_Contexto">
-        <di:waypoint x="480" y="310"/>
-        <di:waypoint x="535" y="310"/>
+        <di:waypoint x="480" y="310" />
+        <di:waypoint x="535" y="310" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Contexto_Router" bpmnElement="F_Contexto_Router">
-        <di:waypoint x="685" y="310"/>
-        <di:waypoint x="740" y="310"/>
+        <di:waypoint x="685" y="310" />
+        <di:waypoint x="740" y="310" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Router_Asiento" bpmnElement="F_Router_Asiento">
-        <di:waypoint x="890" y="310"/>
-        <di:waypoint x="945" y="310"/>
+        <di:waypoint x="890" y="310" />
+        <di:waypoint x="945" y="310" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Asiento_Reglas" bpmnElement="F_Asiento_Reglas">
-        <di:waypoint x="1095" y="310"/>
-        <di:waypoint x="1150" y="310"/>
+        <di:waypoint x="1095" y="310" />
+        <di:waypoint x="1150" y="310" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Reglas_Orientar" bpmnElement="F_Reglas_Orientar">
-        <di:waypoint x="1300" y="310"/>
-        <di:waypoint x="1355" y="310"/>
+        <di:waypoint x="1300" y="310" />
+        <di:waypoint x="1355" y="310" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Orientar_G" bpmnElement="F_Orientar_G">
-        <di:waypoint x="1505" y="310"/>
-        <di:waypoint x="1560" y="310"/>
+        <di:waypoint x="1505" y="310" />
+        <di:waypoint x="1560" y="310" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_G_Si" bpmnElement="F_G_Si">
-        <di:waypoint x="1580" y="290"/>
-        <di:waypoint x="1580" y="227"/>
-        <di:waypoint x="1660" y="227"/>
+        <di:waypoint x="1580" y="290" />
+        <di:waypoint x="1580" y="227" />
+        <di:waypoint x="1660" y="227" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1590" y="230" width="20" height="20"/>
+          <dc:Bounds x="1590" y="230" width="20" height="20" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_G_No" bpmnElement="F_G_No">
-        <di:waypoint x="1580" y="330"/>
-        <di:waypoint x="1580" y="392"/>
-        <di:waypoint x="1660" y="392"/>
+        <di:waypoint x="1580" y="330" />
+        <di:waypoint x="1580" y="392" />
+        <di:waypoint x="1660" y="392" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1588" y="360" width="20" height="20"/>
+          <dc:Bounds x="1588" y="360" width="20" height="20" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Planea_Join" bpmnElement="F_Planea_Join">
-        <di:waypoint x="1830" y="227"/>
-        <di:waypoint x="1900" y="227"/>
-        <di:waypoint x="1900" y="290"/>
+        <di:waypoint x="1830" y="227" />
+        <di:waypoint x="1900" y="227" />
+        <di:waypoint x="1900" y="290" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Rebanada_Join" bpmnElement="F_Rebanada_Join">
-        <di:waypoint x="1830" y="392"/>
-        <di:waypoint x="1900" y="392"/>
-        <di:waypoint x="1900" y="330"/>
+        <di:waypoint x="1830" y="392" />
+        <di:waypoint x="1900" y="392" />
+        <di:waypoint x="1900" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Join_Orient" bpmnElement="F_Join_Orient">
-        <di:waypoint x="1920" y="310"/>
-        <di:waypoint x="1980" y="310"/>
+        <di:waypoint x="1920" y="310" />
+        <di:waypoint x="1980" y="310" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_F_Orient_Senal" bpmnElement="F_Orient_Senal">
-        <di:waypoint x="2060" y="340"/>
-        <di:waypoint x="2060" y="520"/>
+        <di:waypoint x="2060" y="340" />
+        <di:waypoint x="2060" y="610" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_F_Senal_End" bpmnElement="F_Senal_End">
-        <di:waypoint x="2140" y="550"/>
-        <di:waypoint x="2230" y="550"/>
+      <bpmndi:BPMNEdge id="Edge_F_Senal_Rumbo" bpmnElement="F_Senal_Rumbo">
+        <di:waypoint x="2140" y="640" />
+        <di:waypoint x="2200" y="640" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_MF_Start" bpmnElement="MF_Start">
-        <di:waypoint x="265" y="140"/>
-        <di:waypoint x="265" y="295"/>
+      <bpmndi:BPMNEdge id="Edge_F_Rumbo_Si" bpmnElement="F_Rumbo_Si">
+        <di:waypoint x="2220" y="620" />
+        <di:waypoint x="2220" y="595" />
+        <di:waypoint x="2305" y="595" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2228" y="598" width="20" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Edge_MF_Orient" bpmnElement="MF_Orient">
-        <di:waypoint x="2060" y="280"/>
-        <di:waypoint x="2060" y="140"/>
+      <bpmndi:BPMNEdge id="Edge_F_Rumbo_No" bpmnElement="F_Rumbo_No">
+        <di:waypoint x="2220" y="660" />
+        <di:waypoint x="2220" y="685" />
+        <di:waypoint x="2290" y="685" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2228" y="666" width="20" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Assoc_Compactacion" bpmnElement="Assoc_Compactacion">
-        <di:waypoint x="410" y="260"/>
-        <di:waypoint x="405" y="280"/>
+        <di:waypoint x="620" y="255" />
+        <di:waypoint x="620" y="280" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Assoc_Git" bpmnElement="Assoc_Git">
-        <di:waypoint x="405" y="370"/>
-        <di:waypoint x="405" y="340"/>
+        <di:waypoint x="405" y="370" />
+        <di:waypoint x="405" y="340" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Assoc_Contexto" bpmnElement="Assoc_Contexto">
-        <di:waypoint x="610" y="370"/>
-        <di:waypoint x="610" y="340"/>
+        <di:waypoint x="610" y="370" />
+        <di:waypoint x="610" y="340" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Assoc_Router" bpmnElement="Assoc_Router">
-        <di:waypoint x="815" y="370"/>
-        <di:waypoint x="815" y="340"/>
+        <di:waypoint x="815" y="370" />
+        <di:waypoint x="815" y="340" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Assoc_Asiento" bpmnElement="Assoc_Asiento">
-        <di:waypoint x="1020" y="370"/>
-        <di:waypoint x="1020" y="340"/>
+        <di:waypoint x="1020" y="370" />
+        <di:waypoint x="1020" y="340" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Assoc_Reglas" bpmnElement="Assoc_Reglas">
-        <di:waypoint x="1225" y="370"/>
-        <di:waypoint x="1225" y="340"/>
+        <di:waypoint x="1225" y="370" />
+        <di:waypoint x="1225" y="340" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Assoc_Orientar" bpmnElement="Assoc_Orientar">
-        <di:waypoint x="1430" y="370"/>
-        <di:waypoint x="1430" y="340"/>
+        <di:waypoint x="1430" y="370" />
+        <di:waypoint x="1430" y="340" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Shape_Ann_Contrato" bpmnElement="Ann_Contrato">
+        <dc:Bounds x="190" y="170" width="245" height="100" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Ann_Rumbo" bpmnElement="Ann_Rumbo">
+        <dc:Bounds x="2270" y="430" width="200" height="110" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Edge_Assoc_Rumbo" bpmnElement="Assoc_Rumbo">
+        <di:waypoint x="2320" y="540" />
+        <di:waypoint x="2240" y="625" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_Start" bpmnElement="MF_Start">
+        <di:waypoint x="130" y="140" />
+        <di:waypoint x="130" y="295" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="109" y="208" width="73" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MF_Orient" bpmnElement="MF_Orient">
+        <di:waypoint x="2060" y="280" />
+        <di:waypoint x="2060" y="140" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2047" y="200" width="57" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Assoc_Contrato" bpmnElement="Assoc_Contrato">
+        <di:waypoint x="190" y="232" />
+        <di:waypoint x="145" y="307" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
-  <bpmn:message id="Message_Arranque" name="Solicitud /jidoka:arranca"/>
-  <bpmn:message id="Message_Orientacion" name="Orientación de sesión"/>
 </bpmn:definitions>
