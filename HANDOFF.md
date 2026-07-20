@@ -6,9 +6,15 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-19 — El editor del gobierno · sprint `v1.25.0` — 🔨 R1 EN PR, R2–R4 SIN CONSTRUIR)
+## Dónde estamos (2026-07-20 — El editor del gobierno · sprint `v1.25.0` — ✅ R1 MERGEADO CON GEMBA **GO** · 🔨 R2–R4 SIGUIENTES)
 
-**Sprint "El editor del gobierno" (la extensión de VS Code) — plan aprobado en plan mode, R1 construido y en PR.** Rama `sprint/linterna-gobierno-20260719` (arrastra también el `v1.24.0` de la linterna, ver sección siguiente). Contrato: `docs/sprints/sprint-editor-gobierno-plan.md`.
+**El PR #114 (linterna `v1.24.0` + R1 del editor) está MERGEADO a `main`** con la orden nombrada del cliente (*"pr, marge y poda autorizado"*, 2026-07-20); la rama `sprint/linterna-gobierno-20260719` fue podada. **El Gemba de R1 corrió y salió GO:** el cliente pulsó F5, el Extension Development Host abrió con el repo cargado (ajuste de sesión: `launch.json` ahora pasa `${workspaceFolder}` para que abra solo), corrió *"Jidoka: ver el gobierno"* y siguió la conversación con el grafo enfrente. Evidencia: `qa_runs/editor-r1-gemba-20260720/LOG.md` (committeada) + cuadro en `docs/sprints/cierre-20260720.md`. **El stack VS Code quedó demostrado — R2 (ledger `tools/ligas.json` + gate) está desbloqueado**; contrato: `docs/sprints/sprint-editor-gobierno-plan.md`.
+
+**⚠️ DECISIÓN PENDIENTE DEL CLIENTE — tag + GitHub release de `v1.24.0`:** el CHANGELOG `1.24.0` ya está cerrado y mergeado en `main` (SSOT en 1.24.0), pero la orden del 2026-07-20 nombró PR, merge y poda — **no el release**. Cortar `v1.24.0` (tag anotado + `gh release create`) espera orden nombrada.
+
+---
+
+### El relevo original del sprint (2026-07-19, actualizado por el cierre de arriba)
 
 **El QUÉ aprobado:** *el usuario declara, desde una interfaz visual, qué código sostiene qué capacidad — y con qué fuerza y en qué dirección se vigila esa relación — sin editar JSON a mano.* Nace de dos hallazgos al usar la linterna sobre entisoft: el grafo se satura (132 objetos) y **el gobierno es demasiado grueso** (el área `codigo` avisa sobre las **89** capacidades sin decir cuál). La línea doctrinal: **la extensión AUTORA, el gate EJECUTA** (ADR 0002 intacto; la UI nunca es el muro).
 
@@ -20,15 +26,15 @@
 
 **Evidencia (verde, esta máquina 2026-07-19):** `probar-linterna` 42/42 · `probar-extension` 9/9 · `probar-hooks` 32/32 · `probar-gate` 14/14 · `probar-auditor` 7/7 · suite completa del preflight. Dos mordidas reales en vivo: el **poka-yoke de `probar-publicar`** cazó que `probar-extension` faltaba en el preflight (ROJO→VERDE), y **la linterna se cazó a sí misma** con `extension/` huérfano.
 
-**⚠️ PENDIENTE CRÍTICO — el Gemba de R1 (owner: cliente):** **nadie ha visto correr la extensión.** El JS parsea, el contrato manifiesto↔código lintea y la invocación a PowerShell está probada, pero **que VS Code la cargue y el webview pinte no está verificado**. R1 existe como el **go/no-go del stack**: si F5 falla, R2–R4 estarían sobre arena. **Cómo probarlo:** abrir `C:\Repositorios\jidoka` en VS Code → **F5** → en la ventana nueva, Ctrl+Shift+P → "Jidoka: ver el gobierno". Para el caso real, abrir ahí `C:\Repositorios\entisoft-rescate` y repetir.
+**~~PENDIENTE CRÍTICO — el Gemba de R1~~ ✅ ATENDIDO 2026-07-20:** el cliente corrió F5 y el stack quedó demostrado (ver "Dónde estamos" arriba; evidencia en `qa_runs/editor-r1-gemba-20260720/LOG.md`). Hueco declarado: el caso real (entisoft) NO se probó desde la extensión — entisoft no tiene el motor `v1.24.0` todavía (la bajada a los labs sigue pendiente).
 
-**R2–R4 NO construidos a propósito** (esperan el veredicto de R1): R2 = ledger `tools/ligas.json` + `estado-ligas.ps1` + gate leyendo **desde la base** (ADR 0003); R3 = la extensión **autora** las ligas (clic derecho → ligar a capacidad, con dirección y fuerza); R4 = `.vsix`, ADR 0044, CHANGELOG y SSOT a `1.25.0`. **Por eso este PR no bumpea versión ni cierra CHANGELOG** — eso es R4.
+**R2–R4 NO construidos a propósito** (ya desbloqueados por el GO de R1): R2 = ledger `tools/ligas.json` + `estado-ligas.ps1` + gate leyendo **desde la base** (ADR 0003); R3 = la extensión **autora** las ligas (clic derecho → ligar a capacidad, con dirección y fuerza); R4 = `.vsix`, ADR 0044, CHANGELOG y SSOT a `1.25.0`. El sprint del editor no bumpeó versión en el PR #114 — eso es R4.
 
 ---
 
-## Dónde estuvimos (2026-07-19 — La linterna del gobierno · `v1.24.0` — ✅ COMMITEADO, en el mismo PR)
+## Dónde estuvimos (2026-07-19 — La linterna del gobierno · `v1.24.0` — ✅ MERGEADO A MAIN el 2026-07-20, PR #114)
 
-**Sprint "La linterna del gobierno" construido en la rama `sprint/linterna-gobierno-20260719` (ADR 0043, `v1.24.0`, sin commitear/mergear al cierre de esta nota).** Nace de `/jidoka:descubre` + plan mode con el cliente: entra a proyectos avanzados, mete Jidoka, y su Claude Code se pone necio con "documentos sin trackear/blast-radius"; el parche era pedirle al agente que lo arreglara, quedando **juez y parte** ("no sé qué hace, horas revisando, él me explica"). La linterna le devuelve el juicio: **ver la máquina con sus ojos, no con la narración del agente.**
+**Sprint "La linterna del gobierno" construido en la rama `sprint/linterna-gobierno-20260719` (ADR 0043, `v1.24.0`; mergeado a `main` el 2026-07-20 con orden nombrada — falta solo el tag+release, ver la decisión pendiente arriba).** Nace de `/jidoka:descubre` + plan mode con el cliente: entra a proyectos avanzados, mete Jidoka, y su Claude Code se pone necio con "documentos sin trackear/blast-radius"; el parche era pedirle al agente que lo arreglara, quedando **juez y parte** ("no sé qué hace, horas revisando, él me explica"). La linterna le devuelve el juicio: **ver la máquina con sus ojos, no con la narración del agente.**
 
 **Qué se construyó:** `tools/estado-gobierno.ps1` (nuevo, mecánica) — **vista de solo lectura** que deriva el grafo del gobierno de la ley real (`blast-radius.json` + `docs-gobernados.json` + `settings.json` + `andon.yml` + `product/capacidades`) y lo emite a un **`.html` autocontenido** (force-directed, JS vanilla inline; cero deps/servidor). Muestra áreas, gates vivo/dormido, **documentos-dueño** (aristas duras `doc_bloquea` vs blandas `doc_avisa`), capacidades + wikilinks, hooks, checks de CI, y **huérfanos en rojo** con contador (métrica: cero huérfanos). No inventa verdad (matcher/reglas byte-fieles a `verificar`/`rutear`/`estado-docs`), **falla cerrado** si el repo no es git. `tools/probar-linterna.ps1` (27/27). **Es vista, NO gate** (ADR 0043, respeta ADR 0002; nace aviso por regla 2-3). Cableado: manifiesto (siembra mecánica), preflight `publicar.ps1` + CI `andon.yml`, andon/README, CHANGELOG, SSOT bumpeado a 1.24.0.
 
@@ -37,8 +43,8 @@
 **Demos generados (`.jidoka/`, gitignoreado):** `gobierno.html` (jidoka, 0 huérfanos), `gobierno-entisoft.html` (entisoft, 15 huérfanos reales: capa `deploy/`, capa `portal/` — leído solo-lectura, sin tocar su árbol).
 
 **Pendientes / follow-ups:**
-1. **Gemba del cliente (owner: cliente) — PENDIENTE:** abrir los dos `.html` y confirmar a la vista (la extensión Chrome estaba caída, no se renderizó del lado del agente; el JS pasa `node --check`).
-2. **Release `v1.24.0`:** rama sin commitear/mergear; merge requiere orden nombrada del cliente + `gh auth switch --user ArmandoMedina`.
+1. **Gemba del cliente — PARCIALMENTE ATENDIDO 2026-07-20:** el grafo de **jidoka** el cliente lo vio corriendo la extensión (F5); el de **entisoft** (`gobierno-entisoft.html`, 15 huérfanos) sigue **PENDIENTE** de sus ojos.
+2. **~~Merge~~ ✅ HECHO (PR #114, 2026-07-20) · Release `v1.24.0`:** tag + GitHub release esperan orden nombrada (ver decisión pendiente arriba).
 3. **Dos avisos de `verificar` anotados (decisión del cliente):** ¿la linterna merece (a) su propio diagrama en `docs/atlas/` y (b) una nota de capacidad en `product/capacidades/`? Ambos "considera", no bloquean.
 4. **Follow-up de deuda (ADR 0043):** consolidar la regla vivo/dormido y el grafo de capacidades (hoy réplicas byte-fieles en la linterna) en `rutear.ps1 -Json` / `auditar.ps1 -Grafo` — regla 2-3.
 5. **Bajar `v1.24.0` a los labs** con `-Actualizar` (la linterna se siembra: `clase mecanica`).
