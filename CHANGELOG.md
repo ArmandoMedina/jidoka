@@ -2,6 +2,18 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.24.0] — 2026-07-19
+
+### La linterna del gobierno — ver la máquina determinista con tus ojos, no con la narración del agente (ADR 0043)
+
+Nace de que el cliente entra a proyectos avanzados, les mete Jidoka, y su Claude Code se pone necio con "documentos sin trackear / blast-radius" — y el parche era pedirle al agente que lo arreglara, quedando **juez y parte** (*"no sé qué hace, horas revisando cada cambio, él me explica"*). El dolor de fondo: la barrera de entrada de Jidoka es alta, y el método prohíbe delegar a ciegas. El grafo del gobierno ya existía disperso y en texto (`blast-radius.json`, `rutear.ps1`, `estado-docs.ps1`, `auditar.ps1`, `settings.json`, `andon.yml`); nadie lo renderizaba junto ni mostraba los **huérfanos** (lo que ninguna capa cubre — el "candy.md" que el agente suelta).
+
+- **`feat` — `tools/estado-gobierno.ps1` (nuevo, mecánica):** una **vista de solo lectura** que **deriva** el grafo del gobierno de la ley real y lo emite a un **`.html` autocontenido** (grafo force-directed en JS vanilla inline; cero dependencias, cero servidor, cero Chromium — se abre con doble clic). Muestra áreas, gates (vivo/dormido), **documentos-dueño** con aristas **duras** (`doc_bloquea`, bloquean el push) vs **blandas** (`doc_avisa`), capacidades + sus wikilinks, hooks, checks de CI, y los **huérfanos en rojo** con contador (la métrica: cero huérfanos en un repo brownfield). **No inventa verdad**: el matcher de globs, la regla vivo/dormido y la normalización de secciones son copias byte-fieles de `verificar`/`rutear`/`estado-docs` (verificado en code-review). **Falla cerrado** (exit 2) si el repo no es git — no pinta un "cero huérfanos" con cero archivos.
+- **`feat` — es vista, NO gate (ADR 0043):** no bloquea nada, nadie la llama para que un gate decida — un reporte, como `estado-docs.ps1` o los SVG del atlas. Respeta **ADR 0002** (nada de API/MCP como capa de gobierno). Nace **aviso** por regla 2-3, como el atlas. Se siembra a los hijos (`-Actualizar`).
+- **`test` — `tools/probar-linterna.ps1` (nuevo, mecánica):** fixture git ROJO→VERDE (huérfano trackeado + untracked → contador correcto; corregido → cero) + regresiones de **inyección** (`__META__`/`__DATA__` en la ley no corrompe el JSON embebido), **falla-cerrado** (dir no-git → exit 2), **rutas con acento** (`git -c core.quotepath=false`, sin falsos huérfanos en español) y **`node --check`** del JS embebido (si hay node). En el smoke de `andon.yml` y en el preflight de `publicar.ps1`.
+- **ADR 0043** — La linterna del gobierno: vista de solo lectura, no gate · aceptado.
+- **Follow-up registrado:** consolidar la regla vivo/dormido y el grafo de capacidades (hoy réplicas byte-fieles en la linterna) en una fuente única (`rutear.ps1 -Json`, `auditar.ps1 -Grafo`) — refactor por regla 2-3, la duplicación no causa bug hoy.
+
 ## [1.23.0] — 2026-07-17
 
 ### Documentos gobernados — el motor gobierna la *estructura* de los documentos de instancia, no solo el hash (modelo SAP)

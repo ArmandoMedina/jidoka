@@ -39,6 +39,7 @@ jobs:
           .\tools\probar-disparos.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-preflight.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-docs.ps1;     if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-linterna.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-anti-pii.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           # Self-tests Jidoka-only (no sembrados): corren solo si estan presentes
           # (un hijo instalado no los tiene, y este mismo workflow se siembra).
@@ -47,7 +48,7 @@ jobs:
           # probar-instalador.ps1 caen en cuarentena y el preflight local no puede
           # correrlos; el CI no tiene ese AV, asi que es donde el smoke del instalador
           # y del camino AV-seguro (sembrar-manual) si corre (ADR 0027 enmienda).
-          foreach ($jt in 'probar-instalador','probar-sembrar','probar-version','probar-publicar','probar-agentes') {
+          foreach ($jt in 'probar-instalador','probar-sembrar','probar-version','probar-publicar','probar-agentes','probar-extension') {
             if (Test-Path ".\tools\$jt.ps1") { & ".\tools\$jt.ps1"; if ($LASTEXITCODE -ne 0) { exit 1 } }
           }
           exit 0

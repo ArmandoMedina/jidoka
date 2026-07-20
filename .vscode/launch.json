@@ -1,0 +1,18 @@
+{
+  // Arranque de la extension de Jidoka (extension/): abre este repo (o jidoka.code-workspace)
+  // en VS Code y pulsa F5. Se abre una ventana nueva ("Extension Development Host") ya con
+  // esta carpeta abierta y la extension cargada; ahi corre el comando "Jidoka: ver el gobierno"
+  // desde la paleta (Ctrl+Shift+P). No hay build step: la extension es JS plano (ADR 0044).
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Jidoka: correr la extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "${workspaceFolder}",
+        "--extensionDevelopmentPath=${workspaceFolder}/extension"
+      ]
+    }
+  ]
+}
