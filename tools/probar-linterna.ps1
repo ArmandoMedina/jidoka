@@ -202,6 +202,14 @@ try {
   if ($htmlR -match '"tipo":"capability"') { Ok "R2: nodos capacidad presentes (repo real)" } else { No "R2: faltan nodos capability" }
   if ($htmlR -match '"tipo":"hook"') { Ok "R2: nodos hook presentes" } else { No "R2: faltan nodos hook" }
   if ($htmlR -match '"kind":"product"') { Ok "R2: aristas product (area->capacidad) presentes" } else { No "R2: faltan aristas product" }
+  # RW (rework del Gemba del cliente, 2026-07-20): flechas, severidad, tabla, reparto, sueltos.
+  if ($htmlR -match 'data-m="reparto"') { Ok "RW: modo Reparto (treemap por capa de cobertura) en la barra" } else { No "RW: falta el boton del modo Reparto" }
+  if ($htmlR -match '"reparto":\[') { Ok "RW: META trae el reparto de archivos por capa" } else { No "RW: falta META.reparto" }
+  if ($htmlR -match '"dura":true') { Ok "RW: el area con doc_bloquea viaja marcada dura (anillo rojo en Foco)" } else { No "RW: falta dura:true (decisiones carga el unico doc_bloquea)" }
+  if ($htmlR -match 'function flecha\(') { Ok "RW: el render dibuja flechas (la direccion ya no se tira)" } else { No "RW: falta flecha() en el render" }
+  if ($htmlR -match 'id="tabla"') { Ok "RW: la tabla del gobierno (para leer) esta bajo el grafo" } else { No "RW: falta la tabla del gobierno" }
+  if ($htmlR -match 'setAttribute\(.viewBox.') { Ok "RW: fit-to-viewport (viewBox) activo -- nada se corta fuera de pantalla" } else { No "RW: falta el fit del viewBox" }
+  if ($htmlR -match '\.node\.suelto') { Ok "RW: los sueltos no-huerfanos llevan trazo propio (no parecen huerfanos)" } else { No "RW: falta el estilo .node.suelto" }
   if ($htmlR -match '"liga:linterna-extension"') { Ok "R2c: la liga dogfood del repo real aparece en el grafo" } else { No "R2c: falta la liga dogfood linterna-extension" }
   if ($htmlR -match '"kind":"liga-avisa"') { Ok "R2c: la arista de la liga dogfood va tipada (liga-avisa)" } else { No "R2c: falta la arista liga-avisa en el repo real" }
   $colgR = Get-AristasColgadasCount $htmlR
