@@ -6,7 +6,24 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-20 — El editor del gobierno, parte 2 · **`v1.25.0` CERRADO Y LIBERADO** · PR #115)
+## Dónde estamos (2026-07-20 tarde — El descubrimiento del sistema configurable · rama `descubre/sistema-configurable-20260720` SIN MERGEAR)
+
+**Dos sesiones de descubrimiento con el cliente aterrizaron LA visión: Jidoka evoluciona de metodología a sistema de gobierno configurable con UI guiada** (la UI autora, el gate ejecuta — ADRs 0002/0044 intactos). El camino y sus artefactos:
+
+1. **El spike del modo "Capas" se construyó y el cliente lo RECHAZÓ en Gemba** (*"la verdad es que no"*) — rama `spike/linterna-capas-enforcement-20260720` (1 commit, `fa3a8c3`), **aparcada sin mergear**; su destino es decisión del cliente (¿podar?). Lección: el problema nunca fue de mapas — el cliente no quiere ver el todo, quiere ser guiado en el momento concreto.
+2. **El descubrimiento quedó en el repo** (esta rama): el informe [`docs/analisis/descubrimiento-sistema-configurable-202607.md`](docs/analisis/descubrimiento-sistema-configurable-202607.md) (la tesis textual del cliente; las 5 relaciones de "ligar" — incluidas la de lectura `@` y la de prohibición; los 3 regímenes de gobierno por pieza, con el hallazgo "los comandos del ritual están en el cajón equivocado: el hash no distingue extensión legal de mutilación"; la bandeja "pendiente de parametrizar"; el formulario de alta; los hallazgos del censo — `permissions` de settings.json VACÍO con `deny-vs-ask` catálogo-solo, PreToolUse subutilizado, el hueco de `docs/`, `gemba.md` sin `@`) + **la maqueta clickeable validada por el cliente** (*"me gustó"*): [`docs/analisis/maqueta-tuberia-202607.html`](docs/analisis/maqueta-tuberia-202607.html) (censo real de 54 piezas; 4 pestañas: tubería con regímenes pintados, bandeja con 5 casos —1 REAL—, flujos guiados, lo-que-no-ves). Entrada nueva en el ROADMAP (Backlog, primera sección) que subsume el follow-up del "ligar genérico".
+3. **Nota de trato para la próxima sesión:** el cliente pidió leer ÍNTEGRO el transcript del chat anterior (jsonl) para ser entendido — funcionó; repetir la técnica si vuelve a sentirse mal entendido. **Los menús de opciones abstractas lo pierden; los artefactos concretos clickeables lo destraban.**
+
+**Pendiente (cliente — nada bloquea al agente):**
+1. **Nombrar el ADR del cambio de identidad** (metodología → sistema configurable) — sin eso no se construye nada de la visión (disparo `aprobacion-nombrada`).
+2. **Elegir la primera rebanada** (candidatas en el informe: bandeja mínima · contrato SAP de comandos · formulario en la extensión · cablear deny-vs-ask · prohibiciones) → `/jidoka:planea`.
+3. **Destino de la rama del spike** (podar o conservar aparcada).
+4. **¿Issues del lazo** para los hallazgos mecánicos? (batch, no goteo).
+5. **PR + merge de esta rama** de descubrimiento (orden nombrada, como siempre).
+
+---
+
+## Dónde estuvimos (2026-07-20 — El editor del gobierno, parte 2 · **`v1.25.0` CERRADO Y LIBERADO** · PR #115)
 
 **Sprint "El editor del gobierno, parte 2" (R2–R4) TERMINADO, mergeado y liberado** con la orden nombrada del cliente (*"pr, marge, versión y poda autorizado"*). Récord completo: [`docs/sprints/sprint-editor-gobierno-2-entrega.md`](docs/sprints/sprint-editor-gobierno-2-entrega.md) (con el cuadro de cierre). En una línea: **el gate granular código↔capacidad** (`ligas.json` + `estado-ligas.ps1`, CI desde la base, nombra la capacidad exacta) + **la extensión que lo autora** (clic derecho → "ligar código a capacidad...") + **la linterna con 4 modos legibles** (flechas, anillo rojo del bloqueo duro, tabla del gobierno, treemap Reparto — rework de **2 Gembas del cliente**: 8 hallazgos de uso real + nomenclatura, todos curados en la rama antes del merge) + `.vsix` + ADR 0044. `v1.24.0` quedó **sin tag propio a propósito** (subsumida en `v1.25.0`).
 
