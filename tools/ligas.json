@@ -1,4 +1,12 @@
 {
   "descripcion": "El ledger de ligas codigo<->capacidad. Lo AUTORA el cliente (extension 'Jidoka: ligar a capacidad...' o a mano); lo hace cumplir tools/estado-ligas.ps1 (pre-push + CI desde la base). direccion: codigo-a-capacidad | capacidad-a-codigo | ambas. fuerza: avisa | bloquea. NO se siembra a los hijos: es dato de instancia, no mecanica.",
-  "ligas": []
+  "ligas": [
+    {
+      "id": "linterna-extension",
+      "codigo": ["tools/estado-gobierno.ps1", "extension/*"],
+      "capacidades": ["product/capacidades/AND-1-muro-andon.md"],
+      "direccion": "codigo-a-capacidad",
+      "fuerza": "avisa"
+    }
+  ]
 }

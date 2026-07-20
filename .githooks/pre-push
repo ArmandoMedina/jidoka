@@ -9,5 +9,9 @@ rc=$?
 # Gate anti-PII: fuga de dato de entorno en docs rastreados (disparo sin-pii-en-el-repo).
 powershell -NoProfile -ExecutionPolicy Bypass -File "./tools/anti-pii.ps1"
 ra=$?
+# Gate de ligas codigo<->capacidad (ledger tools/ligas.json; -Estricto = las 'bloquea' muerden).
+powershell -NoProfile -ExecutionPolicy Bypass -File "./tools/estado-ligas.ps1" -Estricto
+rl=$?
 if [ "$rc" -ne 0 ]; then exit "$rc"; fi
-exit "$ra"
+if [ "$ra" -ne 0 ]; then exit "$ra"; fi
+exit "$rl"
