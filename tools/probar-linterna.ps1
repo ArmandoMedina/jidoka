@@ -77,6 +77,18 @@ try {
 '@
   Set-Content -LiteralPath (Join-Path $fix 'tools/docs-gobernados.json') -Value $ledgerFix -Encoding ASCII
 
+  # ligas: una BUENA (codigo real -> capacidad real) y una ROTA (codigo inexistente).
+  New-Item -ItemType Directory -Path (Join-Path $fix 'product/capacidades') -Force | Out-Null
+  Set-Content -LiteralPath (Join-Path $fix 'product/capacidades/CAP-1-algo.md') -Value "---`nclave: CAP-1`n---`n# cap" -Encoding UTF8
+  $ligasFix = @'
+{ "ligas": [
+  { "id": "buena", "codigo": ["tools/algo.ps1"], "capacidades": ["product/capacidades/CAP-1-algo.md"],
+    "direccion": "codigo-a-capacidad", "fuerza": "bloquea" },
+  { "id": "fantasma", "codigo": ["tools/no-existe.ps1"], "capacidades": ["product/capacidades/CAP-1-algo.md"],
+    "direccion": "ambas", "fuerza": "avisa" }
+] }
+'@
+  Set-Content -LiteralPath (Join-Path $fix 'tools/ligas.json') -Value $ligasFix -Encoding ASCII
   Set-Content -LiteralPath (Join-Path $fix 'tools/algo.ps1') -Value "# algo" -Encoding ASCII
   Set-Content -LiteralPath (Join-Path $fix 'NOTAS.md') -Value "# t`n## Intro`ncuerpo" -Encoding UTF8
   Set-Content -LiteralPath (Join-Path $fix 'LICENSE') -Value "MIT" -Encoding ASCII
@@ -105,6 +117,14 @@ try {
   if ($html1 -match '"t":"doc:NOTAS\.md","kind":"avisa"') { Ok "H2: la arista doc_avisa se unifica al nodo capa-2 (doc:)" } else { No "H2: la arista avisa no apunta al nodo capa-2 unificado" }
   if ($html1 -match 'gate:gemba-stop') { Ok "gate DORMIDO (gemba-stop) presente como nodo" } else { No "el gate dormido gemba-stop deberia ser un nodo (inactivo, no ausente)" }
   if ($html1 -match 'gate:andon-stop') { Ok "gate VIVO (andon-stop) presente como nodo" } else { No "andon-stop deberia ser un nodo" }
+  # R2c: las ligas codigo<->capacidad se pintan (nodo propio, arista tipada, rota en rojo).
+  if ($html1 -match '"liga:buena"') { Ok "R2c: la liga declarada es un nodo propio (liga:buena)" } else { No "R2c: falta el nodo liga:buena" }
+  if ($html1 -match '"kind":"liga-bloquea"') { Ok "R2c: arista liga->capacidad tipada por fuerza (liga-bloquea)" } else { No "R2c: falta la arista liga-bloquea" }
+  if ($html1 -match '"tipo":"liga-rota"') { Ok "R2c: la liga con codigo inexistente se pinta ROTA (rojo)" } else { No "R2c: la liga fantasma deberia ser tipo liga-rota" }
+  if ($html1 -match '"s":"area:motor","t":"liga:buena","kind":"liga"') { Ok "R2c: ancla area->liga (el cumulo del area la adopta)" } else { No "R2c: falta la arista ancla area:motor -> liga:buena" }
+  $colg1 = Get-AristasColgadasCount $html1
+  if ($colg1 -eq 0) { Ok "R2c: cero aristas colgadas con las ligas en el grafo" } else { No "R2c: $colg1 arista(s) colgadas tras agregar ligas (-1 = no parseo)" }
+
   # A4: la ruta con acento no se escapa en octal ni sale como huerfano falso.
   if ($html1 -notmatch '\\303|\\\d\d\d') { Ok "ruta con acento: sin escape octal en el .html (core.quotepath=false)" } else { No "aparecio un escape octal (git quotepath): la ruta con acento se mangleo" }
   if ($html1 -notmatch 'orphan:nota-') { Ok "la nota con acento (cubierta por 'raiz') NO es huerfano falso" } else { No "la nota con acento salio como huerfano falso (bug quotepath)" }
@@ -182,6 +202,8 @@ try {
   if ($htmlR -match '"tipo":"capability"') { Ok "R2: nodos capacidad presentes (repo real)" } else { No "R2: faltan nodos capability" }
   if ($htmlR -match '"tipo":"hook"') { Ok "R2: nodos hook presentes" } else { No "R2: faltan nodos hook" }
   if ($htmlR -match '"kind":"product"') { Ok "R2: aristas product (area->capacidad) presentes" } else { No "R2: faltan aristas product" }
+  if ($htmlR -match '"liga:linterna-extension"') { Ok "R2c: la liga dogfood del repo real aparece en el grafo" } else { No "R2c: falta la liga dogfood linterna-extension" }
+  if ($htmlR -match '"kind":"liga-avisa"') { Ok "R2c: la arista de la liga dogfood va tipada (liga-avisa)" } else { No "R2c: falta la arista liga-avisa en el repo real" }
   $colgR = Get-AristasColgadasCount $htmlR
   if ($colgR -eq 0) { Ok "R2: ninguna arista cuelga de un nodo inexistente (repo real)" } else { No "R2: $colgR arista(s) colgadas en el grafo real (-1 = no parseo)" }
   # los 3 modos de vista (Foco / Agrupado / Clusters): sin ellos el grafo denso es una marana.

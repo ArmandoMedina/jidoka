@@ -295,6 +295,58 @@ foreach ($c in $caps) {
   }
 }
 
+# (2b) las ligas codigo<->capacidad (ledger tools/ligas.json, autorado por el cliente).
+# Cada liga es un NODO propio (no una arista area->cap: perderia direccion/fuerza/rotura;
+# ni un nodo por archivo: explotaria). ROTA (apunta a codigo o capacidad inexistente) se
+# pinta en rojo -- la mentira no se omite. El ancla al cluster: la primera entrada de
+# 'codigo' cuya cobertura resuelva un area emite area->liga y el cumulo la adopta.
+$ligasPath = Join-Path $repoRoot 'tools/ligas.json'
+if (Test-Path -LiteralPath $ligasPath) {
+  $ligasObj = $null
+  try { $ligasObj = [System.IO.File]::ReadAllText((Resolve-Path -LiteralPath $ligasPath).Path) | ConvertFrom-Json } catch {}
+  if ($ligasObj -and $ligasObj.PSObject.Properties['ligas']) {
+    foreach ($lg in @($ligasObj.ligas)) {
+      if (-not $lg.id -or -not $lg.codigo -or -not $lg.capacidades) { continue }
+      $rota = $false
+      foreach ($pat in @($lg.codigo)) {
+        $hit = $false
+        foreach ($f in $files) { if (Test-Pattern $f $pat) { $hit = $true; break } }
+        if (-not $hit) { $rota = $true }
+      }
+      foreach ($capPat in @($lg.capacidades)) {
+        $hit = $false
+        foreach ($f in $files) { if (Test-Pattern $f $capPat) { $hit = $true; break } }
+        if (-not $hit) { $rota = $true }
+      }
+      $tipoLiga = if ($rota) { 'liga-rota' } else { 'liga' }
+      $det = "Liga declarada (la autora el cliente; el gate estado-ligas.ps1 la hace cumplir). Si cambia [$(@($lg.codigo) -join ', ')] sin tocar [$(@($lg.capacidades) -join ', ')] (direccion: $($lg.direccion)), el gate $($lg.fuerza)."
+      if ($rota) { $det = "LIGA ROTA: apunta a codigo o capacidad que ya no existe en el repo; el gate la avisa y la excluye de la evaluacion. " + $det }
+      Add-NodoUnico "liga:$($lg.id)" $lg.id $tipoLiga (-not $rota) $det
+      $kindCap = "liga-$($lg.fuerza)"
+      foreach ($capPat in @($lg.capacidades)) {
+        $resolvio = $false
+        foreach ($c in $caps) {
+          if (Test-Pattern $c.path $capPat) {
+            $aristas.Add([pscustomobject]@{ s = "liga:$($lg.id)"; t = "cap:$($c.file)"; kind = $kindCap })
+            $resolvio = $true
+          }
+        }
+        if (-not $resolvio) {
+          Add-NodoUnico "capglob:$capPat" $capPat 'capability' $true "Capacidad apuntada por una liga pero inexistente en product/capacidades (liga rota)."
+          $aristas.Add([pscustomobject]@{ s = "liga:$($lg.id)"; t = "capglob:$capPat"; kind = $kindCap })
+        }
+      }
+      foreach ($pat in @($lg.codigo)) {
+        $cov = Get-Cobertura $pat
+        if ($cov -and $cov -like 'area:*') {
+          $aristas.Add([pscustomobject]@{ s = $cov; t = "liga:$($lg.id)"; kind = 'liga' })
+          break
+        }
+      }
+    }
+  }
+}
+
 # el area que gobierna el motor (hooks + CI): a ella se cuelgan los hooks no-gate y los checks.
 $ciArea = $null
 $covCi = Get-Cobertura '.github/workflows/andon.yml'
@@ -374,7 +426,7 @@ $tmpl = @'
 <style>
   :root{--bg:#0f1115;--fg:#e6e8ee;--mut:#9aa3b2;--card:#171a21;--line:#2a2f3a;
         --area:#4c8dff;--gate-on:#31c48d;--gate-off:#6b7280;--conf:#2dd4bf;--desv:#f59e0b;--orphan:#ef4444;--free:#94a3b8;
-        --owner:#22d3ee;--cap:#a78bfa;--hook:#fb923c;--check:#f472b6;}
+        --owner:#22d3ee;--cap:#a78bfa;--hook:#fb923c;--check:#f472b6;--liga:#84cc16;}
   @media (prefers-color-scheme:light){:root{--bg:#f6f7f9;--fg:#1b1f27;--mut:#5b6472;--card:#fff;--line:#e2e6ec;--btnA:#d7e3fb;}}
   :root{--btnA:#31405e;}
   @media (prefers-color-scheme:light){:root{--btnA:#d7e3fb;}}
@@ -436,6 +488,8 @@ const TIPOS = {
   hook:{c:'var(--hook)',r:8,txt:'hook'},
   check:{c:'var(--check)',r:7,txt:'check de CI'},
   orphan:{c:'var(--orphan)',r:9,txt:'HUERFANO'},
+  liga:{c:'var(--liga)',r:8,txt:'liga codigo-capacidad'},
+  'liga-rota':{c:'var(--orphan)',r:8,txt:'liga ROTA'},
 };
 function colorOf(n){
   if(n.tipo==='gate') return n.vivo?'var(--gate-on)':'var(--gate-off)';
@@ -487,7 +541,8 @@ if(nCaps>0&&capArea&&idx.has(capArea))aggEdges.push({s:idx.get(capArea),t:idx.ge
 // punteada, capacidad=violeta, wikilink=teal, vigila=verde, ci/hook=punteado tenue.
 const EK={bloquea:['var(--orphan)',''],avisa:['var(--desv)','4 3'],product:['var(--cap)','2 3'],
   wikilink:['var(--conf)',''],vigila:['var(--gate-on)',''],cubre:['var(--area)',''],
-  ci:['var(--check)','1 3'],hook:['var(--hook)','1 3']};
+  ci:['var(--check)','1 3'],hook:['var(--hook)','1 3'],
+  liga:['var(--liga)','2 3'],'liga-bloquea':['var(--orphan)',''],'liga-avisa':['var(--desv)','4 3']};
 const adj=new Map(); nodes.forEach(n=>adj.set(n.id,new Set()));
 baseEdges.concat(aggEdges).forEach(e=>{adj.get(nodes[e.s].id).add(nodes[e.t].id);adj.get(nodes[e.t].id).add(nodes[e.s].id);});
 
