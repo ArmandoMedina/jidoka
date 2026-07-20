@@ -39,6 +39,7 @@ jobs:
           .\tools\probar-disparos.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-preflight.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-docs.ps1;     if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-ligas.ps1;    if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-linterna.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-anti-pii.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           # Self-tests Jidoka-only (no sembrados): corren solo si estan presentes
@@ -105,6 +106,42 @@ jobs:
             }
           }
           exit 0
+
+      # Las ligas codigo<->capacidad (el gobierno GRANULAR que autora el cliente).
+      # Como las ligas fuerza:bloquea MUERDEN, evaluador Y ledger se leen DESDE LA
+      # BASE (ADR 0003): un PR no puede desactivar la liga que lo juzga. Si la base
+      # aun no trae el ledger, no hay ley que aplicar (las ligas que un PR estrena
+      # juzgan al SIGUIENTE) -- mismo principio que el step del blast-radius.
+      - name: ligas codigo-capacidad sobre el rango del PR (ledger de la BASE)
+        shell: powershell
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $ref = "origin/$env:BASE_REF"
+          git cat-file -e "${ref}:tools/estado-ligas.ps1"; $okEval = ($LASTEXITCODE -eq 0)
+          git cat-file -e "${ref}:tools/ligas.json"; $okLedger = ($LASTEXITCODE -eq 0)
+          if ($okEval) {
+            $evalBase  = Join-Path $env:TEMP 'estado-ligas-base.ps1'
+            $ligasBase = Join-Path $env:TEMP 'ligas-base.json'
+            Remove-Item $ligasBase -Force -ErrorAction SilentlyContinue
+            git show "${ref}:tools/estado-ligas.ps1" | Out-File $evalBase -Encoding ascii
+            if ($okLedger) { git show "${ref}:tools/ligas.json" | Out-File $ligasBase -Encoding ascii }
+            $out = (& $evalBase -Base $ref -Ledger $ligasBase -Repo "$env:GITHUB_WORKSPACE" -Estricto 6>&1 | Out-String)
+          } else {
+            Write-Host "##[warning] La base $ref aun no trae el gate de ligas; fallback al del PR (solo valido en el PR fundacional)."
+            $out = (.\tools\estado-ligas.ps1 -Base $ref -Estricto 6>&1 | Out-String)
+          }
+          $code = $LASTEXITCODE
+          Write-Host $out
+          $hallazgos = @($out -split "`r?`n" | Where-Object { $_ -match '\[(AVISO|BLOQUEA|ROTA)\]' })
+          "## Andon - ligas codigo-capacidad (rango del PR)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          if ($hallazgos.Count -gt 0) {
+            foreach ($h in $hallazgos) { "- " + $h.Trim() | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8 }
+          } else {
+            "Sin hallazgos: las ligas declaradas co-ocurren." | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
+          exit $code
 
       - name: anti-PII (fuga de dato de entorno) sobre el arbol del PR
         shell: powershell

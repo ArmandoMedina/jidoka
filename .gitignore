@@ -45,3 +45,5 @@ docs/atlas/render/*.png
 # cuentas secundarias, correos, hostnames) NUNCA se commitea -- meterla al repo
 # publica lo que busca frenar. El formato vive en anti-pii.denylist.example.txt.
 tools/anti-pii.denylist.txt
+
+extension/*.vsix

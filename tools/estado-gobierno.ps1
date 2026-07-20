@@ -170,11 +170,15 @@ function Get-Cobertura($path) {
 }
 
 $huerfanos = @()
+# reparto: cuantos archivos se traga cada capa de cobertura (el treemap del modo
+# Reparto; hace visible el bulto del cajon 'raiz' -- propuesta c del Gemba del cliente).
+$cobConteo = @{}
 foreach ($p in $files) {
   # el propio .html generado nunca cuenta (vive fuera de git idealmente)
   if ($p -like '.jidoka/*') { continue }
   $cob = Get-Cobertura $p
-  if (-not $cob) { $huerfanos += $p }
+  if (-not $cob) { $huerfanos += $p; $cob = 'HUERFANO' }
+  if ($cobConteo.ContainsKey($cob)) { $cobConteo[$cob]++ } else { $cobConteo[$cob] = 1 }
 }
 
 # ------------------------------------------------------------------ construir el grafo
@@ -189,9 +193,16 @@ foreach ($a in $areas) {
   if (-not (Test-NoVacio $a.fuente)) { continue }
   $det = "$($a.desc). Gobierna: $($a.fuente -join ', ')."
   if ($a.excluye) { $det += " Excluye: $($a.excluye -join ', ')." }
-  $nodos.Add([pscustomobject]@{ id = "area:$($a.nombre)"; label = $a.nombre; tipo = 'area'; vivo = $true; detalle = $det })
+  # dura: el area carga un doc_bloquea (bloqueo DURO del push). En el esqueleto de Foco
+  # se pinta con anillo rojo -- sin esto la severidad era invisible hasta desplegar
+  # (hallazgo 3 del Gemba del cliente).
+  $dura = [bool](Test-NoVacio $a.doc_bloquea)
+  if ($dura) { $det += " CARGA UN BLOQUEO DURO (doc_bloquea): el push se detiene si su doc-dueno no cambia en el mismo commit." }
+  $nodos.Add([pscustomobject]@{ id = "area:$($a.nombre)"; label = $a.nombre; tipo = 'area'; vivo = $true; dura = $dura; detalle = $det })
   foreach ($gate in (Get-GatesDeArea $a)) {
-    $aristas.Add([pscustomobject]@{ s = "area:$($a.nombre)"; t = "gate:$gate"; kind = 'vigila' })
+    # s=gate, t=area: es el GATE quien vigila al area. Con flechas en el render la
+    # direccion ya se ve, y al reves leia mentira (hallazgo B7 del review del rework).
+    $aristas.Add([pscustomobject]@{ s = "gate:$gate"; t = "area:$($a.nombre)"; kind = 'vigila' })
   }
 }
 if ($ledger -and $ledger.capa2) {
@@ -295,6 +306,63 @@ foreach ($c in $caps) {
   }
 }
 
+# (2b) las ligas codigo<->capacidad (ledger tools/ligas.json, autorado por el cliente).
+# Cada liga es un NODO propio (no una arista area->cap: perderia direccion/fuerza/rotura;
+# ni un nodo por archivo: explotaria). ROTA (apunta a codigo o capacidad inexistente) se
+# pinta en rojo -- la mentira no se omite. El ancla al cluster: la primera entrada de
+# 'codigo' cuya cobertura resuelva un area emite area->liga y el cumulo la adopta.
+$ligasPath = Join-Path $repoRoot 'tools/ligas.json'
+if (Test-Path -LiteralPath $ligasPath) {
+  $ligasObj = $null
+  try { $ligasObj = [System.IO.File]::ReadAllText((Resolve-Path -LiteralPath $ligasPath).Path) | ConvertFrom-Json } catch {}
+  if ($ligasObj -and $ligasObj.PSObject.Properties['ligas']) {
+    $ligaIdx = 0
+    foreach ($lg in @($ligasObj.ligas)) {
+      $ligaIdx++
+      if (-not $lg.codigo -or -not $lg.capacidades) { continue }
+      # una liga sin id el gate SI la evalua ('(sin id)'): se pinta con id sintetico
+      # en vez de omitirse (hallazgo de review: la mentira no se omite).
+      $idLiga = if ($lg.id) { $lg.id } else { "sin-id-$ligaIdx" }
+      $rota = $false
+      foreach ($pat in @($lg.codigo)) {
+        $hit = $false
+        foreach ($f in $files) { if (Test-Pattern $f $pat) { $hit = $true; break } }
+        if (-not $hit) { $rota = $true }
+      }
+      foreach ($capPat in @($lg.capacidades)) {
+        $hit = $false
+        foreach ($f in $files) { if (Test-Pattern $f $capPat) { $hit = $true; break } }
+        if (-not $hit) { $rota = $true }
+      }
+      $tipoLiga = if ($rota) { 'liga-rota' } else { 'liga' }
+      $det = "Liga declarada (la autora el cliente; el gate estado-ligas.ps1 la hace cumplir). Si cambia [$(@($lg.codigo) -join ', ')] sin tocar [$(@($lg.capacidades) -join ', ')] (direccion: $($lg.direccion)), el gate $($lg.fuerza)."
+      if ($rota) { $det = "LIGA ROTA: apunta a codigo o capacidad que ya no existe en el repo; el gate la avisa y la excluye de la evaluacion. " + $det }
+      Add-NodoUnico "liga:$idLiga" $idLiga $tipoLiga (-not $rota) $det
+      $kindCap = "liga-$($lg.fuerza)"
+      foreach ($capPat in @($lg.capacidades)) {
+        $resolvio = $false
+        foreach ($c in $caps) {
+          if (Test-Pattern $c.path $capPat) {
+            $aristas.Add([pscustomobject]@{ s = "liga:$idLiga"; t = "cap:$($c.file)"; kind = $kindCap })
+            $resolvio = $true
+          }
+        }
+        if (-not $resolvio) {
+          Add-NodoUnico "capglob:$capPat" $capPat 'capability' $true "Capacidad apuntada por una liga pero inexistente en product/capacidades (liga rota)."
+          $aristas.Add([pscustomobject]@{ s = "liga:$idLiga"; t = "capglob:$capPat"; kind = $kindCap })
+        }
+      }
+      foreach ($pat in @($lg.codigo)) {
+        $cov = Get-Cobertura $pat
+        if ($cov -and $cov -like 'area:*') {
+          $aristas.Add([pscustomobject]@{ s = $cov; t = "liga:$idLiga"; kind = 'liga' })
+          break
+        }
+      }
+    }
+  }
+}
+
 # el area que gobierna el motor (hooks + CI): a ella se cuelgan los hooks no-gate y los checks.
 $ciArea = $null
 $covCi = Get-Cobertura '.github/workflows/andon.yml'
@@ -338,7 +406,12 @@ if (Test-Path -LiteralPath $ciPath) {
       # id UNICO por posicion: dos steps con el mismo 'name' en jobs distintos ya no colapsan
       # en un nodo (hallazgo de code-review); el label sigue siendo el nombre corto.
       $cid = "check:$($ciIdx):$cn"
-      $short = if ($cn.Length -gt 30) { $cn.Substring(0, 28) + '..' } else { $cn }
+      # etiqueta CORTA (el nombre completo vive en el tooltip): cortar en el primer '('
+      # y a 24 chars max -- "conformidad estructural de d.." no se podia leer (hallazgo
+      # 4 del Gemba del cliente: colision y truncado de etiquetas).
+      $short = ($cn -split '\(')[0].Trim()
+      if (-not $short) { $short = $cn }
+      if ($short.Length -gt 24) { $short = $short.Substring(0, 22) + '..' }
       Add-NodoUnico $cid $short 'check' $true "Check de CI server-side (el muro REAL, required check sin bypass): $cn"
       if ($ciArea) { $aristas.Add([pscustomobject]@{ s = $cid; t = $ciArea; kind = 'ci' }) }
     }
@@ -357,6 +430,8 @@ $meta = [pscustomobject]@{
   areas = $conteo.areas
   gatesVivos = $conteo.gatesVivos
   archivos = $conteo.archivos
+  reparto = @($cobConteo.GetEnumerator() | Sort-Object -Property @{Expression='Value';Descending=$true}, Key | ForEach-Object {
+    [pscustomobject]@{ capa = [string]$_.Key; n = [int]$_.Value } })
 }
 
 $dataJson = (@{ nodes = $nodos; edges = $aristas } | ConvertTo-Json -Depth 8 -Compress)
@@ -374,7 +449,7 @@ $tmpl = @'
 <style>
   :root{--bg:#0f1115;--fg:#e6e8ee;--mut:#9aa3b2;--card:#171a21;--line:#2a2f3a;
         --area:#4c8dff;--gate-on:#31c48d;--gate-off:#6b7280;--conf:#2dd4bf;--desv:#f59e0b;--orphan:#ef4444;--free:#94a3b8;
-        --owner:#22d3ee;--cap:#a78bfa;--hook:#fb923c;--check:#f472b6;}
+        --owner:#22d3ee;--cap:#a78bfa;--hook:#fb923c;--check:#f472b6;--liga:#84cc16;}
   @media (prefers-color-scheme:light){:root{--bg:#f6f7f9;--fg:#1b1f27;--mut:#5b6472;--card:#fff;--line:#e2e6ec;--btnA:#d7e3fb;}}
   :root{--btnA:#31405e;}
   @media (prefers-color-scheme:light){:root{--btnA:#d7e3fb;}}
@@ -402,6 +477,14 @@ $tmpl = @'
   .node text{fill:var(--fg);font-size:11px;pointer-events:none;paint-order:stroke;stroke:var(--bg);stroke-width:3px}
   .node.dim{opacity:.12} .edge.dim{opacity:.05}
   .node.orphan circle{stroke:#fff;stroke-width:1.5;filter:drop-shadow(0 0 5px var(--orphan))}
+  .node.suelto circle{stroke:var(--mut);stroke-width:1.5;stroke-dasharray:2 2}
+  #tabla{border-top:1px solid var(--line);max-height:38vh;overflow:auto;background:var(--bg)}
+  #tabla summary{padding:8px 16px;cursor:pointer;color:var(--mut);font-size:12.5px;user-select:none}
+  #tabla table{border-collapse:collapse;margin:0 16px 14px;font-size:12.5px;width:calc(100% - 32px)}
+  #tabla th{text-align:left;color:var(--mut);font-weight:600;padding:4px 10px 4px 0;border-bottom:1px solid var(--line)}
+  #tabla td{padding:3px 10px 3px 0;border-bottom:1px solid var(--line)}
+  .sevB{color:var(--orphan);font-weight:700}.sevA{color:var(--desv)}.sevD{color:var(--gate-off)}.sevV{color:var(--gate-on)}
+  .tm-lbl{fill:var(--fg);font-size:12px;paint-order:stroke;stroke:var(--bg);stroke-width:3px;pointer-events:none}
   #tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:8px;
        padding:8px 10px;max-width:320px;font-size:12px;color:var(--fg);box-shadow:0 6px 24px rgba(0,0,0,.35);opacity:0;transition:opacity .1s;z-index:5}
   #tip b{color:var(--fg)} #tip .k{color:var(--mut)}
@@ -413,6 +496,7 @@ $tmpl = @'
     <button data-m="foco" class="on" title="Solo areas y gates; clic en un area despliega su telarana">Foco</button>
     <button data-m="agrupado" title="Las capas ruidosas colapsan en un grupo; clic para abrirlo">Agrupado</button>
     <button data-m="clusters" title="Cada area en su propio cumulo">Clusters</button>
+    <button data-m="reparto" title="Treemap: cuantos archivos se traga cada capa de cobertura">Reparto</button>
   </div>
   <h1>Linterna del gobierno &mdash; <span id="repo" class="sub"></span></h1>
   <div class="metric" id="mHuerfanos"><b>0</b><span>huerfanos</span></div>
@@ -422,6 +506,7 @@ $tmpl = @'
   <div class="legend" id="legend"></div>
 </header>
 <div id="wrap"><svg id="svg"></svg><div id="tip"></div></div>
+<details id="tabla"><summary>La tabla del gobierno &mdash; para leer (el grafo es para mirar)</summary><div id="tablaWrap"></div></details>
 <footer><span id="hint"></span> &middot; Vista de solo lectura, derivada de la ley real. No gatea nada. Arrastra los nodos; pasa el cursor para el porque.</footer>
 <script>
 /*__PAYLOAD__*/
@@ -436,6 +521,8 @@ const TIPOS = {
   hook:{c:'var(--hook)',r:8,txt:'hook'},
   check:{c:'var(--check)',r:7,txt:'check de CI'},
   orphan:{c:'var(--orphan)',r:9,txt:'HUERFANO'},
+  liga:{c:'var(--liga)',r:8,txt:'liga codigo-capacidad'},
+  'liga-rota':{c:'var(--orphan)',r:8,txt:'liga ROTA'},
 };
 function colorOf(n){
   if(n.tipo==='gate') return n.vivo?'var(--gate-on)':'var(--gate-off)';
@@ -468,7 +555,11 @@ const clusterKeys=[...new Set([...cluster.values()])];
 const cCenter=new Map();
 function layoutClusters(){ const cols=Math.max(1,Math.ceil(Math.sqrt(clusterKeys.length)));
   const rows=Math.max(1,Math.ceil(clusterKeys.length/cols));
-  clusterKeys.forEach((k,i)=>cCenter.set(k,{x:(i%cols+.5)/cols*W,y:(Math.floor(i/cols)+.5)/rows*H})); }
+  // centros sobre un MUNDO mas ancho que el viewport: el fit-to-view (viewBox) los trae
+  // de vuelta y los cumulos DE VERDAD se separan (hallazgo 7 del Gemba: el centro quedaba
+  // mas enredado que en Agrupado porque los once centros compartian la misma pantalla).
+  const SX=Math.max(W,cols*340), SY=Math.max(H,rows*300);
+  clusterKeys.forEach((k,i)=>cCenter.set(k,{x:(i%cols+.5)/cols*SX-(SX-W)/2,y:(Math.floor(i/cols)+.5)/rows*SY-(SY-H)/2})); }
 
 // --- nodos AGREGADO para el modo Agrupado: las capas numerosas colapsan en uno solo. ---
 const nCaps=DATA.nodes.filter(n=>n.tipo==='capability').length;
@@ -487,7 +578,8 @@ if(nCaps>0&&capArea&&idx.has(capArea))aggEdges.push({s:idx.get(capArea),t:idx.ge
 // punteada, capacidad=violeta, wikilink=teal, vigila=verde, ci/hook=punteado tenue.
 const EK={bloquea:['var(--orphan)',''],avisa:['var(--desv)','4 3'],product:['var(--cap)','2 3'],
   wikilink:['var(--conf)',''],vigila:['var(--gate-on)',''],cubre:['var(--area)',''],
-  ci:['var(--check)','1 3'],hook:['var(--hook)','1 3']};
+  ci:['var(--check)','1 3'],hook:['var(--hook)','1 3'],
+  liga:['var(--liga)','2 3'],'liga-bloquea':['var(--orphan)',''],'liga-avisa':['var(--desv)','4 3']};
 const adj=new Map(); nodes.forEach(n=>adj.set(n.id,new Set()));
 baseEdges.concat(aggEdges).forEach(e=>{adj.get(nodes[e.s].id).add(nodes[e.t].id);adj.get(nodes[e.t].id).add(nodes[e.s].id);});
 
@@ -531,14 +623,16 @@ legendItems.forEach(([tp,lbl,col])=>{
 
 // --- los 3 modos ---
 const modesEl=document.getElementById('modes'), hintEl=document.getElementById('hint');
-const HINTS={foco:'Clic en un AREA para desplegar su telarana; clic en el vacio para recoger.',
+const HINTS={foco:'Clic en un AREA para desplegar su telarana; clic en el vacio para recoger. El anillo ROJO = area con bloqueo duro (doc_bloquea).',
   agrupado:'Las capas numerosas estan colapsadas: clic en un grupo punteado para abrirlo. La leyenda prende y apaga capas.',
-  clusters:'Cada area gravita en su propio cumulo: menos marana. La leyenda filtra capas.'};
+  clusters:'Cada area gravita en su propio cumulo: menos marana. La leyenda filtra capas.',
+  reparto:'Cada rectangulo es una capa de cobertura; su tamano = cuantos archivos se traga. El cajon area:raiz decide que tan exigente es el contador de huerfanos.'};
 function setMode(m){
   mode=m; focusId=null; expanded.clear();
   [...modesEl.children].forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   if(hintEl)hintEl.textContent=HINTS[m];
-  legend.style.opacity = m==='foco'?.35:1; legend.style.pointerEvents = m==='foco'?'none':'auto';
+  const pasiva = (m==='foco'||m==='reparto');
+  legend.style.opacity = pasiva?.35:1; legend.style.pointerEvents = pasiva?'none':'auto';
   if(m==='clusters')layoutClusters();
   alpha=1;
 }
@@ -556,7 +650,7 @@ function step(){
     }
     // gravedad: al centro, o al centro de SU cumulo en el modo Clusters
     let gx=W/2, gy=H/2, gk=0.002;
-    if(mode==='clusters'){ const c=cCenter.get(cluster.get(a.id)); if(c){gx=c.x;gy=c.y;gk=0.02;} }
+    if(mode==='clusters'){ const c=cCenter.get(cluster.get(a.id)); if(c){gx=c.x;gy=c.y;gk=0.05;} }
     a.vx+=(gx-a.x)*gk*k; a.vy+=(gy-a.y)*gk*k;
   }
   const rest = mode==='clusters'?55:90;
@@ -566,30 +660,132 @@ function step(){
     a.vx+=fx; a.vy+=fy; b.vx-=fx; b.vy-=fy;
   });
   nodes.forEach(n=>{ if(n===dragging)return; n.vx*=0.82; n.vy*=0.82; n.x+=n.vx; n.y+=n.vy;
-    n.x=Math.max(24,Math.min(W-24,n.x)); n.y=Math.max(24,Math.min(H-24,n.y)); });
+    // clamp de MUNDO, no de viewport: los nodos ya no se amontonan contra el borde
+    // (el fit-to-view del viewBox se encarga de que todo quepa en pantalla -- hallazgo 5).
+    n.x=Math.max(-2400,Math.min(W+2400,n.x)); n.y=Math.max(-2400,Math.min(H+2400,n.y)); });
   alpha*=0.985;
 }
+// --- etiquetas cortas: los paths largos se abrevian al ultimo tramo; el nombre completo
+//     vive en el tooltip (hallazgo 4 del Gemba: colision y truncado ilegible). ---
+function shortLabel(l){
+  if(l.length<=24||l.indexOf('/')<0) return l;
+  const seg=l.split('/'); let out=seg[seg.length-1];
+  if(seg.length>1&&(seg[seg.length-2]+'/'+out).length<=22) out=seg[seg.length-2]+'/'+out;
+  return '…/'+out;
+}
+const SIEMPRE=new Set(['area','gate','agg','agg-orphan','liga','liga-rota']);
+let visCount=0;
+// las capas ruidosas solo llevan etiqueta si hay pocas en pantalla o al pasar el cursor:
+// mejor un punto mudo que una mancha de texto encimado (hallazgo 4).
+function labelVisible(n){
+  if(SIEMPRE.has(n.tipo))return true;
+  if(hoverId!==null&&(n.id===hoverId||(adj.get(hoverId)||new Set()).has(n.id)))return true;
+  return visCount<=40;
+}
+// --- flecha al destino, del color de la arista: la direccion YA estaba en el dato
+//     {s,t}; el render la tiraba (hallazgo 1). Grosor por fuerza: dura > blanda. ---
+function flecha(a,b,rB,col,dim){
+  const dx=b.x-a.x, dy=b.y-a.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+  const ux=dx/d, uy=dy/d, tx=b.x-ux*(rB+3), ty=b.y-uy*(rB+3), s=4.6;
+  const p1=`${(tx-ux*s*2+uy*s).toFixed(1)},${(ty-uy*s*2-ux*s).toFixed(1)}`;
+  const p2=`${(tx-ux*s*2-uy*s).toFixed(1)},${(ty-uy*s*2+ux*s).toFixed(1)}`;
+  return `<polygon class="edge${dim}" points="${tx.toFixed(1)},${ty.toFixed(1)} ${p1} ${p2}" style="fill:${col};stroke:none"/>`;
+}
+const EW={bloquea:2.2,'liga-bloquea':2.2,avisa:1.5,'liga-avisa':1.5};
+// sueltos que NO son huerfanos (hallazgo 6): cero aristas pero cubiertos por el ledger
+// o un arbol auditado. Trazo punteado + nota en el tooltip -- "sin aristas" ya no
+// significa dos cosas distintas segun el color.
+const suelto=new Set(nodes.filter(n=>!(adj.get(n.id)||new Set()).size&&!SIEMPRE.has(n.tipo)&&n.tipo!=='orphan').map(n=>n.id));
+// --- fit-to-viewport: el viewBox persigue suave el bounding box de lo visible; nada
+//     queda cortado fuera de pantalla (hallazgo 5). ---
+let vb=null;
+function fitViewBox(list){
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  // el bbox IGNORA las etiquetas encendidas por hover: si las contara, el zoom
+  // "bombea" y el hover parpadea (lazo hover->bbox->viewBox->hover, cazado en review).
+  list.forEach(n=>{ const conLbl=SIEMPRE.has(n.tipo)||visCount<=40;
+    const r=radiusOf(n), lw=r+8+(conLbl?shortLabel(n.label).length*6.8:0);
+    x0=Math.min(x0,n.x-r-20); y0=Math.min(y0,n.y-r-18); x1=Math.max(x1,n.x+lw+14); y1=Math.max(y1,n.y+r+18); });
+  if(x1<=x0){x0=0;y0=0;x1=W;y1=H;}
+  const t={x:x0,y:y0,w:Math.max(x1-x0,320),h:Math.max(y1-y0,240)};
+  vb = vb?{x:vb.x+(t.x-vb.x)*.12,y:vb.y+(t.y-vb.y)*.12,w:vb.w+(t.w-vb.w)*.12,h:vb.h+(t.h-vb.h)*.12}:t;
+  svg.setAttribute('viewBox',`${vb.x.toFixed(1)} ${vb.y.toFixed(1)} ${vb.w.toFixed(1)} ${vb.h.toFixed(1)}`);
+}
 function draw(){
+  if(mode==='reparto'){ drawReparto(); return; }
+  const vis=nodes.filter(visible); visCount=vis.length;
   let s='';
   edgesActive().forEach(e=>{
     const a=nodes[e.s], b=nodes[e.t];
     const dimmed = (hoverId!==null && a.id!==hoverId && b.id!==hoverId) ? ' dim':'';
     const ek=EK[e.kind]||['var(--line)',''];
     const dash=ek[1]?`;stroke-dasharray:${ek[1]}`:'';
-    s+=`<line class="edge${dimmed}" style="stroke:${ek[0]}${dash}" x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}"/>`;
+    const w=EW[e.kind]||1.2;
+    s+=`<line class="edge${dimmed}" style="stroke:${ek[0]};stroke-width:${w}${dash}" x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}"/>`;
+    s+=flecha(a,b,radiusOf(b),ek[0],dimmed);
   });
-  nodes.forEach(n=>{
-    if(!visible(n))return;
+  vis.forEach(n=>{
     const r=radiusOf(n), col=colorOf(n);
     const neigh = hoverId!==null && (n.id===hoverId || (adj.get(hoverId)||new Set()).has(n.id));
     const dimmed = (hoverId!==null && !neigh) ? ' dim':'';
-    const cls='node'+(n.tipo==='orphan'?' orphan':'')+((n.tipo==='agg'||n.tipo==='agg-orphan')?' agg':'')+dimmed;
+    const cls='node'+(n.tipo==='orphan'?' orphan':'')+((n.tipo==='agg'||n.tipo==='agg-orphan')?' agg':'')+(suelto.has(n.id)?' suelto':'')+dimmed;
     s+=`<g class="${cls}" data-id="${encodeURIComponent(n.id)}">`+
+       (n.dura?`<circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${(r+3.5).toFixed(1)}" style="fill:none;stroke:var(--orphan);stroke-width:2"/>`:'')+
        `<circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${r}" fill="${col}"/>`+
-       `<text x="${(n.x+r+3).toFixed(1)}" y="${(n.y+3).toFixed(1)}">${esc(n.label)}</text></g>`;
+       (labelVisible(n)?`<text x="${(n.x+r+3).toFixed(1)}" y="${(n.y+3).toFixed(1)}">${esc(shortLabel(n.label))}</text>`:'')+
+       `</g>`;
+  });
+  svg.innerHTML=s;
+  fitViewBox(vis);
+}
+// --- Reparto: treemap de archivos por capa de cobertura (propuesta c del Gemba). El
+//     bulto del cajon 'area:raiz' se ve de un vistazo. ---
+function tmSplit(items,x,y,w,h,out){
+  if(!items.length)return;
+  if(items.length===1){out.push({capa:items[0].capa,n:items[0].n,x:x,y:y,w:w,h:h});return;}
+  const total=items.reduce((a,b)=>a+b.n,0)||1; let acc=0,i=0;
+  for(;i<items.length-1;i++){acc+=items[i].n; if(acc>=total/2)break;}
+  const first=items.slice(0,i+1), rest=items.slice(i+1), f=Math.min(Math.max(acc/total,0.08),0.92);
+  if(w>=h){ tmSplit(first,x,y,w*f,h,out); tmSplit(rest,x+w*f,y,w*(1-f),h,out); }
+  else { tmSplit(first,x,y,w,h*f,out); tmSplit(rest,x,y+h*f,w,h*(1-f),out); }
+}
+const TMCOL=['var(--area)','var(--cap)','var(--conf)','var(--hook)','var(--owner)','var(--check)','var(--desv)','var(--free)','var(--gate-on)','var(--liga)'];
+function drawReparto(){
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`); vb=null;
+  // orden no-creciente GARANTIZADO aqui (no confiar en el sort de PS): tmSplit
+  // recursa infinito si el orden se rompe (cazado en review).
+  const items=(META.reparto||[]).filter(r=>r.n>0).sort((a,b)=>b.n-a.n||(a.capa<b.capa?-1:1));
+  if(!items.length){svg.innerHTML=`<text class="tm-lbl" x="16" y="28">sin archivos que repartir</text>`;return;}
+  const rects=[]; tmSplit(items,8,8,W-16,H-16,rects);
+  const total=items.reduce((a,b)=>a+b.n,0)||1;
+  let s='';
+  rects.forEach((r,i)=>{
+    const col = r.capa==='HUERFANO' ? 'var(--orphan)' : TMCOL[i%TMCOL.length];
+    const pct=(r.n/total*100).toFixed(1);
+    s+=`<g><rect x="${r.x.toFixed(1)}" y="${r.y.toFixed(1)}" width="${Math.max(r.w-3,1).toFixed(1)}" height="${Math.max(r.h-3,1).toFixed(1)}" fill="${col}" opacity="0.78" rx="4"><title>${esc(r.capa)}: ${r.n} archivo(s) (${pct}%)</title></rect>`;
+    if(r.w>110&&r.h>34) s+=`<text class="tm-lbl" x="${(r.x+8).toFixed(1)}" y="${(r.y+20).toFixed(1)}">${esc(r.capa)} · ${r.n} (${pct}%)</text>`;
+    s+='</g>';
   });
   svg.innerHTML=s;
 }
+// --- la tabla del gobierno: el grafo para mirar, la tabla para leer (hallazgo 2: el
+//     force-directed sugiere relaciones por cercania; la tabla dice las que EXISTEN). ---
+(function(){
+  const wrapT=document.getElementById('tablaWrap'); if(!wrapT)return;
+  const SEV={bloquea:['BLOQUEA','sevB',0],'liga-bloquea':['BLOQUEA (liga)','sevB',0],
+    avisa:['avisa','sevA',1],'liga-avisa':['avisa (liga)','sevA',1],product:['avisa (producto)','sevA',1],
+    vigila:['vigila','sevV',2]};
+  const rows=[];
+  DATA.edges.forEach(e=>{ const m=SEV[e.kind]; if(!m)return;
+    const a=byId.get(e.s), b=byId.get(e.t); if(!a||!b)return;
+    rows.push({o:m[2],sev:m[0],cls:m[1],de:a.label,ha:b.label}); });
+  DATA.nodes.filter(n=>n.tipo==='gate'&&!n.vivo).forEach(n=>rows.push({o:3,sev:'DORMIDO',cls:'sevD',de:n.label,ha:(n.detalle||'')}));
+  rows.sort((a,b)=>a.o-b.o||a.de.localeCompare(b.de)||a.ha.localeCompare(b.ha));
+  let h='<table><tr><th>Severidad</th><th>De</th><th>Hacia</th></tr>';
+  rows.forEach(r=>{h+=`<tr><td class="${r.cls}">${esc(r.sev)}</td><td>${esc(r.de)}</td><td>${esc(r.ha)}</td></tr>`;});
+  wrapT.innerHTML=h+'</table>';
+})();
+
 function loop(){ step(); draw(); requestAnimationFrame(loop); }
 setMode('foco');   // arranca limpio: solo areas y gates (el esqueleto legible)
 loop();
@@ -599,14 +795,18 @@ function nodeAt(ev){
   const g=ev.target.closest('.node'); if(!g)return null;
   return decodeURIComponent(g.dataset.id);
 }
+// con viewBox activo las coordenadas de pantalla ya no son las del mundo: se transforma.
+function toWorld(ev){ const pt=svg.createSVGPoint(); pt.x=ev.clientX; pt.y=ev.clientY;
+  const m=svg.getScreenCTM(); return m?pt.matrixTransform(m.inverse()):{x:ev.clientX,y:ev.clientY}; }
 svg.addEventListener('mousedown',ev=>{const id=nodeAt(ev);if(id){dragging=nodes[idx.get(id)];alpha=Math.max(alpha,.3);}});
 window.addEventListener('mousemove',ev=>{
   const rect=wrap.getBoundingClientRect();
-  if(dragging){dragging.x=ev.clientX-rect.left;dragging.y=ev.clientY-rect.top;dragging.vx=dragging.vy=0;return;}
+  if(dragging){const p=toWorld(ev);dragging.x=p.x;dragging.y=p.y;dragging.vx=dragging.vy=0;return;}
   const id=nodeAt(ev);
   if(id){ const n=nodes[idx.get(id)]; hoverId=id;
     tip.style.opacity=1; tip.style.left=(ev.clientX-rect.left+14)+'px'; tip.style.top=(ev.clientY-rect.top+14)+'px';
-    tip.innerHTML=`<b>${esc(n.label)}</b><br><span class="k">${esc((TIPOS[n.tipo]||{txt:n.tipo}).txt)}</span><br>${esc(n.detalle||'')}`;
+    const extra = (suelto.has(n.id)&&n.tipo.indexOf('doc')===0)?'<br><span class="k">Suelto: sin aristas porque su cobertura no es un area (ledger capa-2/3 o arbol auditado) — NO es huerfano.</span>':(suelto.has(n.id)?'<br><span class="k">Suelto: nada lo conecta en la ley actual — NO es huerfano.</span>':'');
+    tip.innerHTML=`<b>${esc(n.label)}</b><br><span class="k">${esc((TIPOS[n.tipo]||{txt:n.tipo}).txt)}</span><br>${esc(n.detalle||'')}${extra}`;
   } else { hoverId=null; tip.style.opacity=0; }
 });
 window.addEventListener('mouseup',()=>{dragging=null;});
@@ -620,7 +820,7 @@ svg.addEventListener('click',ev=>{
     if(expanded.has(id))expanded.delete(id); else expanded.add(id); alpha=1;
   }
 });
-window.addEventListener('resize',()=>{W=wrap.clientWidth;H=wrap.clientHeight;if(mode==='clusters')layoutClusters();alpha=Math.max(alpha,.4);});
+window.addEventListener('resize',()=>{W=wrap.clientWidth||900;H=wrap.clientHeight||600;if(mode==='clusters')layoutClusters();alpha=Math.max(alpha,.4);});
 </script>
 </body></html>
 '@

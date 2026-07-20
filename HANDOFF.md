@@ -6,11 +6,18 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-20 — El editor del gobierno · sprint `v1.25.0` — ✅ R1 MERGEADO CON GEMBA **GO** · 🔨 R2–R4 SIGUIENTES)
+## Dónde estamos (2026-07-20 — El editor del gobierno, parte 2 · **`v1.25.0` CERRADO Y LIBERADO** · PR #115)
 
-**El PR #114 (linterna `v1.24.0` + R1 del editor) está MERGEADO a `main`** con la orden nombrada del cliente (*"pr, marge y poda autorizado"*, 2026-07-20); la rama `sprint/linterna-gobierno-20260719` fue podada. **El Gemba de R1 corrió y salió GO:** el cliente pulsó F5, el Extension Development Host abrió con el repo cargado (ajuste de sesión: `launch.json` ahora pasa `${workspaceFolder}` para que abra solo), corrió *"Jidoka: ver el gobierno"* y siguió la conversación con el grafo enfrente. Evidencia: `qa_runs/editor-r1-gemba-20260720/LOG.md` (committeada) + cuadro en `docs/sprints/cierre-20260720.md`. **El stack VS Code quedó demostrado — R2 (ledger `tools/ligas.json` + gate) está desbloqueado**; contrato: `docs/sprints/sprint-editor-gobierno-plan.md`.
+**Sprint "El editor del gobierno, parte 2" (R2–R4) TERMINADO, mergeado y liberado** con la orden nombrada del cliente (*"pr, marge, versión y poda autorizado"*). Récord completo: [`docs/sprints/sprint-editor-gobierno-2-entrega.md`](docs/sprints/sprint-editor-gobierno-2-entrega.md) (con el cuadro de cierre). En una línea: **el gate granular código↔capacidad** (`ligas.json` + `estado-ligas.ps1`, CI desde la base, nombra la capacidad exacta) + **la extensión que lo autora** (clic derecho → "ligar código a capacidad...") + **la linterna con 4 modos legibles** (flechas, anillo rojo del bloqueo duro, tabla del gobierno, treemap Reparto — rework de **2 Gembas del cliente**: 8 hallazgos de uso real + nomenclatura, todos curados en la rama antes del merge) + `.vsix` + ADR 0044. `v1.24.0` quedó **sin tag propio a propósito** (subsumida en `v1.25.0`).
 
-**⚠️ DECISIÓN PENDIENTE DEL CLIENTE — tag + GitHub release de `v1.24.0`:** el CHANGELOG `1.24.0` ya está cerrado y mergeado en `main` (SSOT en 1.24.0), pero la orden del 2026-07-20 nombró PR, merge y poda — **no el release**. Cortar `v1.24.0` (tag anotado + `gh release create`) espera orden nombrada.
+**Evidencia:** `qa_runs/editor-r2r4-20260720/LOG.md` (committeada) · suite completa 14/14 + auditar · `probar-linterna` 58/58 · 2 code-reviews adversariales (el 2º cazó el anillo invisible que la suite verde no vio) · CI verde en cada push · la liga dogfood mordió 2× nombrando AND-1.
+
+**Pendientes (nada bloquea al agente):**
+1. **Bajar `v1.25.0` a los labs** con `-Actualizar` — entisoft gana `estado-ligas.ps1` + la linterna nueva (la extensión es Jidoka-only; la mecánica sí baja). Ahí el cliente podría por fin correr la linterna sobre entisoft desde VS Code.
+2. **Decisión del cliente — ¿estrechar el área `raiz`?** Con `fuente: "*"` como cajón, "cero huérfanos" mide *"nada se escapó"*, no *"todo tiene lugar pensado"*. El **modo Reparto** (treemap) es el instrumento para decidirlo con ojos. Decisión de ley: solo el cliente.
+3. **Opción (b) de nomenclatura** ("ligar" genérico de las 3 relaciones: blast-radius, wikilinks, ligas) — en ROADMAP, regla 2-3; la (a) ya se aplicó (comando estrechado).
+4. **Gemba visual de entisoft** (`gobierno-entisoft.html`, 15 huérfanos) — sigue esperando ojos del cliente; mejor aún tras la bajada del punto 1.
+5. Deuda anotada de reviews: `Out-File -Encoding ascii` en steps desde-la-base · conteo del reparto case-insensitive (B2).
 
 ---
 
@@ -28,7 +35,7 @@
 
 **~~PENDIENTE CRÍTICO — el Gemba de R1~~ ✅ ATENDIDO 2026-07-20:** el cliente corrió F5 y el stack quedó demostrado (ver "Dónde estamos" arriba; evidencia en `qa_runs/editor-r1-gemba-20260720/LOG.md`). Hueco declarado: el caso real (entisoft) NO se probó desde la extensión — entisoft no tiene el motor `v1.24.0` todavía (la bajada a los labs sigue pendiente).
 
-**R2–R4 NO construidos a propósito** (ya desbloqueados por el GO de R1): R2 = ledger `tools/ligas.json` + `estado-ligas.ps1` + gate leyendo **desde la base** (ADR 0003); R3 = la extensión **autora** las ligas (clic derecho → ligar a capacidad, con dirección y fuerza); R4 = `.vsix`, ADR 0044, CHANGELOG y SSOT a `1.25.0`. El sprint del editor no bumpeó versión en el PR #114 — eso es R4.
+**~~R2–R4 NO construidos~~ ✅ CONSTRUIDOS el 2026-07-20** en el sprint "parte 2" (ver "Dónde estamos" arriba): R2 = ledger + `estado-ligas.ps1` + gate desde la base; R3 = la extensión autora; R4 = `.vsix` + ADR 0044 + SSOT `1.25.0`.
 
 ---
 
