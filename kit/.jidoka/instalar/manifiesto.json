@@ -40,6 +40,8 @@
     { "origen": "tools/probar-docs.ps1", "destino": "tools/probar-docs.ps1", "clase": "mecanica" },
     { "origen": "tools/estado-gobierno.ps1", "destino": "tools/estado-gobierno.ps1", "clase": "mecanica" },
     { "origen": "tools/probar-linterna.ps1", "destino": "tools/probar-linterna.ps1", "clase": "mecanica" },
+    { "origen": "tools/estado-ligas.ps1", "destino": "tools/estado-ligas.ps1", "clase": "mecanica" },
+    { "origen": "tools/probar-ligas.ps1", "destino": "tools/probar-ligas.ps1", "clase": "mecanica" },
     { "origen": "tools/rutear.ps1", "destino": "tools/rutear.ps1", "clase": "mecanica" },
     { "origen": "tools/asientos.ps1", "destino": "tools/asientos.ps1", "clase": "mecanica" },
     { "origen": "tools/sembrar-manual.ps1", "destino": "tools/sembrar-manual.ps1", "clase": "mecanica" },
