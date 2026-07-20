@@ -14,6 +14,7 @@ const vscode = require('vscode');
 const cp = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const ligas = require('./ligas.js');
 
 /** El intérprete del motor: Windows PS 5.1 es la casa; fuera de Windows, pwsh Core. */
 function interprete() {
@@ -103,9 +104,148 @@ async function verGobierno() {
   }
 }
 
+/** Repinta el grafo si el panel esta abierto (tras escribir el ledger). Silencioso: si falla, el proximo verGobierno lo dira. */
+async function refrescarGobierno() {
+  if (!panel) return;
+  const raiz = raizDelRepo();
+  if (!raiz) return;
+  try {
+    const { salida } = await generarVista(raiz);
+    panel.webview.html = fs.readFileSync(salida, 'utf8');
+  } catch (e) { /* la vista vieja queda; verGobierno reporta el error real */ }
+}
+
+/** Ruta relativa POSIX contra la raiz; una carpeta se guarda como glob 'ruta/*'. */
+function rutaRelativa(raiz, fsPath) {
+  let rel = path.relative(raiz, fsPath).split(path.sep).join('/');
+  try { if (fs.statSync(fsPath).isDirectory()) rel = rel + '/*'; } catch (e) { /* si no existe, va tal cual */ }
+  return rel;
+}
+
+/** Las capacidades del repo (product/capacidades/*.md), con su clave del frontmatter. */
+function listarCapacidades(raiz) {
+  const dir = path.join(raiz, 'product', 'capacidades');
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir)
+    .filter((f) => f.endsWith('.md') && f !== 'README.md')
+    .map((f) => {
+      let clave = f.replace(/\.md$/, '');
+      try {
+        const m = /^\s*clave:\s*(.+?)\s*$/m.exec(fs.readFileSync(path.join(dir, f), 'utf8'));
+        if (m) clave = m[1].trim();
+      } catch (e) { /* sin frontmatter legible, el basename sirve */ }
+      return { clave, path: 'product/capacidades/' + f };
+    });
+}
+
+/** La seleccion del explorador (multi), o el uri clicado, o el editor activo. */
+function archivosSeleccionados(uri, uris) {
+  const lista = (uris && uris.length) ? uris : (uri ? [uri] : []);
+  if (lista.length === 0 && vscode.window.activeTextEditor) {
+    lista.push(vscode.window.activeTextEditor.document.uri);
+  }
+  return lista.filter((u) => u && u.scheme === 'file');
+}
+
+/** Clic derecho -> "Jidoka: ligar a capacidad...": QuickPicks y el modulo escribe el ledger. */
+async function ligarCapacidad(uri, uris) {
+  const raiz = raizDelRepo();
+  if (!raiz) {
+    vscode.window.showErrorMessage('Jidoka: abre primero la carpeta de un repo.');
+    return;
+  }
+  const sel = archivosSeleccionados(uri, uris);
+  if (sel.length === 0) {
+    vscode.window.showErrorMessage('Jidoka: selecciona un archivo en el explorador (o abre uno en el editor).');
+    return;
+  }
+  const codigo = sel.map((u) => rutaRelativa(raiz, u.fsPath));
+  const caps = listarCapacidades(raiz);
+  if (caps.length === 0) {
+    vscode.window.showErrorMessage('Jidoka: no hay product/capacidades/*.md en este repo — no hay a que ligar.');
+    return;
+  }
+  const ledgerPath = path.join(raiz, 'tools', 'ligas.json');
+  const previas = new Set();
+  try {
+    for (const l of ligas.leer(ledgerPath).ligas) {
+      if (l.codigo.some((c) => codigo.includes(c))) l.capacidades.forEach((c) => previas.add(c));
+    }
+  } catch (e) { /* ledger ilegible: upsert lo reportara */ }
+
+  const picks = await vscode.window.showQuickPick(
+    caps.map((c) => ({ label: c.clave, description: c.path, picked: previas.has(c.path) })),
+    { canPickMany: true, title: `¿Qué capacidad(es) sostiene ${codigo.join(', ')}?` }
+  );
+  if (!picks || picks.length === 0) return;
+
+  const dir = await vscode.window.showQuickPick(
+    [
+      { label: 'codigo-a-capacidad', description: 'si cambia el código sin tocar la capacidad, el gate reclama' },
+      { label: 'capacidad-a-codigo', description: 'si cambia la capacidad sin tocar el código, el gate reclama' },
+      { label: 'ambas', description: 'vigila en las dos direcciones' },
+    ],
+    { title: '¿En qué dirección se vigila la relación?' }
+  );
+  if (!dir) return;
+
+  const fza = await vscode.window.showQuickPick(
+    [
+      { label: 'avisa', description: 'aviso en push y CI — no detiene nada' },
+      { label: 'bloquea', description: 'detiene el push (pre-push y CI corren estricto)' },
+    ],
+    { title: '¿Con qué fuerza?' }
+  );
+  if (!fza) return;
+
+  try {
+    const liga = ligas.upsert(ledgerPath, {
+      codigo,
+      capacidades: picks.map((p) => p.description),
+      direccion: dir.label,
+      fuerza: fza.label,
+    });
+    vscode.window.setStatusBarMessage(
+      `Jidoka: liga '${liga.id}' escrita en tools/ligas.json — el gate la hace cumplir en el próximo push`, 6000
+    );
+    refrescarGobierno();
+  } catch (e) {
+    vscode.window.showErrorMessage('Jidoka: no pude escribir la liga: ' + (e && e.message ? e.message : String(e)));
+  }
+}
+
+/** Clic derecho -> "Jidoka: quitar liga...": saca la ruta del ledger (la liga vacia se elimina). */
+async function quitarLiga(uri, uris) {
+  const raiz = raizDelRepo();
+  if (!raiz) {
+    vscode.window.showErrorMessage('Jidoka: abre primero la carpeta de un repo.');
+    return;
+  }
+  const sel = archivosSeleccionados(uri, uris);
+  if (sel.length === 0) {
+    vscode.window.showErrorMessage('Jidoka: selecciona el archivo cuya liga quieres quitar.');
+    return;
+  }
+  const ledgerPath = path.join(raiz, 'tools', 'ligas.json');
+  try {
+    let tocadas = 0;
+    for (const u of sel) tocadas += ligas.quitar(ledgerPath, rutaRelativa(raiz, u.fsPath));
+    if (tocadas > 0) {
+      vscode.window.setStatusBarMessage(`Jidoka: ${tocadas} liga(s) actualizadas en tools/ligas.json`, 6000);
+      refrescarGobierno();
+    } else {
+      vscode.window.showInformationMessage('Jidoka: ninguna liga lista esa ruta literal en su código — nada que quitar.');
+    }
+  } catch (e) {
+    vscode.window.showErrorMessage('Jidoka: no pude quitar la liga: ' + (e && e.message ? e.message : String(e)));
+  }
+}
+
 function activate(context) {
   context.subscriptions.push(
-    vscode.commands.registerCommand('jidoka.verGobierno', verGobierno)
+    vscode.commands.registerCommand('jidoka.verGobierno', verGobierno),
+    vscode.commands.registerCommand('jidoka.ligarCapacidad', ligarCapacidad),
+    vscode.commands.registerCommand('jidoka.quitarLiga', quitarLiga)
   );
 }
 
