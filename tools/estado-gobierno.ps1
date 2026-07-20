@@ -200,7 +200,9 @@ foreach ($a in $areas) {
   if ($dura) { $det += " CARGA UN BLOQUEO DURO (doc_bloquea): el push se detiene si su doc-dueno no cambia en el mismo commit." }
   $nodos.Add([pscustomobject]@{ id = "area:$($a.nombre)"; label = $a.nombre; tipo = 'area'; vivo = $true; dura = $dura; detalle = $det })
   foreach ($gate in (Get-GatesDeArea $a)) {
-    $aristas.Add([pscustomobject]@{ s = "area:$($a.nombre)"; t = "gate:$gate"; kind = 'vigila' })
+    # s=gate, t=area: es el GATE quien vigila al area. Con flechas en el render la
+    # direccion ya se ve, y al reves leia mentira (hallazgo B7 del review del rework).
+    $aristas.Add([pscustomobject]@{ s = "gate:$gate"; t = "area:$($a.nombre)"; kind = 'vigila' })
   }
 }
 if ($ledger -and $ledger.capa2) {
@@ -408,6 +410,7 @@ if (Test-Path -LiteralPath $ciPath) {
       # y a 24 chars max -- "conformidad estructural de d.." no se podia leer (hallazgo
       # 4 del Gemba del cliente: colision y truncado de etiquetas).
       $short = ($cn -split '\(')[0].Trim()
+      if (-not $short) { $short = $cn }
       if ($short.Length -gt 24) { $short = $short.Substring(0, 22) + '..' }
       Add-NodoUnico $cid $short 'check' $true "Check de CI server-side (el muro REAL, required check sin bypass): $cn"
       if ($ciArea) { $aristas.Add([pscustomobject]@{ s = $cid; t = $ciArea; kind = 'ci' }) }
@@ -427,7 +430,7 @@ $meta = [pscustomobject]@{
   areas = $conteo.areas
   gatesVivos = $conteo.gatesVivos
   archivos = $conteo.archivos
-  reparto = @($cobConteo.GetEnumerator() | Sort-Object -Property Value -Descending | ForEach-Object {
+  reparto = @($cobConteo.GetEnumerator() | Sort-Object -Property @{Expression='Value';Descending=$true}, Key | ForEach-Object {
     [pscustomobject]@{ capa = [string]$_.Key; n = [int]$_.Value } })
 }
 
@@ -686,7 +689,7 @@ function flecha(a,b,rB,col,dim){
   const ux=dx/d, uy=dy/d, tx=b.x-ux*(rB+3), ty=b.y-uy*(rB+3), s=4.6;
   const p1=`${(tx-ux*s*2+uy*s).toFixed(1)},${(ty-uy*s*2-ux*s).toFixed(1)}`;
   const p2=`${(tx-ux*s*2-uy*s).toFixed(1)},${(ty-uy*s*2+ux*s).toFixed(1)}`;
-  return `<polygon class="edge${dim}" points="${tx.toFixed(1)},${ty.toFixed(1)} ${p1} ${p2}" fill="${col}" stroke="none"/>`;
+  return `<polygon class="edge${dim}" points="${tx.toFixed(1)},${ty.toFixed(1)} ${p1} ${p2}" style="fill:${col};stroke:none"/>`;
 }
 const EW={bloquea:2.2,'liga-bloquea':2.2,avisa:1.5,'liga-avisa':1.5};
 // sueltos que NO son huerfanos (hallazgo 6): cero aristas pero cubiertos por el ledger
@@ -698,7 +701,10 @@ const suelto=new Set(nodes.filter(n=>!(adj.get(n.id)||new Set()).size&&!SIEMPRE.
 let vb=null;
 function fitViewBox(list){
   let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
-  list.forEach(n=>{ const r=radiusOf(n), lw=r+8+(labelVisible(n)?shortLabel(n.label).length*6.8:0);
+  // el bbox IGNORA las etiquetas encendidas por hover: si las contara, el zoom
+  // "bombea" y el hover parpadea (lazo hover->bbox->viewBox->hover, cazado en review).
+  list.forEach(n=>{ const conLbl=SIEMPRE.has(n.tipo)||visCount<=40;
+    const r=radiusOf(n), lw=r+8+(conLbl?shortLabel(n.label).length*6.8:0);
     x0=Math.min(x0,n.x-r-20); y0=Math.min(y0,n.y-r-18); x1=Math.max(x1,n.x+lw+14); y1=Math.max(y1,n.y+r+18); });
   if(x1<=x0){x0=0;y0=0;x1=W;y1=H;}
   const t={x:x0,y:y0,w:Math.max(x1-x0,320),h:Math.max(y1-y0,240)};
@@ -724,7 +730,7 @@ function draw(){
     const dimmed = (hoverId!==null && !neigh) ? ' dim':'';
     const cls='node'+(n.tipo==='orphan'?' orphan':'')+((n.tipo==='agg'||n.tipo==='agg-orphan')?' agg':'')+(suelto.has(n.id)?' suelto':'')+dimmed;
     s+=`<g class="${cls}" data-id="${encodeURIComponent(n.id)}">`+
-       (n.dura?`<circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${(r+3.5).toFixed(1)}" fill="none" stroke="var(--orphan)" stroke-width="2"/>`:'')+
+       (n.dura?`<circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${(r+3.5).toFixed(1)}" style="fill:none;stroke:var(--orphan);stroke-width:2"/>`:'')+
        `<circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${r}" fill="${col}"/>`+
        (labelVisible(n)?`<text x="${(n.x+r+3).toFixed(1)}" y="${(n.y+3).toFixed(1)}">${esc(shortLabel(n.label))}</text>`:'')+
        `</g>`;
@@ -746,7 +752,10 @@ function tmSplit(items,x,y,w,h,out){
 const TMCOL=['var(--area)','var(--cap)','var(--conf)','var(--hook)','var(--owner)','var(--check)','var(--desv)','var(--free)','var(--gate-on)','var(--liga)'];
 function drawReparto(){
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`); vb=null;
-  const items=(META.reparto||[]).filter(r=>r.n>0);
+  // orden no-creciente GARANTIZADO aqui (no confiar en el sort de PS): tmSplit
+  // recursa infinito si el orden se rompe (cazado en review).
+  const items=(META.reparto||[]).filter(r=>r.n>0).sort((a,b)=>b.n-a.n||(a.capa<b.capa?-1:1));
+  if(!items.length){svg.innerHTML=`<text class="tm-lbl" x="16" y="28">sin archivos que repartir</text>`;return;}
   const rects=[]; tmSplit(items,8,8,W-16,H-16,rects);
   const total=items.reduce((a,b)=>a+b.n,0)||1;
   let s='';
@@ -796,7 +805,7 @@ window.addEventListener('mousemove',ev=>{
   const id=nodeAt(ev);
   if(id){ const n=nodes[idx.get(id)]; hoverId=id;
     tip.style.opacity=1; tip.style.left=(ev.clientX-rect.left+14)+'px'; tip.style.top=(ev.clientY-rect.top+14)+'px';
-    const extra = suelto.has(n.id)?'<br><span class="k">Suelto: sin aristas porque su cobertura no es un area (ledger capa-2/3 o arbol auditado) — NO es huerfano.</span>':'';
+    const extra = (suelto.has(n.id)&&n.tipo.indexOf('doc')===0)?'<br><span class="k">Suelto: sin aristas porque su cobertura no es un area (ledger capa-2/3 o arbol auditado) — NO es huerfano.</span>':(suelto.has(n.id)?'<br><span class="k">Suelto: nada lo conecta en la ley actual — NO es huerfano.</span>':'');
     tip.innerHTML=`<b>${esc(n.label)}</b><br><span class="k">${esc((TIPOS[n.tipo]||{txt:n.tipo}).txt)}</span><br>${esc(n.detalle||'')}${extra}`;
   } else { hoverId=null; tip.style.opacity=0; }
 });
@@ -811,7 +820,7 @@ svg.addEventListener('click',ev=>{
     if(expanded.has(id))expanded.delete(id); else expanded.add(id); alpha=1;
   }
 });
-window.addEventListener('resize',()=>{W=wrap.clientWidth;H=wrap.clientHeight;if(mode==='clusters')layoutClusters();alpha=Math.max(alpha,.4);});
+window.addEventListener('resize',()=>{W=wrap.clientWidth||900;H=wrap.clientHeight||600;if(mode==='clusters')layoutClusters();alpha=Math.max(alpha,.4);});
 </script>
 </body></html>
 '@

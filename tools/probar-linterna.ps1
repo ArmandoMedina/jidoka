@@ -122,6 +122,7 @@ try {
   if ($html1 -match '"kind":"liga-bloquea"') { Ok "R2c: arista liga->capacidad tipada por fuerza (liga-bloquea)" } else { No "R2c: falta la arista liga-bloquea" }
   if ($html1 -match '"tipo":"liga-rota"') { Ok "R2c: la liga con codigo inexistente se pinta ROTA (rojo)" } else { No "R2c: la liga fantasma deberia ser tipo liga-rota" }
   if ($html1 -match '"s":"area:motor","t":"liga:buena","kind":"liga"') { Ok "R2c: ancla area->liga (el cumulo del area la adopta)" } else { No "R2c: falta la arista ancla area:motor -> liga:buena" }
+  if ($html1 -match '"s":"gate:andon-stop","t":"area:motor","kind":"vigila"') { Ok "RW: la arista vigila sale del GATE hacia el area (B7: el gate vigila, no al reves)" } else { No "RW: vigila deberia ir gate->area" }
   $colg1 = Get-AristasColgadasCount $html1
   if ($colg1 -eq 0) { Ok "R2c: cero aristas colgadas con las ligas en el grafo" } else { No "R2c: $colg1 arista(s) colgadas tras agregar ligas (-1 = no parseo)" }
 
@@ -205,8 +206,12 @@ try {
   # RW (rework del Gemba del cliente, 2026-07-20): flechas, severidad, tabla, reparto, sueltos.
   if ($htmlR -match 'data-m="reparto"') { Ok "RW: modo Reparto (treemap por capa de cobertura) en la barra" } else { No "RW: falta el boton del modo Reparto" }
   if ($htmlR -match '"reparto":\[') { Ok "RW: META trae el reparto de archivos por capa" } else { No "RW: falta META.reparto" }
-  if ($htmlR -match '"dura":true') { Ok "RW: el area con doc_bloquea viaja marcada dura (anillo rojo en Foco)" } else { No "RW: falta dura:true (decisiones carga el unico doc_bloquea)" }
-  if ($htmlR -match 'function flecha\(') { Ok "RW: el render dibuja flechas (la direccion ya no se tira)" } else { No "RW: falta flecha() en el render" }
+  if ($htmlR -match '"dura":true') { Ok "RW: el area con doc_bloquea viaja marcada dura" } else { No "RW: falta dura:true (decisiones carga el unico doc_bloquea)" }
+  # el anillo debe ir con ESTILO INLINE: el CSS .node circle pisa los atributos de
+  # presentacion SVG y el anillo salia invisible (hallazgo A1 del review -- este assert
+  # cruza dato con render, no solo presencia).
+  if ($htmlR -match 'style="fill:none;stroke:var\(--orphan\);stroke-width:2"') { Ok "RW: el anillo dura lleva estilo inline (el CSS no lo puede pisar)" } else { No "RW: el anillo dura sin estilo inline -- .node circle lo vuelve invisible (A1)" }
+  if ($htmlR -match 's\+=flecha\(') { Ok "RW: flecha() se INVOCA en el render (no solo se declara)" } else { No "RW: flecha() declarada pero nadie la llama" }
   if ($htmlR -match 'id="tabla"') { Ok "RW: la tabla del gobierno (para leer) esta bajo el grafo" } else { No "RW: falta la tabla del gobierno" }
   if ($htmlR -match 'setAttribute\(.viewBox.') { Ok "RW: fit-to-viewport (viewBox) activo -- nada se corta fuera de pantalla" } else { No "RW: falta el fit del viewBox" }
   if ($htmlR -match '\.node\.suelto') { Ok "RW: los sueltos no-huerfanos llevan trazo propio (no parecen huerfanos)" } else { No "RW: falta el estilo .node.suelto" }

@@ -49,6 +49,29 @@ su propia maquinaria sobre sí misma.
 
 Regresión post-curas: `probar-ligas` **27/27** · `probar-extension` **16/16** (12 tests JS) · `probar-linterna` **49/49** · `probar-version` 4/4.
 
+## Rework del Gemba del cliente + segundo code-review (2026-07-20)
+
+Los 7 hallazgos del Gemba del cliente (dirección tirada, severidad invisible en Foco, etiquetas
+encimadas, nodos fuera de pantalla, sueltos ambiguos, Clusters enredado, lectura por cercanía)
+se curaron como **rework en esta rama** (issues #116–#118 cerrados como absorbidos — eran Gemba
+de rama sin mergear, no cosecha). Un segundo review adversarial sobre el rework dictaminó
+**"NO mergear tal cual"** y cazó lo que la suite no vio:
+
+- **ALTO A1 (curado):** el anillo rojo de `dura` era **invisible en el navegador** — el CSS
+  `.node circle` pisa los atributos de presentación SVG. La suite estaba verde encima (los
+  asserts medían presencia de texto, no render). Cura: estilo inline + assert que exige el
+  estilo inline exacto. La lección: **un assert de presencia no caza una rotura de render.**
+- **MEDIO (curados):** guard de orden en `tmSplit` (recursión infinita si el sort de PS cambia) ·
+  el bbox del fit ignora las etiquetas de hover (lazo hover→zoom que "bombeaba") · asserts
+  endurecidos (flecha INVOCADA, anillo inline, vigila gate→área).
+- **BAJO (6 curados):** halo gris en las puntas de flecha · desempate determinista del sort del
+  reparto · etiqueta vacía de checks que empiezan con `(` · resize a dimensión 0 · tooltip de
+  sueltos condicionado por tipo · **dirección de `vigila` invertida** (ahora sale del gate — con
+  flechas visibles, "el área vigila al gate" leía mentira). **1 anotado:** `$cobConteo` es
+  hashtable case-insensitive (dos áreas `Docs`/`docs` se fundirían en el treemap — ultra-borde).
+
+Regresión post-curas: `probar-linterna` **58/58**.
+
 ## Pendiente que deja esta corrida (Gemba del cliente, sin código ni terminal)
 
 1. F5 → clic derecho sobre un archivo → *"Jidoka: ligar a capacidad..."* → 2 capacidades +
