@@ -184,6 +184,13 @@ try {
   if ($htmlR -match '"kind":"product"') { Ok "R2: aristas product (area->capacidad) presentes" } else { No "R2: faltan aristas product" }
   $colgR = Get-AristasColgadasCount $htmlR
   if ($colgR -eq 0) { Ok "R2: ninguna arista cuelga de un nodo inexistente (repo real)" } else { No "R2: $colgR arista(s) colgadas en el grafo real (-1 = no parseo)" }
+  # los 3 modos de vista (Foco / Agrupado / Clusters): sin ellos el grafo denso es una marana.
+  foreach ($m in @('foco', 'agrupado', 'clusters')) {
+    if ($htmlR -match ("data-m=""" + $m + """")) { Ok "modo '$m' presente en la barra" } else { No "falta el boton del modo '$m'" }
+  }
+  if ($htmlR -match "setMode\('foco'\)") { Ok "arranca en modo Foco (esqueleto legible, no los N nodos de golpe)" } else { No "deberia arrancar en modo Foco" }
+  if ($htmlR -match "hidden=new Set\(\['capability','check'\]\)") { Ok "las capas ruidosas (capacidad/check) nacen apagadas en la leyenda" } else { No "capability/check deberian nacer ocultas" }
+  if ($htmlR -match 'function visible\(' -and $htmlR -match 'function edgesActive\(') { Ok "la visibilidad depende del modo (visible/edgesActive)" } else { No "faltan visible()/edgesActive()" }
   # el JS embebido debe PARSEAR (evita la pagina en blanco por error de sintaxis). Si no hay node, se salta.
   if ($null -ne (Get-Command node -ErrorAction SilentlyContinue)) {
     $mjs = [regex]::Match($htmlR, '(?s)<script>(.+?)</script>')

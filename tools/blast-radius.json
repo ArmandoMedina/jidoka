@@ -94,6 +94,16 @@
     "rol": "escribano"
   },
   {
+    "nombre": "extension",
+    "desc": "la extension de VS Code (extension/): el editor del gobierno. AUTORA la ley, no la ejecuta (ADR 0044) -- el muro sigue siendo el gate determinista fuera del LLM. JS plano sin build step, Jidoka-only (no se siembra a los hijos)",
+    "fuente": ["extension/*"],
+    "doc_bloquea": [],
+    "doc_avisa": ["CHANGELOG.md"],
+    "revisa": true,
+    "mensaje": "cambiaste la extension de VS Code: registra el cambio en CHANGELOG.md y corre tools/probar-extension.ps1 (el lint del contrato manifiesto<->codigo; sin build step no hay compilador que cace un comando declarado que nadie registra). Si solo corregiste typos o formato, este aviso no es para ti",
+    "rol": "escribano"
+  },
+  {
     "nombre": "raiz",
     "desc": "tierra de nadie: un archivo suelto en la raiz casi siempre tiene un lugar con dueno en otra parte (patron heredado del laboratorio de campo)",
     "fuente": ["*"],

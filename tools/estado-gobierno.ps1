@@ -375,11 +375,18 @@ $tmpl = @'
   :root{--bg:#0f1115;--fg:#e6e8ee;--mut:#9aa3b2;--card:#171a21;--line:#2a2f3a;
         --area:#4c8dff;--gate-on:#31c48d;--gate-off:#6b7280;--conf:#2dd4bf;--desv:#f59e0b;--orphan:#ef4444;--free:#94a3b8;
         --owner:#22d3ee;--cap:#a78bfa;--hook:#fb923c;--check:#f472b6;}
-  @media (prefers-color-scheme:light){:root{--bg:#f6f7f9;--fg:#1b1f27;--mut:#5b6472;--card:#fff;--line:#e2e6ec;}}
+  @media (prefers-color-scheme:light){:root{--bg:#f6f7f9;--fg:#1b1f27;--mut:#5b6472;--card:#fff;--line:#e2e6ec;--btnA:#d7e3fb;}}
+  :root{--btnA:#31405e;}
+  @media (prefers-color-scheme:light){:root{--btnA:#d7e3fb;}}
   *{box-sizing:border-box} html,body{margin:0;height:100%}
   body{background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,Segoe UI,Roboto,sans-serif;display:flex;flex-direction:column}
   header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;gap:20px;align-items:center;flex-wrap:wrap}
   h1{font-size:15px;margin:0;font-weight:650}
+  .modes{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:3px}
+  .modes button{border:0;background:transparent;color:var(--mut);font:600 12.5px/1 system-ui,Segoe UI,sans-serif;padding:7px 12px;border-radius:6px;cursor:pointer}
+  .modes button.on{background:var(--btnA);color:var(--fg)}
+  .modes button:focus-visible{outline:2px solid var(--area);outline-offset:1px}
+  .node.agg circle{stroke:var(--fg);stroke-width:1.6;stroke-dasharray:3 2}
   .metric{display:flex;gap:6px;align-items:baseline}
   .metric b{font-size:26px;line-height:1} .metric.bad b{color:var(--orphan)} .metric.good b{color:var(--gate-on)}
   .metric span{color:var(--mut);font-size:12px}
@@ -402,6 +409,11 @@ $tmpl = @'
 </style></head>
 <body>
 <header>
+  <div class="modes" id="modes">
+    <button data-m="foco" class="on" title="Solo areas y gates; clic en un area despliega su telarana">Foco</button>
+    <button data-m="agrupado" title="Las capas ruidosas colapsan en un grupo; clic para abrirlo">Agrupado</button>
+    <button data-m="clusters" title="Cada area en su propio cumulo">Clusters</button>
+  </div>
   <h1>Linterna del gobierno &mdash; <span id="repo" class="sub"></span></h1>
   <div class="metric" id="mHuerfanos"><b>0</b><span>huerfanos</span></div>
   <div class="metric"><b id="mAreas">0</b><span>areas</span></div>
@@ -410,7 +422,7 @@ $tmpl = @'
   <div class="legend" id="legend"></div>
 </header>
 <div id="wrap"><svg id="svg"></svg><div id="tip"></div></div>
-<footer>Vista de solo lectura, derivada de la ley real (tools/blast-radius.json + docs-gobernados.json). No gatea nada. Arrastra los nodos; pasa el cursor para el porque.</footer>
+<footer><span id="hint"></span> &middot; Vista de solo lectura, derivada de la ley real. No gatea nada. Arrastra los nodos; pasa el cursor para el porque.</footer>
 <script>
 /*__PAYLOAD__*/
 const TIPOS = {
@@ -438,53 +450,119 @@ const mh=document.getElementById('mHuerfanos');
 mh.querySelector('b').textContent=META.huerfanos;
 mh.classList.add(META.huerfanos>0?'bad':'good');
 
-// --- leyenda + filtro por tipo ---
+function esc(t){return (t+'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+const svg=document.getElementById('svg'), wrap=document.getElementById('wrap'), tip=document.getElementById('tip');
+let W=wrap.clientWidth||900, H=wrap.clientHeight||600;
+
+// --- CLUSTER de cada nodo: el area a la que se conecta (o un grupo especial). Se usa
+//     en el modo Foco (que desplegar al clicar un area) y en Clusters (donde gravita). ---
+const cluster=new Map();
+const byId=new Map(DATA.nodes.map(n=>[n.id,n]));
+DATA.nodes.forEach(n=>{ if(n.tipo==='area')cluster.set(n.id,n.id);
+  else if(n.tipo==='orphan')cluster.set(n.id,'__orphans'); else if(n.tipo==='gate')cluster.set(n.id,'__gates'); });
+DATA.edges.forEach(e=>{ const a=byId.get(e.s),b=byId.get(e.t);
+  if(a&&a.tipo==='area'&&b&&!cluster.has(b.id))cluster.set(b.id,a.id);
+  if(b&&b.tipo==='area'&&a&&!cluster.has(a.id))cluster.set(a.id,b.id); });
+DATA.nodes.forEach(n=>{ if(!cluster.has(n.id))cluster.set(n.id,'__otros'); });
+const clusterKeys=[...new Set([...cluster.values()])];
+const cCenter=new Map();
+function layoutClusters(){ const cols=Math.max(1,Math.ceil(Math.sqrt(clusterKeys.length)));
+  const rows=Math.max(1,Math.ceil(clusterKeys.length/cols));
+  clusterKeys.forEach((k,i)=>cCenter.set(k,{x:(i%cols+.5)/cols*W,y:(Math.floor(i/cols)+.5)/rows*H})); }
+
+// --- nodos AGREGADO para el modo Agrupado: las capas numerosas colapsan en uno solo. ---
+const nCaps=DATA.nodes.filter(n=>n.tipo==='capability').length;
+const nOrph=DATA.nodes.filter(n=>n.tipo==='orphan').length;
+const capArea=(DATA.edges.find(e=>e.kind==='product')||{}).s;
+const AGG=[];
+if(nCaps>0)AGG.push({id:'__aggCap',label:nCaps+' capacidades',tipo:'agg',vivo:true,detalle:'Grupo de '+nCaps+' capacidades. Clic para abrir o cerrar.'});
+if(nOrph>0)AGG.push({id:'__aggOrph',label:nOrph+' sin gobernar',tipo:'agg-orphan',vivo:false,detalle:'Grupo de '+nOrph+' huerfanos. Clic para abrir o cerrar.'});
+
+const nodes=DATA.nodes.concat(AGG).map((n,i)=>({...n,x:W/2+Math.cos(i*1.7)*150+(i%9)*7,y:H/2+Math.sin(i*1.7)*150+(i%7)*7,vx:0,vy:0}));
+const idx=new Map(nodes.map((n,i)=>[n.id,i]));
+const baseEdges=DATA.edges.filter(e=>idx.has(e.s)&&idx.has(e.t)).map(e=>({s:idx.get(e.s),t:idx.get(e.t),kind:e.kind}));
+const aggEdges=[];
+if(nCaps>0&&capArea&&idx.has(capArea))aggEdges.push({s:idx.get(capArea),t:idx.get('__aggCap'),kind:'product'});
+// estilo de arista por tipo de relacion (color + punteado): dura=roja solida, blanda=ambar
+// punteada, capacidad=violeta, wikilink=teal, vigila=verde, ci/hook=punteado tenue.
+const EK={bloquea:['var(--orphan)',''],avisa:['var(--desv)','4 3'],product:['var(--cap)','2 3'],
+  wikilink:['var(--conf)',''],vigila:['var(--gate-on)',''],cubre:['var(--area)',''],
+  ci:['var(--check)','1 3'],hook:['var(--hook)','1 3']};
+const adj=new Map(); nodes.forEach(n=>adj.set(n.id,new Set()));
+baseEdges.concat(aggEdges).forEach(e=>{adj.get(nodes[e.s].id).add(nodes[e.t].id);adj.get(nodes[e.t].id).add(nodes[e.s].id);});
+
+// --- estado de vista: el modo domina que se ve; la leyenda filtra capas. ---
+let mode='foco', focusId=null, alpha=1, dragging=null, hoverId=null;
+const expanded=new Set();                      // grupos abiertos en Agrupado
+const hidden=new Set(['capability','check']);  // capas ruidosas apagadas por defecto
+
+function tipoOculto(t){ return hidden.has(t); }
+function visible(n){
+  if(mode==='foco'){
+    if(n.tipo==='area'||n.tipo==='gate')return true;
+    return focusId ? cluster.get(n.id)===focusId : false;
+  }
+  if(mode==='agrupado'){
+    if(n.tipo==='capability')return expanded.has('__aggCap');
+    if(n.tipo==='orphan')return expanded.has('__aggOrph');
+    if(n.tipo==='agg')return nCaps>0&&!expanded.has('__aggCap');
+    if(n.tipo==='agg-orphan')return nOrph>0&&!expanded.has('__aggOrph');
+    return !tipoOculto(n.tipo);
+  }
+  if(n.tipo==='agg'||n.tipo==='agg-orphan')return false;   // clusters: sin agregados
+  return !tipoOculto(n.tipo);
+}
+function edgesActive(){
+  const es = mode==='agrupado' ? baseEdges.concat(aggEdges) : baseEdges;
+  return es.filter(e=>visible(nodes[e.s])&&visible(nodes[e.t]));
+}
+
+// --- leyenda (filtra capas; en Foco manda el modo, asi que se atenua) ---
 const legend=document.getElementById('legend');
-const hidden=new Set();
 const legendItems=[['area','area','var(--area)'],['gate','gate','var(--gate-on)'],
   ['doc-owner','doc-dueno','var(--owner)'],['doc-conforme','doc ok','var(--conf)'],['doc-desviado','doc desviado','var(--desv)'],
   ['capability','capacidad','var(--cap)'],['hook','hook','var(--hook)'],['check','check CI','var(--check)'],['orphan','huerfano','var(--orphan)']];
 legendItems.forEach(([tp,lbl,col])=>{
-  const el=document.createElement('span');el.className='lg';el.dataset.tp=tp;
+  const el=document.createElement('span');el.className='lg'+(hidden.has(tp)?' off':'');el.dataset.tp=tp;
   el.innerHTML=`<span class="dot" style="background:${col}"></span>${lbl}`;
-  el.onclick=()=>{el.classList.toggle('off');if(hidden.has(tp))hidden.delete(tp);else hidden.add(tp);draw();};
+  el.onclick=()=>{el.classList.toggle('off');if(hidden.has(tp))hidden.delete(tp);else hidden.add(tp);alpha=Math.max(alpha,.4);};
   legend.appendChild(el);
 });
-function tipoOculto(t){ if(t.startsWith('doc-'))return hidden.has(t); return hidden.has(t); }
 
-// --- layout force-directed (vanilla, sin dependencias) ---
-const svg=document.getElementById('svg'), wrap=document.getElementById('wrap'), tip=document.getElementById('tip');
-let W=wrap.clientWidth, H=wrap.clientHeight;
-const nodes=DATA.nodes.map((n,i)=>({...n,x:W/2+Math.cos(i)*140+(i%7)*9,y:H/2+Math.sin(i)*140+(i%5)*9,vx:0,vy:0}));
-const idx=new Map(nodes.map((n,i)=>[n.id,i]));
-const edges=DATA.edges.filter(e=>idx.has(e.s)&&idx.has(e.t)).map(e=>({s:idx.get(e.s),t:idx.get(e.t),kind:e.kind}));
-// estilo de arista por tipo de relacion (color + punteado): dura=roja solida, blanda=ambar
-// punteada, capacidad=violeta, wikilink=teal, vigila=verde, ci/hook=gris.
-const EK={bloquea:['var(--orphan)',''],avisa:['var(--desv)','4 3'],product:['var(--cap)','2 3'],
-  wikilink:['var(--conf)',''],vigila:['var(--gate-on)',''],cubre:['var(--area)',''],
-  ci:['var(--check)','1 3'],hook:['var(--hook)','1 3']};
-const adj=new Map(); nodes.forEach((_,i)=>adj.set(i,new Set()));
-edges.forEach(e=>{adj.get(e.s).add(e.t);adj.get(e.t).add(e.s);});
-let alpha=1, dragging=null, hoverId=null;
+// --- los 3 modos ---
+const modesEl=document.getElementById('modes'), hintEl=document.getElementById('hint');
+const HINTS={foco:'Clic en un AREA para desplegar su telarana; clic en el vacio para recoger.',
+  agrupado:'Las capas numerosas estan colapsadas: clic en un grupo punteado para abrirlo. La leyenda prende y apaga capas.',
+  clusters:'Cada area gravita en su propio cumulo: menos marana. La leyenda filtra capas.'};
+function setMode(m){
+  mode=m; focusId=null; expanded.clear();
+  [...modesEl.children].forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  if(hintEl)hintEl.textContent=HINTS[m];
+  legend.style.opacity = m==='foco'?.35:1; legend.style.pointerEvents = m==='foco'?'none':'auto';
+  if(m==='clusters')layoutClusters();
+  alpha=1;
+}
+modesEl.addEventListener('click',ev=>{ if(ev.target.dataset&&ev.target.dataset.m)setMode(ev.target.dataset.m); });
 
 function step(){
   if(alpha<0.005 && !dragging) return;
-  const k=alpha;
-  for(let i=0;i<nodes.length;i++){
-    const a=nodes[i];
-    // repulsion
-    for(let j=i+1;j<nodes.length;j++){
-      const b=nodes[j]; let dx=a.x-b.x, dy=a.y-b.y; let d2=dx*dx+dy*dy||1; let d=Math.sqrt(d2);
+  const vis=nodes.filter(visible), k=alpha;
+  for(let i=0;i<vis.length;i++){
+    const a=vis[i];
+    for(let j=i+1;j<vis.length;j++){
+      const b=vis[j]; let dx=a.x-b.x, dy=a.y-b.y; let d2=dx*dx+dy*dy||1; let d=Math.sqrt(d2);
       const rep=2600/d2; const fx=dx/d*rep, fy=dy/d*rep;
       a.vx+=fx*k; a.vy+=fy*k; b.vx-=fx*k; b.vy-=fy*k;
     }
-    // gravedad al centro
-    a.vx+=(W/2-a.x)*0.002*k; a.vy+=(H/2-a.y)*0.002*k;
+    // gravedad: al centro, o al centro de SU cumulo en el modo Clusters
+    let gx=W/2, gy=H/2, gk=0.002;
+    if(mode==='clusters'){ const c=cCenter.get(cluster.get(a.id)); if(c){gx=c.x;gy=c.y;gk=0.02;} }
+    a.vx+=(gx-a.x)*gk*k; a.vy+=(gy-a.y)*gk*k;
   }
-  // resortes en aristas
-  edges.forEach(e=>{
+  const rest = mode==='clusters'?55:90;
+  edgesActive().forEach(e=>{
     const a=nodes[e.s], b=nodes[e.t]; let dx=b.x-a.x, dy=b.y-a.y; let d=Math.sqrt(dx*dx+dy*dy)||1;
-    const f=(d-90)*0.02*k; const fx=dx/d*f, fy=dy/d*f;
+    const f=(d-rest)*0.02*k; const fx=dx/d*f, fy=dy/d*f;
     a.vx+=fx; a.vy+=fy; b.vx-=fx; b.vy-=fy;
   });
   nodes.forEach(n=>{ if(n===dragging)return; n.vx*=0.82; n.vy*=0.82; n.x+=n.vx; n.y+=n.vy;
@@ -493,28 +571,27 @@ function step(){
 }
 function draw(){
   let s='';
-  edges.forEach(e=>{
+  edgesActive().forEach(e=>{
     const a=nodes[e.s], b=nodes[e.t];
     const dimmed = (hoverId!==null && a.id!==hoverId && b.id!==hoverId) ? ' dim':'';
-    if(tipoOculto(a.tipo)||tipoOculto(b.tipo))return;
     const ek=EK[e.kind]||['var(--line)',''];
     const dash=ek[1]?`;stroke-dasharray:${ek[1]}`:'';
     s+=`<line class="edge${dimmed}" style="stroke:${ek[0]}${dash}" x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}"/>`;
   });
   nodes.forEach(n=>{
-    if(tipoOculto(n.tipo))return;
+    if(!visible(n))return;
     const r=radiusOf(n), col=colorOf(n);
-    const neigh = hoverId!==null && (n.id===hoverId || (adj.get(idx.get(hoverId))||new Set()).has(idx.get(n.id)));
+    const neigh = hoverId!==null && (n.id===hoverId || (adj.get(hoverId)||new Set()).has(n.id));
     const dimmed = (hoverId!==null && !neigh) ? ' dim':'';
-    const cls='node'+(n.tipo==='orphan'?' orphan':'')+dimmed;
+    const cls='node'+(n.tipo==='orphan'?' orphan':'')+((n.tipo==='agg'||n.tipo==='agg-orphan')?' agg':'')+dimmed;
     s+=`<g class="${cls}" data-id="${encodeURIComponent(n.id)}">`+
        `<circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${r}" fill="${col}"/>`+
        `<text x="${(n.x+r+3).toFixed(1)}" y="${(n.y+3).toFixed(1)}">${esc(n.label)}</text></g>`;
   });
   svg.innerHTML=s;
 }
-function esc(t){return (t+'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
 function loop(){ step(); draw(); requestAnimationFrame(loop); }
+setMode('foco');   // arranca limpio: solo areas y gates (el esqueleto legible)
 loop();
 
 // --- interaccion: drag + hover ---
@@ -533,7 +610,17 @@ window.addEventListener('mousemove',ev=>{
   } else { hoverId=null; tip.style.opacity=0; }
 });
 window.addEventListener('mouseup',()=>{dragging=null;});
-window.addEventListener('resize',()=>{W=wrap.clientWidth;H=wrap.clientHeight;alpha=Math.max(alpha,.3);});
+// clic: en Foco despliega/recoge el area; en Agrupado abre/cierra un grupo colapsado.
+svg.addEventListener('click',ev=>{
+  const id=nodeAt(ev);
+  if(!id){ if(mode==='foco'&&focusId){focusId=null;alpha=1;} return; }
+  const n=nodes[idx.get(id)];
+  if(mode==='foco'&&n.tipo==='area'){ focusId=(focusId===id?null:id); alpha=1; }
+  else if(mode==='agrupado'&&(n.tipo==='agg'||n.tipo==='agg-orphan')){
+    if(expanded.has(id))expanded.delete(id); else expanded.add(id); alpha=1;
+  }
+});
+window.addEventListener('resize',()=>{W=wrap.clientWidth;H=wrap.clientHeight;if(mode==='clusters')layoutClusters();alpha=Math.max(alpha,.4);});
 </script>
 </body></html>
 '@
