@@ -6,7 +6,27 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-19 — La linterna del gobierno · `v1.24.0` — 🔨 EN RAMA, sin mergear)
+## Dónde estamos (2026-07-19 — El editor del gobierno · sprint `v1.25.0` — 🔨 R1 EN PR, R2–R4 SIN CONSTRUIR)
+
+**Sprint "El editor del gobierno" (la extensión de VS Code) — plan aprobado en plan mode, R1 construido y en PR.** Rama `sprint/linterna-gobierno-20260719` (arrastra también el `v1.24.0` de la linterna, ver sección siguiente). Contrato: `docs/sprints/sprint-editor-gobierno-plan.md`.
+
+**El QUÉ aprobado:** *el usuario declara, desde una interfaz visual, qué código sostiene qué capacidad — y con qué fuerza y en qué dirección se vigila esa relación — sin editar JSON a mano.* Nace de dos hallazgos al usar la linterna sobre entisoft: el grafo se satura (132 objetos) y **el gobierno es demasiado grueso** (el área `codigo` avisa sobre las **89** capacidades sin decir cuál). La línea doctrinal: **la extensión AUTORA, el gate EJECUTA** (ADR 0002 intacto; la UI nunca es el muro).
+
+**R1 — CONSTRUIDO Y VERDE (commit en la rama):**
+1. **Los 3 modos** en `tools/estado-gobierno.ps1`: **Foco** (default; solo áreas+gates, clic en un área despliega su telaraña), **Agrupado** (las capas numerosas colapsan en un nodo; clic para abrir), **Clusters** (cada área en su cúmulo). Las capas ruidosas (`capability`, `check`) nacen apagadas.
+2. **`extension/`** — extensión de VS Code en **JS plano sin build step** (molde del atlas: cero deps de runtime), comando **"Jidoka: ver el gobierno"** que corre el `.ps1` y muestra su HTML en un webview. **Jidoka-only** (no se siembra). `.vscode/launch.json` para que F5 la arranque.
+3. **`tools/probar-extension.ps1`** — el lint que hace de compilador barato (sin build no hay quien cace un comando declarado que nadie registra) y que vuelve **invariante** la decisión "no se siembra": si alguien mete `extension/` al manifiesto, el test lo caza.
+4. **Área `extension` en la ley** — la propia linterna la marcó huérfana al crearla (dogfooding) → gobernada → cero huérfanos.
+
+**Evidencia (verde, esta máquina 2026-07-19):** `probar-linterna` 42/42 · `probar-extension` 9/9 · `probar-hooks` 32/32 · `probar-gate` 14/14 · `probar-auditor` 7/7 · suite completa del preflight. Dos mordidas reales en vivo: el **poka-yoke de `probar-publicar`** cazó que `probar-extension` faltaba en el preflight (ROJO→VERDE), y **la linterna se cazó a sí misma** con `extension/` huérfano.
+
+**⚠️ PENDIENTE CRÍTICO — el Gemba de R1 (owner: cliente):** **nadie ha visto correr la extensión.** El JS parsea, el contrato manifiesto↔código lintea y la invocación a PowerShell está probada, pero **que VS Code la cargue y el webview pinte no está verificado**. R1 existe como el **go/no-go del stack**: si F5 falla, R2–R4 estarían sobre arena. **Cómo probarlo:** abrir `C:\Repositorios\jidoka` en VS Code → **F5** → en la ventana nueva, Ctrl+Shift+P → "Jidoka: ver el gobierno". Para el caso real, abrir ahí `C:\Repositorios\entisoft-rescate` y repetir.
+
+**R2–R4 NO construidos a propósito** (esperan el veredicto de R1): R2 = ledger `tools/ligas.json` + `estado-ligas.ps1` + gate leyendo **desde la base** (ADR 0003); R3 = la extensión **autora** las ligas (clic derecho → ligar a capacidad, con dirección y fuerza); R4 = `.vsix`, ADR 0044, CHANGELOG y SSOT a `1.25.0`. **Por eso este PR no bumpea versión ni cierra CHANGELOG** — eso es R4.
+
+---
+
+## Dónde estuvimos (2026-07-19 — La linterna del gobierno · `v1.24.0` — ✅ COMMITEADO, en el mismo PR)
 
 **Sprint "La linterna del gobierno" construido en la rama `sprint/linterna-gobierno-20260719` (ADR 0043, `v1.24.0`, sin commitear/mergear al cierre de esta nota).** Nace de `/jidoka:descubre` + plan mode con el cliente: entra a proyectos avanzados, mete Jidoka, y su Claude Code se pone necio con "documentos sin trackear/blast-radius"; el parche era pedirle al agente que lo arreglara, quedando **juez y parte** ("no sé qué hace, horas revisando, él me explica"). La linterna le devuelve el juicio: **ver la máquina con sus ojos, no con la narración del agente.**
 
