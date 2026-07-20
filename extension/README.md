@@ -9,8 +9,8 @@
 | Comando (Ctrl+Shift+P o clic derecho) | Qué hace |
 |---|---|
 | **Jidoka: ver el gobierno** | Corre `tools/estado-gobierno.ps1` y pinta el grafo (áreas, gates, docs-dueño, capacidades, ligas, huérfanos en rojo) en un panel. Modos Foco / Agrupado / Clusters. |
-| **Jidoka: ligar a capacidad...** | Clic derecho sobre archivo(s) o carpeta del explorador → eliges capacidades (multi), dirección (`codigo-a-capacidad` / `capacidad-a-codigo` / `ambas`) y fuerza (`avisa` / `bloquea`) → escribe `tools/ligas.json`. El diff aparece en *Source Control*; el grafo se repinta. |
-| **Jidoka: quitar liga...** | Saca la ruta seleccionada del ledger; una liga que queda sin código se elimina entera. |
+| **Jidoka: ligar código a capacidad...** | Clic derecho sobre archivo(s) o carpeta del explorador → eliges capacidades (multi), dirección (`codigo-a-capacidad` / `capacidad-a-codigo` / `ambas`) y fuerza (`avisa` / `bloquea`) → escribe `tools/ligas.json`. El diff aparece en *Source Control*; el grafo se repinta. El nombre promete exactamente lo que hace: la relación código↔capacidad (el blast-radius área↔doc y los wikilinks capacidad↔capacidad son otras relaciones, con su propia mecánica). |
+| **Jidoka: quitar liga código-capacidad...** | Saca la ruta seleccionada del ledger; una liga que queda sin código se elimina entera. |
 
 Requiere que el repo abierto tenga el motor de Jidoka (`tools/estado-gobierno.ps1`, `v1.24.0+`).
 

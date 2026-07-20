@@ -32,12 +32,12 @@
       },
       {
         "command": "jidoka.ligarCapacidad",
-        "title": "Jidoka: ligar a capacidad...",
+        "title": "Jidoka: ligar codigo a capacidad...",
         "category": "Jidoka"
       },
       {
         "command": "jidoka.quitarLiga",
-        "title": "Jidoka: quitar liga...",
+        "title": "Jidoka: quitar liga codigo-capacidad...",
         "category": "Jidoka"
       }
     ],

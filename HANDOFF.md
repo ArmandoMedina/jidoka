@@ -6,25 +6,18 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-20 — El editor del gobierno, parte 2 · `v1.25.0` — 🔨 R2–R4 CONSTRUIDOS, EN RAMA)
+## Dónde estamos (2026-07-20 — El editor del gobierno, parte 2 · **`v1.25.0` CERRADO Y LIBERADO** · PR #115)
 
-**Sprint "El editor del gobierno, parte 2" (R2–R4) CONSTRUIDO en la rama `sprint/editor-gobierno-2-20260720`** (plan aprobado en plan mode 2026-07-20: `docs/sprints/sprint-editor-gobierno-2-plan.md`; ADR 0044). Las 6 rebanadas internas (C1–C6) entregadas, cada una verde y commiteada:
+**Sprint "El editor del gobierno, parte 2" (R2–R4) TERMINADO, mergeado y liberado** con la orden nombrada del cliente (*"pr, marge, versión y poda autorizado"*). Récord completo: [`docs/sprints/sprint-editor-gobierno-2-entrega.md`](docs/sprints/sprint-editor-gobierno-2-entrega.md) (con el cuadro de cierre). En una línea: **el gate granular código↔capacidad** (`ligas.json` + `estado-ligas.ps1`, CI desde la base, nombra la capacidad exacta) + **la extensión que lo autora** (clic derecho → "ligar código a capacidad...") + **la linterna con 4 modos legibles** (flechas, anillo rojo del bloqueo duro, tabla del gobierno, treemap Reparto — rework de **2 Gembas del cliente**: 8 hallazgos de uso real + nomenclatura, todos curados en la rama antes del merge) + `.vsix` + ADR 0044. `v1.24.0` quedó **sin tag propio a propósito** (subsumida en `v1.25.0`).
 
-1. **R2 — el gate:** `tools/ligas.json` (ledger, **dato de instancia, NO se siembra**) + `tools/estado-ligas.ps1` (co-ocurrencia por dirección/fuerza; `[BLOQUEA]` siempre se imprime **nombrando la capacidad exacta**, solo `-Estricto` mata; rotas avisan y se excluyen; falla cerrado) + `probar-ligas.ps1` (26 casos). Cableado: pre-push, preflight, smoke, y step de CI leyendo evaluador **y ledger desde la base** (ADR 0003).
-2. **R2c — la linterna pinta las ligas:** nodo `liga:<id>`, aristas `liga-bloquea`/`liga-avisa`, rotas en rojo, ancla al cúmulo del área (`probar-linterna` 49/49).
-3. **R3 — la extensión autora:** *"Jidoka: ligar a capacidad..."* / *"quitar liga..."* (clic derecho, multi-selección, QuickPicks capacidades→dirección→fuerza) → `extension/ligas.js` escribe el ledger (UTF-8 sin BOM, contrato JS↔PS probado) y el grafo se repinta (`probar-extension` 16/16, `ligas.test.js` 9/9 con `node --test`).
-4. **R4 — empaquetado y gobierno:** `.vsix` empaquetado real (`jidoka-gobierno-0.1.0.vsix`, 8 archivos; gitignoreado; guía `extension/README.md`), **ADR 0044** + índice, CHANGELOG cerrado y SSOT a **`1.25.0`**, `andon/README.md` con la fila de ligas, capacidad `AND-1` extendida.
+**Evidencia:** `qa_runs/editor-r2r4-20260720/LOG.md` (committeada) · suite completa 14/14 + auditar · `probar-linterna` 58/58 · 2 code-reviews adversariales (el 2º cazó el anillo invisible que la suite verde no vio) · CI verde en cada push · la liga dogfood mordió 2× nombrando AND-1.
 
-**La mordida dogfood (la métrica del QUÉ, en vivo):** la liga `linterna-extension` declarada en C2 mordió en C6 sobre el rango real del sprint — *"cambiaste [extension/*] sin tocar su capacidad: product/capacidades/AND-1-muro-andon.md"*. **Nombra la exacta, no "revisa las 89".** Evidencia: `qa_runs/editor-r2r4-20260720/LOG.md` (committeada).
-
-**⚠️ PENDIENTE — el Gemba de R3 (owner: cliente, sin código ni terminal):** nadie ha visto los QuickPicks en pantalla (mismo estado que R1 antes del F5). Cómo: F5 → clic derecho en un archivo → *"Jidoka: ligar a capacidad..."* → elegir, ver el diff en *Source Control* y la liga en el grafo; luego cambiar un archivo ligado `bloquea` sin su capacidad y ver el push detenido nombrándola; y *"quitar liga..."*. Los pasos exactos en el LOG de la corrida.
-
-**Gemba del cliente sobre la linterna (2026-07-20) — 7 hallazgos, CURADOS COMO REWORK en esta misma rama** (corrección de rumbo del cliente: *"es Gemba de la rama que ni se ha mergeado"* — los issues #116–#118 que el agente abrió prematuramente se **cerraron** como absorbidos; el tracker es para cosecha post-release, no para masa en el horno): flechas + grosor por fuerza (1) · anillo rojo del `doc_bloquea` en Foco (3) · etiquetas legibles (4) · fit-to-viewport (5) · sueltos no-huérfanos anotados (6) · Clusters separado de verdad (7) · la tabla del gobierno (2/b) · modo **Reparto** treemap (c). `probar-linterna` 56/56. **PENDIENTE: el re-Gemba del cliente** — volver a abrir la linterna (los 4 modos) y dar el "está todo bien" que él mismo puso como condición del merge.
-
-**⚠️ DECISIONES PENDIENTES DEL CLIENTE:**
-1. **Tag + GitHub release de `v1.24.0`:** mergeado en `main` desde el PR #114, sin taguear — la orden del cierre nombró PR/merge/poda, no el release. (Alternativa: si este sprint se mergea pronto, cortar directo `v1.25.0` y saltar el tag intermedio — decide el cliente.)
-2. **Merge del PR #115 de este sprint** (requiere orden nombrada, como siempre).
-3. **¿Estrechar el área `raiz`?** (planteada por el cliente en su Gemba): con `fuente: "*"` como cajón, "cero huérfanos" mide *"nada se escapó del cajón"*, no *"todo tiene un lugar pensado"* (por eso jidoka marca 0 y entisoft 15). Estrecharla vuelve exigente el contador — el treemap (#118) es el instrumento para decidirlo con ojos. Decisión de ley: solo el cliente.
+**Pendientes (nada bloquea al agente):**
+1. **Bajar `v1.25.0` a los labs** con `-Actualizar` — entisoft gana `estado-ligas.ps1` + la linterna nueva (la extensión es Jidoka-only; la mecánica sí baja). Ahí el cliente podría por fin correr la linterna sobre entisoft desde VS Code.
+2. **Decisión del cliente — ¿estrechar el área `raiz`?** Con `fuente: "*"` como cajón, "cero huérfanos" mide *"nada se escapó"*, no *"todo tiene lugar pensado"*. El **modo Reparto** (treemap) es el instrumento para decidirlo con ojos. Decisión de ley: solo el cliente.
+3. **Opción (b) de nomenclatura** ("ligar" genérico de las 3 relaciones: blast-radius, wikilinks, ligas) — en ROADMAP, regla 2-3; la (a) ya se aplicó (comando estrechado).
+4. **Gemba visual de entisoft** (`gobierno-entisoft.html`, 15 huérfanos) — sigue esperando ojos del cliente; mejor aún tras la bajada del punto 1.
+5. Deuda anotada de reviews: `Out-File -Encoding ascii` en steps desde-la-base · conteo del reparto case-insensitive (B2).
 
 ---
 
