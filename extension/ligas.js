@@ -55,20 +55,20 @@ function mismaLista(a, b) {
 }
 
 /**
- * Inserta o funde una liga. Si ya existe una con el MISMO código + dirección +
- * fuerza, se le unen las capacidades (no se duplica); si no, se crea con id
- * derivado (o el que venga), sufijado -2/-3 si colisiona. Devuelve la liga escrita.
+ * Inserta o actualiza una liga. Si ya existe una con el MISMO código + dirección +
+ * fuerza, sus capacidades se REEMPLAZAN por las dadas — la selección del QuickPick
+ * es el estado final, así desmarcar una capacidad de verdad la quita (hallazgo de
+ * code-review: unir en vez de reemplazar hacía mentir a la UI). Si no existe, se
+ * crea con id derivado (o el que venga), sufijado -2/-3 si colisiona.
  */
 function upsert(ledgerPath, liga) {
   validar(liga);
   const obj = leer(ledgerPath);
   const existente = obj.ligas.find(
-    (l) => mismaLista(l.codigo, liga.codigo) && l.direccion === liga.direccion && l.fuerza === liga.fuerza
+    (l) => Array.isArray(l.codigo) && mismaLista(l.codigo, liga.codigo) && l.direccion === liga.direccion && l.fuerza === liga.fuerza
   );
   if (existente) {
-    for (const c of liga.capacidades) {
-      if (!existente.capacidades.includes(c)) existente.capacidades.push(c);
-    }
+    existente.capacidades = [...liga.capacidades];
     escribir(ledgerPath, obj);
     return existente;
   }
@@ -93,18 +93,21 @@ function upsert(ledgerPath, liga) {
 
 /**
  * Quita una ruta del 'codigo' de toda liga que la liste literal; una liga que se
- * queda sin código se elimina entera. Devuelve cuántas ligas se tocaron.
+ * queda sin código se elimina entera. Devuelve cuántas ligas se tocaron. Solo
+ * escribe si tocó algo (no crea un ledger fantasma ni re-formatea uno ajeno) y
+ * tolera ligas malformadas sin 'codigo' (editadas a mano: las deja en paz — el
+ * evaluador PS es quien las acusa con su mensaje claro).
  */
 function quitar(ledgerPath, ruta) {
   const obj = leer(ledgerPath);
   let tocadas = 0;
   obj.ligas = obj.ligas.filter((l) => {
-    if (!l.codigo.includes(ruta)) return true;
+    if (!Array.isArray(l.codigo) || !l.codigo.includes(ruta)) return true;
     l.codigo = l.codigo.filter((c) => c !== ruta);
     tocadas++;
     return l.codigo.length > 0;
   });
-  escribir(ledgerPath, obj);
+  if (tocadas > 0) escribir(ledgerPath, obj);
   return tocadas;
 }
 

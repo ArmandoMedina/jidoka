@@ -66,7 +66,9 @@ function Match-Any($list, $pattern) {
 Write-Host "== Estado de las ligas (codigo<->capacidad; ledger tools/ligas.json) =="
 
 # -Cambiados acepta lista separada por comas (invocacion via powershell -File pasa
-# los args como strings planos; mismo contrato documentado que verificar.ps1).
+# los args como strings planos). Contrato PROPIO de este script (verificar.ps1 no
+# splitea); limitacion conocida: una ruta legitima con coma se parte -- solo afecta
+# la via de inyeccion (tests/CLI), el diff de git nunca pasa por aqui.
 $Cambiados = @($Cambiados | ForEach-Object { $_ -split ',' } | Where-Object { $_ })
 
 # El ledger por defecto vive en el REPO medido (-Repo), no junto al script: en CI

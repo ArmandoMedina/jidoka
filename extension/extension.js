@@ -115,9 +115,15 @@ async function refrescarGobierno() {
   } catch (e) { /* la vista vieja queda; verGobierno reporta el error real */ }
 }
 
-/** Ruta relativa POSIX contra la raiz; una carpeta se guarda como glob 'ruta/*'. */
+/**
+ * Ruta relativa POSIX contra la raiz; una carpeta se guarda como glob 'ruta/*'.
+ * Devuelve null si el archivo vive FUERA del workspace ('..' u otra unidad):
+ * una liga con esa ruta jamas casaria git ls-files -- naceria ROTA en silencio
+ * (hallazgo de code-review; pasa en workspaces multi-root).
+ */
 function rutaRelativa(raiz, fsPath) {
   let rel = path.relative(raiz, fsPath).split(path.sep).join('/');
+  if (rel === '' || rel.startsWith('..') || path.isAbsolute(rel) || rel.includes(':')) return null;
   try { if (fs.statSync(fsPath).isDirectory()) rel = rel + '/*'; } catch (e) { /* si no existe, va tal cual */ }
   return rel;
 }
@@ -159,7 +165,11 @@ async function ligarCapacidad(uri, uris) {
     vscode.window.showErrorMessage('Jidoka: selecciona un archivo en el explorador (o abre uno en el editor).');
     return;
   }
-  const codigo = sel.map((u) => rutaRelativa(raiz, u.fsPath));
+  const codigo = sel.map((u) => rutaRelativa(raiz, u.fsPath)).filter((r) => r !== null);
+  if (codigo.length === 0) {
+    vscode.window.showErrorMessage('Jidoka: la seleccion vive fuera de la carpeta del repo — una liga asi naceria ROTA (el gate mide rutas del repo).');
+    return;
+  }
   const caps = listarCapacidades(raiz);
   if (caps.length === 0) {
     vscode.window.showErrorMessage('Jidoka: no hay product/capacidades/*.md en este repo — no hay a que ligar.');
@@ -169,7 +179,9 @@ async function ligarCapacidad(uri, uris) {
   const previas = new Set();
   try {
     for (const l of ligas.leer(ledgerPath).ligas) {
-      if (l.codigo.some((c) => codigo.includes(c))) l.capacidades.forEach((c) => previas.add(c));
+      if (Array.isArray(l.codigo) && Array.isArray(l.capacidades) && l.codigo.some((c) => codigo.includes(c))) {
+        l.capacidades.forEach((c) => previas.add(c));
+      }
     }
   } catch (e) { /* ledger ilegible: upsert lo reportara */ }
 
@@ -229,7 +241,10 @@ async function quitarLiga(uri, uris) {
   const ledgerPath = path.join(raiz, 'tools', 'ligas.json');
   try {
     let tocadas = 0;
-    for (const u of sel) tocadas += ligas.quitar(ledgerPath, rutaRelativa(raiz, u.fsPath));
+    for (const u of sel) {
+      const ruta = rutaRelativa(raiz, u.fsPath);
+      if (ruta !== null) tocadas += ligas.quitar(ledgerPath, ruta);
+    }
     if (tocadas > 0) {
       vscode.window.setStatusBarMessage(`Jidoka: ${tocadas} liga(s) actualizadas en tools/ligas.json`, 6000);
       refrescarGobierno();

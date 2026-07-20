@@ -120,6 +120,10 @@ try {
   $r = Corre $fix @('-Ledger', $ambasPath, '-Cambiados', 'servidor/pagos.js')
   $r2 = Corre $fix @('-Ledger', $ambasPath, '-Cambiados', 'product/capacidades/PAGO-1.md')
   if ($r.out -match '\[AVISO\] liga ''dual''' -and $r2.out -match '\[AVISO\] liga ''dual''') { Ok "'ambas': viola en las dos direcciones por separado" } else { No "'ambas' deberia violar en cada direccion" }
+  # ...y con AMBOS lados tocados NO viola (caza una implementacion sobre-ansiosa que
+  # reclame cuando cualquier lado se toca sin exigir la ausencia del otro; hallazgo de review).
+  $r3 = Corre $fix @('-Ledger', $ambasPath, '-Cambiados', 'servidor/pagos.js,product/capacidades/PAGO-1.md')
+  if ($r3.code -eq 0 -and $r3.out -notmatch '\[AVISO\]') { Ok "'ambas' con codigo Y capacidad tocados: silencio verde (co-ocurrencia satisfecha)" } else { No "'ambas' ambos-tocados: esperaba 0 sin aviso, fue $($r3.code)" }
 
   # 8: cambio que no casa ninguna liga -> silencio verde.
   $r = Corre $fix @('-Ledger', $ledgerPath, '-Cambiados', 'suelto.ps1', '-Estricto')

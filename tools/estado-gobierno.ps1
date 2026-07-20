@@ -305,8 +305,13 @@ if (Test-Path -LiteralPath $ligasPath) {
   $ligasObj = $null
   try { $ligasObj = [System.IO.File]::ReadAllText((Resolve-Path -LiteralPath $ligasPath).Path) | ConvertFrom-Json } catch {}
   if ($ligasObj -and $ligasObj.PSObject.Properties['ligas']) {
+    $ligaIdx = 0
     foreach ($lg in @($ligasObj.ligas)) {
-      if (-not $lg.id -or -not $lg.codigo -or -not $lg.capacidades) { continue }
+      $ligaIdx++
+      if (-not $lg.codigo -or -not $lg.capacidades) { continue }
+      # una liga sin id el gate SI la evalua ('(sin id)'): se pinta con id sintetico
+      # en vez de omitirse (hallazgo de review: la mentira no se omite).
+      $idLiga = if ($lg.id) { $lg.id } else { "sin-id-$ligaIdx" }
       $rota = $false
       foreach ($pat in @($lg.codigo)) {
         $hit = $false
@@ -321,25 +326,25 @@ if (Test-Path -LiteralPath $ligasPath) {
       $tipoLiga = if ($rota) { 'liga-rota' } else { 'liga' }
       $det = "Liga declarada (la autora el cliente; el gate estado-ligas.ps1 la hace cumplir). Si cambia [$(@($lg.codigo) -join ', ')] sin tocar [$(@($lg.capacidades) -join ', ')] (direccion: $($lg.direccion)), el gate $($lg.fuerza)."
       if ($rota) { $det = "LIGA ROTA: apunta a codigo o capacidad que ya no existe en el repo; el gate la avisa y la excluye de la evaluacion. " + $det }
-      Add-NodoUnico "liga:$($lg.id)" $lg.id $tipoLiga (-not $rota) $det
+      Add-NodoUnico "liga:$idLiga" $idLiga $tipoLiga (-not $rota) $det
       $kindCap = "liga-$($lg.fuerza)"
       foreach ($capPat in @($lg.capacidades)) {
         $resolvio = $false
         foreach ($c in $caps) {
           if (Test-Pattern $c.path $capPat) {
-            $aristas.Add([pscustomobject]@{ s = "liga:$($lg.id)"; t = "cap:$($c.file)"; kind = $kindCap })
+            $aristas.Add([pscustomobject]@{ s = "liga:$idLiga"; t = "cap:$($c.file)"; kind = $kindCap })
             $resolvio = $true
           }
         }
         if (-not $resolvio) {
           Add-NodoUnico "capglob:$capPat" $capPat 'capability' $true "Capacidad apuntada por una liga pero inexistente en product/capacidades (liga rota)."
-          $aristas.Add([pscustomobject]@{ s = "liga:$($lg.id)"; t = "capglob:$capPat"; kind = $kindCap })
+          $aristas.Add([pscustomobject]@{ s = "liga:$idLiga"; t = "capglob:$capPat"; kind = $kindCap })
         }
       }
       foreach ($pat in @($lg.codigo)) {
         $cov = Get-Cobertura $pat
         if ($cov -and $cov -like 'area:*') {
-          $aristas.Add([pscustomobject]@{ s = $cov; t = "liga:$($lg.id)"; kind = 'liga' })
+          $aristas.Add([pscustomobject]@{ s = $cov; t = "liga:$idLiga"; kind = 'liga' })
           break
         }
       }

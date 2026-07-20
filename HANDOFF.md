@@ -6,11 +6,22 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-20 — El editor del gobierno · sprint `v1.25.0` — ✅ R1 MERGEADO CON GEMBA **GO** · 🔨 R2–R4 SIGUIENTES)
+## Dónde estamos (2026-07-20 — El editor del gobierno, parte 2 · `v1.25.0` — 🔨 R2–R4 CONSTRUIDOS, EN RAMA)
 
-**El PR #114 (linterna `v1.24.0` + R1 del editor) está MERGEADO a `main`** con la orden nombrada del cliente (*"pr, marge y poda autorizado"*, 2026-07-20); la rama `sprint/linterna-gobierno-20260719` fue podada. **El Gemba de R1 corrió y salió GO:** el cliente pulsó F5, el Extension Development Host abrió con el repo cargado (ajuste de sesión: `launch.json` ahora pasa `${workspaceFolder}` para que abra solo), corrió *"Jidoka: ver el gobierno"* y siguió la conversación con el grafo enfrente. Evidencia: `qa_runs/editor-r1-gemba-20260720/LOG.md` (committeada) + cuadro en `docs/sprints/cierre-20260720.md`. **El stack VS Code quedó demostrado — R2 (ledger `tools/ligas.json` + gate) está desbloqueado**; contrato: `docs/sprints/sprint-editor-gobierno-plan.md`.
+**Sprint "El editor del gobierno, parte 2" (R2–R4) CONSTRUIDO en la rama `sprint/editor-gobierno-2-20260720`** (plan aprobado en plan mode 2026-07-20: `docs/sprints/sprint-editor-gobierno-2-plan.md`; ADR 0044). Las 6 rebanadas internas (C1–C6) entregadas, cada una verde y commiteada:
 
-**⚠️ DECISIÓN PENDIENTE DEL CLIENTE — tag + GitHub release de `v1.24.0`:** el CHANGELOG `1.24.0` ya está cerrado y mergeado en `main` (SSOT en 1.24.0), pero la orden del 2026-07-20 nombró PR, merge y poda — **no el release**. Cortar `v1.24.0` (tag anotado + `gh release create`) espera orden nombrada.
+1. **R2 — el gate:** `tools/ligas.json` (ledger, **dato de instancia, NO se siembra**) + `tools/estado-ligas.ps1` (co-ocurrencia por dirección/fuerza; `[BLOQUEA]` siempre se imprime **nombrando la capacidad exacta**, solo `-Estricto` mata; rotas avisan y se excluyen; falla cerrado) + `probar-ligas.ps1` (26 casos). Cableado: pre-push, preflight, smoke, y step de CI leyendo evaluador **y ledger desde la base** (ADR 0003).
+2. **R2c — la linterna pinta las ligas:** nodo `liga:<id>`, aristas `liga-bloquea`/`liga-avisa`, rotas en rojo, ancla al cúmulo del área (`probar-linterna` 49/49).
+3. **R3 — la extensión autora:** *"Jidoka: ligar a capacidad..."* / *"quitar liga..."* (clic derecho, multi-selección, QuickPicks capacidades→dirección→fuerza) → `extension/ligas.js` escribe el ledger (UTF-8 sin BOM, contrato JS↔PS probado) y el grafo se repinta (`probar-extension` 16/16, `ligas.test.js` 9/9 con `node --test`).
+4. **R4 — empaquetado y gobierno:** `.vsix` empaquetado real (`jidoka-gobierno-0.1.0.vsix`, 8 archivos; gitignoreado; guía `extension/README.md`), **ADR 0044** + índice, CHANGELOG cerrado y SSOT a **`1.25.0`**, `andon/README.md` con la fila de ligas, capacidad `AND-1` extendida.
+
+**La mordida dogfood (la métrica del QUÉ, en vivo):** la liga `linterna-extension` declarada en C2 mordió en C6 sobre el rango real del sprint — *"cambiaste [extension/*] sin tocar su capacidad: product/capacidades/AND-1-muro-andon.md"*. **Nombra la exacta, no "revisa las 89".** Evidencia: `qa_runs/editor-r2r4-20260720/LOG.md` (committeada).
+
+**⚠️ PENDIENTE — el Gemba de R3 (owner: cliente, sin código ni terminal):** nadie ha visto los QuickPicks en pantalla (mismo estado que R1 antes del F5). Cómo: F5 → clic derecho en un archivo → *"Jidoka: ligar a capacidad..."* → elegir, ver el diff en *Source Control* y la liga en el grafo; luego cambiar un archivo ligado `bloquea` sin su capacidad y ver el push detenido nombrándola; y *"quitar liga..."*. Los pasos exactos en el LOG de la corrida.
+
+**⚠️ DECISIONES PENDIENTES DEL CLIENTE:**
+1. **Tag + GitHub release de `v1.24.0`:** mergeado en `main` desde el PR #114, sin taguear — la orden del cierre nombró PR/merge/poda, no el release. (Alternativa: si este sprint se mergea pronto, cortar directo `v1.25.0` y saltar el tag intermedio — decide el cliente.)
+2. **Merge del PR de este sprint** (requiere orden nombrada, como siempre).
 
 ---
 
@@ -28,7 +39,7 @@
 
 **~~PENDIENTE CRÍTICO — el Gemba de R1~~ ✅ ATENDIDO 2026-07-20:** el cliente corrió F5 y el stack quedó demostrado (ver "Dónde estamos" arriba; evidencia en `qa_runs/editor-r1-gemba-20260720/LOG.md`). Hueco declarado: el caso real (entisoft) NO se probó desde la extensión — entisoft no tiene el motor `v1.24.0` todavía (la bajada a los labs sigue pendiente).
 
-**R2–R4 NO construidos a propósito** (ya desbloqueados por el GO de R1): R2 = ledger `tools/ligas.json` + `estado-ligas.ps1` + gate leyendo **desde la base** (ADR 0003); R3 = la extensión **autora** las ligas (clic derecho → ligar a capacidad, con dirección y fuerza); R4 = `.vsix`, ADR 0044, CHANGELOG y SSOT a `1.25.0`. El sprint del editor no bumpeó versión en el PR #114 — eso es R4.
+**~~R2–R4 NO construidos~~ ✅ CONSTRUIDOS el 2026-07-20** en el sprint "parte 2" (ver "Dónde estamos" arriba): R2 = ledger + `estado-ligas.ps1` + gate desde la base; R3 = la extensión autora; R4 = `.vsix` + ADR 0044 + SSOT `1.25.0`.
 
 ---
 

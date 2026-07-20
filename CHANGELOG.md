@@ -2,6 +2,20 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.25.0] — 2026-07-20
+
+### El editor del gobierno — la extensión AUTORA, el gate EJECUTA (ADR 0044)
+
+Sucede a la linterna (`v1.24.0`): aquella devolvió los ojos, esta devuelve la **mano**. Nace de dos hallazgos al usar la linterna sobre el caso real: el grafo se satura y **el gobierno es demasiado grueso** — el área `codigo` avisaba sobre *las 89 capacidades* sin decir cuál. El QUÉ del cliente: *"yo poder decir: este archivo son estas 5 capacidades, y que el trigger sea el cambio de código... o al revés, o en ambas direcciones"* — sin editar JSON a mano. La cadena completa: **clic → JSON en git → pre-push/CI**; nada depende de la cooperación del modelo.
+
+- **`feat` — el ledger `tools/ligas.json` (nuevo, dato de instancia):** las declaraciones del cliente — `{ id, codigo[], capacidades[], direccion (codigo-a-capacidad | capacidad-a-codigo | ambas), fuerza (avisa | bloquea) }`. **NO se siembra** (a diferencia de `docs-gobernados.json`): sembrarlo haría que `-Actualizar` pisara las declaraciones del hijo.
+- **`feat` — el evaluador `tools/estado-ligas.ps1` (nuevo, mecánica):** mide **co-ocurrencia** sobre el rango git (matcher byte-fiel a `verificar.ps1`). `[BLOQUEA]` se imprime siempre **nombrando la capacidad exacta**; solo `-Estricto` (pre-push + CI) lo vuelve exit 1. Ligas **ROTAS** (código o capacidad inexistente) avisan y quedan excluidas — nunca bloquean (un medidor con metadatos podridos no emite veredicto). **Falla cerrado** (exit 2) ante ledger ilegible o rango incalculable. En CI, evaluador **y ledger se leen desde la base** (ADR 0003). Primera liga dogfood (`linterna-extension` → `AND-1`) que **mordió en el propio sprint** nombrando la capacidad.
+- **`feat` — la extensión autora (R3):** comandos **"Jidoka: ligar a capacidad..."** y **"Jidoka: quitar liga..."** (clic derecho en el explorador, multi-selección; carpeta → glob): QuickPicks de capacidades (clave del frontmatter, pre-marcadas las ya ligadas) → dirección → fuerza → `extension/ligas.js` escribe el ledger (UTF-8 sin BOM — el contrato de encoding que el evaluador PS lee) y el grafo del panel se repinta. La UI **nunca** es el muro (ADR 0002 intacto).
+- **`feat` — la linterna pinta las ligas (R2c):** nodo propio `liga:<id>` con dirección/fuerza en el tooltip, aristas tipadas `liga-bloquea`/`liga-avisa` hacia sus capacidades, **rotas en rojo**, ancladas al cúmulo de su área.
+- **`test` — `tools/probar-ligas.ps1` (nuevo, mecánica):** 26 casos ROJO→VERDE — co-ocurrencia por dirección, `avisa` jamás bloquea, rotas sin falso bloqueo, falla-cerrado, rango git real con `-Base`, y el **contrato entre stacks** (lo que escribe `node -e` vía `ligas.js` lo lee y hace cumplir el `.ps1`). `extension/ligas.test.js` (9 casos, `node --test`) cableado en `probar-extension.ps1`.
+- **ADR 0044** — el editor del gobierno: la extensión autora, el gate ejecuta · aceptado. Capacidad [[AND-1-muro-andon]] extendida.
+- **Declarado (regla 2-3):** ni marketplace ni siembra de la extensión (el `.vsix` se empaqueta a mano, guía en `extension/README.md`); la herramienta **no sugiere** qué ligar (el juicio es del humano); el gate sigue midiendo co-ocurrencia, no contenido.
+
 ## [1.24.0] — 2026-07-19
 
 ### La linterna del gobierno — ver la máquina determinista con tus ojos, no con la narración del agente (ADR 0043)

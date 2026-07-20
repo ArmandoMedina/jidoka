@@ -43,16 +43,26 @@ test('upsert: crea con id derivado del código', () => {
   assert.strictEqual(ligas.leer(p).ligas.length, 1);
 });
 
-test('upsert: mismo código+dirección+fuerza une capacidades (no duplica)', () => {
+test('upsert: mismo código+dirección+fuerza REEMPLAZA capacidades (desmarcar de verdad quita)', () => {
   const p = ledgerTmp();
   ligas.upsert(p, LIGA);
   ligas.upsert(p, { ...LIGA, capacidades: ['product/capacidades/PAGO-2.md'] });
   const obj = ligas.leer(p);
   assert.strictEqual(obj.ligas.length, 1);
-  assert.deepStrictEqual(obj.ligas[0].capacidades, [
-    'product/capacidades/PAGO-1.md',
-    'product/capacidades/PAGO-2.md',
-  ]);
+  assert.deepStrictEqual(obj.ligas[0].capacidades, ['product/capacidades/PAGO-2.md']);
+});
+
+test('quitar: sin nada que quitar NO escribe (ni crea un ledger fantasma)', () => {
+  const p = ledgerTmp();
+  assert.strictEqual(ligas.quitar(p, 'no/existe.js'), 0);
+  assert.strictEqual(fs.existsSync(p), false);
+});
+
+test('quitar: tolera una liga malformada sin codigo (editada a mano) sin tronar', () => {
+  const p = ledgerTmp();
+  fs.writeFileSync(p, JSON.stringify({ ligas: [{ id: 'rara', capacidades: ['x.md'], direccion: 'ambas', fuerza: 'avisa' }] }, null, 2), 'utf8');
+  assert.strictEqual(ligas.quitar(p, 'a.js'), 0);
+  assert.strictEqual(ligas.leer(p).ligas.length, 1);
 });
 
 test('upsert: id colisionado se sufija -2', () => {
