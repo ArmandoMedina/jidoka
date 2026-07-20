@@ -19,9 +19,12 @@
 
 **⚠️ PENDIENTE — el Gemba de R3 (owner: cliente, sin código ni terminal):** nadie ha visto los QuickPicks en pantalla (mismo estado que R1 antes del F5). Cómo: F5 → clic derecho en un archivo → *"Jidoka: ligar a capacidad..."* → elegir, ver el diff en *Source Control* y la liga en el grafo; luego cambiar un archivo ligado `bloquea` sin su capacidad y ver el push detenido nombrándola; y *"quitar liga..."*. Los pasos exactos en el LOG de la corrida.
 
+**Gemba del cliente sobre la linterna (2026-07-20, post-PR) — 3 hallazgos REGISTRADOS por el lazo:** [#116](https://github.com/ArmandoMedina/jidoka/issues/116) el render tira la dirección (sin `marker-end`) y en Foco la severidad no se ve (el único `doc_bloquea` es indistinguible) · [#117](https://github.com/ArmandoMedina/jidoka/issues/117) el force-directed fabrica caminos por cercanía; propuesta: tabla por severidad bajo el grafo · [#118](https://github.com/ArmandoMedina/jidoka/issues/118) treemap de archivos por área (hace visible el bulto de `raiz`). Verificados contra el código; material del siguiente sprint, NO entraron al PR #115 (alcance cerrado).
+
 **⚠️ DECISIONES PENDIENTES DEL CLIENTE:**
 1. **Tag + GitHub release de `v1.24.0`:** mergeado en `main` desde el PR #114, sin taguear — la orden del cierre nombró PR/merge/poda, no el release. (Alternativa: si este sprint se mergea pronto, cortar directo `v1.25.0` y saltar el tag intermedio — decide el cliente.)
-2. **Merge del PR de este sprint** (requiere orden nombrada, como siempre).
+2. **Merge del PR #115 de este sprint** (requiere orden nombrada, como siempre).
+3. **¿Estrechar el área `raiz`?** (planteada por el cliente en su Gemba): con `fuente: "*"` como cajón, "cero huérfanos" mide *"nada se escapó del cajón"*, no *"todo tiene un lugar pensado"* (por eso jidoka marca 0 y entisoft 15). Estrecharla vuelve exigente el contador — el treemap (#118) es el instrumento para decidirlo con ojos. Decisión de ley: solo el cliente.
 
 ---
 
