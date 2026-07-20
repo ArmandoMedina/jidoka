@@ -6,7 +6,28 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-17 — Documentos gobernados · KIT-2 · `v1.23.0` — ✅ MERGEADO Y LIBERADO)
+## Dónde estamos (2026-07-19 — La linterna del gobierno · `v1.24.0` — 🔨 EN RAMA, sin mergear)
+
+**Sprint "La linterna del gobierno" construido en la rama `sprint/linterna-gobierno-20260719` (ADR 0043, `v1.24.0`, sin commitear/mergear al cierre de esta nota).** Nace de `/jidoka:descubre` + plan mode con el cliente: entra a proyectos avanzados, mete Jidoka, y su Claude Code se pone necio con "documentos sin trackear/blast-radius"; el parche era pedirle al agente que lo arreglara, quedando **juez y parte** ("no sé qué hace, horas revisando, él me explica"). La linterna le devuelve el juicio: **ver la máquina con sus ojos, no con la narración del agente.**
+
+**Qué se construyó:** `tools/estado-gobierno.ps1` (nuevo, mecánica) — **vista de solo lectura** que deriva el grafo del gobierno de la ley real (`blast-radius.json` + `docs-gobernados.json` + `settings.json` + `andon.yml` + `product/capacidades`) y lo emite a un **`.html` autocontenido** (force-directed, JS vanilla inline; cero deps/servidor). Muestra áreas, gates vivo/dormido, **documentos-dueño** (aristas duras `doc_bloquea` vs blandas `doc_avisa`), capacidades + wikilinks, hooks, checks de CI, y **huérfanos en rojo** con contador (métrica: cero huérfanos). No inventa verdad (matcher/reglas byte-fieles a `verificar`/`rutear`/`estado-docs`), **falla cerrado** si el repo no es git. `tools/probar-linterna.ps1` (27/27). **Es vista, NO gate** (ADR 0043, respeta ADR 0002; nace aviso por regla 2-3). Cableado: manifiesto (siembra mecánica), preflight `publicar.ps1` + CI `andon.yml`, andon/README, CHANGELOG, SSOT bumpeado a 1.24.0.
+
+**Evidencia (verde, esta máquina 2026-07-19):** suite completa `publicar -SoloVerificar` **12/12 + auditar** (probar-linterna incluido; probar-instalador/sembrar corrieron sin cuarentena AV) · `verificar` exit 0 (2 avisos no bloqueantes) · `auditar` íntegro · `probar-version`/`probar-publicar` verdes (el poka-yoke confirmó probar-linterna en el preflight). **Code-review independiente:** R1 revisado (3 ALTO + 2 MEDIO cazados y arreglados con regresión); R2 en revisión al cierre de esta nota.
+
+**Demos generados (`.jidoka/`, gitignoreado):** `gobierno.html` (jidoka, 0 huérfanos), `gobierno-entisoft.html` (entisoft, 15 huérfanos reales: capa `deploy/`, capa `portal/` — leído solo-lectura, sin tocar su árbol).
+
+**Pendientes / follow-ups:**
+1. **Gemba del cliente (owner: cliente) — PENDIENTE:** abrir los dos `.html` y confirmar a la vista (la extensión Chrome estaba caída, no se renderizó del lado del agente; el JS pasa `node --check`).
+2. **Release `v1.24.0`:** rama sin commitear/mergear; merge requiere orden nombrada del cliente + `gh auth switch --user ArmandoMedina`.
+3. **Dos avisos de `verificar` anotados (decisión del cliente):** ¿la linterna merece (a) su propio diagrama en `docs/atlas/` y (b) una nota de capacidad en `product/capacidades/`? Ambos "considera", no bloquean.
+4. **Follow-up de deuda (ADR 0043):** consolidar la regla vivo/dormido y el grafo de capacidades (hoy réplicas byte-fieles en la linterna) en `rutear.ps1 -Json` / `auditar.ps1 -Grafo` — regla 2-3.
+5. **Bajar `v1.24.0` a los labs** con `-Actualizar` (la linterna se siembra: `clase mecanica`).
+
+**Coordinación:** el lab "enti" (`C:\Repositorios\entisoft-rescate`) lo trabaja **otro agente**; esta sesión solo lo LEYÓ para generar su linterna (escribió el `.html` en el `.jidoka/` de la nave, no en el árbol de enti — verificado `git status` limpio en enti).
+
+---
+
+## Dónde estuvimos (2026-07-17 — Documentos gobernados · KIT-2 · `v1.23.0` — ✅ MERGEADO Y LIBERADO)
 
 **Sprint "Documentos gobernados" cerrado, mergeado y liberado (`v1.23.0`, ADR 0042).** El **hermano estructural del sello**: el motor se gobierna por hash; los documentos **instancia-de-template** que el ritual inyecta con `@` (`brief`/`infra`/`CONTRIBUTING`) por **secciones** (modelo SAP del cliente — alterar la estructura gobernada = *garantía nula*). Nació de que el cliente sintió "los docs de los hijos están super diferentes"; la medición desmintió la premisa (el ritual NO diverge, es motor por-hash) y encontró el hueco real: los docs de instancia sin gobierno de estructura, con `CONTRIBUTING` como el peor caso (un stub de 4 líneas sin template). Piezas: `tools/docs-gobernados.json` (ledger capa-1/2/3 + secciones requeridas congeladas), `tools/estado-docs.ps1` (detector — **aviso** en `/jidoka:arranca`, **muro opt-in** `-Estricto` en CI apagado por defecto), template real de `CONTRIBUTING`. Contrato+récord: `docs/sprints/sprint-documentos-gobernados-{plan,entrega}.md`. Evidencia: `qa_runs/documentos-gobernados-20260717/LOG.md` (suite verde + demos + caso enti confirmado con máquina).
 

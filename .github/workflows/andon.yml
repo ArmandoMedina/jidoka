@@ -39,6 +39,7 @@ jobs:
           .\tools\probar-disparos.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-preflight.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-docs.ps1;     if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-linterna.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-anti-pii.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           # Self-tests Jidoka-only (no sembrados): corren solo si estan presentes
           # (un hijo instalado no los tiene, y este mismo workflow se siembra).
