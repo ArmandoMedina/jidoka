@@ -183,6 +183,23 @@ try {
   $r = Corre $fixB @('-Base', 'principal', '-Estricto')
   if ($r.code -eq 1 -and $r.out -match 'PAGO-1\.md') { Ok "rango git real (-Base): la violacion se detecta por diff, no solo inyectada" } else { No "-Base: esperaba 1 nombrando PAGO-1.md, fue $($r.code)" }
 
+  # 13: CONTRATO ENTRE STACKS -- lo que escribe el modulo JS de la extension
+  # (extension/ligas.js) lo lee y hace cumplir el evaluador PS (UTF-8 sin BOM).
+  # En un hijo sembrado extension/ no existe (Jidoka-only): SKIP honesto.
+  $ligasJs = Join-Path $raiz 'extension/ligas.js'
+  if (($null -ne (Get-Command node -ErrorAction SilentlyContinue)) -and (Test-Path -LiteralPath $ligasJs)) {
+    $jsLedger = Join-Path $fix 'tools/ligas-js.json'
+    $eapPrev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    & node -e "const l=require(process.argv[1]); l.upsert(process.argv[2], {codigo:['servidor/pagos.js'], capacidades:['product/capacidades/PAGO-1.md'], direccion:'codigo-a-capacidad', fuerza:'bloquea'});" $ligasJs $jsLedger 2>&1 | Out-Null
+    $nodeOk = ($LASTEXITCODE -eq 0)
+    $ErrorActionPreference = $eapPrev
+    if ($nodeOk -and (Test-Path -LiteralPath $jsLedger)) { Ok "contrato: el modulo JS escribio el ledger (upsert)" } else { No "contrato: node no pudo escribir el ledger via ligas.js" }
+    $r = Corre $fix @('-Ledger', $jsLedger, '-Cambiados', 'servidor/pagos.js', '-Estricto')
+    if ($r.code -eq 1 -and $r.out -match 'PAGO-1\.md') { Ok "contrato entre stacks: lo que escribe JS lo lee y hace cumplir PS" } else { No "contrato: el evaluador no leyo el ledger escrito por JS (exit $($r.code))" }
+  } else {
+    Write-Host "  [SKIP]  contrato entre stacks (node o extension/ligas.js no disponibles)" -ForegroundColor DarkGray
+  }
+
   # ---------------------------------------------------------------- Parte B (ledger REAL)
   $realPath = Join-Path $raiz 'tools/ligas.json'
   if (Test-Path -LiteralPath $realPath) {

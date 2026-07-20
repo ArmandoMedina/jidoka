@@ -65,6 +65,19 @@ else {
       else { No "error de sintaxis en extension/$($f.Name) (node --check fallo)" }
     }
     if ($jsFiles.Count -eq 0) { No "no hay ningun .js en extension/" }
+
+    # los modulos con self-test JS corren con el runner nativo. Se pasan los *.test.js
+    # EXPLICITOS (no el directorio): con el dir, node tambien carga extension.js, que
+    # requiere el modulo 'vscode' y solo existe dentro del editor.
+    $testFiles = @(Get-ChildItem -LiteralPath $dir -Filter *.test.js -File -ErrorAction SilentlyContinue)
+    if ($testFiles.Count -gt 0) {
+      $eapPrev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+      & node --test @($testFiles | ForEach-Object { $_.FullName }) 2>&1 | Out-Null
+      $testsOk = ($LASTEXITCODE -eq 0)
+      $ErrorActionPreference = $eapPrev
+      if ($testsOk) { Ok "self-tests JS verdes (node --test, $($testFiles.Count) archivo(s) *.test.js)" }
+      else { No "node --test fallo (algun self-test JS en rojo)" }
+    }
   }
   else {
     Write-Host "  [SKIP]  node --check (node no disponible en esta maquina)" -ForegroundColor DarkGray
