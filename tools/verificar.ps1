@@ -229,6 +229,84 @@ if ($flujoCfg -and $flujoCfg.handoff -and (Test-Path 'HANDOFF.md')) {
   if (-not $rotoHandoff) { Ok "[contrato-handoff] HANDOFF.md dentro de contrato ($nHistoricas/$maxHist historicas, $($hLineas.Count)/$techoLin lineas)" }
 }
 
+# Contrato del ROADMAP (FLU-1, ADR 0045): el ROADMAP es una cola de trabajo
+# CLASIFICADA, no un diario. Espejo del contrato del HANDOFF -- misma semantica de
+# falla-cerrado, mismo caracter de invariante de ESTADO (no de diff): se mide siempre.
+# Solo aplica si flujo.json trae la clave 'roadmap' y existe ROADMAP.md (un repo sin el
+# pilar de flujo no se bloquea). Las unicas secciones legales son las clases de servicio
+# (Urgente/Con fecha/Normal/Algun dia) mas Referencia (landscape, sin contrato de item);
+# cada item vivo declara [alta:] (+ apetito/vence segun su clase). El detalle vive en el
+# historico declarado (roadmap-historico.md) o en su doc dueno; el techo lo impide crecer.
+if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
+  $uAcc = [char]0xFA   # 'u' acentuada: Algun -> Algún (este motor es ASCII, el ROADMAP no)
+  $iAcc = [char]0xED   # 'i' acentuada: dia -> día
+  # -Encoding UTF8 obligatorio, mismo gotcha que el HANDOFF: sin el, PS 5.1 lee el UTF-8
+  # sin BOM como ANSI y 'Algún día' se deforma -- el regex no casa y el contrato se mide
+  # en falso (recetario docs/guias/entorno-windows-powershell51.md).
+  $rLineas = @(Get-Content 'ROADMAP.md' -Encoding UTF8)
+  # Falla CERRADO ante config incompleta (mismo criterio que el handoff): techo_lineas
+  # requerida y entera no-negativa, o exit 2. 'historico' ausente NO es Fail: usa default.
+  $rTechoParsed = 0
+  $rTechoRaw = $flujoCfg.roadmap.techo_lineas
+  if ($null -eq $rTechoRaw -or
+      -not [int]::TryParse([string]$rTechoRaw, [ref]$rTechoParsed) -or
+      $rTechoParsed -lt 0) {
+    Fail "tools/flujo.json: la clave roadmap esta incompleta (techo_lineas requerida, entero no-negativo). Sin ella el contrato no se puede medir."
+  }
+  $rTecho = $rTechoParsed
+  $rHist = [string]$flujoCfg.roadmap.historico
+  if (-not $rHist) { $rHist = 'docs/roadmap-historico.md' }
+  $rPermitidas = "Urgente, Con fecha, Normal, Alg${uAcc}n d${iAcc}a, Referencia"
+  $rotoRoadmap = $false
+  $nItems = 0
+  $claseActual = $null   # clase de la seccion en curso ($null = ninguna/ilegal: no clasifica items)
+  foreach ($ln in $rLineas) {
+    if ($ln -match '^## (.+)$') {
+      $secTexto = $matches[1].Trim()
+      # Fold de acentos ('Algún día'/'Algun dia' -> 'algun dia') y a minusculas: acepta
+      # la clase con y sin acento.
+      $secClave = ($secTexto -replace $uAcc,'u' -replace $iAcc,'i').ToLowerInvariant()
+      $clase = $null
+      switch ($secClave) {
+        'urgente'    { $clase = 'urgente' }
+        'con fecha'  { $clase = 'confecha' }
+        'normal'     { $clase = 'normal' }
+        'algun dia'  { $clase = 'algundia' }
+        'referencia' { $clase = 'referencia' }
+      }
+      if ($null -eq $clase) {
+        Block "[contrato-roadmap] el ROADMAP es cola clasificada, no diario: seccion '$secTexto' fuera del contrato (permitidas: $rPermitidas); el detalle vive en el historico ($rHist) o en su doc dueno."
+        $rotoRoadmap = $true
+        $claseActual = $null
+      }
+      else { $claseActual = $clase }
+      continue
+    }
+    # Solo items de nivel RAIZ ('^- '); los sub-bullets indentados ('^  - ') no cuentan.
+    if ($ln -match '^- ') {
+      if ($null -eq $claseActual -or $claseActual -eq 'referencia') { continue }
+      $nItems++
+      $rNombre = $ln.Trim()
+      if ($rNombre.Length -gt 60) { $rNombre = $rNombre.Substring(0, 60) }
+      $faltan = @()
+      if ($ln -notmatch 'alta:\s*\d{4}-\d{2}-\d{2}') { $faltan += 'alta:AAAA-MM-DD' }
+      if ($claseActual -eq 'urgente' -or $claseActual -eq 'confecha' -or $claseActual -eq 'normal') {
+        if ($ln -notmatch 'apetito:\d+h') { $faltan += 'apetito:Nh' }
+      }
+      if ($claseActual -eq 'confecha' -and $ln -notmatch 'vence:\d{4}-\d{2}-\d{2}') { $faltan += 'vence:AAAA-MM-DD' }
+      if ($faltan.Count -gt 0) {
+        Block "[contrato-roadmap] el item '$rNombre' no declara su contrato: falta(n) $($faltan -join ', '). Todo item vivo trae [alta:AAAA-MM-DD] (Urgente/Con fecha/Normal ademas apetito:Nh; Con fecha ademas vence:AAAA-MM-DD)."
+        $rotoRoadmap = $true
+      }
+    }
+  }
+  if ($rLineas.Count -gt $rTecho) {
+    Block "[contrato-roadmap] ROADMAP.md mide $($rLineas.Count) lineas; el techo del contrato es $rTecho (tools/flujo.json). La cola se clasifica, no se acumula: poda lo cumplido a CHANGELOG.md o archiva en $rHist."
+    $rotoRoadmap = $true
+  }
+  if (-not $rotoRoadmap) { Ok "[contrato-roadmap] ROADMAP.md dentro de contrato ($nItems items clasificados, $($rLineas.Count)/$rTecho lineas)" }
+}
+
 # Costura .local: extension de mecanica ESPECIFICA del repo (p.ej. lint/tests de un
 # lenguaje: ruff, pytest). El motor generico NO se bifurca -- el hijo pone sus checks
 # aqui y siguen contando para $script:warn / $script:block (usa Note/Block/Ok). Es la

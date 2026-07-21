@@ -4,5 +4,9 @@
     "max_historicas": 2,
     "techo_lineas": 120,
     "historico": "docs/handoff-historico.md"
+  },
+  "roadmap": {
+    "techo_lineas": 90,
+    "historico": "docs/roadmap-historico.md"
   }
 }
