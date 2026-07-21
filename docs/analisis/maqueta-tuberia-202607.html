@@ -140,6 +140,7 @@
   <button data-t="flujos">3 · Flujos guiados</button>
   <button data-t="huecos">4 · Lo que no estás viendo</button>
   <button id="tourBtn" style="background:var(--ok);color:#03170a;border:none;font-weight:700;margin-left:auto" onclick="tourStart()">▶ Tour guiado</button>
+  <button id="rootBtn" onclick="rootToggle()">🔒 Modo avanzado</button>
 </nav>
 
 <div class="tab on" id="tuberia">
@@ -421,6 +422,7 @@ ORDER.forEach(cat=>{
 });
 
 function select(id){
+  curSel=id;
   document.querySelectorAll('.chip').forEach(c=>{c.classList.remove('sel','glow')});
   const me=document.querySelector(`.chip[data-id="${id}"]`); if(me) me.classList.add('sel');
   (ADJ[id]||[]).forEach(e=>{ const t=document.querySelector(`.chip[data-id="${e.id}"]`); if(t) t.classList.add('glow'); });
@@ -442,6 +444,7 @@ function select(id){
       <div class="confbox vision"><b>En tu visión:</b> ${p.confVision}</div>`;
   if(id==='l-ley'||id==='doc-brief'||id==='t-templates') h+=`<button class="wizbtn" onclick="wizStart('doc')">▶ Probar el flujo guiado de alta de doc (maqueta)</button>`;
   if(p.tipo==='Asientos — agentes') h+=`<button class="wizbtn" onclick="wizStart('agente')">▶ Probar el flujo de alta de agente (maqueta)</button>`;
+  if(rootMode) h+=`<button class="wizbtn" style="background:var(--violet);color:#120b22" onclick="wizStart('reclas',{id:'${id}'})">⚙️ Reclasificar régimen (modo avanzado)</button>`;
   d.innerHTML=h;
 }
 
@@ -464,6 +467,31 @@ function altaResumen(){
        cajon:q('f-cajon').value.split(' ')[0], fz:document.querySelector('input[name="f-fz"]:checked').value,
        cmds:[['f-c1','arranca'],['f-c2','planea'],['f-c3','descubre']].filter(x=>q(x[0]).checked).map(x=>x[1]),
        ci:q('f-ci').checked};
+  W.paso=2; wizRender();
+}
+
+/* ================== Modo avanzado (root) ================== */
+let rootMode=false, curSel=null;
+function rootToggle(){ if(rootMode){ rootMode=false; rootPaint(); } else { wizStart('root'); } }
+function rootPaint(){
+  const b=document.getElementById('rootBtn');
+  b.textContent=rootMode?'🔓 Modo avanzado: ON':'🔒 Modo avanzado';
+  b.style.background=rootMode?'var(--violet)':'';
+  b.style.color=rootMode?'#120b22':'';
+  b.style.fontWeight=rootMode?'700':'';
+  if(curSel) select(curSel);
+}
+function rootCheck(){
+  const v=(document.getElementById('r-pass').value||'').toUpperCase().replace('Í','I').trim();
+  if(v==='GARANTIA-NULA'){ rootMode=true; wizClose(); rootPaint(); }
+  else { document.getElementById('r-err').textContent='No es. Está escrita a la vista (en la versión real: en el README) — a propósito.'; }
+}
+function reclasResumen(){
+  W.r={reg:document.querySelector('input[name="rc-reg"]:checked').value,
+       lock:document.getElementById('rc-lock').checked,
+       why:document.getElementById('rc-why').value,
+       firma:document.getElementById('rc-firma').value,
+       fecha:new Date().toISOString().slice(0,10)};
   W.paso=2; wizRender();
 }
 function wizClose(){ ovl.classList.remove('on'); }
@@ -583,6 +611,41 @@ function wizRender(){
         <code>bandeja → este elemento SALE de pendientes · linterna → nodo gobernado de verdad</code>
       </div>
       <div class="carton">Cartón: no escribió nada. Burocracia de UNA vez, determinismo para siempre.</div>
+      <div class="acciones"><button class="atras" onclick="nav(-1)">← Ajustar</button><button class="sigue" onclick="wizClose()">Eso quiero 🙂</button></div>`;}
+  }
+
+  if(W.tipo==='root'){
+    if(W.paso===1) h=`<h3>🔒 Entrar al modo avanzado</h3><div class="paso">Aquí se cambia la ESTRUCTURA: regímenes, invariantes, candados. No es para el día a día.</div>
+      <div class="confbox"><b>Esto no es seguridad</b> — es un "no le muevas si no le sabes". La contraseña vive a la vista (en la versión real: en el README del repo). Teclearla no te autentica: te hace <b>firmar que sabes lo que haces</b>. Desde aquí adentro, garantía nula sobre lo que toques.</div>
+      <label class="f">Escribe la contraseña (pista: es exactamente lo que aceptas al entrar)</label>
+      <input type="text" id="r-pass" placeholder="…" autocomplete="off">
+      <p class="hint" id="r-err"></p>
+      <div class="acciones"><button class="atras" onclick="wizClose()">Cancelar</button><button class="sigue" onclick="rootCheck()">Entrar →</button></div>`;
+  }
+
+  if(W.tipo==='reclas'){
+    const pp=P[W.pre.id], rg0=regOf(W.pre.id), rt0=REGTXT[rg0];
+    if(W.paso===1) h=`<h3>⚙️ Reclasificar régimen — ${pp.nombre}</h3><div class="paso">Acto estructural (modo avanzado). Queda firmado y registrado — nunca mudo.</div>
+      <div class="confbox">Régimen actual: <b>${rt0[0]}</b></div>
+      <label class="f">Nuevo régimen</label>
+      <label class="rr"><input type="radio" name="rc-reg" value="motor">🔴 Motor sellado <small>solo el lazo lo actualiza; borrarlo exige ADR</small></label>
+      <label class="rr"><input type="radio" name="rc-reg" value="sap" checked>🟡 Contrato SAP <small>invariantes fijos + extensiones registradas</small></label>
+      <label class="rr"><input type="radio" name="rc-reg" value="libre">🟢 Libre <small>registrado, sin opinión del gobierno</small></label>
+      <label class="ck" style="margin-top:12px"><input type="checkbox" id="rc-lock">🔒 <b>Candado a la IA</b> <small style="display:block;margin-left:22px;color:var(--dim)">deny determinista del harness + hook PreToolUse: el agente NO PUEDE tocar esta pieza — ni queriendo, ni "sin que nadie se dé cuenta". Todo intento se bloquea en el momento y se acusa en la bandeja. Este sí es muro real, y vive fuera del LLM.</small></label>
+      <label class="f">¿Por qué? (va al registro)</label>
+      <input type="text" id="rc-why" placeholder="p. ej. este comando ya quedó probado — lo sello">
+      <label class="f">Firma</label>
+      <input type="text" id="rc-firma" placeholder="tu nombre">
+      <div class="acciones"><button class="atras" onclick="wizClose()">Cancelar</button><button class="sigue" onclick="reclasResumen()">Ver qué escribiría →</button></div>`;
+    if(W.paso===2){const r=W.r;
+      h=`<h3>✍️ Reclasificado (en cartón)</h3><div class="paso">La versión real escribiría, con tu OK:</div>
+      <div class="escribe">
+        <code>ledger de contratos → ${pp.nombre}: régimen "${r.reg}"</code>
+        <code>registro estructural → firmó: ${r.firma||'(sin firma — la versión real NO dejaría pasar esto)'} · ${r.fecha} · "${r.why||'sin motivo declarado'}"</code>
+        ${r.lock?`<code>settings.json → permissions.deny: Edit sobre la pieza — muro del harness, fuera del LLM</code><code>hook PreToolUse → cualquier intento del agente: BLOQUEADO al momento + acusado en la bandeja</code>`:''}
+        <code>la pieza carga el badge "reclasificada (firmada)" en la tubería — visible, nunca muda</code>
+      </div>
+      <div class="carton">Cartón: nada se escribió. Nota la división del trabajo: la contraseña te dejó ENTRAR (deliberación), la firma te hace RESPONSABLE (atribución), y el candado es el único MURO (harness, no README).</div>
       <div class="acciones"><button class="atras" onclick="nav(-1)">← Ajustar</button><button class="sigue" onclick="wizClose()">Eso quiero 🙂</button></div>`;}
   }
 
