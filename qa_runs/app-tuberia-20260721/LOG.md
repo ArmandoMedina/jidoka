@@ -116,3 +116,33 @@
 **Pendiente:** el STOP de fidelidad de R2 (Gemba del `.exe`) antes de cablear la mitad UI. La mitad MOTOR (esta rebanada) queda verde y lista para que `app.js` la consuma vía `invoke('cargar_datos')`.
 
 ---
+
+## R4 (mitad motor) — parametrizar.ps1, el escritor único — ✅ VERDE
+
+> **La mitad UI** (cablear el formulario de alta `altaResumen` + el wizard 'doc' con escritura real vía `invoke`, refresco automático) **espera el STOP de fidelidad de R2.** Esta rebanada entrega SOLO la mitad MOTOR: el comando que se vuelve el único escritor de los ledgers. La app lo invocará. `app/` y `extension/` NO se tocaron.
+
+**Qué se entregó (solo motor PS + su self-test; nada de `app/`, nada de `extension/`):**
+- `tools/parametrizar.ps1` — **el escritor único** (`param -Repo -Path -Tipo -Regimen -Area -Fuerza -Comandos -Json`). Port fiel de `extension/contratos.js` (`escribir`/`leerContratos`/`upsertContrato`/`leerLey`/`agregarAFuente`, 113 líneas) + `extension/ritual.js` (`insertarArroba`/`MARCADOR`, 53 líneas). Hace, en orden, calcando `extension.js:409-458` ("acumula avisos, jamás éxito falso"): (1) **upsert** del contrato en `tools/contratos.json` (merge por path, estado `parametrizado`; crea el archivo si no existe — INSTANCIA no-clobber, ADR 0046); (2) si `-Area`: agrega `-Path` a la fuente del área en `tools/blast-radius.json` (idempotente; área inexistente → AVISO); (3) por cada comando de `-Comandos` (csv): `insertarArroba` en `.claude/commands/jidoka/<c>.md` bajo el marcador `<!-- jidoka:arrobas -->` (**idempotencia por token con borde**; garantiza newline final; sin marcador o comando ausente → AVISO). Los pasos 2-3 acumulan avisos **sin revertir el paso 1** (el contrato queda; jamás éxito falso, jamás silencio). Toda escritura UTF-8 **sin BOM** + newline final vía `[System.IO.File]::WriteAllText(...UTF8Encoding($false))`; JSON con `ConvertTo-Json -Depth 8` y arrays protegidos con `@()`. Salida `-Json`: `{ok,contrato,avisos,arrobas}` a stdout; error duro → `{ok:false,error}` + exit 1. ASCII puro, PS 5.1.
+- `tools/probar-parametrizar.ps1` — self-test con fixture temporal (TEMP, jamás toca el repo real), contador Ok/No, exit por veredicto (molde `probar-bandeja.ps1`). Trae los casos de los dos `.test.js` + los del plan R4. ASCII puro.
+- **Cableado (las DOS listas):** `tools/publicar.ps1` (foreach del preflight) y `.github/workflows/andon.yml` (smoke condicional if-exists) ganan `probar-parametrizar`.
+
+**Decisiones del port (divergencias con los `.js`, confesadas):**
+- **`agregarAFuente` NO crea el área.** `contratos.js:96-105` CREA el área si no existe; el plan R4 ordena lo contrario ("si el área no existe → AVISO, no error"). El port respeta el plan: si el área no está en la ley, no la crea a ciegas — reporta AVISO y el contrato queda escrito. (El port de `registrarOverride`/`firmaDeterminista` NO se hizo: es R5, `override.ps1`.)
+- **Trampa PS 5.1 en el retorno de funciones:** una función que retorna `@($x)` con 1 elemento lo **re-desenvuelve a escalar** al salir. Un área sola llegaba como `PSCustomObject` (`.Count` vacío → el `for` nunca corría → área existente reportada como inexistente). Fix: `@()` en el **sitio de llamada** (`$arr = @(Leer-Ley $p)`). Cazado por el caso 6a del self-test antes de cablear.
+- La idempotencia del `@` es **byte-fiel** a `ritual.js:24`: regex `'@' + [regex]::Escape(arroba) + '(?![\w./-])'` sobre la línea sin espacios — el borde por token muerde (`glo.md` se inserta pese a existir `glosario.md`), verificado en el caso 4.
+
+**Evidencia (esta máquina, 2026-07-21):**
+
+| Gate | Exit | Nota |
+|---|---|---|
+| `tools/probar-parametrizar.ps1` | **0** | **25/25** verdes. Alta nueva (crea contratos.json sin BOM + newline); upsert merge (2do gana, no duplica); @ bajo el marcador + idempotente; **la sutileza** (`glo.md` inserta pese a `glosario.md`); comando sin marcador → aviso + contrato igual; área existente idempotente vs área inexistente → aviso; array de 1 sale como array; `-Json` parsea sin BOM; validaciones (regimen/fuerza inválidos, ley ausente) → exit 1 + `{ok:false,error}`. |
+| `tools/probar-publicar.ps1` | **0** | 7/7. El meta-test "todos los `probar-*` en la lista del preflight" sigue verde con `probar-parametrizar` agregado. |
+| `tools/probar-app.ps1` | **0** | 14/14. La app no se tocó; sigue sana (49 piezas ≥ 37). |
+| `tools/anti-pii.ps1` (con los 2 archivos nuevos vía `git add -N`) | **0** | Sin fugas en 265 archivos. Los fixtures respetan la ley anti-PII: ningún token `@X.md` precedido de char-de-palabra (regex de email de la base). |
+| `tools/verificar.ps1` | **0** | Sin bloqueo. **3 avisos no bloqueantes** por tocar el cableado del motor (`publicar.ps1`, `andon.yml` → áreas `atlas`/`barreras`): atlas, `andon/README.md`, grafo de producto. Son consecuencia de cablear un test nuevo en las listas, no doc-drift accionable; el CHANGELOG del release es R7 (mismo patrón que R2/R3). |
+
+**Demo del cliente (owner: cliente):** parametrizar el doc de R3 desde el formulario → verlo salir de la bandeja, el `@` en `arranca.md`, la regla en la ley — sin salir de la app. **Requiere la mitad UI** (cablear `altaResumen` + wizard 'doc' con `invoke`), **que espera el STOP de fidelidad de R2.**
+
+**Pendiente:** el STOP de fidelidad de R2 (Gemba del `.exe`) antes de cablear la mitad UI. La mitad MOTOR (esta rebanada) queda verde y lista para que `app.js` invoque `parametrizar.ps1` y muestre sus avisos reales (nada de éxito falso).
+
+---
