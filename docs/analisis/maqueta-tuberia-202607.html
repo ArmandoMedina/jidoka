@@ -444,7 +444,7 @@ function select(id){
       <div class="confbox vision"><b>En tu visión:</b> ${p.confVision}</div>`;
   if(id==='l-ley'||id==='doc-brief'||id==='t-templates') h+=`<button class="wizbtn" onclick="wizStart('doc')">▶ Probar el flujo guiado de alta de doc (maqueta)</button>`;
   if(p.tipo==='Asientos — agentes') h+=`<button class="wizbtn" onclick="wizStart('agente')">▶ Probar el flujo de alta de agente (maqueta)</button>`;
-  if(rootMode) h+=`<button class="wizbtn" style="background:var(--violet);color:#120b22" onclick="wizStart('reclas',{id:'${id}'})">⚙️ Reclasificar régimen (modo avanzado)</button>`;
+  if(rootMode) h+=`<button id="reclasBtn" class="wizbtn" style="background:var(--violet);color:#120b22" onclick="wizStart('reclas',{id:'${id}'})">⚙️ Reclasificar régimen (modo avanzado)</button>`;
   d.innerHTML=h;
 }
 
@@ -667,7 +667,7 @@ function wizRender(){
 ovl.onclick=e=>{ if(e.target===ovl) wizClose(); };
 
 /* ================== Tour guiado ================== */
-const TOUR=[
+const TOUR_BASE=[
  {tab:'tuberia', sel:'header', title:'Bienvenido — esto es la tubería de tu Jidoka',
   text:'Todas las piezas son reales (censadas de tu repo); ningún botón escribe nada. El tour son 14 paradas por las 4 pestañas — incluye abrir los pop-ups por ti y explicártelos por dentro. Sal cuando quieras; se retoma con el mismo botón.'},
  {tab:'tuberia', sel:'.leg', title:'Los 3 regímenes de gobierno (los colores)',
@@ -697,16 +697,35 @@ const TOUR=[
  {tab:'huecos', sel:'nav', title:'Fin del tour — y qué sigue',
   text:'Ya viste todo: tubería con contratos, bandeja, formulario, reconciliar y los huecos. Esto ya vive en el repo (docs/analisis/descubrimiento-sistema-configurable). Lo que sigue es tuyo: nombrar el ADR de identidad y elegir la primera rebanada. Ahora juega: el formulario del caso REAL es buen inicio.'}
 ];
-let ti=-1, tprev=null;
+/* Tramo root: solo se teje al tour si entraste con la contraseña */
+const TOUR_ROOT=[
+ {tab:'tuberia', sel:'#rootBtn', title:'BONUS root — estás en modo avanzado',
+  text:'Este tramo del tour solo existe porque tecleaste la contraseña. El botón violeta es tu recordatorio permanente: aquí adentro los actos son ESTRUCTURALES y todo va firmado. Garantía nula desde este punto.'},
+ {tab:'tuberia', do:()=>select('m-verificar'), sel:'#reclasBtn', title:'Cada pieza ganó su botón estructural',
+  text:'Con el modo activo, el detalle de CUALQUIER pieza trae "Reclasificar régimen". Elegí verificar.ps1 a propósito: es motor sellado — el caso más delicado que puedes tocar. Vamos a abrirlo.'},
+ {tab:'tuberia', do:()=>{ select('m-verificar'); wizStart('reclas',{id:'m-verificar'}); }, sel:'#wiz', title:'El acto estructural, por dentro',
+  text:'Tres decisiones: el régimen nuevo, el porqué (va al registro) y tu firma. Fíjate en lo que NO hay: un camino mudo. Reclasificar sin explicarte no existe.'},
+ {tab:'tuberia', do:()=>{ if(W.tipo!=='reclas'||W.paso!==1) wizStart('reclas',{id:'m-verificar'}); }, sel:'#wiz .ck', title:'El candado a la IA — el único muro de los tres',
+  text:'La contraseña delibera, la firma atribuye — pero SOLO esto detiene: permissions.deny del harness + PreToolUse. El agente no puede tocar la pieza ni en silencio; todo intento se bloquea al momento y cae acusado a la bandeja. Vive fuera del LLM: no le pide permiso al modelo.'},
+ {tab:'tuberia', do:()=>{ if(W.tipo!=='reclas'||W.paso!==1) wizStart('reclas',{id:'m-verificar'}); reclasResumen(); }, sel:'#wiz .escribe', title:'La salida firmada (lee el detalle)',
+  text:'Dejé la firma VACÍA a propósito — lee la segunda línea: "la versión real NO dejaría pasar esto". Root te deja entrar fácil, pero jamás salir sin nombre. Deliberación, atribución, muro: cada pieza hace su trabajo.'}
+];
+let ti=-1, tprev=null, TOURACT=TOUR_BASE;
 const tbox=document.createElement('div'); tbox.id='tourbox';
 tbox.innerHTML='<h4 id="tt"></h4><p id="tx"></p><div class="tbar"><span class="tn" id="tc"></span><span><button class="tout" onclick="tourEnd()">Salir</button><button class="tprev" onclick="tourGo(ti-1)">← Anterior</button><button class="tnext" id="tnx" onclick="tourGo(ti+1)">Siguiente →</button></span></div>';
 document.body.appendChild(tbox);
-function tourStart(){ tourGo(0); }
+function tourStart(){
+  TOURACT = TOUR_BASE.slice(0,-1);
+  if(rootMode) TOURACT = TOURACT.concat(TOUR_ROOT);
+  TOURACT = TOURACT.concat(TOUR_BASE.slice(-1));
+  TOURACT[0] = Object.assign({}, TOURACT[0], {text: TOURACT[0].text.replace('14 paradas', TOURACT.length+' paradas'+(rootMode?' (incluye el tramo root que desbloqueaste)':''))});
+  tourGo(0);
+}
 function tourEnd(){ if(tprev) tprev.classList.remove('tourhl'); tprev=null; ti=-1; tbox.style.display='none'; wizClose(); }
 function tourGo(i){
   if(i<0) i=0;
-  if(i>=TOUR.length){ tourEnd(); return; }
-  ti=i; const s=TOUR[i];
+  if(i>=TOURACT.length){ tourEnd(); return; }
+  ti=i; const s=TOURACT[i];
   wizClose();
   if(tprev) tprev.classList.remove('tourhl');
   const nb=document.querySelector('nav button[data-t="'+s.tab+'"]'); if(nb) nb.click();
@@ -715,8 +734,8 @@ function tourGo(i){
   if(el){ el.classList.add('tourhl'); tprev=el; el.scrollIntoView({behavior:'smooth',block:'center'}); }
   document.getElementById('tt').textContent=(i+1)+' · '+s.title;
   document.getElementById('tx').textContent=s.text;
-  document.getElementById('tc').textContent='Parada '+(i+1)+' de '+TOUR.length;
-  document.getElementById('tnx').textContent=(i===TOUR.length-1)?'Terminar ✓':'Siguiente →';
+  document.getElementById('tc').textContent='Parada '+(i+1)+' de '+TOURACT.length;
+  document.getElementById('tnx').textContent=(i===TOURACT.length-1)?'Terminar ✓':'Siguiente →';
   tbox.style.display='block';
 }
 </script>
