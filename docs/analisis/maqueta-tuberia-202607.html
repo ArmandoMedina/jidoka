@@ -95,6 +95,18 @@
   .rr input{margin-right:7px}
   .rr small{color:var(--dim);margin-left:22px;display:block}
 
+  /* ---- tour ---- */
+  .tourhl{outline:3px solid var(--acc);outline-offset:3px;border-radius:6px;position:relative;z-index:35}
+  #tourbox{display:none;position:fixed;bottom:18px;left:50%;transform:translateX(-50%);width:540px;max-width:92vw;background:#0d2135;border:1px solid var(--acc);border-radius:12px;padding:16px 20px;z-index:40;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+  #tourbox h4{margin:0 0 6px;font-size:14.5px;color:#fff;text-transform:none;letter-spacing:0}
+  #tourbox p{margin:0 0 12px;font-size:13px;color:var(--txt)}
+  #tourbox .tbar{display:flex;justify-content:space-between;align-items:center}
+  #tourbox .tn{color:var(--dim);font-size:12px}
+  #tourbox button{border:none;border-radius:7px;padding:6px 14px;font-weight:600;cursor:pointer;font-size:12.5px;margin-left:6px}
+  #tourbox .tprev{background:var(--chip);color:var(--txt);border:1px solid var(--line)}
+  #tourbox .tnext{background:var(--acc);color:#06131f}
+  #tourbox .tout{background:none;color:var(--dim);border:none}
+
   /* ---- Wizard modal ---- */
   #ovl{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:50}
   #ovl.on{display:flex;align-items:center;justify-content:center}
@@ -127,6 +139,7 @@
   <button data-t="bandeja">2 · La bandeja — pendiente de parametrizar <span style="background:var(--bad);color:#fff;border-radius:9px;padding:0 7px;font-size:11px;margin-left:4px">5</span></button>
   <button data-t="flujos">3 · Flujos guiados</button>
   <button data-t="huecos">4 · Lo que no estás viendo</button>
+  <button id="tourBtn" style="background:var(--ok);color:#03170a;border:none;font-weight:700;margin-left:auto" onclick="tourStart()">▶ Tour guiado</button>
 </nav>
 
 <div class="tab on" id="tuberia">
@@ -433,7 +446,7 @@ function select(id){
 }
 
 /* ================== Tabs ================== */
-document.querySelectorAll('nav button').forEach(b=>{
+document.querySelectorAll('nav button[data-t]').forEach(b=>{
   b.onclick=()=>{
     document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
@@ -589,6 +602,53 @@ function wizRender(){
   wiz.innerHTML=h;
 }
 ovl.onclick=e=>{ if(e.target===ovl) wizClose(); };
+
+/* ================== Tour guiado ================== */
+const TOUR=[
+ {tab:'tuberia', sel:'header', title:'Bienvenido — esto es la tubería de tu Jidoka',
+  text:'Todas las piezas son reales (censadas de tu repo); ningún botón escribe nada. El tour son 11 paradas por las 4 pestañas. Sal cuando quieras — puedes retomarlo con el mismo botón.'},
+ {tab:'tuberia', sel:'.leg', title:'Los 3 regímenes de gobierno (los colores)',
+  text:'Cada pieza trae su contrato pintado: ROJO = motor sellado (solo Jidoka lo actualiza, por el lazo). ÁMBAR = contrato SAP (invariantes de fábrica + tus extensiones registradas). VERDE = libre (tuyo). El VIOLETA punteado marca las piezas que hoy están en el cajón equivocado.'},
+ {tab:'tuberia', sel:'.chip[data-id="c-arranca"]', do:()=>select('c-arranca'), title:'Una pieza y su cableado real',
+  text:'Acabo de darle clic al arranca por ti: las piezas conectadas se ILUMINAN (lo que lee y lo que corre) y a la derecha ves su régimen, su cableado y cómo se configura hoy vs en tu visión. Así se ve "el cableado" sin marañas: una pieza a la vez.'},
+ {tab:'tuberia', sel:'.chip[data-id="l-ley"]', do:()=>select('l-ley'), title:'La ley — el corazón de la vigilancia',
+  text:'blast-radius.json: 11 áreas de "si tocas X, mantén Y fresco". La tabla completa está en el panel derecho. Dato: solo 1 área bloquea (decisiones); las otras 10 avisan. Hoy se edita a mano — tu visión la autora desde la UI.'},
+ {tab:'tuberia', sel:'.chip[data-id="a-auditor"]', do:()=>select('a-auditor'), title:'"Bajar caminos" ya existe — pero invisible',
+  text:'Mira el auditor: tiene Bash (puede ejecutar) pero NO tiene Edit — no puede tocar lo que juzga. Juez que no es parte, cableado, no prometido. Esto vive en frontmatter que nunca ves; tu visión lo vuelve visible y configurable.'},
+ {tab:'bandeja', sel:'#bandeja .bitem:nth-of-type(2)', title:'La bandeja — tu regla hecha pantalla',
+  text:'"Si se da de alta por fuera, que salga como pendiente de parametrizar." Y ojo: ESTE caso es REAL — ese archivo existe hoy en tu repo, nada lo gobierna y nadie lo lee, pero la linterna lo da por cubierto. El verde miente; la bandeja lo confiesa.'},
+ {tab:'bandeja', sel:'#bandeja .bitem:nth-of-type(1) button', title:'El formulario (este pruébalo tú)',
+  text:'Este botón abre el alta completa: tipo, régimen, cajón, fuerza, quién lo lee, responsable, muro opt-in. Dos detalles a propósito: "motor sellado" NO se ofrece (camino absurdo, recortado) y al final te dice exactamente QUÉ escribiría. Dale clic al terminar el tour.'},
+ {tab:'bandeja', sel:'#bandeja .bitem:nth-of-type(5)', title:'El estira y afloja, resuelto',
+  text:'Alguien quitó el @PRODUCT_BRIEF del arranca por fuera. "Reconciliar" te da DOS salidas legales: restaurar el invariante, o aceptar la desviación CON FIRMA (garantía nula + badge permanente). Lo único que no existe es la desviación muda.'},
+ {tab:'flujos', sel:'#flujos .flowcard:nth-of-type(3)', title:'La única mecánica genuinamente nueva',
+  text:'"Esto NO se puede conectar con esto." Hoy ninguna ley de Jidoka sabe decir eso — merece diseño y ADR propios. Las otras dos tarjetas reusan mecánica que ya existe; esta es la nueva.'},
+ {tab:'huecos', sel:'#huecos .hueco:nth-of-type(1)', title:'Lo que no estabas viendo — el hallazgo gordo',
+  text:'El harness trae permisos deterministas allow-ask-deny: un muro que NO le pide permiso al modelo — tu doctrina pura. La sección está VACÍA, y tu disparo deny-vs-ask lleva meses esperándolo como "catálogo-solo". La doctrina lo pedía; nadie lo cableó.'},
+ {tab:'huecos', sel:'nav', title:'Fin del tour — y qué sigue',
+  text:'Ya viste todo: tubería con contratos, bandeja, formulario, reconciliar y los huecos. Esto ya vive en el repo (docs/analisis/descubrimiento-sistema-configurable). Lo que sigue es tuyo: nombrar el ADR de identidad y elegir la primera rebanada. Ahora juega: el formulario del caso REAL es buen inicio.'}
+];
+let ti=-1, tprev=null;
+const tbox=document.createElement('div'); tbox.id='tourbox';
+tbox.innerHTML='<h4 id="tt"></h4><p id="tx"></p><div class="tbar"><span class="tn" id="tc"></span><span><button class="tout" onclick="tourEnd()">Salir</button><button class="tprev" onclick="tourGo(ti-1)">← Anterior</button><button class="tnext" id="tnx" onclick="tourGo(ti+1)">Siguiente →</button></span></div>';
+document.body.appendChild(tbox);
+function tourStart(){ tourGo(0); }
+function tourEnd(){ if(tprev) tprev.classList.remove('tourhl'); tprev=null; ti=-1; tbox.style.display='none'; }
+function tourGo(i){
+  if(i<0) i=0;
+  if(i>=TOUR.length){ tourEnd(); return; }
+  ti=i; const s=TOUR[i];
+  if(tprev) tprev.classList.remove('tourhl');
+  const nb=document.querySelector('nav button[data-t="'+s.tab+'"]'); if(nb) nb.click();
+  if(s.do) s.do();
+  const el=document.querySelector(s.sel);
+  if(el){ el.classList.add('tourhl'); tprev=el; el.scrollIntoView({behavior:'smooth',block:'center'}); }
+  document.getElementById('tt').textContent=(i+1)+' · '+s.title;
+  document.getElementById('tx').textContent=s.text;
+  document.getElementById('tc').textContent='Parada '+(i+1)+' de '+TOUR.length;
+  document.getElementById('tnx').textContent=(i===TOUR.length-1)?'Terminar ✓':'Siguiente →';
+  tbox.style.display='block';
+}
 </script>
 </body>
 </html>
