@@ -33,7 +33,7 @@
 # o la promesa "matcher byte-fiel" (andon/README.md) se rompe: la bandeja mostraria distinto
 # de lo que el CI bloquea.
 
-param([string]$Repo = '', [string]$Salida = '')
+param([string]$Repo = '', [string]$Salida = '', [switch]$Json)
 
 $repoRoot = if ($Repo) { $Repo } else { Split-Path -Parent $PSScriptRoot }
 $leyPath = Join-Path $repoRoot 'tools/blast-radius.json'
@@ -200,6 +200,17 @@ foreach ($f in $files) {
     continue   # parametrizado o aceptado: fuera de la cola pendiente
   }
   $cola += @{ path = $f; motivo = $c.motivo; detalle = $c.detalle }
+}
+
+# --- Salida JSON (-Json): aditiva. Emite SOLO {"cola":[...],"aceptados":[...]} a stdout
+#     y sale con el mismo exit 0 de siempre. Sin -Json, NADA de esto corre (byte-identico).
+#     TRAMPA PS 5.1: un array de 1 elemento se colapsa a objeto en ConvertTo-Json; el @()
+#     al construir el hashtable raiz fuerza SIEMPRE array (verificado en probar-bandeja).
+#     Sin BOM: Write-Output del string (no Out-File, que mete BOM en PS 5.1).
+if ($Json) {
+  $raizJson = @{ cola = @($cola); aceptados = @($aceptados) }
+  Write-Output ($raizJson | ConvertTo-Json -Depth 6)
+  exit 0
 }
 
 # --- Salida consola ------------------------------------------------------------

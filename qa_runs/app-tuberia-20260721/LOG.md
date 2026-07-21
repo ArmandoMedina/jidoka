@@ -66,3 +66,53 @@
 **Pendiente del cliente:** Gemba de fidelidad (doble clic al `.exe`, aprobar con los ojos). Nada bloquea al agente para R3 salvo esa aprobación de fidelidad (STOP del plan).
 
 ---
+
+## R3 (mitad motor) — el contrato de datos app↔motor — ✅ VERDE
+
+> **La mitad UI (app.js con `invoke`) espera el STOP de fidelidad de R2.** Esta rebanada entrega SOLO la mitad MOTOR: la foto de datos que la app leerá al abrir. `app/` no se tocó (la mitad UI viaja tras la aprobación de fidelidad del cliente).
+
+**Qué se entregó (solo motor PS + una semilla JSON; nada de `app/`, nada de la maqueta):**
+- `tools/bandeja.ps1` — switch **`-Json` aditivo**: con `-Json` emite a stdout SOLO `{"cola":[...],"aceptados":[...]}` (UTF-8 sin BOM, `ConvertTo-Json -Depth 6`) y sale con el exit 0 de siempre. El hashtable raíz envuelve con `@($cola)`/`@($aceptados)` para que un array de 1 elemento NO se colapse a objeto (trampa PS 5.1). Sin `-Json`, la salida de consola es **byte-idéntica** a la de antes (aditivo puro).
+- `tools/estado-ritual.ps1` — mismo `-Json` aditivo: emite `{"comandos":[{"comando","conforme","faltan":[]}]}`. Silencia el `Write-Host` legado solo cuando `-Json` está presente; respeta `-Estricto` en el exit code. Sin `-Json`, byte-idéntico.
+- `tools/tuberia-piezas.json` — **la semilla curada** (spec congelada): las **49 piezas** (`pz`) + **57 aristas** (`E`) + los regímenes (`REGBY`/`REGOVR`/`REGTXT`/`REGCOLOR` → `regimenes.{porTipo,override,texto,color}`) extraídas VERBATIM del bloque de datos de la maqueta. Textos en español con acentos (es CONTENIDO, no motor); UTF-8 **sin BOM**. Campo `path` = ruta real donde la pieza conceptual tiene traza evidente (deducida con `Test-Path`: comandos→`.claude/commands/jidoka/*.md`, asientos→`.claude/agents/*.md`, skills→`.claude/skills/*/SKILL.md`, ley/motor→`tools/*` o `kit/*`, docs→su canónico); `path:null` para conceptos sin archivo único dueño (git/GitHub/CI, disparos/templates/capacidades-como-grupo).
+- `tools/tuberia-datos.ps1` — **el consolidador** (`param([string]$Repo=''`, resuelto como en `bandeja.ps1`). Emite UN JSON consolidado (UTF-8 sin BOM) con las 9 claves `version/repo/generado/piezas/aristas/regimenes/bandeja/ritual/areas`. **No recalcula**: invoca `bandeja.ps1 -Json` y `estado-ritual.ps1 -Json` **en proceso aparte** (`& powershell -NoProfile -ExecutionPolicy Bypass -File ... -Json`) y parsea su stdout. Superpone el estado VIVO sobre cada pieza (`regimen` con override por path de `contratos.json`, `candado` bool, `firma`). Falla CERRADO (exit 1, stderr) sin `blast-radius.json`; `contratos.json` ausente = normal (instancia, sin overrides).
+- Tests extendidos: `probar-bandeja.ps1` (+casos `-Json`), `probar-ritual.ps1` (+caso `-Json`), `probar-app.ps1` (+sección R3-motor). `tuberia-datos.ps1` **no** es un `probar-*` (no entra a las listas de `publicar.ps1`/`andon.yml`).
+
+**Decisiones tomadas:**
+- **49 piezas / 57 aristas, no 37+42.** El texto del plan estimó "37+42"; el bloque de datos REAL de la maqueta congelada tiene **49 `pz` y 57 tuplas `E`**. La semilla es fiel al artefacto (todos los 49 ids verificados idénticos a la maqueta), no a la estimación. El umbral del test es `>=37` → 49 lo cumple con holgura.
+- **Invocación en proceso aparte, NO dot-source.** `bandeja.ps1`/`estado-ritual.ps1` terminan con `exit 0`; dot-sourcearlos correría ese `exit` en el proceso del consolidador y lo mataría antes de emitir. El sub-proceso `& powershell -File ... -Json` aísla el `exit` y deja capturar solo su stdout JSON (calca el molde de `probar-bandeja.ps1`).
+- **El estado vivo manda sobre la spec:** el régimen efectivo por pieza = default de la semilla (`override[id]` o `porTipo[tipo]`), sobrescrito por `contratos.json` si hay un contrato con `regimen` para el `path` real de la pieza. Piezas con `path:null` nunca reciben override.
+
+**Evidencia (esta máquina, 2026-07-21):**
+
+| Gate | Exit | Nota |
+|---|---|---|
+| `tools/probar-bandeja.ps1` | **0** | 21/21. Nuevos: `-Json` exit 0, sin BOM (primer byte ≠ 0xEF), parsea `{cola,aceptados}`, `cola` es array, **`aceptados` array de 1 elemento** (el caso crítico del colapso PS 5.1), y sin `-Json` la consola es idéntica. |
+| `tools/probar-ritual.ps1` | **0** | 19/19. Nuevos: `-Json` sin BOM, parsea `{comandos}`, `comandos` es array, `conforme` es bool, `faltan=[B.md]`, y consola idéntica sin `-Json`. |
+| `tools/probar-app.ps1` | **0** | 14/14. Nueva sección R3-motor: `tuberia-datos.ps1` corre sobre el repo real (exit 0), stdout sin BOM, parsea, trae las claves raíz, **49 piezas (>=37)**. |
+| `tools/probar-publicar.ps1` | **0** | 7/7. El meta-test "todos los `probar-*` en la lista" sigue verde: `tuberia-datos` NO es `probar-*`, no rompe la lista. |
+| `tools/verificar.ps1` | **0** | Sin bloqueo. **3 avisos no bloqueantes** por tocar scripts del motor (`bandeja.ps1`, `estado-ritual.ps1`, `probar-app.ps1` → áreas `atlas`/`barreras`): atlas, `andon/README.md`, grafo de producto. Son consecuencia de extender el motor con un switch aditivo, no doc-drift accionable; el CHANGELOG del release es R7. |
+| `tools/tuberia-datos.ps1` (corrida real) | **0** | Foto consolidada emitida; forma abajo. (El `\| Select -First 5` reporta 255 por cerrar el pipe temprano — SIGPIPE del upstream, no fallo del script; la corrida completa sale 0.) |
+
+**Forma del JSON consolidado (primeras líneas de la corrida real):**
+```
+{
+    "version":  "1.26.0",
+    "repo":  "C:/Repositorio personal/jidoka",
+    "generado":  "2026-07-21T19:09:12Z",
+    "piezas":  [
+      ... 49 piezas con {id,tipo,nombre,tag,desc,confHoy,confVision,path,regimen,candado,firma} ...
+    ],
+    "aristas":  [ ... 57 {de,a,rel} ... ],
+    "regimenes":  { porTipo{13}, override{5}, texto{4}, color{4} },
+    "bandeja":  { cola[34], aceptados[] },   // de bandeja.ps1 -Json (reuso)
+    "ritual":  [ 7 {comando,conforme,faltan} ],  // de estado-ritual.ps1 -Json (reuso)
+    "areas":  [ 12 nombres de blast-radius.json ]
+}
+```
+
+**Demo del cliente (owner: cliente):** abrir la app → la tubería muestra las 49 piezas con SU estado real; crear un doc por fuera → refrescar → aparece en la bandeja. **Requiere la mitad UI (`app/ui/app.js` con `invoke`), que espera el STOP de fidelidad de R2.**
+
+**Pendiente:** el STOP de fidelidad de R2 (Gemba del `.exe`) antes de cablear la mitad UI. La mitad MOTOR (esta rebanada) queda verde y lista para que `app.js` la consuma vía `invoke('cargar_datos')`.
+
+---

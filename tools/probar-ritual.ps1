@@ -70,6 +70,34 @@ Set-Content -LiteralPath (Join-Path $fix 'cmd/estricto.md') -Value "# es`n@A.md`
 $codeE2 = $LASTEXITCODE
 if ($codeE2 -eq 0) { Ok "-Estricto sin estrictos desviados -> exit 0 (no bloquea de mas)" } else { No "-Estricto sano: esperaba exit 0, fue $codeE2" }
 
+# ----- -Json (R3-motor): aditivo. Emite SOLO {comandos:[{comando,conforme,faltan}]}. -----
+# Capturo stdout como BYTES para el assert de sin-BOM via ProcessStartInfo.
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.FileName = 'powershell'
+$psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$scriptFix`" -Json"
+$psi.RedirectStandardOutput = $true
+$psi.UseShellExecute = $false
+$psi.StandardOutputEncoding = New-Object System.Text.UTF8Encoding($false)
+$pj = [System.Diagnostics.Process]::Start($psi)
+$jsonTxt = $pj.StandardOutput.ReadToEnd()
+$pj.WaitForExit()
+$jsonBytes = (New-Object System.Text.UTF8Encoding($false)).GetBytes($jsonTxt)
+
+if ($jsonBytes.Length -ge 1 -and $jsonBytes[0] -ne 0xEF) { Ok "-Json stdout sin BOM (primer byte no es 0xEF)" } else { No "-Json: el stdout empieza con BOM (0xEF)" }
+$jparsed = $null
+try { $jparsed = $jsonTxt | ConvertFrom-Json } catch { }
+if ($jparsed -and $null -ne $jparsed.comandos) { Ok "-Json parsea a {comandos:[...]}" } else { No "-Json no parsea o le falta la clave comandos" }
+if ($jparsed) {
+  if ($jparsed.comandos -is [System.Array]) { Ok "-Json comandos es ARRAY (@() forzo array)" } else { No "-Json comandos NO es array (colapso PS 5.1)" }
+  $c0 = $jparsed.comandos | Where-Object { $_.comando -eq 'cmd/conforme.md' } | Select-Object -First 1
+  if ($c0 -and $c0.conforme -is [bool] -and $c0.conforme -eq $true) { Ok "-Json conforme es bool true para cmd/conforme.md" } else { No "-Json conforme no es bool true para cmd/conforme.md" }
+  $cf = $jparsed.comandos | Where-Object { $_.comando -eq 'cmd/falta.md' } | Select-Object -First 1
+  if ($cf -and $cf.conforme -eq $false -and (@($cf.faltan) -contains 'B.md')) { Ok "-Json falta.md conforme:false con faltan=[B.md]" } else { No "-Json falta.md deberia traer conforme:false y faltan con B.md" }
+}
+# sin -Json la consola no cambio (texto legado, no JSON).
+$outSanidad = (& powershell -NoProfile -File $scriptFix 2>&1 | Out-String)
+if ($outSanidad -match 'Conformidad del estatuto del ritual' -and $outSanidad -match '\[CONFORME\]' -and $outSanidad -notmatch '^\s*\{') { Ok "sin -Json la consola es identica (texto legado, no JSON)" } else { No "sin -Json la salida de consola cambio (aditivo roto)" }
+
 Remove-Item -LiteralPath $fix -Recurse -Force -ErrorAction SilentlyContinue
 
 # ------------------------------------------------------------------ Parte B (repo REAL)

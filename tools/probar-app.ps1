@@ -84,6 +84,43 @@ if (Test-Path -LiteralPath $sembradoPath) {
   }
 }
 
+# ----- R3-motor: el contrato de datos app<->motor (tools/tuberia-datos.ps1). -----
+# La mitad UI (app.js con invoke) lee esta foto al abrir. El test afirma lo que un test SI
+# puede: la foto corre sobre el repo real, parsea, trae sus 7 claves-datos, >=37 piezas, y
+# el stdout es UTF-8 SIN BOM (el JS que lo parsea no tolera un BOM al frente).
+$datosScript = Join-Path $raiz 'tools/tuberia-datos.ps1'
+if (-not (Test-Path -LiteralPath $datosScript)) {
+  No "no existe tools/tuberia-datos.ps1 (el consolidador de datos app<->motor)"
+}
+else {
+  Ok "existe tools/tuberia-datos.ps1 (el contrato de datos app<->motor)"
+  # stdout como bytes: sin BOM.
+  $psi = New-Object System.Diagnostics.ProcessStartInfo
+  $psi.FileName = 'powershell'
+  $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$datosScript`""
+  $psi.RedirectStandardOutput = $true
+  $psi.UseShellExecute = $false
+  $psi.StandardOutputEncoding = New-Object System.Text.UTF8Encoding($false)
+  $pd = [System.Diagnostics.Process]::Start($psi)
+  $datosTxt = $pd.StandardOutput.ReadToEnd()
+  $pd.WaitForExit()
+  $datosExit = $pd.ExitCode
+  $datosBytes = (New-Object System.Text.UTF8Encoding($false)).GetBytes($datosTxt)
+
+  if ($datosExit -eq 0) { Ok "tuberia-datos.ps1 corre sobre el repo real (exit 0)" } else { No "tuberia-datos.ps1: esperaba exit 0, fue $datosExit" }
+  if ($datosBytes.Length -ge 1 -and $datosBytes[0] -ne 0xEF) { Ok "tuberia-datos stdout sin BOM (el JS que lo parsea no tolera BOM)" } else { No "tuberia-datos: el stdout empieza con BOM (0xEF)" }
+  $foto = $null
+  try { $foto = $datosTxt | ConvertFrom-Json } catch { }
+  if ($foto) {
+    Ok "la foto consolidada parsea como JSON"
+    $claves = @('version', 'repo', 'generado', 'piezas', 'aristas', 'regimenes', 'bandeja', 'ritual', 'areas')
+    $faltan = @($claves | Where-Object { -not $foto.PSObject.Properties[$_] })
+    if ($faltan.Count -eq 0) { Ok "la foto trae sus claves raiz (version/repo/generado/piezas/aristas/regimenes/bandeja/ritual/areas)" } else { No "la foto pierde clave(s) raiz: $($faltan -join ', ')" }
+    if (@($foto.piezas).Count -ge 37) { Ok "la foto trae >=37 piezas (censo curado: $(@($foto.piezas).Count))" } else { No "la foto trae solo $(@($foto.piezas).Count) piezas (esperaba >=37)" }
+  }
+  else { No "la foto consolidada no parsea como JSON" }
+}
+
 Write-Host ""
 if ($script:fail -gt 0) {
   Write-Host "== App INCOMPLETA: $($script:fail) fallo(s), $($script:pass) ok. ==" -ForegroundColor Red

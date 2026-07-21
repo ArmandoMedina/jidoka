@@ -14,7 +14,7 @@
 # la autoridad sobre la LEGALIDAD del @; el sello solo ve bytes. La cura completa (clase
 # 'contrato' en la siembra) esta diferida (R3b, ADR 0046). El detector lo confiesa abajo.
 
-param([switch]$Estricto)
+param([switch]$Estricto, [switch]$Json)
 
 $raiz = Split-Path -Parent $PSScriptRoot
 $ledgerPath = Join-Path $raiz 'tools/ritual-gobernado.json'
@@ -38,15 +38,23 @@ function Get-Arrobas($path) {
   return , $out
 }
 
-Write-Host "== Conformidad del estatuto del ritual (@-includes de fabrica) =="
+# --- Con -Json, la salida de consola se silencia (aditivo puro): se acumula el array
+#     $comandos y se emite SOLO {"comandos":[{comando,conforme,faltan[]}]} al final.
+#     Sin -Json, el comportamiento es byte-identico al de siempre. ---
+if (-not $Json) { Write-Host "== Conformidad del estatuto del ritual (@-includes de fabrica) ==" }
 
 if (-not (Test-Path -LiteralPath $ledgerPath)) {
+  if ($Json) {
+    Write-Output (@{ comandos = @() } | ConvertTo-Json -Depth 6)
+    exit 0
+  }
   Write-Host "  (no hay tools/ritual-gobernado.json: actualiza el motor para gobernar los @ de fabrica del ritual.)" -ForegroundColor Yellow
   exit 0
 }
 $ledger = Get-Content -LiteralPath $ledgerPath -Raw | ConvertFrom-Json
 
 $conf = 0; $desv = 0; $estrictoRoto = 0
+$comandos = @()   # -Json: @{ comando; conforme; faltan[] } por comando presente
 foreach ($e in $ledger.comandos) {
   $cmdAbs = Join-Path $raiz $e.comando
   if (-not (Test-Path -LiteralPath $cmdAbs)) { continue }   # comando no presente en este arquetipo/hijo: se salta
@@ -56,16 +64,28 @@ foreach ($e in $ledger.comandos) {
     if ($arrobas -notcontains $req) { $faltan += $req }
   }
   if ($faltan.Count -eq 0) {
-    Write-Host ("  [CONFORME]  {0}" -f $e.comando) -ForegroundColor Green
+    if (-not $Json) { Write-Host ("  [CONFORME]  {0}" -f $e.comando) -ForegroundColor Green }
     $conf++
+    $comandos += @{ comando = "$($e.comando)"; conforme = $true; faltan = @() }
   }
   else {
-    if ($e.estricto) { $etq = '[DESVIADO*]' } else { $etq = '[DESVIADO] ' }
-    Write-Host ("  {0} {1} -- falta(n) el/los @: {2}" -f $etq, $e.comando, ($faltan -join ', ')) -ForegroundColor Yellow
-    Write-Host "               garantia nula: la logica que el comando esperaba inyectar con ese @ no corre."
+    if (-not $Json) {
+      if ($e.estricto) { $etq = '[DESVIADO*]' } else { $etq = '[DESVIADO] ' }
+      Write-Host ("  {0} {1} -- falta(n) el/los @: {2}" -f $etq, $e.comando, ($faltan -join ', ')) -ForegroundColor Yellow
+      Write-Host "               garantia nula: la logica que el comando esperaba inyectar con ese @ no corre."
+    }
     $desv++
     if ($e.estricto) { $estrictoRoto++ }
+    $comandos += @{ comando = "$($e.comando)"; conforme = $false; faltan = @($faltan) }
   }
+}
+
+# -Json: emite el array (envuelto en @() para no colapsar 1 elemento a objeto) y sale con
+# el MISMO exit code de siempre (respeta -Estricto). Sin BOM: Write-Output del string.
+if ($Json) {
+  Write-Output (@{ comandos = @($comandos) } | ConvertTo-Json -Depth 6)
+  if ($Estricto -and $estrictoRoto -gt 0) { exit 1 }
+  exit 0
 }
 
 if ($estrictoRoto -gt 0) { $extra = " ($estrictoRoto estricto)" } else { $extra = '' }
