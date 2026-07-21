@@ -6,7 +6,34 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-20 — El editor del gobierno, parte 2 · **`v1.25.0` CERRADO Y LIBERADO** · PR #115)
+## Dónde estamos (2026-07-21 — **el Gemba de la gestión del flujo** · sesión de diagnóstico, nada construido)
+
+**Sesión de diagnóstico pedida por el cliente, sin código.** El dolor reportado: *«el roadmap y el handoff son un desmadre; todos los temas están siempre abiertos; la IA no se puede centrar; no tengo sensación de avance; no tengo a la vista lo que hay que hacer»* — más *«echo de menos el casting personalizado, las IAs no tienen personalidades ni enfoques»*.
+
+**Se midió, no se opinó.** Informe completo: **[`docs/analisis/gemba-gestion-del-flujo-202607.md`](docs/analisis/gemba-gestion-del-flujo-202607.md)** — 274 MB de transcripciones del lab destilados a 684 mensajes del cliente + forense con números de los dos repos.
+
+**El hallazgo que ordena a los demás:** el método define «hecho» = *lo viste funcionar*, y **los últimos 3 sprints del lab salieron a `main` sin que el cliente los viera** (su HANDOFF tiene una sección literal `🚨 COLA DE GEMBAS VENCIDOS`, 6 sprints, 13 pasos de aceptación sin correr). No falta sensación de avance: **por la propia definición del método, nada está hecho.**
+
+**La tesis, ya verificada:** la Casa del TPS tiene dos pilares — Jidoka (parar ante el defecto) y **Just-In-Time (el flujo)**. Este método construyó el derecho con dientes; **el izquierdo no existe**. **Benchmark completo (4/4 frentes, con fuentes): [`docs/analisis/benchmark-flujo-202607.md`](docs/analisis/benchmark-flujo-202607.md).** Confirmado — con tres correcciones que importan más que la confirmación:
+
+1. **«El wey que organiza a la raza» no existe en Toyota.** Ningún rol humano gestiona el flujo caso por caso: lo hacen el takt, la caja heijunka y el kanban. Los humanos responden excepciones y mejoran el estándar. **No falta un PM: faltan las reglas.** (Y en Scrum el SM tampoco decide alcance ni prioridad — eso es del Product Owner, que aquí ya es el cliente.)
+2. **El apetito se mide en horas de revisión HUMANA**, no de agente: la restricción del sistema es aceptar, no producir. Todo lo demás se subordina a ese número (paso 3 de Goldratt).
+3. **Que la IA vaya «miles de pasos por delante» es SOBREPRODUCCIÓN** — la peor de las 7 mudas según Ohno. En TPS, la estación que va más rápido que el takt **se frena**. No es una fortaleza sin explotar: es un defecto con nombre desde los años 50.
+
+**Qué hacer cuando se retome (una cosa, no cinco):**
+1. Leer los dos informes — el diagnóstico y el benchmark. Única lectura obligatoria.
+2. Contestar las **3 decisiones abiertas** del diagnóstico: el **apetito** (ahora se sabe en qué unidad: horas de revisión del cliente), **orden vs paralelo** (hay objeción registrada al «todo a la vez»), y **la coordinación de escritores** (3 frentes en paralelo + una rama del socio sin subir).
+3. Con eso: `/jidoka:planea` con el QUÉ para aprobación formal. **Las 5 piezas están en el informe; ninguna se poda del alcance.**
+
+**Advertencia que atraviesa los 4 frentes:** ninguna de estas piezas funciona como acuerdo. Kanban depende de presión social que con agentes no existe; Shape Up fue abandonado por dos equipos humanos que aflojaron el apetito; Scrum se gamea relajando la DoD. **Todo tiene que ser código que rechaza la acción** — el benchmark llegó por cuatro caminos ajenos a la tesis que este repo ya tenía escrita.
+
+**Nada se construyó y nada se commiteó.** El working tree trae 4 archivos sin commitear: este HANDOFF, los dos informes y el índice de `docs/analisis/`. La rama y el commit los decide el cliente (regla: nunca directo a `main`).
+
+> **Kaizen de la sesión — el agente confundió «bájame la carga» con «terminamos».** El cliente dijo *«no te voy a poder seguir el ritmo»* y el agente lo interpretó como fin de sesión y se puso a cerrar. Corrección del cliente: *«nada de que seguimos mañana»* — lo que pedía era **delegar el ritmo, no detener el trabajo**: menos lectura para él, no menos avance. Es exactamente el síntoma que el informe describe (takt), ocurriendo dentro de la sesión que lo describe, y con un modo de falla nuevo que vale registrar: **ante la señal «voy más lento que tú», el agente por defecto se detiene en vez de absorber más trabajo.** El ritmo lo marca quien absorbe; el volumen de trabajo, no.
+
+---
+
+## Dónde estuvimos (2026-07-20 — El editor del gobierno, parte 2 · **`v1.25.0` CERRADO Y LIBERADO** · PR #115)
 
 **Sprint "El editor del gobierno, parte 2" (R2–R4) TERMINADO, mergeado y liberado** con la orden nombrada del cliente (*"pr, marge, versión y poda autorizado"*). Récord completo: [`docs/sprints/sprint-editor-gobierno-2-entrega.md`](docs/sprints/sprint-editor-gobierno-2-entrega.md) (con el cuadro de cierre). En una línea: **el gate granular código↔capacidad** (`ligas.json` + `estado-ligas.ps1`, CI desde la base, nombra la capacidad exacta) + **la extensión que lo autora** (clic derecho → "ligar código a capacidad...") + **la linterna con 4 modos legibles** (flechas, anillo rojo del bloqueo duro, tabla del gobierno, treemap Reparto — rework de **2 Gembas del cliente**: 8 hallazgos de uso real + nomenclatura, todos curados en la rama antes del merge) + `.vsix` + ADR 0044. `v1.24.0` quedó **sin tag propio a propósito** (subsumida en `v1.25.0`).
 

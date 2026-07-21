@@ -15,3 +15,4 @@
 | [prueba-de-vida-nodriza-202607](prueba-de-vida-nodriza-202607.md) | Qué piezas del método tienen uso real documentado y cuáles cero señal de vida (un test verde NO es señal de vida) | 2026-07-16 · v1.18.0 |
 | [costo-neto-sgi-202607](costo-neto-sgi-202607.md) | Costo neto del método en el lab real SGI (issue #72) — primer pase manual, reconstruible desde los artefactos citados | 2026-07 · SGI |
 | [veredicto-teatro-vs-real-202607](veredicto-teatro-vs-real-202607.md) | La síntesis de las 5 auditorías: "¿Toyota y Scrum de verdad, o puro teatro?" — respondida con la evidencia cruzada | 2026-07-16 · v1.18.0 |
+| [gemba-gestion-del-flujo-202607](gemba-gestion-del-flujo-202607.md) | Por qué nada cierra: 684 mensajes del cliente + forense con números de los dos repos. El método construyó el pilar Jidoka del TPS y **le falta el de Just-In-Time** (hipótesis, benchmark sin recoger) | 2026-07-21 · v1.25.0 |
