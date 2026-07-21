@@ -42,6 +42,7 @@ jobs:
           .\tools\probar-ligas.ps1;    if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-linterna.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-bandeja.ps1;  if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-ritual.ps1;   if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-anti-pii.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           # Self-tests Jidoka-only (no sembrados): corren solo si estan presentes
           # (un hijo instalado no los tiene, y este mismo workflow se siembra).
@@ -103,6 +104,25 @@ jobs:
             if ($LASTEXITCODE -ne 0) {
               "## Andon - conformidad estructural (docs gobernados)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
               "- Un documento gobernado ESTRICTO altero su estructura: garantia nula. Restaura las secciones requeridas o revierte estricto:true en tools/docs-gobernados.json." | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+              exit 1
+            }
+          }
+          exit 0
+
+      # Conformidad del ESTATUTO del ritual (los @ de fabrica de los comandos) - MURO OPT-IN.
+      # estado-ritual.ps1 -Estricto sale 1 SOLO si un comando marcado 'estricto:true' en el
+      # ledger tools/ritual-gobernado.json perdio un @ de fabrica. Nace APAGADO (todos
+      # estricto:false), asi que este step es verde por defecto (el aviso vive en
+      # /jidoka:arranca). Hermano del step de docs gobernados (ADR 0046).
+      - name: conformidad del estatuto del ritual (muro opt-in)
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Continue'
+          if (Test-Path '.\tools\estado-ritual.ps1') {
+            .\tools\estado-ritual.ps1 -Estricto
+            if ($LASTEXITCODE -ne 0) {
+              "## Andon - conformidad del estatuto del ritual" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+              "- Un comando ESTRICTO perdio un @ de fabrica: garantia nula. Restaura el @ o revierte estricto:true en tools/ritual-gobernado.json." | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
               exit 1
             }
           }

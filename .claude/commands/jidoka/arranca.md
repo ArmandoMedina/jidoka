@@ -34,6 +34,13 @@ La lupa de todo lo demás; léela primero:
 > muro (jidoka KIT-2; el muro es opt-in en CI).
 !`test -f tools/estado-docs.ps1 && powershell -File tools/estado-docs.ps1 || echo "[docs] sin detector de conformidad estructural -- corre instalar.ps1 -Actualizar (o sembrar-manual) para gobernar la estructura de brief/infra/CONTRIBUTING."`
 
+> **¿Y los `@` de fábrica del ritual siguen puestos?** El estatuto de arriba gobierna la *estructura* de
+> los docs; este gobierna los **`@`-includes de fábrica** de los comandos `/jidoka:*`. Un `@` extra que
+> agregaste es **CONFORME** (aditiva legal); si a un comando le falta un `@` de fábrica, sale `DESVIADO`
+> nombrándolo — *garantía nula*: la lógica que ese `@` inyectaba no corre. Reconcilia: restaura el `@` o
+> acéptalo con firma. Aviso, no muro (jidoka CFG-1, el estatuto; muro opt-in en CI).
+!`test -f tools/estado-ritual.ps1 && powershell -File tools/estado-ritual.ps1 || echo "[ritual] sin detector del estatuto del ritual -- corre instalar.ps1 -Actualizar (o sembrar-manual) para gobernar los @ de fabrica de los comandos /jidoka:*."`
+
 - **El QUÉ** (el brief: caso concreto, métrica, autoridad del dominio, criterio de "hecho"):
 @product/PRODUCT_BRIEF.md
 
