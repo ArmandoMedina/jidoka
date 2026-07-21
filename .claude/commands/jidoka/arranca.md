@@ -29,7 +29,7 @@ La lupa de todo lo demás; léela primero:
 
 > **El `@` existe, ¿pero tiene las secciones?** El preflight de arriba verifica que el archivo **esté**;
 > este verifica que su **estructura** siga el molde gobernado. Un `CONTRIBUTING`/`brief`/`infra` presente
-> pero **destripado o reestructurado** pasa el `[FALTA]` y aun así **inyecta basura** al `@`. Modelo SAP:
+> pero **destripado o reestructurado** pasa el `[FALTA]` y aun así **inyecta basura** al `@`. Gobierno por estatuto:
 > el contenido varía libre, las **secciones** no — `DESVIADO` = *garantía nula* sobre ese doc. Aviso, no
 > muro (jidoka KIT-2; el muro es opt-in en CI).
 !`test -f tools/estado-docs.ps1 && powershell -File tools/estado-docs.ps1 || echo "[docs] sin detector de conformidad estructural -- corre instalar.ps1 -Actualizar (o sembrar-manual) para gobernar la estructura de brief/infra/CONTRIBUTING."`

@@ -12,7 +12,7 @@ El cliente hizo análisis de flujos en un hijo (lab de rescate) y sintió que "l
 - Los documentos **instancia-de-template** que el ritual inyecta con `@` — `PRODUCT_BRIEF`, `infra`, `CONTRIBUTING` — **no** los cubre nada: el sello solo hashea el motor y las plantillas, no el doc **lleno** del hijo. Y el hash es la herramienta **equivocada** para ellos, porque su contenido varía a propósito por proyecto (un hash siempre diría "modificado").
 - Donde había template (brief, infra) el hijo **conformó** (brief 14/14 secciones idénticas en orden; infra molde + 1 aditiva). Donde **no** había template (`CONTRIBUTING`, que se sembraba como stub inline de 4 líneas) cada repo inventó su estructura — tres versiones sin relación. Ese era el hueco.
 
-El modelo mental del cliente es **SAP**: puedes configurar/llenar el sistema, pero si **alteras la estructura** gobernada, *garantía nula* — el proveedor ya no garantiza que funcione. Aplicado aquí: si el hijo destripa o reestructura `CONTRIBUTING`, la lógica que el ritual inyecta con `@CONTRIBUTING.md` opera sobre basura, y el preflight de existencia (jidoka#104) no lo caza porque el archivo **sí existe**.
+El modelo mental del cliente es el **estatuto**: puedes configurar/llenar el sistema, pero si **alteras la estructura** gobernada, *garantía nula* — el garante ya no garantiza que funcione. Aplicado aquí: si el hijo destripa o reestructura `CONTRIBUTING`, la lógica que el ritual inyecta con `@CONTRIBUTING.md` opera sobre basura, y el preflight de existencia (jidoka#104) no lo caza porque el archivo **sí existe**.
 
 ## Decisión
 
@@ -49,3 +49,7 @@ Se añade el **hermano estructural** del sello: gobierno por **secciones**, no p
 - El motor gana `tools/estado-docs.ps1`, `tools/docs-gobernados.json`, `tools/probar-docs.ps1` (sembrados; el test corre en el smoke local y en CI). `probar-publicar` los exige en el preflight (invariante existente).
 - Los hijos existentes con un `CONTRIBUTING` viejo o reestructurado verán un **aviso** (no un muro) al abrir sesión — el nudge honesto que el cliente buscaba. Encienden el muro cuando quieran, por doc, en su ledger.
 - Límite v0 aceptado (grieta #3): el detector mide **presencia** de secciones, no su **contenido** — la verdad del contenido la pone el humano.
+
+## Enmienda — 2026-07-21 (rename del concepto)
+
+Este ADR introdujo el concepto por una **analogía con una marca de un tercero** (un ERP). El 2026-07-21, por orden del cliente, esa analogía se retiró para no depender de una marca ajena, y el concepto pasó a llamarse **estatuto**: el régimen de gobierno por estructura donde las secciones son invariantes de fábrica, el contenido es libre, y alterar la estructura gobernada = *garantía nula*. El texto de arriba ya usa el nombre nuevo. La decisión de identidad —los tres regímenes por pieza (`motor` / `estatuto` / `libre`)— se formaliza en [ADR 0046](0046-contratos-y-regimenes.md). No cambia nada de la mecánica: solo el nombre.

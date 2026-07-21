@@ -72,7 +72,7 @@
 
   /* ---- regímenes ---- */
   .chip.rmotor{border-left:3px solid var(--bad)}
-  .chip.rsap{border-left:3px solid var(--warn)}
+  .chip.restatuto{border-left:3px solid var(--warn)}
   .chip.rlibre{border-left:3px solid var(--ok)}
   .chip.rmal{border-left:3px dashed var(--violet)}
   .leg{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--dim);padding:12px 22px 0}
@@ -147,9 +147,9 @@
   <div class="leg">
     <span style="color:var(--txt);font-weight:600">Régimen de cada pieza:</span>
     <span><i style="background:var(--bad)"></i>motor sellado — solo Jidoka lo actualiza (el lazo)</span>
-    <span><i style="background:var(--warn)"></i>contrato SAP — invariantes de fábrica + tus extensiones</span>
+    <span><i style="background:var(--warn)"></i>estatuto — invariantes de fábrica + tus extensiones</span>
     <span><i style="background:var(--ok)"></i>libre — tuyo, solo se registra</span>
-    <span><i style="background:var(--violet)"></i>⚠ hoy en el cajón equivocado (hash; debería ser SAP)</span>
+    <span><i style="background:var(--violet)"></i>⚠ hoy en el cajón equivocado (hash; debería ser estatuto)</span>
   </div>
   <div id="layout">
     <div id="cats"></div>
@@ -301,7 +301,7 @@ pz('gh-branch','GitHub — el muro','branch protection','server-side', 'Lo que c
 /* --- Ley y ledgers --- */
 pz('l-ley','La ley y los ledgers','blast-radius.json','11 áreas', 'LA ley única: 11 áreas de "si tocas X, mantén Y fresco". La leen el verificador, el router, los Stop hooks, el CI (desde la base) y la linterna. 1 sola área bloquea (decisiones); 10 avisan.','Editando el JSON a mano (justo lo que tu visión mata).','Cada regla se AUTORA desde la UI: área, fuente, doc, fuerza. La extensión ya empezó (ligas); esto es el resto.',{tabla:'areas'});
 pz('l-ligas','La ley y los ledgers','ligas.json','1 liga', 'El ledger granular código↔capacidad. Hoy: 1 liga (linterna-extension → AND-1, avisa). La única pieza que YA se autora desde UI (clic derecho en VS Code).','La extensión de VS Code (¡ya!).','El molde a copiar para todo lo demás.');
-pz('l-docsgob','La ley y los ledgers','docs-gobernados.json','3 docs', 'El gobierno por SECCIONES (modelo SAP): brief, infra y CONTRIBUTING deben conservar su estructura; el contenido es libre. estricto:false = aviso.','JSON a mano.','Checkbox "gobernar estructura" al dar de alta un doc.');
+pz('l-docsgob','La ley y los ledgers','docs-gobernados.json','3 docs', 'El gobierno por SECCIONES (gobierno por estatuto): brief, infra y CONTRIBUTING deben conservar su estructura; el contenido es libre. estricto:false = aviso.','JSON a mano.','Checkbox "gobernar estructura" al dar de alta un doc.');
 pz('l-manifiesto','La ley y los ledgers','manifiesto de siembra','36 piezas', 'Qué baja a los repos hijos: 36 piezas de mecánica, 2 arquetipos de ley (docs-as-code, code-first), 5-6 stubs. La extensión es Jidoka-only a propósito.','kit/.jidoka/instalar/manifiesto.json a mano.','La UI mostraría qué pieza viaja y cuál no — y por qué.');
 
 /* --- Motor --- */
@@ -377,14 +377,14 @@ const ADJ = {};
 E.forEach(([a,b,rel])=>{ (ADJ[a]=ADJ[a]||[]).push({id:b,rel,dir:'→'}); (ADJ[b]=ADJ[b]||[]).push({id:a,rel,dir:'←'}); });
 
 /* regímenes de gobierno (el contrato de cada pieza) */
-const REGBY={'Ritual — comandos':'mal','Asientos — agentes':'sap','Skills — oficios':'motor','Hooks de Claude':'motor','git — el cinturón local':'motor','GitHub — el muro':'motor','La ley y los ledgers':'sap','El motor (tools/)':'motor','Doctrina ejecutable':'motor','Templates del kit':'motor','Producto — capacidades':'libre','Extensión VS Code':'motor','Docs de instancia':'sap'};
+const REGBY={'Ritual — comandos':'mal','Asientos — agentes':'estatuto','Skills — oficios':'motor','Hooks de Claude':'motor','git — el cinturón local':'motor','GitHub — el muro':'motor','La ley y los ledgers':'estatuto','El motor (tools/)':'motor','Doctrina ejecutable':'motor','Templates del kit':'motor','Producto — capacidades':'libre','Extensión VS Code':'motor','Docs de instancia':'estatuto'};
 const REGOVR={'l-ligas':'libre','l-manifiesto':'motor','doc-handoff':'libre','doc-roadmap':'libre','doc-changelog':'libre'};
 const REGTXT={
  motor:['motor sellado','Invariante de fábrica: lo actualiza el lazo (-Actualizar). Editarlo por fuera = DIVERGE; borrarlo sin ADR = BLOQUEA (no-borres-el-motor).'],
- sap:['contrato SAP','Invariantes de fábrica (probados por Jidoka) + tus extensiones, registradas y legales. Romper un invariante = DESVIADO, garantía nula — aviso local, muro opt-in en CI.'],
+ estatuto:['estatuto','Invariantes de fábrica (probados por Jidoka) + tus extensiones, registradas y legales. Romper un invariante = DESVIADO, garantía nula — aviso local, muro opt-in en CI.'],
  libre:['libre','Tuyo. Jidoka lo registra (para que el verde no mienta) pero no opina de su contenido.'],
- mal:['⚠ mal cajón hoy','HOY se gobierna por hash como si fuera motor: agregar un @ legal se acusa IGUAL que quitar el brief. DEBERÍA ser contrato SAP: los @ de fábrica y los pasos del ritual son invariantes; tus @ extra, extensiones registradas.']};
-const REGCOLOR={motor:'var(--bad)',sap:'var(--warn)',libre:'var(--ok)',mal:'var(--violet)'};
+ mal:['⚠ mal cajón hoy','HOY se gobierna por hash como si fuera motor: agregar un @ legal se acusa IGUAL que quitar el brief. DEBERÍA ser estatuto: los @ de fábrica y los pasos del ritual son invariantes; tus @ extra, extensiones registradas.']};
+const REGCOLOR={motor:'var(--bad)',estatuto:'var(--warn)',libre:'var(--ok)',mal:'var(--violet)'};
 function regOf(id){return REGOVR[id]||REGBY[P[id].tipo]||'libre';}
 
 /* tabla de áreas para el detalle de la ley */
@@ -586,7 +586,7 @@ function wizRender(){
       <label class="f">¿Qué tipo de pieza es? (del catálogo real de templates)</label>
       <select id="f-tipo"><option value="glosario"${W.pre.tipo==='glosario'?' selected':''}>Glosario del dominio</option><option value="analisis"${W.pre.tipo==='analisis'?' selected':''}>Análisis / informe</option><option value="proceso">Proceso</option><option value="guia">Guía operativa</option><option value="libre"${W.pre.tipo==='libre'?' selected':''}>Otro / libre</option></select>
       <label class="f">Régimen de gobierno</label>
-      <label class="rr"><input type="radio" name="f-reg" value="sap" checked>🟡 Estructura gobernada <small>molde con secciones; contenido libre; desviarse = DESVIADO, garantía nula</small></label>
+      <label class="rr"><input type="radio" name="f-reg" value="estatuto" checked>🟡 Estructura gobernada <small>molde con secciones; contenido libre; desviarse = DESVIADO, garantía nula</small></label>
       <label class="rr"><input type="radio" name="f-reg" value="libre">🟢 Libre, pero REGISTRADO <small>declarado a propósito — deja de contar como "cubierto por accidente"</small></label>
       <div class="hint">🔴 "Motor sellado" no aparece: ese régimen solo lo trae Jidoka de fábrica. La UI recorta el camino absurdo.</div>
       <label class="f">Vigilancia — ¿en qué cajón vive?</label>
@@ -629,7 +629,7 @@ function wizRender(){
       <div class="confbox">Régimen actual: <b>${rt0[0]}</b></div>
       <label class="f">Nuevo régimen</label>
       <label class="rr"><input type="radio" name="rc-reg" value="motor">🔴 Motor sellado <small>solo el lazo lo actualiza; borrarlo exige ADR</small></label>
-      <label class="rr"><input type="radio" name="rc-reg" value="sap" checked>🟡 Contrato SAP <small>invariantes fijos + extensiones registradas</small></label>
+      <label class="rr"><input type="radio" name="rc-reg" value="estatuto" checked>🟡 Estatuto <small>invariantes fijos + extensiones registradas</small></label>
       <label class="rr"><input type="radio" name="rc-reg" value="libre">🟢 Libre <small>registrado, sin opinión del gobierno</small></label>
       <label class="ck" style="margin-top:12px"><input type="checkbox" id="rc-lock">🔒 <b>Candado a la IA</b> <small style="display:block;margin-left:22px;color:var(--dim)">deny determinista del harness + hook PreToolUse: el agente NO PUEDE tocar esta pieza — ni queriendo, ni "sin que nadie se dé cuenta". Todo intento se bloquea en el momento y se acusa en la bandeja. Este sí es muro real, y vive fuera del LLM.</small></label>
       <label class="f">¿Por qué? (va al registro)</label>
@@ -671,7 +671,7 @@ const TOUR_BASE=[
  {tab:'tuberia', sel:'header', title:'Bienvenido — esto es la tubería de tu Jidoka',
   text:'Todas las piezas son reales (censadas de tu repo); ningún botón escribe nada. El tour son 14 paradas por las 4 pestañas — incluye abrir los pop-ups por ti y explicártelos por dentro. Sal cuando quieras; se retoma con el mismo botón.'},
  {tab:'tuberia', sel:'.leg', title:'Los 3 regímenes de gobierno (los colores)',
-  text:'Cada pieza trae su contrato pintado: ROJO = motor sellado (solo Jidoka lo actualiza, por el lazo). ÁMBAR = contrato SAP (invariantes de fábrica + tus extensiones registradas). VERDE = libre (tuyo). El VIOLETA punteado marca las piezas que hoy están en el cajón equivocado.'},
+  text:'Cada pieza trae su contrato pintado: ROJO = motor sellado (solo Jidoka lo actualiza, por el lazo). ÁMBAR = estatuto (invariantes de fábrica + tus extensiones registradas). VERDE = libre (tuyo). El VIOLETA punteado marca las piezas que hoy están en el cajón equivocado.'},
  {tab:'tuberia', sel:'.chip[data-id="c-arranca"]', do:()=>select('c-arranca'), title:'Una pieza y su cableado real',
   text:'Acabo de darle clic al arranca por ti: las piezas conectadas se ILUMINAN (lo que lee y lo que corre) y a la derecha ves su régimen, su cableado y cómo se configura hoy vs en tu visión. Así se ve "el cableado" sin marañas: una pieza a la vez.'},
  {tab:'tuberia', sel:'.chip[data-id="l-ley"]', do:()=>select('l-ley'), title:'La ley — el corazón de la vigilancia',
