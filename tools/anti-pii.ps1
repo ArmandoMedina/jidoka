@@ -47,9 +47,7 @@ $dominiosOk = @('jidoka.local','example.com','example.org','example.net')
 $sufijosOk  = @('.local','.test','.example','.invalid','noreply.github.com')
 $segsOk     = @('x','usuario','user','tu-usuario','nombre','ruta','you','username','tu','yo','miusuario','tuusuario')
 # La propia maquinaria del gate contiene patrones por naturaleza: se excluye.
-# probar-ritual.ps1: fixtures sinteticos @X.md del self-test del estatuto del ritual, no PII.
-$excluidos  = @('tools/anti-pii.ps1','tools/probar-anti-pii.ps1','tools/anti-pii.denylist.example.txt',
-                'tools/probar-ritual.ps1')
+$excluidos  = @('tools/anti-pii.ps1','tools/probar-anti-pii.ps1','tools/anti-pii.denylist.example.txt')
 $extsOk     = @('.md','.json','.yml','.yaml','.txt','.ps1')
 
 $reEmail   = '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'
