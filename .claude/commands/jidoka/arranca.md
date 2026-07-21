@@ -53,6 +53,9 @@ La lupa de todo lo demás; léela primero:
 - **El DÓNDE — dónde se quedó la última sesión**: el relevo se lee y **se limpia** al abrir; interprétalo contra git (§1a), no al revés:
 @HANDOFF.md
 
+<!-- Punto de insercion de @ del cliente (parametrizar desde la extension). Aditiva legal: el estatuto del ritual acepta un @ extra. No borres el marcador. -->
+<!-- jidoka:arrobas -->
+
 - **El plan de trabajo del día**, si una sesión anterior lo dejó a medias (efímero, fuera de git — ADR 0006):
 !`test -f .jidoka/plan-actual.md && cat .jidoka/plan-actual.md || echo "(no hay plan de trabajo activo — empezamos limpio)"`
 

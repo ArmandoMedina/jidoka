@@ -39,19 +39,34 @@
         "command": "jidoka.quitarLiga",
         "title": "Jidoka: quitar liga codigo-capacidad...",
         "category": "Jidoka"
+      },
+      {
+        "command": "jidoka.parametrizar",
+        "title": "Jidoka: parametrizar...",
+        "category": "Jidoka"
+      },
+      {
+        "command": "jidoka.verBandeja",
+        "title": "Jidoka: ver la bandeja (pendiente de parametrizar)",
+        "category": "Jidoka"
       }
     ],
     "menus": {
       "explorer/context": [
         {
-          "command": "jidoka.ligarCapacidad",
+          "command": "jidoka.parametrizar",
           "when": "resourceScheme == file",
           "group": "9_jidoka@1"
         },
         {
-          "command": "jidoka.quitarLiga",
+          "command": "jidoka.ligarCapacidad",
           "when": "resourceScheme == file",
           "group": "9_jidoka@2"
+        },
+        {
+          "command": "jidoka.quitarLiga",
+          "when": "resourceScheme == file",
+          "group": "9_jidoka@3"
         }
       ]
     }
