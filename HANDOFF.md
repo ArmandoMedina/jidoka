@@ -15,7 +15,8 @@
 - ✅ **M2**: R4 cierre con orden fijo + `[contrato-changelog]` · R5 límite WIP (`estado-flujo.ps1 -Gate` planta a `planea`).
 - ✅ **M3**: R6 vista `-Json` + primer hook `SessionStart` · R7 reporte sin jerga con hill chart · R8a reparto (`product/casting.md`: autoridad-del-dominio ≠ dueño-operador) · R8b los 4 asientos piensan distinto («Lo que noté por mi cuenta» obligatorio).
 - ✅ Kit cableado (mordida real: los stubs viejos violaban los contratos — un hijo nacía bloqueado; curado, `probar-sembrar` 38/38, `probar-instalador` 67/67) · capacidad `FLU-1` al grafo (`auditar` íntegro) · **merge de `origin/main` (PR #119, el descubrimiento) reconciliado bajo los contratos nuevos**.
-- 🔨 **Falta del cierre:** review adversarial del diff completo · suite completa post-merge · evidencia `qa_runs/flujo-20260721/LOG.md` · registrar el Gemba del sprint en `flujo.json` · PR (merge con orden nombrada del cliente).
+- ✅ Suite completa post-merge (16/16 + auditar) · evidencia `qa_runs/flujo-20260721/LOG.md` · **Gemba del sprint REGISTRADO en `flujo.json`** (`flu-1-pilar-de-flujo`, aceptado:false — `planea` queda plantado hasta que el cliente lo acepte: el muro mordiéndose la cola a propósito).
+- 🔨 **Falta:** veredicto del review adversarial de la rama (corriendo) · push + PR · **merge con orden nombrada del cliente** · el Gemba del cliente (pasos en el plan, sin terminal).
 
 **Kaizen vigente:** ante la señal «voy más lento que tú», el agente por defecto se detiene en vez de absorber más trabajo — el ritmo lo marca quien absorbe; el volumen, no.
 
