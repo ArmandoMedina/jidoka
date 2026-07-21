@@ -97,7 +97,7 @@
 
   /* ---- tour ---- */
   .tourhl{outline:3px solid var(--acc);outline-offset:3px;border-radius:6px;position:relative;z-index:35}
-  #tourbox{display:none;position:fixed;bottom:18px;left:50%;transform:translateX(-50%);width:540px;max-width:92vw;background:#0d2135;border:1px solid var(--acc);border-radius:12px;padding:16px 20px;z-index:40;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+  #tourbox{display:none;position:fixed;bottom:18px;left:50%;transform:translateX(-50%);width:540px;max-width:92vw;background:#0d2135;border:1px solid var(--acc);border-radius:12px;padding:16px 20px;z-index:60;box-shadow:0 8px 30px rgba(0,0,0,.5)}
   #tourbox h4{margin:0 0 6px;font-size:14.5px;color:#fff;text-transform:none;letter-spacing:0}
   #tourbox p{margin:0 0 12px;font-size:13px;color:var(--txt)}
   #tourbox .tbar{display:flex;justify-content:space-between;align-items:center}
@@ -606,7 +606,7 @@ ovl.onclick=e=>{ if(e.target===ovl) wizClose(); };
 /* ================== Tour guiado ================== */
 const TOUR=[
  {tab:'tuberia', sel:'header', title:'Bienvenido — esto es la tubería de tu Jidoka',
-  text:'Todas las piezas son reales (censadas de tu repo); ningún botón escribe nada. El tour son 13 paradas por las 4 pestañas. Sal cuando quieras — puedes retomarlo con el mismo botón.'},
+  text:'Todas las piezas son reales (censadas de tu repo); ningún botón escribe nada. El tour son 14 paradas por las 4 pestañas — incluye abrir los pop-ups por ti y explicártelos por dentro. Sal cuando quieras; se retoma con el mismo botón.'},
  {tab:'tuberia', sel:'.leg', title:'Los 3 regímenes de gobierno (los colores)',
   text:'Cada pieza trae su contrato pintado: ROJO = motor sellado (solo Jidoka lo actualiza, por el lazo). ÁMBAR = contrato SAP (invariantes de fábrica + tus extensiones registradas). VERDE = libre (tuyo). El VIOLETA punteado marca las piezas que hoy están en el cajón equivocado.'},
  {tab:'tuberia', sel:'.chip[data-id="c-arranca"]', do:()=>select('c-arranca'), title:'Una pieza y su cableado real',
@@ -617,16 +617,18 @@ const TOUR=[
   text:'Mira el auditor: tiene Bash (puede ejecutar) pero NO tiene Edit — no puede tocar lo que juzga. Juez que no es parte, cableado, no prometido. Esto vive en frontmatter que nunca ves; tu visión lo vuelve visible y configurable.'},
  {tab:'bandeja', sel:'#bandeja .bitem:nth-of-type(2)', title:'La bandeja — tu regla hecha pantalla',
   text:'"Si se da de alta por fuera, que salga como pendiente de parametrizar." Y ojo: ESTE caso es REAL — ese archivo existe hoy en tu repo, nada lo gobierna y nadie lo lee, pero la linterna lo da por cubierto. El verde miente; la bandeja lo confiesa.'},
- {tab:'bandeja', sel:'#bandeja .bitem:nth-of-type(1) button', title:'El formulario (este pruébalo tú)',
-  text:'Este botón abre el alta completa: tipo, régimen, cajón, fuerza, quién lo lee, responsable, muro opt-in. Dos detalles a propósito: "motor sellado" NO se ofrece (camino absurdo, recortado) y al final te dice exactamente QUÉ escribiría. Dale clic al terminar el tour.'},
- {tab:'bandeja', sel:'#bandeja .bitem:nth-of-type(5)', title:'El estira y afloja, resuelto',
-  text:'Alguien quitó el @PRODUCT_BRIEF del arranca por fuera. "Reconciliar" te da DOS salidas legales: restaurar el invariante, o aceptar la desviación CON FIRMA (garantía nula + badge permanente). Lo único que no existe es la desviación muda.'},
- {tab:'flujos', sel:'#flujos .flowcard:nth-of-type(1)', title:'El wizard corto — el ancestro del formulario',
-  text:'El flujo rápido de 3 preguntas que nació del caso del glosario: aviso → qué tipo es → avisa o bloquea → quién lo lee. Es el MISMO acto que el formulario de la bandeja, en versión express. Decisión de diseño pendiente (tuya): ¿wizard corto en el momento del aviso y formulario completo en el alta consciente — o uno solo?'},
- {tab:'flujos', sel:'#flujos .flowcard:nth-of-type(2)', title:'Alta de agente — el oficio decide todo',
-  text:'Fíjate en el truco de este flujo: te pregunta UNA cosa (el oficio) y deriva el resto — el modelo recomendado y las herramientas recortadas (buscar = solo lectura; juzgar = ejecuta pero no edita). No hay 20 preguntas. Eso es "bajar la cantidad de caminos" aplicado a la propia alta.'},
- {tab:'flujos', sel:'#flujos .flowcard:nth-of-type(3)', title:'La única mecánica genuinamente nueva',
-  text:'"Esto NO se puede conectar con esto." Hoy ninguna ley de Jidoka sabe decir eso — merece diseño y ADR propios. Las otras dos tarjetas reusan mecánica que ya existe; esta es la nueva.'},
+ {tab:'bandeja', do:()=>wizStart('alta',{ruta:'docs/glosario-del-dominio.md',tipo:'glosario'}), sel:'#wiz', title:'El formulario, por dentro',
+  text:'Lo abrí por ti. Recórrelo de arriba a abajo: tipo (del catálogo real), RÉGIMEN (fíjate: "motor sellado" no se ofrece — ese camino absurdo está recortado), cajón de vigilancia, fuerza, LECTURA (los checkboxes que escriben los @ en los comandos), responsable y el muro opt-in de CI. Burocracia de UNA vez.'},
+ {tab:'bandeja', do:()=>{ if(W.tipo!=='alta'||W.paso!==1){ wizStart('alta',{ruta:'docs/glosario-del-dominio.md',tipo:'glosario'}); } altaResumen(); }, sel:'#wiz .escribe', title:'Y esto es lo que escribiría',
+  text:'El final de todo flujo: el contrato de salida. Te dice EXACTAMENTE qué tocaría (la ley, docs-gobernados, los @) — y solo con tu OK, nunca solo. El elemento sale de la bandeja y la linterna lo pinta gobernado de verdad. En cartón: no escribió nada.'},
+ {tab:'bandeja', do:()=>wizStart('rec'), sel:'#wiz', title:'Reconciliar — el estira y afloja, por dentro',
+  text:'El caso: alguien quitó el @PRODUCT_BRIEF del arranca por fuera. DOS salidas legales: restaurar el invariante, o aceptar la desviación CON FIRMA (queda quién y cuándo, garantía nula, badge permanente). Lo único que no existe es quitarlo en silencio.'},
+ {tab:'flujos', do:()=>wizStart('doc'), sel:'#wiz', title:'El wizard corto — el ancestro del formulario',
+  text:'El flujo express de 3 preguntas que nació del caso del glosario. Es el MISMO acto que el formulario de la bandeja, en versión rápida. Decisión de diseño pendiente (tuya): ¿wizard corto en el momento del aviso y formulario completo en el alta consciente — o uno solo?'},
+ {tab:'flujos', do:()=>wizStart('agente'), sel:'#wiz', title:'Alta de agente — el oficio decide todo',
+  text:'Una sola pregunta (el oficio) y deriva el resto: el modelo recomendado y las herramientas recortadas (buscar = solo lectura; juzgar = ejecuta pero no edita). No hay 20 preguntas. Eso es "bajar la cantidad de caminos" aplicado a la propia alta.'},
+ {tab:'flujos', do:()=>wizStart('prohib'), sel:'#wiz', title:'La única mecánica genuinamente nueva',
+  text:'"Esto NO se puede conectar con esto." Hoy ninguna ley de Jidoka sabe decirlo — merece diseño y ADR propios. Dato: dos de sus tres variantes ya tienen dónde cablearse HOY (los permisos deny del harness y PreToolUse); solo una pide ledger nuevo.'},
  {tab:'huecos', sel:'#huecos .hueco:nth-of-type(1)', title:'Lo que no estabas viendo — el hallazgo gordo',
   text:'El harness trae permisos deterministas allow-ask-deny: un muro que NO le pide permiso al modelo — tu doctrina pura. La sección está VACÍA, y tu disparo deny-vs-ask lleva meses esperándolo como "catálogo-solo". La doctrina lo pedía; nadie lo cableó.'},
  {tab:'huecos', sel:'nav', title:'Fin del tour — y qué sigue',
@@ -637,11 +639,12 @@ const tbox=document.createElement('div'); tbox.id='tourbox';
 tbox.innerHTML='<h4 id="tt"></h4><p id="tx"></p><div class="tbar"><span class="tn" id="tc"></span><span><button class="tout" onclick="tourEnd()">Salir</button><button class="tprev" onclick="tourGo(ti-1)">← Anterior</button><button class="tnext" id="tnx" onclick="tourGo(ti+1)">Siguiente →</button></span></div>';
 document.body.appendChild(tbox);
 function tourStart(){ tourGo(0); }
-function tourEnd(){ if(tprev) tprev.classList.remove('tourhl'); tprev=null; ti=-1; tbox.style.display='none'; }
+function tourEnd(){ if(tprev) tprev.classList.remove('tourhl'); tprev=null; ti=-1; tbox.style.display='none'; wizClose(); }
 function tourGo(i){
   if(i<0) i=0;
   if(i>=TOUR.length){ tourEnd(); return; }
   ti=i; const s=TOUR[i];
+  wizClose();
   if(tprev) tprev.classList.remove('tourhl');
   const nb=document.querySelector('nav button[data-t="'+s.tab+'"]'); if(nb) nb.click();
   if(s.do) s.do();
