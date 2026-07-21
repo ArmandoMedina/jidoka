@@ -50,6 +50,12 @@ Llena este cuadro con **hechos** (números, nombres, sí/no — nada de "creo qu
 
 Cierra con trazabilidad lo que ya no vive; borra solo el andamiaje que nunca fue contenido. **Si dudas entre borrar y marcar → marca.** El plan de trabajo del día (`/.jidoka/plan-actual.md`) se poda aquí.
 
+**El paso duro de la poda: corre `tools/expirar.ps1` (ejecutar, no simular).** El circuit breaker mueve lo vencido del `ROADMAP.md` a `docs/MUERTOS.md` con fecha y motivo, por clase de servicio (`tools/flujo.json`). Así la poda deja de depender de que alguien se acuerde: lo caduco muere por script, no por juicio, y revivir un muerto es re-proponerlo con alta nueva (nada vuelve solo).
+
+```
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/expirar.ps1
+```
+
 ## 3. Commitea la evidencia del Gemba (paso obligatorio, no cortesía)
 
 El bulto de `qa_runs/` está gitignored. La evidencia **citada** desde HANDOFF/CHANGELOG se commitea selectivamente:

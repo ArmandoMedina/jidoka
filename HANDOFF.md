@@ -13,9 +13,8 @@
 **Los insumos (committeados en la rama):** el diagnóstico [`docs/analisis/gemba-gestion-del-flujo-202607.md`](docs/analisis/gemba-gestion-del-flujo-202607.md) y el benchmark [`docs/analisis/benchmark-flujo-202607.md`](docs/analisis/benchmark-flujo-202607.md). Decisiones del cliente registradas en el plan (apetito 4h/1h diarias → WIP ~8/~3; «quiero todo»; Tauri solo la tubería; CHANGELOG con estructura fija; roles: autoridad-del-dominio ≠ dueño-operador).
 
 **Avance:**
-- ✅ R0: plan aprobado, archivado y registrado en el índice de sprints.
-- 🔨 R1 (contrato del HANDOFF): **este propio archivo es el primer artefacto migrado** — histórico creado, gate en construcción.
-- ⬜ R2–R8b: pendientes, en orden.
+- ✅ R0 plan aprobado y archivado · ✅ **M1 COMPLETO**: R1 contrato del HANDOFF (este archivo, 419→40 líneas, gate mordiendo), R2 contrato del ROADMAP (140→55, 32 vivos en 4 clases), R3 expiración automática (`expirar.ps1` → `docs/MUERTOS.md`, paso duro del cierre + aviso del arranca).
+- ⬜ M2 (R4 cierre estandarizado + contrato CHANGELOG, R5 límite WIP) · ⬜ M3 (R6 vista, R7 reporte, R8a reparto, R8b casting). Diseño fijado en el plan-contrato.
 
 **Kaizen vigente de la sesión anterior:** ante la señal «voy más lento que tú», el agente por defecto se detiene en vez de absorber más trabajo — el ritmo lo marca quien absorbe; el volumen de trabajo, no. (Registrado también como contexto del sprint: es el síntoma que FLU-1 ataca.)
 

@@ -7,6 +7,8 @@
   },
   "roadmap": {
     "techo_lineas": 90,
-    "historico": "docs/roadmap-historico.md"
+    "historico": "docs/roadmap-historico.md",
+    "muertos": "docs/MUERTOS.md",
+    "vencimiento_dias": { "urgente": 14, "normal": 90, "algun-dia": 180 }
   }
 }

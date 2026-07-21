@@ -34,6 +34,12 @@ La lupa de todo lo demás; léela primero:
 > muro (jidoka KIT-2; el muro es opt-in en CI).
 !`test -f tools/estado-docs.ps1 && powershell -File tools/estado-docs.ps1 || echo "[docs] sin detector de conformidad estructural -- corre instalar.ps1 -Actualizar (o sembrar-manual) para gobernar la estructura de brief/infra/CONTRIBUTING."`
 
+> **Early-warning de la expiración del ROADMAP.** El circuit breaker en modo `-Simular` (dry-run: no
+> toca nada) anuncia qué ítems vencidos morirían y cuántos vencen en ≤7 días — para que el estado de
+> apertura ya diga qué está por caducar. La muerte real ocurre en el cierre (`/jidoka:cierra`, paso 2),
+> no aquí. Sin `tools/flujo.json` (o sin `vencimiento_dias`) dirá «no aplica».
+!`test -f tools/expirar.ps1 && powershell -NoProfile -ExecutionPolicy Bypass -File tools/expirar.ps1 -Simular || echo "[flujo] sin circuit breaker (tools/expirar.ps1 no sembrado) -- corre instalar.ps1 -Actualizar; el ROADMAP no expira lo vencido en este arranca."`
+
 - **El QUÉ** (el brief: caso concreto, métrica, autoridad del dominio, criterio de "hecho"):
 @product/PRODUCT_BRIEF.md
 

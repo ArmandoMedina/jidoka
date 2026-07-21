@@ -33,6 +33,15 @@
 # -> exit 1 (el ROADMAP no es diario); (o) techo excedido -> exit 1; (p) item bajo
 # Referencia sin metadatos -> exit 0 (exento); (q) flujo.json sin clave roadmap -> el check
 # NO aplica, exit 0; (r) roadmap:{} incompleto (sin techo_lineas) -> exit 2 (falla cerrado).
+#
+# Casos de la EXPIRACION (tools/expirar.ps1, el circuit breaker; fixtures con -Repo + -Hoy
+# inyectada): (s) 1 Normal vencido (alta hace 100 dias) -> expirar SIN -Simular: exit 0, el
+# item ya NO esta en ROADMAP, SI esta en MUERTOS con motivo y fecha, y el ROADMAP resultante
+# sigue pasando [contrato-roadmap]; (t) -Simular NO modifica nada (ROADMAP y MUERTOS byte-
+# iguales) y anuncia el vencido; (u) segunda corrida -> 0 vencidos y sin doble entrada
+# (idempotencia); (v) "Con fecha" con vence: pasado -> muere; (w) Referencia vieja -> NO muere;
+# (x) flujo sin vencimiento_dias -> "no aplica" exit 0; (y) "Algun dia" con alta hace 200 dias
+# (ventana 180) -> muere. Se ejecuta la mecanica REAL con -Hoy anclada a 2026-07-21.
 
 # Continue (no Stop): este test hace shell-out al verificar real, y el caso corrupto (f)
 # hace que el hijo escriba a stderr (el error de ConvertFrom-Json). Con 2>&1 + Stop, PS 5.1
@@ -41,6 +50,8 @@
 $ErrorActionPreference = 'Continue'
 $veri = Join-Path $PSScriptRoot 'verificar.ps1'
 if (-not (Test-Path $veri)) { Write-Host "  [FALLA] no existe tools/verificar.ps1 (el gate que este test ejercita)" -ForegroundColor Red; exit 1 }
+$expi = Join-Path $PSScriptRoot 'expirar.ps1'
+if (-not (Test-Path $expi)) { Write-Host "  [FALLA] no existe tools/expirar.ps1 (la mecanica que este test ejercita)" -ForegroundColor Red; exit 1 }
 
 $script:pass = 0; $script:fail = 0
 function Ok($m) { Write-Host "  [PASA]  $m"; $script:pass++ }
@@ -374,13 +385,152 @@ $rR = Invoke-Verificar $dirR
 if ($rR.Code -eq 2) { Ok "roadmap-incompleto: exit 2 (falla cerrado, techo_lineas requerida)" } else { No "roadmap-incompleto: esperaba exit 2, fue $($rR.Code)`n$($rR.Out)" }
 if ($rR.Out -match 'incompleta') { Ok "roadmap-incompleto: acusa la clave roadmap incompleta" } else { No "roadmap-incompleto: esperaba mensaje de clave incompleta`n$($rR.Out)" }
 
+Write-Host ""
+Write-Host "== La expiracion (tools/expirar.ps1, circuit breaker): fixtures con -Hoy inyectada =="
+
+# Ancla de fecha para TODA la seccion: la mecanica se corre con -Hoy 2026-07-21 (no la del
+# sistema), asi el test es reproducible. Las 'alta' se derivan del ancla (hace N dias).
+$ci = [System.Globalization.CultureInfo]::InvariantCulture
+$anchor = '2026-07-21'
+$hoyDt = [datetime]::ParseExact($anchor, 'yyyy-MM-dd', $ci)
+$alta100 = $hoyDt.AddDays(-100).ToString('yyyy-MM-dd')   # Normal (90d): vencido
+$alta200 = $hoyDt.AddDays(-200).ToString('yyyy-MM-dd')   # Algun dia (180d): vencido
+$altaFresca = $hoyDt.AddDays(-5).ToString('yyyy-MM-dd')  # Normal: sobrevive de sobra
+
+function New-FlujoExpirar($techo) {
+  # flujo.json completo para expirar: roadmap con techo (para el contrato) + muertos +
+  # vencimiento_dias por clase. Sin la clave handoff -> el check hermano no aplica.
+  return @"
+{
+  "roadmap": {
+    "techo_lineas": $techo,
+    "historico": "docs/roadmap-historico.md",
+    "muertos": "docs/MUERTOS.md",
+    "vencimiento_dias": { "urgente": 14, "normal": 90, "algun-dia": 180 }
+  }
+}
+"@
+}
+
+function New-ExpirarFixture($nombre, $flujoTexto, $roadmapLines) {
+  $dir = Join-Path $tmpRoot $nombre
+  New-Item -ItemType Directory -Path (Join-Path $dir 'tools') -Force | Out-Null
+  New-Item -ItemType Directory -Path (Join-Path $dir 'docs') -Force | Out-Null
+  if ($null -ne $flujoTexto) {
+    [System.IO.File]::WriteAllText((Join-Path $dir 'tools/flujo.json'), $flujoTexto, $utf8NoBom)
+  }
+  [System.IO.File]::WriteAllLines((Join-Path $dir 'HANDOFF.md'), [string[]]@("# HANDOFF fixture"), $utf8NoBom)
+  [System.IO.File]::WriteAllLines((Join-Path $dir 'ROADMAP.md'), [string[]]$roadmapLines, $utf8NoBom)
+  # MUERTOS sembrado con header (como la nave): expirar appendea bajo el.
+  [System.IO.File]::WriteAllLines((Join-Path $dir 'docs/MUERTOS.md'), [string[]]@("# Muertos fixture", ""), $utf8NoBom)
+  return $dir
+}
+
+function Invoke-Expirar($dir, $simular) {
+  $a = @('-NoProfile','-ExecutionPolicy','Bypass','-File',$expi,'-Repo',$dir,'-Hoy',$anchor)
+  if ($simular) { $a += '-Simular' }
+  $out = (& powershell @a 2>&1 | Out-String)
+  return @{ Out = $out; Code = $LASTEXITCODE }
+}
+function Read-Text($p) { return [System.IO.File]::ReadAllText($p, $utf8NoBom) }
+
+# ------------------------------------------------------------------ (s) Normal vencido muere
+$rExp = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Item vencido de sobra** [alta:$alta100${sep}apetito:2h] -- deberia morir por ventana Normal",
+  "- **Item fresco** [alta:$altaFresca${sep}apetito:2h] -- sobrevive"
+)
+$dirS = New-ExpirarFixture 'expira-normal' (New-FlujoExpirar 90) $rExp
+$rS = Invoke-Expirar $dirS $false
+$roadmapS = Read-Text (Join-Path $dirS 'ROADMAP.md')
+$muertosS = Read-Text (Join-Path $dirS 'docs/MUERTOS.md')
+if ($rS.Code -eq 0) { Ok "expira-normal: exit 0" } else { No "expira-normal: esperaba exit 0, fue $($rS.Code)`n$($rS.Out)" }
+if ($roadmapS -notmatch 'Item vencido de sobra') { Ok "expira-normal: el vencido YA NO esta en ROADMAP" } else { No "expira-normal: el vencido sigue en ROADMAP`n$roadmapS" }
+if ($roadmapS -match 'Item fresco') { Ok "expira-normal: el fresco SIGUE en ROADMAP" } else { No "expira-normal: el fresco desaparecio del ROADMAP`n$roadmapS" }
+if ($muertosS -match 'Item vencido de sobra' -and $muertosS -match "## $anchor" -and $muertosS -match "alta $alta100" -and $muertosS -match 'revive re-proponi') { Ok "expira-normal: el vencido esta en MUERTOS con motivo y fecha de hoy" } else { No "expira-normal: MUERTOS no trae el vencido con motivo/fecha`n$muertosS" }
+# El ROADMAP resultante sigue pasando el contrato [contrato-roadmap].
+$rSveri = Invoke-Verificar $dirS
+if ($rSveri.Code -eq 0 -and $rSveri.Out -match 'contrato-roadmap' -and $rSveri.Out -match 'dentro de contrato') { Ok "expira-normal: el ROADMAP podado sigue dentro de [contrato-roadmap]" } else { No "expira-normal: el ROADMAP tras expirar rompe el contrato (exit $($rSveri.Code))`n$($rSveri.Out)" }
+
+# ------------------------------------------------------------------ (t) -Simular no toca nada
+$dirT = New-ExpirarFixture 'expira-simula' (New-FlujoExpirar 90) $rExp
+$roadmapAntes = Read-Text (Join-Path $dirT 'ROADMAP.md')
+$muertosAntes = Read-Text (Join-Path $dirT 'docs/MUERTOS.md')
+$rT = Invoke-Expirar $dirT $true
+$roadmapDespues = Read-Text (Join-Path $dirT 'ROADMAP.md')
+$muertosDespues = Read-Text (Join-Path $dirT 'docs/MUERTOS.md')
+if ($rT.Code -eq 0) { Ok "expira-simula: exit 0" } else { No "expira-simula: esperaba exit 0, fue $($rT.Code)`n$($rT.Out)" }
+if ($roadmapAntes -eq $roadmapDespues -and $muertosAntes -eq $muertosDespues) { Ok "expira-simula: -Simular NO modifico ni ROADMAP ni MUERTOS (byte-iguales)" } else { No "expira-simula: -Simular altero un archivo (dry-run roto)" }
+if ($rT.Out -match '\[SIMULA\]' -and $rT.Out -match 'Item vencido de sobra') { Ok "expira-simula: anuncia el vencido con prefijo [SIMULA]" } else { No "expira-simula: no anuncio el vencido en dry-run`n$($rT.Out)" }
+
+# ------------------------------------------------------------------ (u) idempotencia
+$dirU = New-ExpirarFixture 'expira-idempotente' (New-FlujoExpirar 90) $rExp
+$rU1 = Invoke-Expirar $dirU $false
+$roadmapU1 = Read-Text (Join-Path $dirU 'ROADMAP.md')
+$rU2 = Invoke-Expirar $dirU $false
+$roadmapU2 = Read-Text (Join-Path $dirU 'ROADMAP.md')
+$muertosU2 = Read-Text (Join-Path $dirU 'docs/MUERTOS.md')
+if ($rU2.Code -eq 0 -and $rU2.Out -match '0 vencidos') { Ok "expira-idempotente: la 2a corrida dice '0 vencidos'" } else { No "expira-idempotente: la 2a corrida no reporto 0 vencidos (exit $($rU2.Code))`n$($rU2.Out)" }
+if ($roadmapU1 -eq $roadmapU2) { Ok "expira-idempotente: el ROADMAP no cambio en la 2a corrida" } else { No "expira-idempotente: la 2a corrida volvio a tocar el ROADMAP" }
+if (([regex]::Matches($muertosU2, "## $anchor")).Count -eq 1) { Ok "expira-idempotente: MUERTOS tiene UNA sola entrada de hoy (sin doble muerte)" } else { No "expira-idempotente: MUERTOS duplico la entrada de hoy" }
+
+# ------------------------------------------------------------------ (v) Con fecha vencida muere
+$rConFecha = @(
+  "# Roadmap fixture",
+  "",
+  "## Con fecha",
+  "- **Con fecha ya pasada** [alta:2026-06-01${sep}vence:2026-07-01${sep}apetito:4h] -- vence antes de hoy"
+)
+$dirV = New-ExpirarFixture 'expira-confecha' (New-FlujoExpirar 90) $rConFecha
+$rV = Invoke-Expirar $dirV $false
+$roadmapV = Read-Text (Join-Path $dirV 'ROADMAP.md')
+$muertosV = Read-Text (Join-Path $dirV 'docs/MUERTOS.md')
+if ($rV.Code -eq 0 -and $roadmapV -notmatch 'Con fecha ya pasada' -and $muertosV -match 'Con fecha ya pasada' -and $muertosV -match '2026-07-01; revive') { Ok "expira-confecha: el 'Con fecha' con vence pasado murio (motivo con su vence)" } else { No "expira-confecha: el 'Con fecha' vencido no murio bien (exit $($rV.Code))`n$roadmapV`n$muertosV" }
+
+# ------------------------------------------------------------------ (w) Referencia no muere
+$rRef = @(
+  "# Roadmap fixture",
+  "",
+  "## Referencia",
+  "> landscape",
+  "- **Algo viejisimo declarativo** [alta:2020-01-01] -- Referencia nunca vence"
+)
+$dirW = New-ExpirarFixture 'expira-referencia' (New-FlujoExpirar 90) $rRef
+$rW = Invoke-Expirar $dirW $false
+$roadmapW = Read-Text (Join-Path $dirW 'ROADMAP.md')
+if ($rW.Code -eq 0 -and $rW.Out -match '0 vencidos' -and $roadmapW -match 'Algo viejisimo declarativo') { Ok "expira-referencia: la Referencia vieja NO murio (0 vencidos, sigue en ROADMAP)" } else { No "expira-referencia: la Referencia se toco indebidamente (exit $($rW.Code))`n$($rW.Out)`n$roadmapW" }
+
+# ------------------------------------------------------------------ (x) sin vencimiento_dias -> no aplica
+# New-FlujoRoadmap trae roadmap con techo pero SIN vencimiento_dias: expirar no aplica.
+$dirX = New-ExpirarFixture 'expira-sin-config' (New-FlujoRoadmap 90) $rExp
+$roadmapXantes = Read-Text (Join-Path $dirX 'ROADMAP.md')
+$rX = Invoke-Expirar $dirX $false
+$roadmapXdespues = Read-Text (Join-Path $dirX 'ROADMAP.md')
+if ($rX.Code -eq 0 -and $rX.Out -match 'no aplica') { Ok "expira-sin-config: sin vencimiento_dias -> 'no aplica' exit 0" } else { No "expira-sin-config: esperaba 'no aplica' exit 0, fue $($rX.Code)`n$($rX.Out)" }
+if ($roadmapXantes -eq $roadmapXdespues) { Ok "expira-sin-config: no toco el ROADMAP (nada que expirar)" } else { No "expira-sin-config: modifico el ROADMAP sin contrato de vencimiento" }
+
+# ------------------------------------------------------------------ (y) Algun dia vencido muere
+$rIcebox = @(
+  "# Roadmap fixture",
+  "",
+  $hAlgunDia,
+  "- **Item del icebox vencido** [alta:$alta200] -- 200 dias > ventana 180"
+)
+$dirY = New-ExpirarFixture 'expira-algundia' (New-FlujoExpirar 90) $rIcebox
+$rY = Invoke-Expirar $dirY $false
+$roadmapY = Read-Text (Join-Path $dirY 'ROADMAP.md')
+$muertosY = Read-Text (Join-Path $dirY 'docs/MUERTOS.md')
+if ($rY.Code -eq 0 -and $roadmapY -notmatch 'Item del icebox vencido' -and $muertosY -match 'Item del icebox vencido' -and $muertosY -match "alta $alta200") { Ok "expira-algundia: el 'Algun dia' con 200 dias murio (ventana 180)" } else { No "expira-algundia: el icebox vencido no murio bien (exit $($rY.Code))`n$roadmapY`n$muertosY" }
+
 # ------------------------------------------------------------------ limpieza
 Remove-Item -LiteralPath $tmpRoot -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
 if ($script:fail -gt 0) {
-  Write-Host "== Pilar de flujo (HANDOFF+ROADMAP) INCOMPLETO: $($script:fail) fallo(s), $($script:pass) ok. ==" -ForegroundColor Red
+  Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+expiracion) INCOMPLETO: $($script:fail) fallo(s), $($script:pass) ok. ==" -ForegroundColor Red
   exit 1
 }
-Write-Host "== Pilar de flujo (HANDOFF+ROADMAP) sano: $($script:pass) verificaciones verdes. =="
+Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+expiracion) sano: $($script:pass) verificaciones verdes. =="
 exit 0
