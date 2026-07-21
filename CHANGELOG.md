@@ -2,6 +2,17 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.26.0] — 2026-07-21
+
+### El pilar de flujo, movimiento 1 — los documentos dejan de crecer (FLU-1, ADR 0045)
+
+La Casa del TPS tiene dos pilares; el método construyó Jidoka (parar ante el defecto) y el pilar de flujo (JIT) no existía. Nace del diagnóstico medido sobre 274 MB de transcripciones y de un benchmark de 4 frentes (`docs/analisis/gemba-gestion-del-flujo-202607.md`, `docs/analisis/benchmark-flujo-202607.md`): el HANDOFF declaraba «se limpia al abrir» en su primera línea y llegó a 419 líneas con 12 secciones históricas sin que nada lo detectara. La regla del sprint: **todo tiene que ser código que rechaza la acción** — Kanban se apoya en presión social que con agentes no existe. Plan-contrato: `docs/sprints/sprint-pilar-de-flujo-plan.md` (aprobado 2026-07-21; apetito: 6 horas de revisión del cliente con muerte por defecto).
+
+- **`feat` — el contrato del HANDOFF (R1):** el relevo se JALA, no se empuja. Check `[contrato-handoff]` en `tools/verificar.ps1`: UNA sección «Dónde estamos» + máximo N históricas + techo de líneas; excedido → **BLOQUEA** el push. Los límites son dato de instancia en `tools/flujo.json` (nuevo; sin el archivo el check no aplica — un repo sin el pilar no se bloquea; corrupto → falla cerrado, exit 2). Lo cerrado se archiva ÍNTEGRO en `docs/handoff-historico.md` (nuevo), que **`/jidoka:arranca` nunca inyecta**. Migración inicial: el HANDOFF de la nave pasó de 419 líneas y 12 históricas a 40 líneas y 2.
+- **`fix` cazado en vivo:** el check leía HANDOFF.md sin `-Encoding UTF8` y PS 5.1 deformaba los acentos — el contrato se medía en falso (0 históricas donde había 2). Curado con caso de regresión en el self-test.
+- **`test` — `tools/probar-flujo.ps1` (nuevo, mecánica):** fixtures ROJO→VERDE del contrato (conforme, doble «estamos», históricas de más, techo excedido, sin flujo.json = no aplica, corrupto = falla cerrado, acentos UTF-8 sin BOM contados bien). En el preflight de `publicar.ps1` y en el CI.
+- **ADR 0045** — el pilar de flujo: contratos de documentos con gate, límite WIP y visibilidad determinista · aceptado.
+
 ## [1.25.0] — 2026-07-20
 
 ### El editor del gobierno — la extensión AUTORA, el gate EJECUTA (ADR 0044)

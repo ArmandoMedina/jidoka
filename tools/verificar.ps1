@@ -167,6 +167,68 @@ foreach ($del in @($eliminados | Where-Object { $_ })) {
   }
 }
 
+# Contrato del HANDOFF (FLU-1, ADR 0045): el relevo se JALA (lo que la sesion
+# entrante necesita), no se EMPUJA (el diario de la que sale). El contrato es dato
+# de instancia en tools/flujo.json (clave 'handoff'); sin el archivo o sin la clave,
+# el check no aplica (un repo sin el pilar de flujo no se bloquea). Es invariante de
+# ESTADO, no de diff: se mide siempre -- la linea se para aunque este push no toque
+# el HANDOFF (andon: el defecto se ataca donde se ve). Los limites: UNA seccion
+# "Donde estamos", max_historicas secciones viejas, techo_lineas total; lo demas
+# vive INTEGRO en el historico declarado (que /arranca nunca inyecta).
+$flujoCfg = $null
+if (Test-Path 'tools/flujo.json') {
+  $flujoCfg = Get-Content 'tools/flujo.json' -Raw | ConvertFrom-Json
+  if (-not $flujoCfg) { Fail "tools/flujo.json existe pero no parsea como JSON" }
+}
+if ($flujoCfg -and $flujoCfg.handoff -and (Test-Path 'HANDOFF.md')) {
+  $oAcc = [char]0xF3   # 'o' acentuada: este motor es ASCII, el HANDOFF no
+  # -Encoding UTF8 obligatorio: sin el, PS 5.1 lee el UTF-8 sin BOM como ANSI y
+  # "Donde" acentuado se deforma -- el regex no casa y el contrato se mide en falso
+  # (gotcha del recetario docs/guias/entorno-windows-powershell51.md, cazada en vivo).
+  $hLineas = @(Get-Content 'HANDOFF.md' -Encoding UTF8)
+  $nEstamos    = @($hLineas | Where-Object { $_ -match "^## D[o$oAcc]nde estamos" }).Count
+  # Ancla de limite en el sufijo: 'Antes' debe ir seguido de fin de linea, espacio o
+  # '(' -- si no, "## Antesala del proyecto" casaria por prefijo y contaria como
+  # historica en falso (hallazgo #2). El grupo ([ (]|$) es explicito a proposito
+  # (mas legible que un \b, que aqui tambien serviria tras la 's').
+  $nHistoricas = @($hLineas | Where-Object { $_ -match "^## (D[o$oAcc]nde estuvimos|Antes)([ (]|$)" }).Count
+  # Falla CERRADO ante config incompleta (hallazgo #1): sin max_historicas/techo_lineas
+  # (o si no parsean como enteros no-negativos), [int]$null daria 0 y BLOQUEARIA TODO con
+  # mensajes rotos. El JSON incompleto es tan invalido como el corrupto -> exit 2, no un
+  # falso bloqueo. 'historico' ausente NO es motivo de Fail: usa el default de abajo.
+  $maxParsed = 0; $techoParsed = 0
+  $maxRaw   = $flujoCfg.handoff.max_historicas
+  $techoRaw = $flujoCfg.handoff.techo_lineas
+  if ($null -eq $maxRaw -or $null -eq $techoRaw -or
+      -not [int]::TryParse([string]$maxRaw, [ref]$maxParsed) -or
+      -not [int]::TryParse([string]$techoRaw, [ref]$techoParsed) -or
+      $maxParsed -lt 0 -or $techoParsed -lt 0) {
+    Fail "tools/flujo.json: la clave handoff esta incompleta (max_historicas/techo_lineas requeridas, enteros no-negativos). Sin ellas el contrato no se puede medir."
+  }
+  $maxHist  = $maxParsed
+  $techoLin = $techoParsed
+  $histDest = [string]$flujoCfg.handoff.historico
+  if (-not $histDest) { $histDest = 'docs/handoff-historico.md' }
+  $rotoHandoff = $false
+  if ($nEstamos -eq 0) {
+    Block "[contrato-handoff] el relevo perdio su seccion 'Donde estamos': el contrato exige exactamente UNA. Redacta el estado vigente bajo un encabezado '## Donde estamos'."
+    $rotoHandoff = $true
+  }
+  if ($nEstamos -gt 1) {
+    Block "[contrato-handoff] HANDOFF.md trae $nEstamos secciones 'Donde estamos'; el contrato admite UNA. Funde el estado vigente y archiva el resto INTEGRO en $histDest."
+    $rotoHandoff = $true
+  }
+  if ($nHistoricas -gt $maxHist) {
+    Block "[contrato-handoff] HANDOFF.md trae $nHistoricas secciones historicas ('Donde estuvimos'/'Antes'); el contrato admite $maxHist. Mueve las viejas INTEGRAS a $histDest (ese archivo no se inyecta al abrir)."
+    $rotoHandoff = $true
+  }
+  if ($hLineas.Count -gt $techoLin) {
+    Block "[contrato-handoff] HANDOFF.md mide $($hLineas.Count) lineas; el techo del contrato es $techoLin (tools/flujo.json). El relevo se jala, no se empuja: poda o archiva en $histDest."
+    $rotoHandoff = $true
+  }
+  if (-not $rotoHandoff) { Ok "[contrato-handoff] HANDOFF.md dentro de contrato ($nHistoricas/$maxHist historicas, $($hLineas.Count)/$techoLin lineas)" }
+}
+
 # Costura .local: extension de mecanica ESPECIFICA del repo (p.ej. lint/tests de un
 # lenguaje: ruff, pytest). El motor generico NO se bifurca -- el hijo pone sus checks
 # aqui y siguen contando para $script:warn / $script:block (usa Note/Block/Ok). Es la
