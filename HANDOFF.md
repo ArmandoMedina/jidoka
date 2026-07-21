@@ -6,7 +6,43 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-21 — El descubrimiento del sistema configurable CERRADO · rama `descubre/sistema-configurable-20260720` SIN MERGEAR, 8 commits)
+## Dónde estamos (2026-07-21 tarde — Sistema configurable CONSTRUIDO + giro de superficie a la app Tauri)
+
+**El sprint "sistema configurable, fase 1" está construido completo y verde en la rama `sprint/sistema-configurable-20260721` (6 commits sobre `main`):**
+
+1. `587e133` — **R1**: los 3 ADRs (0045 identidad · 0046 contratos/regímenes · 0047 meta-gobierno) + CFG-1, y el rename que retira la marca "SAP" por `estatuto`.
+2. `afde41b` — **R2**: la bandeja "pendiente de parametrizar" (`tools/bandeja.ps1`, 15/15).
+3. `3e6ad5f` — **R3**: el estatuto del ritual (`tools/estado-ritual.ps1`, 13/13).
+4. `4b5fd84` — **R5**: el candado IA (hook `PreToolUse`, `.claude/hooks/candado-pretooluse.ps1`, hooks 42/42, `deny-vs-ask` cableado).
+5. `ba522fe` — **R4**: el formulario para parametrizar (webview fiel a la maqueta en la extensión).
+6. `c9bf5c9` — **R6**: el modo avanzado (firma + reclasificar, extensión 26/26).
+
+Todo verde; evidencia en [`qa_runs/sistema-configurable-20260721/LOG.md`](qa_runs/sistema-configurable-20260721/LOG.md).
+
+**Pero el Gemba del cliente REPROBÓ la superficie.** El motor quedó bien; la cara quedó fragmentada en comandos de VS Code (paleta + clic derecho + webviews sueltos) — lo contrario de lo que el cliente validó en 6 Gembas: **la maqueta como UNA app navegable**. La retro del transcript encontró la causa en el plan: decía a la vez "la maqueta ES la spec visual" y "no se porta", y esa exclusión de la cara visible **nunca se le resaltó** al cliente al aprobar.
+
+**Decisión del cliente (2026-07-21):** la superficie del gobierno es una **app de escritorio Tauri fiel a la maqueta** — una sola ventana navegable, no comandos dispersos. Registrada en el **[ADR 0048](docs/decisions/0048-superficie-app-tuberia.md)** (supersede el 0044 **en la superficie**; el principio "la UI autora, el gate ejecuta" sigue vivo). El motor PowerShell del sprint pasado (R1/R2/R3/R5) es la **base de la app**; la extensión se retira.
+
+**Sprint nuevo "La app de la tubería"** con plan aprobado en [`docs/sprints/sprint-app-tuberia-plan.md`](docs/sprints/sprint-app-tuberia-plan.md):
+- **R1** — cerrar el legado + la ley nueva (ADR 0048, CHANGELOG `v1.26.0`, HANDOFF reconciliado, PR del sprint legado).
+- **R2** — el cascarón fiel con **GEMBA TEMPRANO** (doble clic al `.exe` a ver la maqueta tal cual, antes de cablear datos).
+- **R3** — las lecturas (datos reales a la app).
+- **R4** — las escrituras (parametrizar de verdad).
+- **R5** — el modo avanzado real (firma + candado desde la app).
+- **R6** — retiro de la extensión (VS Code limpio).
+- **R7** — empaquetado + release `v1.27.0`.
+
+**Regla de modelos (orden del cliente):** Fable orquesta y pone criterio en el hilo; opus/sonnet/haiku hacen TODA la mecánica en subagentes. Ningún subagente en Fable.
+
+**Pendientes del cliente (nada bloquea al agente):**
+1. **Orden nombrada para el merge del PR del sprint legado** (`sprint/sistema-configurable-20260721` a `main`, corta `v1.26.0`).
+2. **Gemba de fidelidad en R2** (aprobar la cara de la app con sus ojos antes de cablear datos) — es el criterio de "hecho" de esa rebanada.
+
+---
+
+## Dónde estuvimos (2026-07-21 — El descubrimiento del sistema configurable CERRADO · rama `descubre/sistema-configurable-20260720`)
+
+> **Nota git (git gana):** esta sección dijo "SIN MERGEAR" — falso. La rama del descubrimiento **se mergeó vía PR #119** (merge `0b14de1`); el plan viajó en ella y la construcción ya corrió (ver la sección de arriba).
 
 **El descubrimiento quedó completo y durable en la rama; la sesión cerró con cuadro** ([`docs/sprints/cierre-20260721.md`](docs/sprints/cierre-20260721.md)). La visión: **Jidoka evoluciona de metodología a sistema de gobierno configurable con UI guiada** (la UI autora, el gate ejecuta — ADRs 0002/0044 intactos). Los artefactos, en orden de lectura para la sesión de construcción:
 
