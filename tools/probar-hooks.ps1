@@ -285,6 +285,41 @@ try {
 }
 finally { Remove-Item $tmpAgentes -Recurse -Force -ErrorAction SilentlyContinue }
 
+# --- flujo-sessionstart.ps1: la vista de "que sigue" al abrir sesion (FLU-1, R6) ---
+# El PRIMER hook SessionStart del repo empuja el estado del flujo al abrir. Prueba de
+# vida: existe, settings.json lo declara en SessionStart, corre en el repo real
+# imprimiendo el encabezado (exit 0), y en un dir SIN tools/estado-flujo.ps1 sale 0
+# SILENCIOSO (un repo sin el pilar no ensucia el arranque).
+$flujoHook = Join-Path $hooksDir 'flujo-sessionstart.ps1'
+Check 'flujo-sessionstart: el archivo del hook existe' (Test-Path $flujoHook) "no existe $flujoHook"
+
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$settingsPath = Join-Path $repoRoot '.claude/settings.json'
+$tieneSessionStart = $false
+if (Test-Path $settingsPath) {
+  try {
+    $settingsObj = Get-Content $settingsPath -Raw | ConvertFrom-Json
+    foreach ($grp in @($settingsObj.hooks.SessionStart)) {
+      foreach ($h in @($grp.hooks)) { if ("$($h.command)" -match 'flujo-sessionstart\.ps1') { $tieneSessionStart = $true } }
+    }
+  } catch { $tieneSessionStart = $false }
+}
+Check 'flujo-sessionstart: settings.json lo declara en el evento SessionStart' $tieneSessionStart "no aparece en hooks.SessionStart de .claude/settings.json"
+
+# Corriendo en el repo REAL: imprime el encabezado y sale 0.
+$outFlujoReal = Invoke-Hook $flujoHook '{"hook_event_name":"SessionStart","source":"startup"}' $repoRoot
+$codeFlujoReal = $LASTEXITCODE
+Check 'flujo-sessionstart: imprime el encabezado "Que sigue" en el repo real' ($outFlujoReal -match 'Que sigue \(FLU-1') "no imprimio el encabezado: $outFlujoReal"
+Check 'flujo-sessionstart: sale 0 en el repo real' ($codeFlujoReal -eq 0) "exit code fue $codeFlujoReal"
+
+# En un dir SIN tools/estado-flujo.ps1: exit 0 SILENCIOSO (sin encabezado).
+$tmpNoFlujo = Join-Path $env:TEMP ("jidoka-noflujo-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+New-Item -ItemType Directory -Path $tmpNoFlujo -Force | Out-Null
+$outNoFlujo = Invoke-Hook $flujoHook '{"hook_event_name":"SessionStart","source":"startup"}' $tmpNoFlujo
+$codeNoFlujo = $LASTEXITCODE
+Check 'flujo-sessionstart: dir sin tools/estado-flujo.ps1 sale 0 silencioso' (($codeNoFlujo -eq 0) -and (-not ($outNoFlujo -match 'Que sigue'))) "no salio silencioso (code=$codeNoFlujo): $outNoFlujo"
+Remove-Item $tmpNoFlujo -Recurse -Force -ErrorAction SilentlyContinue
+
 Write-Host ""
 if ($script:fallos -gt 0) {
   Write-Host "== $($script:fallos) de $($script:casos) caso(s) fallidos. Un hook tiene un bug: no lo estrenes. ==" -ForegroundColor Red

@@ -59,6 +59,14 @@
 # exit 0; (w4) flujo.json corrupto -> exit 2 (falla cerrado); (w5) entrada sin id -> AVISO +
 # cuenta como pendiente (exit 1, fail-safe: lo dudoso bloquea); (w6) estado presente pero
 # gembas_pendientes ausente -> exit 0 (lista vacia).
+#
+# Casos de la VISTA (tools/estado-flujo.ps1 -Json y el resumen default, R6): (j1) -Json
+# sobre un fixture completo (roadmap con 1 urgente + 1 con fecha + 2 normal, uno con
+# espera:Marcelo, + MUERTOS con una entrada) parsea con ConvertFrom-Json: version 1,
+# siguientes[0] es el Urgente, esperando_terceros trae a Marcelo, muertos_recientes no
+# vacio, conteos correctos; (j2) -Json sin ROADMAP -> JSON valido con claves vacias,
+# exit 0; (j3) el resumen default imprime "Sprint activo" y "Siguen:"; (j4) -Json con
+# flujo.json corrupto -> exit 2 (falla cerrado, como el gate).
 
 # Continue (no Stop): este test hace shell-out al verificar real, y el caso corrupto (f)
 # hace que el hijo escriba a stderr (el error de ConvertFrom-Json). Con 2>&1 + Stop, PS 5.1
@@ -780,13 +788,98 @@ $dirW6 = New-EstadoFixture 'wip-sin-lista' $estadoSinLista
 $rW6 = Invoke-EstadoFlujo $dirW6
 if ($rW6.Code -eq 0 -and $rW6.Out -match 'flujo despejado') { Ok "wip-sin-lista: estado presente pero gembas_pendientes ausente -> lista vacia, exit 0 despejado" } else { No "wip-sin-lista: esperaba exit 0 despejado (lista vacia), fue $($rW6.Code)`n$($rW6.Out)" }
 
+Write-Host ""
+Write-Host "== La vista de que sigue (tools/estado-flujo.ps1 -Json / resumen, R6): fixtures =="
+
+# Fixture completo: tools/flujo.json (estado + roadmap) + ROADMAP.md + docs/MUERTOS.md.
+function New-VistaFixture($nombre, $flujoTexto, $roadmapLines, $muertosLines) {
+  $dir = Join-Path $tmpRoot $nombre
+  New-Item -ItemType Directory -Path (Join-Path $dir 'tools') -Force | Out-Null
+  New-Item -ItemType Directory -Path (Join-Path $dir 'docs') -Force | Out-Null
+  if ($null -ne $flujoTexto) {
+    [System.IO.File]::WriteAllText((Join-Path $dir 'tools/flujo.json'), $flujoTexto, $utf8NoBom)
+  }
+  if ($null -ne $roadmapLines) {
+    [System.IO.File]::WriteAllLines((Join-Path $dir 'ROADMAP.md'), [string[]]$roadmapLines, $utf8NoBom)
+  }
+  if ($null -ne $muertosLines) {
+    [System.IO.File]::WriteAllLines((Join-Path $dir 'docs/MUERTOS.md'), [string[]]$muertosLines, $utf8NoBom)
+  }
+  return $dir
+}
+function Invoke-EstadoJson($dir) {
+  $out = (& powershell -NoProfile -ExecutionPolicy Bypass -File $esti -Json -Repo $dir 2>&1 | Out-String)
+  return @{ Out = $out; Code = $LASTEXITCODE }
+}
+function Invoke-EstadoResumen($dir) {
+  $out = (& powershell -NoProfile -ExecutionPolicy Bypass -File $esti -Repo $dir 2>&1 | Out-String)
+  return @{ Out = $out; Code = $LASTEXITCODE }
+}
+
+# ------------------------------------------------------------------ (j1) -Json completo
+$vistaFlujo = @"
+{
+  "estado": { "wip_limite": 8, "sprint_activo": "prueba-r6", "gembas_pendientes": [] },
+  "roadmap": { "techo_lineas": 90, "muertos": "docs/MUERTOS.md" }
+}
+"@
+$vistaRoadmap = @(
+  "# Roadmap fixture",
+  "",
+  "## Urgente",
+  "- **Un urgente R6** [alta:2026-07-10${sep}apetito:2h] -- el primero de la cola",
+  "",
+  "## Con fecha",
+  "- **Uno con fecha R6** [alta:2026-07-15${sep}vence:2026-08-01${sep}apetito:4h] -- con vence",
+  "",
+  "## Normal",
+  "- **Uno normal R6** [alta:2026-07-12${sep}apetito:6h] -- normal simple",
+  "- **Espera a Marcelo** [alta:2026-07-11${sep}apetito:2h${sep}espera:Marcelo] -- bloqueado por tercero"
+)
+$vistaMuertos = @(
+  "# Muertos fixture",
+  "",
+  "## 2026-07-20",
+  "- **Un muerto reciente R6** [alta:2026-04-01${sep}apetito:2h] -- murio por ventana Normal",
+  "  - murio: Normal, alta 2026-04-01, vencia 2026-06-30; revive re-proponiendolo"
+)
+$dirJ1 = New-VistaFixture 'vista-completa' $vistaFlujo $vistaRoadmap $vistaMuertos
+$rJ1 = Invoke-EstadoJson $dirJ1
+$objJ1 = $null
+try { $objJ1 = $rJ1.Out | ConvertFrom-Json } catch { $objJ1 = $null }
+if ($rJ1.Code -eq 0 -and $objJ1 -and $objJ1.version -eq 1) { Ok "vista-json: exit 0 y JSON parseable (version 1)" } else { No "vista-json: esperaba exit 0 + JSON version 1, fue $($rJ1.Code)`n$($rJ1.Out)" }
+if ($objJ1 -and $objJ1.siguientes -and $objJ1.siguientes[0].clase -eq 'urgente') { Ok "vista-json: siguientes[0] es el Urgente (orden: urgente -> con fecha -> normal)" } else { No "vista-json: siguientes[0] no es el Urgente`n$($rJ1.Out)" }
+if ($objJ1 -and @($objJ1.esperando_terceros | Where-Object { $_.quien -eq 'Marcelo' }).Count -ge 1) { Ok "vista-json: esperando_terceros trae a Marcelo" } else { No "vista-json: esperando_terceros no trae a Marcelo`n$($rJ1.Out)" }
+if ($objJ1 -and @($objJ1.muertos_recientes).Count -ge 1) { Ok "vista-json: muertos_recientes NO vacio (ultima entrada de MUERTOS)" } else { No "vista-json: muertos_recientes vacio, esperaba la entrada`n$($rJ1.Out)" }
+if ($objJ1 -and $objJ1.conteos.urgente -eq 1 -and $objJ1.conteos.con_fecha -eq 1 -and $objJ1.conteos.normal -eq 2 -and $objJ1.conteos.algun_dia -eq 0) { Ok "vista-json: conteos correctos (urgente 1, con_fecha 1, normal 2, algun_dia 0)" } else { No "vista-json: conteos incorrectos`n$($rJ1.Out)" }
+
+# ------------------------------------------------------------------ (j2) -Json sin ROADMAP
+# flujo.json con estado pero SIN ROADMAP.md: la vista degrada, no truena -> JSON minimo
+# valido con las claves de cola vacias, exit 0.
+$dirJ2 = New-VistaFixture 'vista-sin-roadmap' '{ "estado": { "wip_limite": 8, "sprint_activo": "sin-roadmap" } }' $null $null
+$rJ2 = Invoke-EstadoJson $dirJ2
+$objJ2 = $null
+try { $objJ2 = $rJ2.Out | ConvertFrom-Json } catch { $objJ2 = $null }
+if ($rJ2.Code -eq 0 -and $objJ2 -and $objJ2.version -eq 1) { Ok "vista-sin-roadmap: exit 0 y JSON valido (version 1)" } else { No "vista-sin-roadmap: esperaba exit 0 + JSON valido, fue $($rJ2.Code)`n$($rJ2.Out)" }
+if ($objJ2 -and @($objJ2.siguientes).Count -eq 0 -and @($objJ2.esperando_terceros).Count -eq 0 -and $objJ2.conteos.urgente -eq 0) { Ok "vista-sin-roadmap: claves de cola vacias (degrada, no truena)" } else { No "vista-sin-roadmap: esperaba claves vacias`n$($rJ2.Out)" }
+
+# ------------------------------------------------------------------ (j3) resumen default
+$dirJ3 = New-VistaFixture 'vista-resumen' $vistaFlujo $vistaRoadmap $vistaMuertos
+$rJ3 = Invoke-EstadoResumen $dirJ3
+if ($rJ3.Code -eq 0 -and $rJ3.Out -match 'Sprint activo' -and $rJ3.Out -match 'Siguen:') { Ok "vista-resumen: el modo default imprime 'Sprint activo' y 'Siguen:' (exit 0)" } else { No "vista-resumen: esperaba 'Sprint activo' + 'Siguen:' exit 0, fue $($rJ3.Code)`n$($rJ3.Out)" }
+
+# ------------------------------------------------------------------ (j4) -Json corrupto
+$dirJ4 = New-VistaFixture 'vista-corrupta' "esto no es json valido {{{" $vistaRoadmap $null
+$rJ4 = Invoke-EstadoJson $dirJ4
+if ($rJ4.Code -eq 2) { Ok "vista-json-corrupta: exit 2 (falla cerrado -- la vista no emite a ciegas)" } else { No "vista-json-corrupta: esperaba exit 2, fue $($rJ4.Code)`n$($rJ4.Out)" }
+
 # ------------------------------------------------------------------ limpieza
 Remove-Item -LiteralPath $tmpRoot -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
 if ($script:fail -gt 0) {
-  Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion+WIP) INCOMPLETO: $($script:fail) fallo(s), $($script:pass) ok. ==" -ForegroundColor Red
+  Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion+WIP+vista) INCOMPLETO: $($script:fail) fallo(s), $($script:pass) ok. ==" -ForegroundColor Red
   exit 1
 }
-Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion+WIP) sano: $($script:pass) verificaciones verdes. =="
+Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion+WIP+vista) sano: $($script:pass) verificaciones verdes. =="
 exit 0
