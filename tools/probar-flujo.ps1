@@ -67,6 +67,13 @@
 # vacio, conteos correctos; (j2) -Json sin ROADMAP -> JSON valido con claves vacias,
 # exit 0; (j3) el resumen default imprime "Sprint activo" y "Siguen:"; (j4) -Json con
 # flujo.json corrupto -> exit 2 (falla cerrado, como el gate).
+#
+# Casos del REPORTE para terceros (tools/reporte-avance.ps1, R7 -- es VISTA, no gate):
+# (r1) sobre el repo REAL genera el .html con exit 0, trae los 5 titulos de seccion y NO
+# contiene NINGUNA jerga prohibida (grep case-insensitive de: gate, WIP, commit, "PR ",
+# rebanada -- el reporte se le manda tal cual a un tercero no-tecnico); (r2) sobre un fixture
+# minimo SIN docs/MUERTOS.md ni tools/flujo.json genera sin tronar (degrada con gracia) y la
+# seccion 4 dice "Nada se ha descartado"; (r3) el .html trae el hill chart (`<svg`).
 
 # Continue (no Stop): este test hace shell-out al verificar real, y el caso corrupto (f)
 # hace que el hijo escriba a stderr (el error de ConvertFrom-Json). Con 2>&1 + Stop, PS 5.1
@@ -79,6 +86,8 @@ $expi = Join-Path $PSScriptRoot 'expirar.ps1'
 if (-not (Test-Path $expi)) { Write-Host "  [FALLA] no existe tools/expirar.ps1 (la mecanica que este test ejercita)" -ForegroundColor Red; exit 1 }
 $esti = Join-Path $PSScriptRoot 'estado-flujo.ps1'
 if (-not (Test-Path $esti)) { Write-Host "  [FALLA] no existe tools/estado-flujo.ps1 (la mecanica que este test ejercita)" -ForegroundColor Red; exit 1 }
+$repo = Join-Path $PSScriptRoot 'reporte-avance.ps1'
+if (-not (Test-Path $repo)) { Write-Host "  [FALLA] no existe tools/reporte-avance.ps1 (la vista que este test ejercita)" -ForegroundColor Red; exit 1 }
 
 $script:pass = 0; $script:fail = 0
 function Ok($m) { Write-Host "  [PASA]  $m"; $script:pass++ }
@@ -873,13 +882,52 @@ $dirJ4 = New-VistaFixture 'vista-corrupta' "esto no es json valido {{{" $vistaRo
 $rJ4 = Invoke-EstadoJson $dirJ4
 if ($rJ4.Code -eq 2) { Ok "vista-json-corrupta: exit 2 (falla cerrado -- la vista no emite a ciegas)" } else { No "vista-json-corrupta: esperaba exit 2, fue $($rJ4.Code)`n$($rJ4.Out)" }
 
+Write-Host ""
+Write-Host "== El reporte para terceros (tools/reporte-avance.ps1, R7): VISTA sin jerga =="
+
+# El repo REAL es el padre de tools/ (donde vive este test). El reporte se corre contra el,
+# con -Salida a un .html temporal (no se toca el .jidoka/ real).
+$repoReal = Split-Path -Parent $PSScriptRoot
+function Invoke-Reporte($repoDir) {
+  $salida = Join-Path $tmpRoot ("reporte-" + [System.Guid]::NewGuid().ToString('N') + '.html')
+  $out = (& powershell -NoProfile -ExecutionPolicy Bypass -File $repo -Repo $repoDir -Salida $salida 2>&1 | Out-String)
+  $html = ''
+  if (Test-Path -LiteralPath $salida) { $html = [System.IO.File]::ReadAllText($salida, [System.Text.Encoding]::UTF8) }
+  return @{ Out = $out; Code = $LASTEXITCODE; Html = $html; Salida = $salida }
+}
+
+# ------------------------------------------------------------------ (r1) repo real, 5 secciones, cero jerga
+$rR1 = Invoke-Reporte $repoReal
+if ($rR1.Code -eq 0 -and $rR1.Html) { Ok "reporte-real: exit 0 y .html generado" } else { No "reporte-real: esperaba exit 0 + .html, fue $($rR1.Code)`n$($rR1.Out)" }
+# Los 5 titulos de seccion (se casan por su parte ASCII, esta fuente es ASCII a proposito).
+$titulos = @('se termin', 'vamos', 'espera una respuesta', 'se descart', 'sigue</h2>')
+$faltan = @($titulos | Where-Object { $rR1.Html -notmatch [regex]::Escape($_) })
+if ($faltan.Count -eq 0) { Ok "reporte-real: trae los 5 titulos de seccion" } else { No "reporte-real: faltan titulos de seccion: $($faltan -join ', ')" }
+# La JERGA PROHIBIDA: grep case-insensitive. El .html se le manda TAL CUAL a un tercero; ni
+# una de estas palabras -- ni siquiera dentro de una clase CSS -- puede aparecer.
+$jerga = @('gate', 'wip', 'commit', 'PR ', 'rebanada')
+$coladas = @($jerga | Where-Object { $rR1.Html -match ('(?i)' + [regex]::Escape($_)) })
+if ($coladas.Count -eq 0) { Ok "reporte-real: CERO jerga prohibida (gate/WIP/commit/'PR '/rebanada)" } else { No "reporte-real: jerga colada en la salida: $($coladas -join ', ')" }
+
+# ------------------------------------------------------------------ (r3) el hill chart
+if ($rR1.Html -match '<svg') { Ok "reporte-real: trae el hill chart (<svg inline)" } else { No "reporte-real: no trae <svg (el hill chart)" }
+
+# ------------------------------------------------------------------ (r2) fixture minimo degrada con gracia
+# Un repo pelado: sin tools/flujo.json ni docs/MUERTOS.md. El reporte no debe tronar y la
+# seccion 4 cae al mensaje "Nada se ha descartado".
+$dirR2 = Join-Path $tmpRoot 'reporte-minimo'
+New-Item -ItemType Directory -Path $dirR2 -Force | Out-Null
+$rR2 = Invoke-Reporte $dirR2
+if ($rR2.Code -eq 0 -and $rR2.Html) { Ok "reporte-minimo: genera sin tronar (exit 0) pese a que faltan flujo.json y MUERTOS" } else { No "reporte-minimo: esperaba exit 0 + .html, fue $($rR2.Code)`n$($rR2.Out)" }
+if ($rR2.Html -match 'Nada se ha descartado') { Ok "reporte-minimo: la seccion 4 dice 'Nada se ha descartado' (degrada con gracia)" } else { No "reporte-minimo: esperaba 'Nada se ha descartado' sin MUERTOS`n$($rR2.Out)" }
+
 # ------------------------------------------------------------------ limpieza
 Remove-Item -LiteralPath $tmpRoot -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
 if ($script:fail -gt 0) {
-  Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion+WIP+vista) INCOMPLETO: $($script:fail) fallo(s), $($script:pass) ok. ==" -ForegroundColor Red
+  Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion+WIP+vista+reporte) INCOMPLETO: $($script:fail) fallo(s), $($script:pass) ok. ==" -ForegroundColor Red
   exit 1
 }
-Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion+WIP+vista) sano: $($script:pass) verificaciones verdes. =="
+Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion+WIP+vista+reporte) sano: $($script:pass) verificaciones verdes. =="
 exit 0
