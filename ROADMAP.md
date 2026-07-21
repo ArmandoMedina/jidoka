@@ -12,6 +12,8 @@
 
 ## Normal
 
+- **Construir «El sistema configurable, fase 1»** `[alta:2026-07-21 · apetito:8h · espera:cliente]` — plan archivado (`docs/sprints/sprint-sistema-configurable-plan.md`, mergeado en PR #119); R0 por ratificar con aprobación nombrada en sesión de construcción; nace del descubrimiento (informe + maqueta validada en 6 Gembas).
+- **Issues del lazo con los hallazgos del censo** `[alta:2026-07-21 · apetito:1h]` — PreToolUse subutilizado · hueco de `docs/` · `gemba.md` sin `@` (batch, no goteo; el de permisos ya está listado aparte).
 - **Reporte/vista para terceros del lab** — ver sprint FLU-1 en curso (R6/R7): la vista «qué sigue» y el reporte sin jerga `[alta:2026-07-21 · apetito:6h]`.
 - **Coordinación de escritores multi-máquina** `[alta:2026-07-21 · apetito:8h]` — 3 frentes de escritura sobre el método + la rama del socio sin subir; «una sola sesión escritora por working tree» no alcanza con varias PCs (decisión abierta #3 del diagnóstico del flujo).
 - **Permisos `allow/ask/deny` + plan mode inescapable** `[alta:2026-07-21 · apetito:4h]` — cablear el disparo `deny-vs-ask` (meses en catálogo); el muro que evita saltarse plan mode (el cliente lo reclamó 4 veces en 7 sesiones — medido).
@@ -42,6 +44,8 @@
 - **Verificación de contenido del gate** `[alta:2026-07-10]` — más allá de co-ocurrencia; riesgo de over-governance, decisión aparte.
 - **#47 pre-push no protege la rama default** `[alta:2026-07-13]` — sin triar; se decide en la próxima cosecha.
 - **PreCompact hook** `[alta:2026-07-21]` — el disparo `desconfia-de-la-compactacion` como máquina (censo de la maqueta: cero cableados).
+- **Destino del spike `linterna-capas-enforcement`** `[alta:2026-07-21 · espera:cliente]` — rechazado en Gemba («la verdad es que no»); podar la rama o conservarla aparcada.
+- **¿Diagrama del atlas y nota de capacidad para la linterna?** `[alta:2026-07-19 · espera:cliente]` — los 2 avisos de `verificar` anotados al cerrar `v1.24.0`.
 - **Presentación pública (Sprint 4)** `[alta:2026-07-09]` — badges, banner, social preview definitivo; y **comunidad** (Discussions/Discord — decisión del cliente).
 - **Publicar la doctrina suelta «Poka-yoke»** `[alta:2026-07-09]` — ADR 0001 lo deja abierto; decide el autor.
 - **Tablero de instrumentación (leading vs lagging)** `[alta:2026-07-09]` — las 5 series de `doctrina/05`; frontera sin precedente en el linaje.

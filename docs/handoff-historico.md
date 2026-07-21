@@ -4,6 +4,24 @@
 
 ---
 
+## Archivado 2026-07-21 (merge con main PR #119: la sección original del descubrimiento + la histórica de la linterna)
+
+### Dónde estamos (2026-07-21 — El descubrimiento del sistema configurable CERRADO · rama `descubre/sistema-configurable-20260720` SIN MERGEAR, 8 commits) [nota del merge: la rama SÍ se mergeó — PR #119]
+
+**El descubrimiento quedó completo y durable en la rama; la sesión cerró con cuadro** ([`docs/sprints/cierre-20260721.md`](../sprints/cierre-20260721.md)). La visión: **Jidoka evoluciona de metodología a sistema de gobierno configurable con UI guiada** (la UI autora, el gate ejecuta — ADRs 0002/0044 intactos). Los artefactos, en orden de lectura para la sesión de construcción:
+
+1. **El plan-contrato del sprint** [`docs/sprints/sprint-sistema-configurable-plan.md`](../sprints/sprint-sistema-configurable-plan.md) — R0 con Gherkin + 6 rebanadas en orden de dependencia (R1 ADRs+CFG-1 · R2 bandeja · R3 contrato SAP del ritual · R5 candado IA · R4 formulario · R6 modo avanzado), pruebas y demo del cliente por rebanada, diseño mecánico validado contra el código real y **3 trampas confesadas** (la mecánica converge en `-Actualizar` → `contratos.json` es INSTANCIA; el sello seguirá acusando `DIVERGE` hasta la clase `contrato` — R3b diferida; el `deny` de Bash es por prefijo → el hook es el muro). Trae su propia sección "Arranque en el chat nuevo".
+2. **El informe de la visión** [`docs/analisis/descubrimiento-sistema-configurable-202607.md`](../analisis/descubrimiento-sistema-configurable-202607.md) — la spec conceptual: 5 relaciones de "ligar" (incluidas lectura `@` y prohibición), 3 regímenes por pieza (y el hallazgo "los comandos están en el cajón equivocado"), bandeja, formulario, meta-gobierno, hallazgos del censo (`permissions` VACÍO con `deny-vs-ask` catálogo-solo, PreToolUse subutilizado, hueco de `docs/`, `gemba.md` sin `@`).
+3. **La maqueta clickeable** [`docs/analisis/maqueta-tuberia-202607.html`](../analisis/maqueta-tuberia-202607.html) — la spec visual, validada en **6 Gembas vivos** del cliente (2 hallazgos suyos, curados en caliente): tubería de 54 piezas con regímenes, bandeja (1 caso REAL), formulario, reconciliar, modo avanzado (contraseña-ritual `GARANTIA-NULA` + firma + candado IA) y tour de 14/19 paradas que abre los pop-ups por dentro. **Correr ambos tours ES el onboarding de la sesión de construcción.**
+4. **El spike del modo "Capas" RECHAZADO en Gemba** (*"la verdad es que no"*) — rama `spike/linterna-capas-enforcement-20260720` (`fa3a8c3`), aparcada sin mergear. Lección: el cliente no quiere mapas del todo — quiere guía en el momento concreto.
+5. **Nota de trato:** leer ÍNTEGRO el transcript anterior (jsonl) funcionó cuando el cliente se sintió mal entendido — repetir la técnica si recurre. **Los menús de opciones abstractas lo pierden; los artefactos concretos clickeables lo destraban.**
+
+**Pendiente (cliente — nada bloquea al agente):** 1. PR + merge de la rama `descubre/…` [HECHO: PR #119] · 2. Sesión nueva de construcción: `/jidoka:arranca` → ratificar R0 con aprobación nombrada → rama `sprint/sistema-configurable-<fecha>` desde `main` → R1→R6 · 3. Destino de la rama del spike (podar o conservar aparcada) · 4. ¿Issues del lazo para los hallazgos del censo? (batch, no goteo). [Todos clasificados en el ROADMAP al mergear.]
+
+### Dónde estuvimos (2026-07-19 — La linterna del gobierno · `v1.24.0` · mergeada, PR #114)
+
+`tools/estado-gobierno.ps1`: vista de solo lectura del grafo del gobierno (`.html` autocontenido, huérfanos en rojo, falla cerrado; es vista, NO gate — ADR 0043). Detalle completo en el CHANGELOG `[1.24.0]` y abajo en este histórico. Pendientes vivos al archivarse: el **tag+release de `v1.24.0` no se cortó** (quedó subsumido: la orden nombrada de `v1.25.0` cubrió el corte); los 2 avisos de `verificar` anotados (¿diagrama del atlas y nota de capacidad para la linterna?) → clasificados en el ROADMAP (Algún día, espera:cliente).
+
 ## Archivado 2026-07-21 (migración inicial del contrato del HANDOFF, sprint FLU-1)
 
 ## Dónde estamos (2026-07-21 — **el Gemba de la gestión del flujo** · sesión de diagnóstico, nada construido)
