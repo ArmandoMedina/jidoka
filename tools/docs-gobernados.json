@@ -18,6 +18,12 @@
       "molde": "kit/.jidoka/templates/infra.md",
       "requeridas": ["Material de referencia", "Identidades por servicio", "Maquinas y ambientes", "Convenciones que no se re-preguntan"],
       "estricto": false
+    },
+    {
+      "doc": "product/casting.md",
+      "molde": "kit/.jidoka/templates/casting.md",
+      "requeridas": ["El reparto humano", "Los asientos-agente"],
+      "estricto": false
     }
   ],
   "capa3": ["CODE_OF_CONDUCT.md", "LICENSE"]

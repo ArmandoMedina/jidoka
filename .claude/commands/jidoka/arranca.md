@@ -59,7 +59,9 @@ La lupa de todo lo demás; léela primero:
 
 Antes de construir, ubica dos tablas de la ley — ninguna se deduce sobre la marcha ni depende de tu iniciativa:
 
-- **El roster** es la **tabla de responsables**: quién responde por cada asiento del método — no un asiento que el hilo principal "ocupa". Si el repo declaró un casting con nombres, vive en la sección `## El casting` de `product/infra.md` — **ya inyectado arriba**: el casting vive donde se inyecta (cosecha #7; los repos sembrados antes de v1.17 lo tenían en `product/recursos-del-proyecto.md` — migra esa sección a `infra.md`). Si no hay casting declarado, usa los roles **neutrales** de `kanban/roles.md` — esta nave nodriza usa los neutrales a propósito (decisión del cliente, 2026-07-14) — y sugiere sembrarlo si el repo lo amerita.
+- **El roster** es la **tabla de responsables**: quién hace qué —los dos roles humanos (la autoridad del dominio / el dueño-operador) y los asientos-agente, cada uno con su carta SÍ/NO— no un asiento que el hilo principal "ocupa". Vive en su **casa propia**, `product/casting.md` (`infra.md` se quedó con identidades y máquinas) — **inyectado abajo**. Si el repo no declaró casting, usa los roles **neutrales** de `kanban/roles.md`; los repos sembrados antes de v1.26 lo tenían en la sección `## El casting` de `product/infra.md` — migra esa sección a `product/casting.md`.
+!`test -f product/casting.md || echo "[FALTA] product/casting.md -- el @ de abajo inyecta VACIO el reparto de funciones (quien hace que). Siembra la instancia: instalar.ps1 -Actualizar. Sin [FALTA] = el casting existe."`
+@product/casting.md
 - **El router** (`tools/rutear.ps1`) es el **preview de gates** de esta sesión: según lo que toques, ESTOS gates te van a vigilar al cerrar — no una tabla en la que "te sientas".
 !`powershell -NoProfile -File tools/rutear.ps1 || echo "(no hay router: tools/rutear.ps1 no esta sembrado -- actualiza el motor)"`
 

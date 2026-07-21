@@ -12,16 +12,7 @@ estado: vigente
 
 ## El casting
 
-> **Quién ocupa cada asiento del método, por nombre.** `/jidoka:arranca` lee esta sección (este archivo se inyecta al abrir — el casting vive donde se inyecta, cosecha #7). El *rol* es el mecanismo (lo neutral que la ley y los hooks entienden; ver `kanban/roles.md`); el *nombre* es sabor de instancia — mapearlo a una persona lo vuelve memorable y deja claro quién responde por qué (ADR 0023). Sin esta sección, la sesión cae a los roles neutrales.
-
-| Asiento (rol del método) | Nombre | Quién lo ocupa / cuándo |
-|---|---|---|
-| orquestador | [nombre] | El hilo principal: decide y teje, delega lo pesado. |
-| escribano | [nombre] | Sincroniza los docs dueños según la ley; cierra el drift. |
-| revisor-visual | [nombre] | Gemba: corre el demo con datos reales y deja evidencia en `qa_runs/`. |
-| validador | [nombre] | Validación por medición: corre el motor determinista contra golden-masters. |
-
-> Enciende solo los asientos que este repo merece (menú, no molde). Para personalizar el casting —incluido volver un asiento un skill con nombre propio— ve `kanban/roles.md` → **"Personalizar el casting"**.
+> **El casting vive en `product/casting.md`** (molde en `kit/.jidoka/templates/casting.md`) — el reparto de funciones, humanos y agentes, con la carta SÍ/NO de cada asiento. `infra.md` se queda con identidades y máquinas. Este encabezado se conserva como puntero para no romper el gobierno de secciones sobre los `infra.md` viejos que aún castean aquí.
 
 ## Material de referencia
 
