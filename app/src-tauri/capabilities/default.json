@@ -1,9 +1,10 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Capacidades por defecto de la ventana principal. R2: solo el core. R3+ suma los permisos de shell/dialog que el motor necesite.",
+  "description": "Capacidades por defecto de la ventana principal. R3: el core + dialog (el selector de carpeta para elegir repo). NADA de shell: cargar_datos usa std::process::Command (no necesita permiso). Permisos minimos (hallazgo de review R2).",
   "windows": ["main"],
   "permissions": [
-    "core:default"
+    "core:default",
+    "dialog:default"
   ]
 }

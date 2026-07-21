@@ -46,7 +46,8 @@ catch {
   exit 1
 }
 
-# --- La ley: solo necesito los NOMBRES de las areas para el campo 'areas'. ---
+# --- La ley: emito las areas como objetos {nombre,fuente,doc_bloquea,doc_avisa,revisa}
+#     para que la UI pueda reconstruir la tabla completa (nombre/disparaCon/exige). ---
 try {
   $areas = @((Get-Content -LiteralPath $leyPath -Raw | ConvertFrom-Json))
 }
@@ -55,7 +56,15 @@ catch {
   [Console]::Error.WriteLine("        $($_.Exception.Message)")
   exit 1
 }
-$areasNombres = @($areas | ForEach-Object { "$($_.nombre)" })
+$areasObjetos = @($areas | ForEach-Object {
+  [ordered]@{
+    nombre      = "$($_.nombre)"
+    fuente      = @(if ($_.PSObject.Properties['fuente'])      { @($_.fuente) }      else { @() })
+    doc_bloquea = @(if ($_.PSObject.Properties['doc_bloquea']) { @($_.doc_bloquea) } else { @() })
+    doc_avisa   = @(if ($_.PSObject.Properties['doc_avisa'])   { @($_.doc_avisa) }   else { @() })
+    revisa      = if ($_.PSObject.Properties['revisa'] -and $_.revisa) { $true } else { $false }
+  }
+})
 
 # --- Estado VIVO de contratos.json (ausente = normal: sin overrides). Indexado por path. ---
 $ctrRegimen = @{}   # path -> regimen (override)
@@ -151,7 +160,7 @@ $foto = [ordered]@{
   regimenes = $semilla.regimenes
   bandeja   = $bandeja
   ritual    = @($ritual)
-  areas     = @($areasNombres)
+  areas     = @($areasObjetos)
 }
 
 # stdout SIN BOM: Write-Output del string de ConvertTo-Json (no Out-File, que mete BOM en PS 5.1).

@@ -65,6 +65,8 @@
 
 **Pendiente del cliente:** Gemba de fidelidad (doble clic al `.exe`, aprobar con los ojos). Nada bloquea al agente para R3 salvo esa aprobación de fidelidad (STOP del plan).
 
+**Gemba del cliente (2026-07-21): APROBADO** — "Sí es fiel... abre y se ve como me gustó".
+
 ---
 
 ## R3 (mitad motor) — el contrato de datos app↔motor — ✅ VERDE
@@ -177,5 +179,42 @@ El plan R5 listaba `-Quien -Email` como parámetros de `override.ps1`. **Aquí N
 **Demo del cliente (owner: cliente):** candado a una pieza desde la app (modo avanzado, tecleando el nombre del repo) → pedir a la IA editarla → verla rebotar (el hook candado la para). **Requiere la mitad UI** (cablear `reclasResumen` con `invoke`), **que espera el STOP de fidelidad de R2.**
 
 **Pendiente:** el STOP de fidelidad de R2 (Gemba del `.exe`) antes de cablear la mitad UI. La mitad MOTOR (esta rebanada) queda verde y lista para que `app.js` invoque `override.ps1` y muestre la firma real (nada inventado).
+
+---
+
+## R3 (mitad UI) — la tubería con datos reales — ✅ VERDE
+
+> El STOP de fidelidad de R2 quedó **APROBADO** por el cliente ("Sí es fiel... abre y se ve como me gustó"). Con eso, esta rebanada cablea la **mitad UI**: la app deja de ser teatro **EN LAS LECTURAS**. Al abrir, corre el motor PS real (`tools/tuberia-datos.ps1`) vía el puente Rust y pinta la tubería/bandeja con SUS piezas/regímenes/candados/cola reales. Las **escrituras siguen teatro** (los wizards) — son R4/R5-UI.
+
+**Qué se entregó (fidelidad quirúrgica: solo el bloque de datos + 2 controles discretos + el puente Rust):**
+- `app/ui/index.html` — el bloque de datos hardcodeado (las ~49 `pz()`, el array `E`, `REGBY/REGOVR/REGTXT/REGCOLOR`, `AREAS`) se reemplazó por **carga dinámica** desde la foto real, marcado con los sentinelas `/* JIDOKA:DATOS-INICIO ... JIDOKA:DATOS-FIN */`. `jidokaCargar(foto)` reconstruye `P`/`E`/`ADJ`/`REG*`/`AREAS`/`BANDEJA` **con la misma forma** que producía la maqueta y repinta. `regOf(id)` ahora prefiere el `regimen` VIVO por pieza (override de `contratos.json` incluido) que trae la foto, cayendo al derivado por-id/por-tipo. El render de `#cats` se convirtió en `pintarTuberia()` (reinvocable). Los **5 items hardcodeados** del tab `#bandeja` se reemplazaron por `pintarBandeja()` con render dinámico desde `BANDEJA.cola`/`aceptados` — **mismas clases/estilos** (`.bitem`, `.et` coloreado por motivo, botón Parametrizar); el contador del tab (`#bandejaCont`) refleja la cola real. En el panel de detalle, una pieza con `candado:true` muestra el indicador 🔒 (el mismo emoji del modo avanzado; sin estilos nuevos). **Todo lo demás quedó INTACTO** (CSS, tabs, wizards, tour, modo avanzado, textos).
+- **2 controles discretos en la nav** (clases inline, estilo consistente, no protagonistas): `↻ Refrescar` (re-invoca `cargar_datos`) y `📁 Cambiar repo` (re-invoca `elegir_repo`+`cargar_datos`). Un banner de aviso (`#jidokaAviso`, estilo `.et sin` de la paleta) muestra errores del puente en la UI (nada de `alert()`).
+- `app/src-tauri/src/lib.rs` — **el puente Rust**: `cargar_datos(repo)` ejecuta `powershell.exe -NoProfile -ExecutionPolicy Bypass -File <repo>/tools/tuberia-datos.ps1 -Repo <repo>` con `std::process::Command` (**NO** el plugin shell — menos superficie), con `creation_flags(0x08000000)` CREATE_NO_WINDOW en Windows (sin parpadeo de consola); stdout→String, exit≠0→Err con stderr. `repo_actual()`/`elegir_repo()` recuerdan el último repo en `app_data_dir()/repo.txt`; `elegir_repo` abre el selector (`tauri-plugin-dialog`, `blocking_pick_folder`) y **valida** que `<carpeta>/tools/blast-radius.json` exista (si no: Err con el mensaje pedido). El **plugin shell se retiró** de `lib.rs` y `Cargo.toml` (quedó registrado sin usarse en R2; menos superficie).
+- `app/src-tauri/tauri.conf.json` — `app.withGlobalTauri: true` (sin bundler, el JS usa `window.__TAURI__.core.invoke`).
+- `app/src-tauri/capabilities/default.json` — suma **solo** `dialog:default` (lo que usa el selector). **Nada de shell** (`std::process` no necesita permiso) — respeta el hallazgo de review de R2 (permisos mínimos).
+- `tools/probar-app.ps1` — el assert byte-idéntico (que el propio test anunciaba que se relajaría) se **reemplazó por paridad estructural** contra la spec congelada: mismos IDs de tabs (`#tuberia #bandeja #flujos #huecos`), `#ovl`/`#wiz`, variables CSS de la paleta, funciones clave del JS (`wizStart`/`tourStart`/`rootCheck`/`wizRender`), los sentinelas `JIDOKA:DATOS-INICIO/FIN`, **el `<style>` byte-idéntico al de la spec** (hash del bloque; los 2 botones nuevos usan clases inline → el CSS no cambió) y `withGlobalTauri true`. Se mantienen: no-se-siembra, JSON válido, Cargo/main.rs, y los asserts R3-motor (foto parsea, sin BOM, ≥37 piezas).
+
+**Decisiones tomadas:**
+- **`std::process::Command`, no el plugin shell** (menos superficie de permisos; el hallazgo de review R2 fue "permisos mínimos"). El plugin shell se retiró por completo. Solo `dialog:default` en las capacidades.
+- **La foto manda sobre la spec en el régimen:** `regOf` prefiere el `regimen` que la foto ya calculó por pieza (incluye el override vivo de `contratos.json`), calcando la semántica del motor de R3-mitad-motor.
+- **Bandeja dinámica con los mismos estilos:** el motivo colorea el `.et` (existe/desviado/huérfano → rojo `sin`; aceptado → ámbar `dor`; simulado/dato → azul `dat`), reusando la paleta de la maqueta sin inventar clases.
+- **CSS intacto a propósito:** los 2 botones nuevos llevan estilo inline para que el `<style>` quede byte-idéntico y el assert de CSS sea posible (petición del listón).
+
+**Evidencia (esta máquina, 2026-07-21):**
+
+| Gate | Exit | Nota |
+|---|---|---|
+| `npx tauri build --debug --no-bundle` (en `app/`) | **0** | El `.exe` se regeneró: `app/src-tauri/target/debug/jidoka-tuberia.exe` (12.75 MB, 14:30). Compiló con el plugin dialog (shell ya no compila). Único warning benigno de linker (mensaje MSVC en español al crear la import library), no error. |
+| `tools/probar-app.ps1` | **0** | **28/28** verdes: paridad estructural (12 marcadores), sentinelas presentes, **`<style>` byte-idéntico a la spec**, `withGlobalTauri true`, `dialog` sin shell implícito, no-se-siembra, y la sección R3-motor (foto parsea, sin BOM, 49 piezas ≥ 37). |
+| `tools/probar-publicar.ps1` | **0** | 7/7. El meta-test "todos los `probar-*` en la lista del preflight" sigue verde. |
+| `tools/anti-pii.ps1` | **0** | Sin fugas. |
+| `tools/verificar.ps1` | **0** | Sin bloqueo. **4 avisos no bloqueantes** por tocar `probar-app.ps1` (áreas `atlas`/`barreras`: atlas, `andon/README.md`, grafo) y `app/*` (área `app`: "registra en CHANGELOG"). Son consecuencia de extender el motor/app; el CHANGELOG del release es R7 (mismo patrón que R2–R5). |
+| Smoke del contrato JS↔motor | **—** | `JSON.parse` del stdout de `tuberia-datos.ps1` OK (49 piezas, 57 aristas, cola=34); syntax-check del `<script>` con `node vm` → SYNTAX OK; **demo de la bandeja verificado por la mitad PS**: creé `docs/glosario-del-dominio-DEMO-R3.md` por fuera → la foto lo trae en `bandeja.cola` con `motivo=existe` (que la UI pinta como `.et sin` rojo) → borrado. |
+
+**Confesión honesta (el click end-to-end):** no puedo clickear la ventana Tauri en headless. Verifiqué la **mitad PS** del puente (la foto corre, parsea, trae ≥49 piezas, sin BOM; el doc por fuera aparece en la cola) y que **el JS parsea** (node vm). **El click real — abrir el `.exe`, ver SUS piezas, crear un doc y darle ↻ Refrescar para verlo caer en la bandeja — lo hace el cliente en su Gemba** (la app arrancó y compiló; el cableado JS↔Rust↔PS está afirmado por partes, no por un clic mío).
+
+**Demo del cliente (owner: cliente):** doble clic al `.exe` nuevo → al abrir, el selector de carpeta (primera vez) o el último repo recordado → **la tubería muestra SUS 49 piezas con su régimen/candado real** y la bandeja SU cola real (34 pendientes hoy). Crear un doc por fuera (ej. `docs/mi-nota.md`) → `↻ Refrescar` → verlo **aparecer en la bandeja** con su badge de motivo. `📁 Cambiar repo` para apuntar a otro repo Jidoka. Los botones de "configurar" **siguen siendo teatro** (escrituras = R4/R5-UI).
+
+**Pendiente:** cablear las **escrituras** (R4-UI: `altaResumen`/wizard 'doc' → `parametrizar.ps1`; R5-UI: `reclasResumen` → `override.ps1`) — los comandos motor ya están verdes desde R4/R5-mitad-motor.
 
 ---

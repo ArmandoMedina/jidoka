@@ -24,11 +24,15 @@ $dir = Join-Path $raiz 'app'
 $uiPath = Join-Path $dir 'ui/index.html'
 $specPath = Join-Path $raiz 'docs/analisis/maqueta-tuberia-202607.html'
 
-# (a) FIDELIDAD: app/ui/index.html nace copia byte-fiel de la maqueta congelada.
-# NOTA R3: este assert se RELAJARA a paridad estructural (tabs #tuberia #bandeja #flujos
-# #huecos, #ovl/#wiz, paleta) cuando el bloque de datos (P/E) se sustituya por invoke() al
-# motor -- ver el plan-contrato, decision de diseno 3. Mientras tanto, hash identico = teatro
-# fiel, la vara del Gemba de fidelidad que el cliente aprueba con sus ojos.
+# (a) FIDELIDAD -- R3: el assert byte-identico YA NO aplica (la mitad UI reemplazo el bloque
+# de datos por invoke() al motor, decision de diseno 3). Se reemplaza por PARIDAD ESTRUCTURAL
+# contra la spec congelada + hash del <style> byte-identico (el CSS no tenia razon de cambiar;
+# los 2 botones nuevos usan clases inline, no tocan el <style>). La vara del Gemba de fidelidad
+# ya la aprobo el cliente ("Si es fiel... abre y se ve como me gusto", 2026-07-21).
+function Get-StyleBlock($html) {
+  $m = [regex]::Match($html, '(?s)<style>.*?</style>')
+  if ($m.Success) { return $m.Value } else { return $null }
+}
 if (-not (Test-Path -LiteralPath $uiPath)) {
   No "no existe app/ui/index.html (la interfaz de la app)"
 }
@@ -37,12 +41,52 @@ elseif (-not (Test-Path -LiteralPath $specPath)) {
 }
 else {
   Ok "existe app/ui/index.html (la interfaz)"
-  $hUi = (Get-FileHash -LiteralPath $uiPath -Algorithm SHA256).Hash
-  $hSpec = (Get-FileHash -LiteralPath $specPath -Algorithm SHA256).Hash
-  if ($hUi -eq $hSpec) {
-    Ok "app/ui/index.html es byte-identico a la maqueta congelada (SHA256 $hUi)"
+  $uiText = Get-Content -LiteralPath $uiPath -Raw
+  $specText = Get-Content -LiteralPath $specPath -Raw
+
+  # Paridad estructural: los IDs de tabs, #ovl/#wiz, las variables CSS de la paleta y las
+  # funciones clave del JS de la maqueta siguen presentes en la UI (grep textual).
+  $marcadores = @(
+    @('id="tuberia"', 'el tab #tuberia'),
+    @('id="bandeja"', 'el tab #bandeja'),
+    @('id="flujos"', 'el tab #flujos'),
+    @('id="huecos"', 'el tab #huecos'),
+    @('id="ovl"', 'el overlay #ovl (wizard modal)'),
+    @('id="wiz"', 'el contenedor #wiz'),
+    @('--bg:', 'la variable CSS --bg (paleta)'),
+    @('--violet:', 'la variable CSS --violet (paleta)'),
+    @('function wizStart', 'la funcion wizStart (wizards)'),
+    @('function tourStart', 'la funcion tourStart (tour)'),
+    @('function rootCheck', 'la funcion rootCheck (modo avanzado)'),
+    @('function wizRender', 'la funcion wizRender (wizards)')
+  )
+  foreach ($mk in $marcadores) {
+    if ($uiText -match [regex]::Escape($mk[0])) { Ok "paridad estructural: presente $($mk[1])" }
+    else { No "paridad estructural: FALTA $($mk[1]) ('$($mk[0])') en app/ui/index.html" }
+  }
+
+  # Los sentinelas que marcan el bloque de datos reemplazado (mitad UI R3).
+  if ($uiText -match 'JIDOKA:DATOS-INICIO' -and $uiText -match 'JIDOKA:DATOS-FIN') {
+    Ok "sentinelas JIDOKA:DATOS-INICIO/FIN presentes (bloque de datos cableado a invoke)"
   } else {
-    No "app/ui/index.html NO es byte-fiel a la maqueta (UI $hUi vs spec $hSpec): la fidelidad se rompio"
+    No "faltan los sentinelas JIDOKA:DATOS-INICIO/FIN (el bloque de datos debe estar marcado)"
+  }
+
+  # El <style> byte-identico al de la spec (el CSS no cambio; los botones nuevos son inline).
+  $sUi = Get-StyleBlock $uiText
+  $sSpec = Get-StyleBlock $specText
+  if (-not $sUi) { No "no encuentro el bloque <style> en app/ui/index.html" }
+  elseif (-not $sSpec) { No "no encuentro el bloque <style> en la spec congelada" }
+  else {
+    $sha = New-Object System.Security.Cryptography.SHA256Managed
+    $enc = New-Object System.Text.UTF8Encoding($false)
+    $hUiStyle = [BitConverter]::ToString($sha.ComputeHash($enc.GetBytes($sUi))).Replace('-', '')
+    $hSpecStyle = [BitConverter]::ToString($sha.ComputeHash($enc.GetBytes($sSpec))).Replace('-', '')
+    if ($hUiStyle -eq $hSpecStyle) {
+      Ok "el <style> de app/ui/index.html es byte-identico al de la spec (CSS intacto, SHA256 $hUiStyle)"
+    } else {
+      No "el <style> de app/ui/index.html DIVERGE del de la spec (UI $hUiStyle vs spec $hSpecStyle): el CSS se toco"
+    }
   }
 }
 
@@ -60,6 +104,12 @@ else {
     $fd = "$($conf.build.frontendDist)"
     if ($fd -match 'ui') { Ok "frontendDist apunta a la UI ($fd)" }
     else { No "frontendDist ('$fd') no apunta a la UI (la app no serviria la maqueta)" }
+    # withGlobalTauri: sin bundler, el JS usa window.__TAURI__.core.invoke (R3).
+    if ($conf.app -and $conf.app.withGlobalTauri -eq $true) {
+      Ok "app.withGlobalTauri = true (el JS invoca via window.__TAURI__.core.invoke)"
+    } else {
+      No "app.withGlobalTauri no es true (la mitad UI no podria invocar cargar_datos)"
+    }
   }
 }
 
@@ -117,6 +167,23 @@ else {
     $faltan = @($claves | Where-Object { -not $foto.PSObject.Properties[$_] })
     if ($faltan.Count -eq 0) { Ok "la foto trae sus claves raiz (version/repo/generado/piezas/aristas/regimenes/bandeja/ritual/areas)" } else { No "la foto pierde clave(s) raiz: $($faltan -join ', ')" }
     if (@($foto.piezas).Count -ge 37) { Ok "la foto trae >=37 piezas (censo curado: $(@($foto.piezas).Count))" } else { No "la foto trae solo $(@($foto.piezas).Count) piezas (esperaba >=37)" }
+    # areas: objetos con nombre (no solo strings) y al menos uno con doc_bloquea o doc_avisa
+    $areasArr = @($foto.areas)
+    $areasConNombre = @($areasArr | Where-Object { $_.PSObject.Properties['nombre'] -and "$($_.nombre)" -ne '' })
+    if ($areasConNombre.Count -gt 0) {
+      Ok "areas son objetos con campo nombre ($($areasConNombre.Count) areas)"
+    } else {
+      No "areas no son objetos con campo nombre (esperaba objetos {nombre,...})"
+    }
+    $areasConDoc = @($areasArr | Where-Object {
+      ($_.PSObject.Properties['doc_bloquea'] -and @($_.doc_bloquea).Count -gt 0) -or
+      ($_.PSObject.Properties['doc_avisa']   -and @($_.doc_avisa).Count   -gt 0)
+    })
+    if ($areasConDoc.Count -gt 0) {
+      Ok "al menos un area trae doc_bloquea o doc_avisa ($($areasConDoc.Count) areas con docs)"
+    } else {
+      No "ninguna area trae doc_bloquea ni doc_avisa (esperaba al menos una)"
+    }
   }
   else { No "la foto consolidada no parsea como JSON" }
 }
