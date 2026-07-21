@@ -31,11 +31,29 @@ $ledger = @'
 '@
 Set-Content -LiteralPath (Join-Path $fix 'tools/ritual-gobernado.json') -Value $ledger -Encoding ASCII
 
-Set-Content -LiteralPath (Join-Path $fix 'cmd/conforme.md') -Value "# c`n@A.md`n@B.md" -Encoding UTF8
-Set-Content -LiteralPath (Join-Path $fix 'cmd/falta.md')    -Value "# f`n@A.md" -Encoding UTF8
-Set-Content -LiteralPath (Join-Path $fix 'cmd/extra.md')    -Value "# e`n@A.md`n@Z.md" -Encoding UTF8
+$conformeDoc = @'
+# c
+@A.md
+@B.md
+'@
+Set-Content -LiteralPath (Join-Path $fix 'cmd/conforme.md') -Value $conformeDoc -Encoding UTF8
+$faltaDoc = @'
+# f
+@A.md
+'@
+Set-Content -LiteralPath (Join-Path $fix 'cmd/falta.md')    -Value $faltaDoc -Encoding UTF8
+$extraDoc = @'
+# e
+@A.md
+@Z.md
+'@
+Set-Content -LiteralPath (Join-Path $fix 'cmd/extra.md')    -Value $extraDoc -Encoding UTF8
 Set-Content -LiteralPath (Join-Path $fix 'cmd/backtick.md') -Value "# b`n- **``@A.md``** el estado en vuelo" -Encoding UTF8
-Set-Content -LiteralPath (Join-Path $fix 'cmd/estricto.md') -Value "# es`n@Q.md" -Encoding UTF8
+$estrictoDoc = @'
+# es
+@Q.md
+'@
+Set-Content -LiteralPath (Join-Path $fix 'cmd/estricto.md') -Value $estrictoDoc -Encoding UTF8
 # fence.md: '@A.md' SOLO aparece dentro de un bloque de codigo cercado -> no cuenta -> DESVIADO.
 $fenceDoc = @'
 # fe
@@ -65,7 +83,12 @@ $codeE = $LASTEXITCODE
 if ($codeE -eq 1) { Ok "-Estricto con un comando estricto desviado -> exit 1 (muro opt-in muerde)" } else { No "-Estricto: esperaba exit 1, fue $codeE" }
 
 # el mismo fixture pero con estricto.md sano debe salir 0 aun en -Estricto:
-Set-Content -LiteralPath (Join-Path $fix 'cmd/estricto.md') -Value "# es`n@A.md`nahora si trae A" -Encoding UTF8
+$estrictoSanoDoc = @'
+# es
+@A.md
+ahora si trae A
+'@
+Set-Content -LiteralPath (Join-Path $fix 'cmd/estricto.md') -Value $estrictoSanoDoc -Encoding UTF8
 & powershell -NoProfile -File $scriptFix -Estricto 2>&1 | Out-Null
 $codeE2 = $LASTEXITCODE
 if ($codeE2 -eq 0) { Ok "-Estricto sin estrictos desviados -> exit 0 (no bloquea de mas)" } else { No "-Estricto sano: esperaba exit 0, fue $codeE2" }
