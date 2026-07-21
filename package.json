@@ -1,6 +1,6 @@
 {
   "name": "jidoka-method",
-  "version": "1.26.0",
+  "version": "1.27.0",
   "description": "El Sistema de Produccion Toyota para agentes de IA: doctrina + metodo + ritual de sprint, con gates deterministas (Andon). Instalador del metodo.",
   "bin": {
     "jidoka-method": "bin/jidoka-method.js"

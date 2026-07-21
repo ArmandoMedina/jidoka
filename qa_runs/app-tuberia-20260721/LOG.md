@@ -322,3 +322,71 @@ El gate bloquea borrar `tools/*.ps1` o `tools/blast-radius.json` sin un ADR NUEV
 - Manifiesto de siembra `kit/.jidoka/instalar/manifiesto.json`: nunca listó `extension/` (verificado — el invariante de probar-extension lo afirmaba; el de probar-app también lo afirma para `app/`).
 
 ---
+
+## R7 — Empaquetado + v1.27.0 — VERDE
+
+### SSOT de versión (los 3 sitios)
+
+| Archivo | Valor | Verificado |
+|---|---|---|
+| `tools/version.txt` | `1.27.0` | `probar-version.ps1` exit 0 |
+| `package.json` (raíz) | `"version": "1.27.0"` | `probar-version.ps1` exit 0 |
+| `app/src-tauri/tauri.conf.json` | `"version": "1.27.0"` | leído directo |
+| Tope del `CHANGELOG.md` | `## [1.27.0] — 2026-07-21` | `probar-version.ps1` exit 0 |
+
+### `tauri.conf.json` ajustado para release
+
+- `version`: `"1.27.0"` (era `"0.0.0"`)
+- `bundle.targets`: `["nsis"]` (era `"all"`)
+- `bundle.active`: `true` (ya estaba)
+
+### Artefactos generados
+
+`npx tauri build` corrió completo (Cargo release + makensis). Ningún AV (Bitdefender) intervino en esta corrida.
+
+| Artefacto | Ruta | Tamaño | SHA256 |
+|---|---|---|---|
+| Instalador NSIS | `app/src-tauri/target/release/bundle/nsis/jidoka-tuberia_1.27.0_x64-setup.exe` | 1,946,806 bytes (1.86 MB) | `143B051C2C90B26788122A620232C7815F5FE300DF917F426EDDF217CDB8F321` |
+| EXE release suelto | `app/src-tauri/target/release/jidoka-tuberia.exe` | 9,101,824 bytes (8.68 MB) | `436A29C16D58742E5424AEBE5965E8BB6D3AB5B08F3AC5833CE970B25F950E57` |
+
+Ambos en `.gitignore` (`app/src-tauri/target/`) — `git status --short` no lista nada de `target/`.
+
+### Gates de cierre
+
+| Gate | Exit | Nota |
+|---|---|---|
+| `tools/probar-version.ps1` | **0** | `1.27.0` en los 3 sitios (version.txt = CHANGELOG tope = package.json). |
+| `tools/probar-app.ps1` | **0** | **35/35**. La app sigue sana; `tauri.conf.json` tiene version 1.27.0 y targets nsis — el lint parsea el JSON y afirma `frontendDist`, `withGlobalTauri`, Cargo, `main.rs`, no-se-siembra y el contrato de datos. |
+| `tools/probar-publicar.ps1` | **0** | **7/7**. El dry-run deriva `v1.27.0`; el meta-test de todos los `probar-*.ps1` verde. |
+| `tools/anti-pii.ps1` | **0** | Sin fugas en 263 archivos. |
+| `tools/verificar.ps1 -Base main` | **0** | Sin BLOQUEA. 3 avisos no bloqueantes pre-existentes de la rama (comandos/disparos/atlas — no accionables en R7; el CHANGELOG acaba de cerrarse). |
+
+### Demo del cliente — flujo completo del glosario (instalación + operación)
+
+El demo del cliente para R7 es el flujo completo desde el instalador:
+
+1. **Instalar:** doble clic al instalador `jidoka-tuberia_1.27.0_x64-setup.exe` → next x 3 → instala en `%LOCALAPPDATA%\Programs\jidoka-tuberia\` (o ruta personalizada).
+2. **Abrir:** icono en el escritorio / menú inicio → selector de carpeta → apuntar al repo Jidoka.
+3. **Ver las 49 piezas** con sus regímenes/candados reales y la bandeja con la cola real.
+4. **Parametrizar el glosario:** pestaña Bandeja → "Parametrizar →" el glosario → formulario (tipo: glosario, régimen: estatuto, fuerza: avisa, comandos: arranca) → "✍️ Escribir el contrato" → mensaje de éxito + @ insertado en arranca.md → pieza sale de la bandeja (refresco automático).
+5. **Modo avanzado:** botón de candado → teclear el nombre del repo (`jidoka`) → elegir una pieza → Reclasificar + Candado → "✍️ Firmar y aplicar" → ver la firma real (derivada de `git config`, no tecleada).
+6. **VS Code limpio:** `Ctrl+Shift+P` → "Jidoka" → CERO comandos (extensión retirada en R6).
+
+El `.exe` de debug (`target/debug/jidoka-tuberia.exe`) ya arrancó y fue aprobado por el cliente en el Gemba de R3-UI. El instalador NSIS empaqueta el mismo binario en modo release optimizado.
+
+---
+
+## Resumen del sprint completo (tabla R1-R7)
+
+| Rebanada | Qué | Evidencia | Exit |
+|---|---|---|---|
+| **R1** — Cerrar el legado + ley nueva | ADR 0048, índice ADRs, CHANGELOG v1.26.0, SSOT 1.26.0, HANDOFF reconciliado, plan archivado, este LOG | `verificar` 0, `auditar` 0, `probar-version` 0 | 0 |
+| **R2** — Cascarón fiel (GEMBA temprano) | `app/` Tauri v2 byte-fiel a la maqueta; `probar-app` 8/8; área `app` en la ley; gitignore target/ | `probar-app` 0, `probar-publicar` 0, `probar-extension` 26/26, `verificar` 0; **GEMBA aprobado** ("Sí es fiel… abre y se ve como me gustó") | 0 |
+| **R3 motor** — Contrato de datos app↔motor | `tuberia-datos.ps1` + `tuberia-piezas.json` (49 piezas / 57 aristas); `-Json` aditivo en bandeja + ritual | `probar-bandeja` 21/21, `probar-ritual` 19/19, `probar-app` 14/14, `probar-publicar` 7/7, `verificar` 0 | 0 |
+| **R4 motor** — El escritor único | `parametrizar.ps1` (port de contratos.js + ritual.js, 25/25) | `probar-parametrizar` 25/25, `probar-publicar` 7/7, `anti-pii` 0 | 0 |
+| **R5 motor** — La firma que no se inventa | `override.ps1` (port de registrarOverride + firmaDeterminista, 26/26); la firma se deriva de git, nunca tecleada | `probar-override` 26/26, `probar-publicar` 7/7, `anti-pii` 0 | 0 |
+| **R3 UI** — Tubería con datos reales | `app/ui/index.html` carga dinámica via `invoke('cargar_datos')`; CSS intacto (SHA256 0BF53EE3…); puente Rust `std::process::Command`; 49 piezas en la UI | `probar-app` 28/28, smoke JS↔Rust↔motor, `tauri build --debug` OK | 0 |
+| **R4 UI** — Formulario de alta escribe de verdad | `altaResumen` + `invoke('parametrizar')`; preview + éxito + refresco; header honesto | `probar-app` 35/35 (SHA256 0BF53EE3…), smoke `parametrizar.ps1` con args exactos del puente | 0 |
+| **R5 UI** — Modo avanzado reclasifica/firma/candado | `reclasResumen` + `invoke('override_accion')`; contraseña = nombre del repo; firma real visible; `'GARANTIA-NULA'` retirada | `probar-app` 35/35, smoke `override.ps1`, `anti-pii` 0; fix de review: éxito parcial honesto + candado-off desde UI | 0 |
+| **R6** — VS Code queda limpio | `extension/` retirado (`git rm`); `probar-extension` retirado; área `extension` retirada de la ley; `no-borres-el-motor` aceptó con ADR 0048 | `verificar -Base main` 0, `probar-app` 35/35, `probar-publicar` 7/7, `probar-gate` 14/14, `probar-hooks` 35/35 | 0 |
+| **R7** — Empaquetado + v1.27.0 | SSOT → 1.27.0 (version.txt, package.json, tauri.conf.json, CHANGELOG); bundle NSIS 1.86 MB; `target/` en gitignore | `probar-version` 0, `probar-app` 35/35, `probar-publicar` 7/7, `anti-pii` 0, `verificar` 0; artefacto NSIS verificado (SHA256 143B051C…) | 0 |
