@@ -177,7 +177,7 @@ foreach ($del in @($eliminados | Where-Object { $_ })) {
 # vive INTEGRO en el historico declarado (que /arranca nunca inyecta).
 $flujoCfg = $null
 if (Test-Path 'tools/flujo.json') {
-  $flujoCfg = Get-Content 'tools/flujo.json' -Raw | ConvertFrom-Json
+  $flujoCfg = Get-Content 'tools/flujo.json' -Raw -Encoding UTF8 | ConvertFrom-Json
   if (-not $flujoCfg) { Fail "tools/flujo.json existe pero no parsea como JSON" }
 }
 if ($flujoCfg -and $flujoCfg.handoff -and (Test-Path 'HANDOFF.md')) {
@@ -238,10 +238,10 @@ if ($flujoCfg -and $flujoCfg.handoff -and (Test-Path 'HANDOFF.md')) {
 # cada item vivo declara [alta:] (+ apetito/vence segun su clase). El detalle vive en el
 # historico declarado (roadmap-historico.md) o en su doc dueno; el techo lo impide crecer.
 if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
-  $uAcc = [char]0xFA   # 'u' acentuada: Algun -> Algún (este motor es ASCII, el ROADMAP no)
-  $iAcc = [char]0xED   # 'i' acentuada: dia -> día
+  $uAcc = [char]0xFA   # 'u' acentuada para Algun (este motor es ASCII, el ROADMAP no)
+  $iAcc = [char]0xED   # 'i' acentuada para dia
   # -Encoding UTF8 obligatorio, mismo gotcha que el HANDOFF: sin el, PS 5.1 lee el UTF-8
-  # sin BOM como ANSI y 'Algún día' se deforma -- el regex no casa y el contrato se mide
+  # sin BOM como ANSI y 'Algun dia' acentuado se deforma -- el regex no casa y el contrato se mide
   # en falso (recetario docs/guias/entorno-windows-powershell51.md).
   $rLineas = @(Get-Content 'ROADMAP.md' -Encoding UTF8)
   # Falla CERRADO ante config incompleta (mismo criterio que el handoff): techo_lineas
@@ -263,7 +263,7 @@ if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
   foreach ($ln in $rLineas) {
     if ($ln -match '^## (.+)$') {
       $secTexto = $matches[1].Trim()
-      # Fold de acentos ('Algún día'/'Algun dia' -> 'algun dia') y a minusculas: acepta
+      # Fold de acentos (la forma acentuada o no -> 'algun dia') y a minusculas: acepta
       # la clase con y sin acento.
       $secClave = ($secTexto -replace $uAcc,'u' -replace $iAcc,'i').ToLowerInvariant()
       $clase = $null

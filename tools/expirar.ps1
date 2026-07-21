@@ -77,7 +77,7 @@ $hoyStr = $hoyDate.ToString('yyyy-MM-dd')
 # --- El contrato: flujo.json --------------------------------------------------------
 $flujoCfg = $null
 if (Test-Path 'tools/flujo.json') {
-  try { $flujoCfg = Get-Content 'tools/flujo.json' -Raw | ConvertFrom-Json }
+  try { $flujoCfg = Get-Content 'tools/flujo.json' -Raw -Encoding UTF8 | ConvertFrom-Json }
   catch { Fail "tools/flujo.json existe pero no parsea como JSON." }
   if (-not $flujoCfg) { Fail "tools/flujo.json existe pero no parsea como JSON." }
 }
@@ -217,7 +217,7 @@ if (-not $Simular -and $vencidos.Count -gt 0) {
     $venceStr = $v.Vence.ToString('yyyy-MM-dd')
     $altaTxt = if ($v.Alta) { $v.Alta } else { '?' }
     $bloque += $v.Linea
-    $bloque += ("  - muri${oAcc}o: " + (Clase-Display $v.Clase) + ", alta " + $altaTxt + ", venc${iAcc}a " + $venceStr + "; revive re-proponi${eAcc}ndolo con alta nueva")
+    $bloque += ("  - muri${oAcc}: " + (Clase-Display $v.Clase) + ", alta " + $altaTxt + ", venc${iAcc}a " + $venceStr + "; revive re-proponi${eAcc}ndolo con alta nueva")
   }
   $bloqueTexto = ($bloque -join $eolMuertos)
 

@@ -905,8 +905,10 @@ $faltan = @($titulos | Where-Object { $rR1.Html -notmatch [regex]::Escape($_) })
 if ($faltan.Count -eq 0) { Ok "reporte-real: trae los 5 titulos de seccion" } else { No "reporte-real: faltan titulos de seccion: $($faltan -join ', ')" }
 # La JERGA PROHIBIDA: grep case-insensitive. El .html se le manda TAL CUAL a un tercero; ni
 # una de estas palabras -- ni siquiera dentro de una clase CSS -- puede aparecer.
-$jerga = @('gate', 'wip', 'commit', 'PR ', 'rebanada')
-$coladas = @($jerga | Where-Object { $rR1.Html -match ('(?i)' + [regex]::Escape($_)) })
+# \b como en Scrub-Jerga: sin frontera, palabras inocentes del estado real ("mitigate",
+# "commitment", "gateway") harian fallar en falso este caso (hallazgo del review de rama).
+$jerga = @('gate', 'wip', 'commit', 'PR', 'rebanada')
+$coladas = @($jerga | Where-Object { $rR1.Html -match ('(?i)\b' + [regex]::Escape($_) + '\b') })
 if ($coladas.Count -eq 0) { Ok "reporte-real: CERO jerga prohibida (gate/WIP/commit/'PR '/rebanada)" } else { No "reporte-real: jerga colada en la salida: $($coladas -join ', ')" }
 
 # ------------------------------------------------------------------ (r3) el hill chart

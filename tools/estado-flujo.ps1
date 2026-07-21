@@ -100,7 +100,7 @@ if ($Gate) {
 
   $flujoCfg = $null
   if (Test-Path 'tools/flujo.json') {
-    try { $flujoCfg = Get-Content 'tools/flujo.json' -Raw | ConvertFrom-Json }
+    try { $flujoCfg = Get-Content 'tools/flujo.json' -Raw -Encoding UTF8 | ConvertFrom-Json }
     catch { Fail "tools/flujo.json existe pero no parsea como JSON." }
     if (-not $flujoCfg) { Fail "tools/flujo.json existe pero no parsea como JSON." }
   }
@@ -235,7 +235,7 @@ function Parse-MuertosRecientes($muertosPath) {
 # --- El estado (flujo.json). Corrupto -> falla cerrado (exit 2) en ambos modos. -------
 $flujoCfg = $null
 if (Test-Path 'tools/flujo.json') {
-  try { $flujoCfg = Get-Content 'tools/flujo.json' -Raw | ConvertFrom-Json }
+  try { $flujoCfg = Get-Content 'tools/flujo.json' -Raw -Encoding UTF8 | ConvertFrom-Json }
   catch { Fail "tools/flujo.json existe pero no parsea como JSON." }
   if (-not $flujoCfg) { Fail "tools/flujo.json existe pero no parsea como JSON." }
 }
