@@ -276,3 +276,49 @@ El plan R5 listaba `-Quien -Email` como parámetros de `override.ps1`. **Aquí N
 Evidencia: `node vm` SYNTAX OK + `tools/probar-app.ps1` 35/35 (hash intacto) + `npx tauri build --debug --no-bundle` recompilado a `jidoka-tuberia.exe` (12.8 MB, 21/07/2026 15:07:48).
 
 ---
+
+## R6 — VS Code queda limpio — VERDE
+
+**Qué se retiró (ADR 0048: la superficie es la app; la extensión se retira completa):**
+
+- `extension/` completo (`git rm -r`): `extension.js`, `package.json`, `contratos.js`, `ritual.js`, `ligas.js`, `contratos.test.js`, `ritual.test.js`, `ligas.test.js`, `LICENSE`, `README.md`. Los ports de `contratos.js` y `ritual.js` ya viven en `tools/parametrizar.ps1` (R4) y `tools/override.ps1` (R5), con sus tests completos.
+- `tools/probar-extension.ps1` (`git rm`): su invariante clave ("extensión no se siembra") ya migró a `tools/probar-app.ps1` (líneas 164-175, invariante "app/ no se siembra", ADR 0048). Los demás asserts de `probar-extension` (contrato manifiesto↔código, JS parsea, self-tests JS) eran todos extensión-específicos: con la extensión retirada no hay nada que afirmar. No había asserts únicos que siguieran aplicando.
+- `tools/publicar.ps1`: `probar-extension` removido del `foreach` del preflight.
+- `.github/workflows/andon.yml`: `probar-extension` removido de la lista `$jt` (smoke condicional).
+- `tools/blast-radius.json`: área `extension` removida completa (el objeto con `fuente:["extension/*"]`). El área `app` ya la reemplaza (misma estructura, fuente `["app/*"]`, `revisa:true`). JSON quedó con 11 áreas; validado sin BOM.
+- `.vscode/launch.json`: **retirado completo**. Contenía UNA sola configuración (`"type": "extensionHost"`, `"args": ["--extensionDevelopmentPath=${workspaceFolder}/extension"]`). No había otras configuraciones. El `.vscode/extensions.json` y `.vscode/settings.json` no se tocaron (no son de la extensión).
+
+**Confesión honesta — `ligas.js` sin port:**
+`ligas.js` (el módulo que autora las ligas código↔capacidad en `tools/ligas.json`) NO tiene port en el motor PS. El gate `tools/estado-ligas.ps1` (el motor que EVALÚA las ligas) SIGUE vivo y corriendo; lo que se pierde es la **autoría asistida** (la función `upsert` de `ligas.js` que escribía el ledger). Las ligas se gestionan editando `tools/ligas.json` manualmente, o queda como capacidad futura de la app (un wizard de alta de ligas). El test `probar-ligas.ps1` ya tenía un `SKIP` honesto para cuando `extension/ligas.js` no existe (Test-Path + mensaje "node o extension/ligas.js no disponibles") — ese SKIP seguirá disparándose y el test sigue siendo verde.
+
+**Verificación del gate `no-borres-el-motor`:**
+El gate bloquea borrar `tools/*.ps1` o `tools/blast-radius.json` sin un ADR NUEVO (diff-filter=A) en el mismo rango. El ADR 0048 (`docs/decisions/0048-superficie-app-tuberia.md`) fue AGREGADO en el commit 692e8a4 de esta rama — está en el rango `main...HEAD` y pasa el filtro `--diff-filter=A`. El gate lo aceptó: `[OK] [no-borres-el-motor] el cambio BORRA ... con un ADR nuevo en el mismo cambio`.
+
+**Evidencia (esta máquina, 2026-07-21):**
+
+| Gate | Exit | Nota |
+|---|---|---|
+| `tools/verificar.ps1 -Base main` | **0** | Sin BLOQUEA. 3 avisos no bloqueantes pre-existentes de la rama (comandos/disparos/atlas). El gate `no-borres-el-motor` ACEPTO el borrado: ADR 0048 en el rango. |
+| `tools/probar-app.ps1` | **0** | **35/35** verdes. Sin cambios en la app; el invariante "app/ no se siembra" (que migró de probar-extension) sigue verde. |
+| `tools/probar-publicar.ps1` | **0** | **7/7**. El meta-test "todos los probar-*.ps1 en la lista" pasa: `probar-extension` ya no está en disco NI en la lista — coherente. |
+| `tools/probar-gate.ps1` | **0** | **14/14**. El gate no tenía referencias a la extensión. |
+| `tools/probar-hooks.ps1` | **0** | 35/35. Los hooks no alimentaban la extensión. |
+| `tools/probar-anti-pii.ps1` | **0** | **11/11**. Sin fugas. |
+
+**Demo del cliente (owner: cliente):**
+1. Abrir VS Code con este repo.
+2. `Ctrl+Shift+P` → escribir "Jidoka" → **CERO comandos** en la paleta (no existe `Jidoka: ver el gobierno`, `Jidoka: parametrizar`, ni ningún otro).
+3. Clic derecho en cualquier archivo del Explorer → **sin entradas Jidoka** en el menú contextual.
+4. La app (`app/src-tauri/target/debug/jidoka-tuberia.exe`) sigue siendo la única superficie.
+
+**Referencias vivas que NO se tocaron (y por qué):**
+
+- `tools/parametrizar.ps1` cabecera (líneas 3-8): "Port fiel de `extension/contratos.js`..." — registro de provenance del port, no afirmación de que la extensión es la superficie. Registro histórico operativo que orienta a quien lea el código; borrar la referencia no aportaría información.
+- `tools/override.ps1` cabecera (líneas 2-5): igual, provenance del port.
+- `tools/probar-parametrizar.ps1` y `tools/probar-override.ps1` cabeceras: explican de qué casos JS heredaron los test cases. Histórico.
+- `tools/probar-ligas.ps1` líneas 190-204: el SKIP honesto "node o extension/ligas.js no disponibles" sigue siendo verdad (ligas.js ya no existe). El test pasa correctamente con SKIP.
+- `andon/README.md`: no mencionaba la extensión en ningún lugar (verificado).
+- `kit/`: no mencionaba `extension/` ni `probar-extension` (verificado).
+- Manifiesto de siembra `kit/.jidoka/instalar/manifiesto.json`: nunca listó `extension/` (verificado — el invariante de probar-extension lo afirmaba; el de probar-app también lo afirma para `app/`).
+
+---

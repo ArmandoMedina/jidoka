@@ -51,7 +51,7 @@ jobs:
           # probar-instalador.ps1 caen en cuarentena y el preflight local no puede
           # correrlos; el CI no tiene ese AV, asi que es donde el smoke del instalador
           # y del camino AV-seguro (sembrar-manual) si corre (ADR 0027 enmienda).
-          foreach ($jt in 'probar-instalador','probar-sembrar','probar-version','probar-publicar','probar-parametrizar','probar-override','probar-agentes','probar-extension','probar-app') {
+          foreach ($jt in 'probar-instalador','probar-sembrar','probar-version','probar-publicar','probar-parametrizar','probar-override','probar-agentes','probar-app') {
             if (Test-Path ".\tools\$jt.ps1") { & ".\tools\$jt.ps1"; if ($LASTEXITCODE -ne 0) { exit 1 } }
           }
           exit 0
