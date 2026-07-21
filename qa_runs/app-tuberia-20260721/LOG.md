@@ -146,3 +146,36 @@
 **Pendiente:** el STOP de fidelidad de R2 (Gemba del `.exe`) antes de cablear la mitad UI. La mitad MOTOR (esta rebanada) queda verde y lista para que `app.js` invoque `parametrizar.ps1` y muestre sus avisos reales (nada de éxito falso).
 
 ---
+
+## R5 (mitad motor) — override.ps1, la firma que no se inventa — ✅ VERDE
+
+> **La mitad UI** (cablear `reclasResumen`: reclasificar / candado / aceptar desviación con escritura real vía `invoke`, refresco automático) **espera el STOP de fidelidad de R2.** Esta rebanada entrega SOLO la mitad MOTOR: el comando que autora una acción firmada del modo avanzado. La app lo invocará. `app/` y `extension/` NO se tocaron. El hook candado (`candado-pretooluse.ps1`) ya existe (R5 del sprint pasado) y leerá el `candado:true` que este comando escribe.
+
+**Qué se entregó (solo motor PS + su self-test; nada de `app/`, nada de `extension/`):**
+- `tools/override.ps1` — **el escritor único de las acciones firmadas** (`param -Repo -Path -Accion -Motivo -Json`). Port fiel de `extension/contratos.js`: `registrarOverride` + `firmaDeterminista` (ADR 0047). Deriva la firma de git, hace **UPSERT** del contrato en `tools/contratos.json` (merge por path que **preserva campos previos** — un `candado:true` nuevo no pisa el `regimen`/`comandos` que ya estaban; crea un contrato mínimo `{path, cambio, firma}` si el path no tenía; crea el archivo si no existe — INSTANCIA no-clobber, ADR 0046). El cambio por acción calca `porAccion` de `contratos.js:68-74`: `aceptar-desviacion → estado='aceptado'`, `candado-on → candado=true`, `candado-off → candado=false`, `reclasificar-estatuto → regimen='estatuto'`, `reclasificar-libre → regimen='libre'` (NUNCA ofrece `'motor'`: ese régimen solo lo trae Jidoka de fábrica). Toda escritura UTF-8 **sin BOM** + newline final vía `[System.IO.File]::WriteAllText(...UTF8Encoding($false))`; JSON con `ConvertTo-Json -Depth 8`, arrays protegidos con `@()`. Salida `-Json`: `{ok:true,contrato}` | `{ok:false,error}` + exit code coherente. ASCII puro, PS 5.1. Calca el molde de encoding/validación de `parametrizar.ps1` (R4).
+- `tools/probar-override.ps1` — self-test con fixture temporal (TEMP, jamás toca el repo real) que hace `git init` + `git config --local user.name/user.email` **del propio fixture**, y aísla la config global/system del operador (`GIT_CONFIG_GLOBAL`/`GIT_CONFIG_SYSTEM` a rutas inexistentes) para que la firma solo pueda venir de la config local — el caso "sin `user.name`" es determinista aunque el operador SÍ tenga nombre en su `~/.gitconfig`. Trae los casos de `contratos.test.js` que tocan override/firma + los del plan R5. Anti-PII: el email del fixture se construye por **concatenación** (`'prueba@' + 'ejemplo.local'`) para que el escaneo estático nunca vea un correo entero. ASCII puro.
+- **Cableado (las DOS listas):** `tools/publicar.ps1` (foreach del preflight) y `.github/workflows/andon.yml` (lista `$jt`, smoke condicional if-exists) ganan `probar-override`.
+
+**DIVERGENCIA DE DISEÑO CONFESADA (diverge del plan R5 a propósito):**
+El plan R5 listaba `-Quien -Email` como parámetros de `override.ps1`. **Aquí NO.** La firma se **DERIVA** de `git config user.name` / `git config user.email` **DENTRO** del script (corriendo `git -C $Repo`), y **aborta con error si `user.name` está vacío** (`{ok:false, error:"sin git user.name -- la firma no se inventa (ADR 0047)"}`, exit 1). Razón: el ADR 0047 manda "firma derivada de git, nunca inventada"; si el llamador (la app) pudiera pasar `-Quien`, la app podría **inventar** al firmante. El escritor único es dueño de la regla — no hay forma de que la app pase por encima. El `email` vacío **sí se tolera** (string vacío), calcando `contratos.js:54` (`email || ''`: email y cuándo pueden ir vacíos pero se incluyen en la firma). El `cuando` se deriva con `Get-Date` en **ISO 8601 UTC** (jamás tecleado). Firma resultante: `{quien, email, cuando, motivo}`.
+
+**Otras decisiones del port (fidelidad vs `contratos.js`):**
+- **`registrarOverride` byte-fiel** en el efecto por acción y en el merge por path que preserva campos previos (`upsertContrato`). Verificado: `candado-on` sobre un contrato con `regimen`+`comandos` deja ambos intactos; `reclasificar-*` no borra el `candado` previo.
+- **`firmaDeterminista` byte-fiel** en el aborto: lanza sin `quien` y sin `motivo` (calca `contratos.js:52-53`); `email`/`cuando` vacíos se toleran pero se incluyen. El plan además ordena `-Motivo` obligatorio no-vacío como parámetro → validado antes de derivar la firma.
+- Guarda **anti-traversal** en `-Path` (sin `..` ni absoluto), calcada de `parametrizar.ps1`.
+
+**Evidencia (esta máquina, 2026-07-21):**
+
+| Gate | Exit | Nota |
+|---|---|---|
+| `tools/probar-override.ps1` | **0** | **26/26** verdes. candado-on sobre contrato existente (candado true + firma completa, regimen+comandos previos intactos); candado-off (false + firma actualizada); aceptar-desviacion sin previo (contrato mínimo `estado:aceptado`); reclasificar-estatuto/-libre (regimen cambia, candado previo intacto); **sin `user.name` → {ok:false} + exit 1 + contratos.json NO tocado**; motivo vacío → exit 1; acción inválida → exit 1; path inseguro → exit 1; JSON sin BOM; contratos.json termina en newline; array de 1 queda como array. |
+| `tools/probar-parametrizar.ps1` | **0** | **25/25**. El hermano R4 no se tocó; sigue sano. |
+| `tools/probar-publicar.ps1` | **0** | 7/7. El meta-test "todos los `probar-*` en la lista del preflight" sigue verde con `probar-override` agregado. |
+| `tools/anti-pii.ps1` | **0** | Sin fugas. El fixture construye el email por concatenación → ningún token `<char>@X.Y` literal en el árbol. |
+| `tools/verificar.ps1` | **0** | Sin bloqueo. Avisos no bloqueantes por tocar el cableado del motor (`publicar.ps1`, `andon.yml` → áreas del motor), consecuencia de cablear un test nuevo en las listas, no doc-drift accionable; el CHANGELOG del release es R7 (mismo patrón que R2/R3/R4). |
+
+**Demo del cliente (owner: cliente):** candado a una pieza desde la app (modo avanzado, tecleando el nombre del repo) → pedir a la IA editarla → verla rebotar (el hook candado la para). **Requiere la mitad UI** (cablear `reclasResumen` con `invoke`), **que espera el STOP de fidelidad de R2.**
+
+**Pendiente:** el STOP de fidelidad de R2 (Gemba del `.exe`) antes de cablear la mitad UI. La mitad MOTOR (esta rebanada) queda verde y lista para que `app.js` invoque `override.ps1` y muestre la firma real (nada inventado).
+
+---
