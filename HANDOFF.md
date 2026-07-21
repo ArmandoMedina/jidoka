@@ -6,7 +6,25 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-20 — El editor del gobierno, parte 2 · **`v1.25.0` CERRADO Y LIBERADO** · PR #115)
+## Dónde estamos (2026-07-21 — El descubrimiento del sistema configurable CERRADO · rama `descubre/sistema-configurable-20260720` SIN MERGEAR, 8 commits)
+
+**El descubrimiento quedó completo y durable en la rama; la sesión cerró con cuadro** ([`docs/sprints/cierre-20260721.md`](docs/sprints/cierre-20260721.md)). La visión: **Jidoka evoluciona de metodología a sistema de gobierno configurable con UI guiada** (la UI autora, el gate ejecuta — ADRs 0002/0044 intactos). Los artefactos, en orden de lectura para la sesión de construcción:
+
+1. **El plan-contrato del sprint** [`docs/sprints/sprint-sistema-configurable-plan.md`](docs/sprints/sprint-sistema-configurable-plan.md) — R0 con Gherkin + 6 rebanadas en orden de dependencia (R1 ADRs+CFG-1 · R2 bandeja · R3 contrato SAP del ritual · R5 candado IA · R4 formulario · R6 modo avanzado), pruebas y demo del cliente por rebanada, diseño mecánico validado contra el código real y **3 trampas confesadas** (la mecánica converge en `-Actualizar` → `contratos.json` es INSTANCIA; el sello seguirá acusando `DIVERGE` hasta la clase `contrato` — R3b diferida; el `deny` de Bash es por prefijo → el hook es el muro). Trae su propia sección "Arranque en el chat nuevo".
+2. **El informe de la visión** [`docs/analisis/descubrimiento-sistema-configurable-202607.md`](docs/analisis/descubrimiento-sistema-configurable-202607.md) — la spec conceptual: 5 relaciones de "ligar" (incluidas lectura `@` y prohibición), 3 regímenes por pieza (y el hallazgo "los comandos están en el cajón equivocado"), bandeja, formulario, meta-gobierno, hallazgos del censo (`permissions` VACÍO con `deny-vs-ask` catálogo-solo, PreToolUse subutilizado, hueco de `docs/`, `gemba.md` sin `@`).
+3. **La maqueta clickeable** [`docs/analisis/maqueta-tuberia-202607.html`](docs/analisis/maqueta-tuberia-202607.html) — la spec visual, validada en **6 Gembas vivos** del cliente (2 hallazgos suyos, curados en caliente): tubería de 54 piezas con regímenes, bandeja (1 caso REAL), formulario, reconciliar, modo avanzado (contraseña-ritual `GARANTIA-NULA` + firma + candado IA) y tour de 14/19 paradas que abre los pop-ups por dentro. **Correr ambos tours ES el onboarding de la sesión de construcción.**
+4. **El spike del modo "Capas" RECHAZADO en Gemba** (*"la verdad es que no"*) — rama `spike/linterna-capas-enforcement-20260720` (`fa3a8c3`), aparcada sin mergear. Lección: el cliente no quiere mapas del todo — quiere guía en el momento concreto.
+5. **Nota de trato:** leer ÍNTEGRO el transcript anterior (jsonl) funcionó cuando el cliente se sintió mal entendido — repetir la técnica si recurre. **Los menús de opciones abstractas lo pierden; los artefactos concretos clickeables lo destraban.**
+
+**Pendiente (cliente — nada bloquea al agente):**
+1. **PR + merge de la rama `descubre/…`** (orden nombrada) — el plan viaja en ella; la construcción arranca DESPUÉS del merge.
+2. **Sesión nueva de construcción**: `/jidoka:arranca` → **ratificar R0 con aprobación nombrada** → rama `sprint/sistema-configurable-<fecha>` desde `main` → R1→R6. Los 3 ADRs (identidad · contratos/regímenes · meta-gobierno) se escriben en R1 — a propósito NO se escribieron en el descubrimiento.
+3. **Destino de la rama del spike** (podar o conservar aparcada).
+4. **¿Issues del lazo** para los hallazgos del censo? (batch, no goteo).
+
+---
+
+## Dónde estuvimos (2026-07-20 — El editor del gobierno, parte 2 · **`v1.25.0` CERRADO Y LIBERADO** · PR #115)
 
 **Sprint "El editor del gobierno, parte 2" (R2–R4) TERMINADO, mergeado y liberado** con la orden nombrada del cliente (*"pr, marge, versión y poda autorizado"*). Récord completo: [`docs/sprints/sprint-editor-gobierno-2-entrega.md`](docs/sprints/sprint-editor-gobierno-2-entrega.md) (con el cuadro de cierre). En una línea: **el gate granular código↔capacidad** (`ligas.json` + `estado-ligas.ps1`, CI desde la base, nombra la capacidad exacta) + **la extensión que lo autora** (clic derecho → "ligar código a capacidad...") + **la linterna con 4 modos legibles** (flechas, anillo rojo del bloqueo duro, tabla del gobierno, treemap Reparto — rework de **2 Gembas del cliente**: 8 hallazgos de uso real + nomenclatura, todos curados en la rama antes del merge) + `.vsix` + ADR 0044. `v1.24.0` quedó **sin tag propio a propósito** (subsumida en `v1.25.0`).
 

@@ -104,6 +104,20 @@ Hallazgos de una auditoría de terceros sobre este repo (evidencia: corrió `pro
 
 ## Backlog (sin sprint asignado)
 
+### El descubrimiento del sistema configurable (2026-07-20) — la visión aterrizada, esperando el ADR nombrado
+
+Dos sesiones de descubrimiento con el cliente aterrizaron la visión que el follow-up del "ligar
+genérico" (abajo) venía anunciando — y la subsume: **Jidoka evoluciona de metodología con comandos
+fijos a sistema de gobierno configurable con UI guiada** (la UI autora, el gate ejecuta — ADRs
+0002/0044 intactos). El récord completo, con las 5 ideas fuerza (las 5 relaciones de "ligar", los 3
+regímenes de gobierno por pieza, la bandeja "pendiente de parametrizar", el formulario de alta, los
+hallazgos del censo) y las candidatas de rebanada:
+[`docs/analisis/descubrimiento-sistema-configurable-202607.md`](docs/analisis/descubrimiento-sistema-configurable-202607.md).
+Su artefacto validado por el cliente ("me gustó", 2026-07-20): la maqueta clickeable
+[`docs/analisis/maqueta-tuberia-202607.html`](docs/analisis/maqueta-tuberia-202607.html). **Nada se
+construye hasta que el cliente nombre el ADR de identidad y el orden de rebanadas** (las decisiones
+pendientes están listadas al final del informe).
+
 ### Tercera cosecha por el lazo — brownfield regulado + operación (2026-07-13, ADR 0027)
 Siete issues (#40–#46) de dos despliegues reales: un repo de conocimiento **regulado (PLD/CNBV)** y un proceso de **operación ("Caso F")**. Dos se atendieron ya (`v1.10.0`); los otros cinco se registran con marca **regla 2-3** (primer/segundo uso real, esperando el siguiente) — no se construyen por método-ficción.
 
