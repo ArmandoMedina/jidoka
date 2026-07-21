@@ -392,3 +392,27 @@ El `.exe` de debug (`target/debug/jidoka-tuberia.exe`) ya arrancó y fue aprobad
 | **R5 UI** — Modo avanzado reclasifica/firma/candado | `reclasResumen` + `invoke('override_accion')`; contraseña = nombre del repo; firma real visible; `'GARANTIA-NULA'` retirada | `probar-app` 35/35, smoke `override.ps1`, `anti-pii` 0; fix de review: éxito parcial honesto + candado-off desde UI | 0 |
 | **R6** — VS Code queda limpio | `extension/` retirado (`git rm`); `probar-extension` retirado; área `extension` retirada de la ley; `no-borres-el-motor` aceptó con ADR 0048 | `verificar -Base main` 0, `probar-app` 35/35, `probar-publicar` 7/7, `probar-gate` 14/14, `probar-hooks` 35/35 | 0 |
 | **R7** — Empaquetado + v1.27.0 | SSOT → 1.27.0 (version.txt, package.json, tauri.conf.json, CHANGELOG); bundle NSIS 1.86 MB; `target/` en gitignore | `probar-version` 0, `probar-app` 35/35, `probar-publicar` 7/7, `anti-pii` 0, `verificar` 0; artefacto NSIS verificado (SHA256 143B051C…) | 0 |
+
+---
+
+## Hallazgos de CI (post-cierre, cazados en la rama)
+
+### Hallazgo 1 — liga colgante `linterna-extension` (cazado por `probar-ligas`)
+
+Descrito en R6 arriba: `tools/ligas.json` quedó con la entrada `linterna-extension` apuntando a `extension/*` tras el retiro del R6. `probar-ligas` lo detectó (`[FALLA] ledger real: hay ligas rotas`). Curado en el cierre: entrada retirada; `ligas.json` quedó con `"ligas": []`.
+
+### Hallazgo 2 — assert dogfood acoplado al estado del repo (cazado por el CI, curado con skip honesto + fixture)
+
+**Síntoma:** `probar-linterna.ps1` fallaba 2/58 en el CI tras el cierre del sprint:
+- `[FALLA] R2c: falta la liga dogfood linterna-extension`
+- `[FALLA] R2c: falta la arista liga-avisa en el repo real`
+
+**Causa:** los asserts (escritos en v1.25 cuando `linterna-extension` era la liga dogfood del repo) exigían que el ledger real tuviera esa liga específica con su arista `liga-avisa`. Tras R6 la liga se retiró; el ledger real tiene `"ligas": []` legítimamente. El assert quedó acoplado a un estado del repo que ya no es.
+
+**Cobertura preexistente en el fixture (Parte A):** el fixture de la Parte A ya tenía dos ligas — `buena` (`fuerza: bloquea`, código real) y `fantasma` (`fuerza: avisa`, código inexistente pero capacidad válida) — que ejercían `liga-bloquea`, `liga-rota` y el nodo `liga:`. Lo que faltaba era un assert explícito de `liga-avisa` en el fixture; la cobertura del mecanismo existía pero no estaba afirmada.
+
+**Cura (`tools/probar-linterna.ps1`):**
+1. Se agregó un assert explícito de `"kind":"liga-avisa"` en la Parte A (fixture `fantasma`, fuerza avisa, capacidad válida) — la cobertura ya estaba, ahora queda afirmada.
+2. Los dos asserts de Parte B se reemplazaron por un SKIP honesto cuando `tools/ligas.json` tiene 0 ligas: `[SKIP] R2c dogfood liga real (ledger real sin ligas tras ADR 0048 - la cobertura vive en el fixture Parte A)`. Si en el futuro el ledger tiene ligas, los asserts corren — pero sin exigir el nombre `linterna-extension` (exigen que ALGUNA liga real produzca su arista tipada).
+
+**Resultado:** `probar-linterna` pasa 57/57 (1 SKIP honesto, 0 fallos). El mecanismo liga+arista sigue cubierto por el fixture; el assert del repo real es honesto sobre el estado actual.
