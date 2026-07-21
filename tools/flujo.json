@@ -14,5 +14,10 @@
   "changelog": {
     "tipos": ["feat", "fix", "test", "docs", "chore", "breaking"],
     "max_prosa_lineas": 8
+  },
+  "estado": {
+    "wip_limite": 8,
+    "sprint_activo": "pilar-de-flujo (rama sprint/pilar-de-flujo-20260721)",
+    "gembas_pendientes": []
   }
 }

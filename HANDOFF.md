@@ -14,7 +14,8 @@
 
 **Avance:**
 - ✅ R0 plan aprobado y archivado · ✅ **M1 COMPLETO**: R1 contrato del HANDOFF (este archivo, 419→40 líneas, gate mordiendo), R2 contrato del ROADMAP (140→55, 32 vivos en 4 clases), R3 expiración automática (`expirar.ps1` → `docs/MUERTOS.md`, paso duro del cierre + aviso del arranca).
-- ⬜ M2 (R4 cierre estandarizado + contrato CHANGELOG, R5 límite WIP) · ⬜ M3 (R6 vista, R7 reporte, R8a reparto, R8b casting). Diseño fijado en el plan-contrato.
+- ✅ **M2 COMPLETO**: R4 cierre con orden fijo + CHANGELOG bajo contrato (`[contrato-changelog]`: bullets tipados, prosa con techo) · R5 límite WIP (`estado-flujo.ps1 -Gate` planta a `planea` nombrando el Gemba pendiente; aceptación = booleano con fecha en `gemba`; el cierre registra el Gemba nuevo).
+- ⬜ M3 (R6 vista `-Json`+SessionStart, R7 reporte, R8a reparto, R8b casting). Diseño fijado en el plan-contrato; insumo de enti levantado.
 
 **Kaizen vigente de la sesión anterior:** ante la señal «voy más lento que tú», el agente por defecto se detiene en vez de absorber más trabajo — el ritmo lo marca quien absorbe; el volumen de trabajo, no. (Registrado también como contexto del sprint: es el síntoma que FLU-1 ataca.)
 

@@ -26,7 +26,9 @@ El registro se reparte por doc dueño (`kanban/lazo.md`) y se escribe **en este 
 
 5. **Índices** — cada ADR nuevo (`docs/decisions/`) **listado en su índice `README.md` en el mismo commit** (único bloqueo duro del blast-radius); el sprint en `docs/sprints/README.md`. Un ADR por cada decisión no obvia; si una regla gobierna decisiones futuras, asciende a ADR (no la dejes en un checkbox). Si hubo sprint: llena la entrega con `@kit/.jidoka/templates/sprint-entrega.md` en `docs/sprints/` — su Kaizen (1-5 lecciones) es lo único que el siguiente `planea` lee completo. La sección **Verificación (el demo que corre el cliente)** se cierra solo si el cliente pudo correr el demo **sin código ni terminal**; si solo corrió por terminal, dilo en «Pendiente que dejó», no la des por cumplida.
 
-6. **«Cerrado» es veredicto de los gates, no frase del agente.** ANTES de declararlo cerrado: `tools/verificar.ps1` (sin drift ni contratos rotos), `tools/probar-flujo.ps1` (el pilar de flujo sano) y `tools/estado-docs.ps1` (estructura de docs) **verdes**. Un gate rojo significa que el cierre no terminó.
+6. **Registra el Gemba del sprint — `tools/flujo.json` → `estado.gembas_pendientes`.** Si el sprint entrega algo que el cliente debe ver, **REGISTRA su Gemba** con `{ id, desde: AAAA-MM-DD, que_ver, aceptado: false }`. Un sprint sin Gemba registrado es un sprint que **se auto-declaró aceptado** — eso no existe (el criterio: *hecho = lo viste funcionar*). El booleano `aceptado` queda en `false` hasta que el cliente lo acepte con nombre en `/jidoka:gemba`; mientras tanto, el gate del límite WIP (`estado-flujo.ps1 -Gate`) mantiene plantado el próximo `/jidoka:planea` y lo nombra.
+
+7. **«Cerrado» es veredicto de los gates, no frase del agente.** ANTES de declararlo cerrado: `tools/verificar.ps1` (sin drift ni contratos rotos), `tools/probar-flujo.ps1` (el pilar de flujo sano) y `tools/estado-docs.ps1` (estructura de docs) **verdes**. Un gate rojo significa que el cierre no terminó.
 
 ### El cuadro de cierre — los hechos medibles, versionado con los planes
 

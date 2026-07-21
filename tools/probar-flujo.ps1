@@ -51,6 +51,14 @@
 # (idempotencia); (v) "Con fecha" con vence: pasado -> muere; (w) Referencia vieja -> NO muere;
 # (x) flujo sin vencimiento_dias -> "no aplica" exit 0; (y) "Algun dia" con alta hace 200 dias
 # (ventana 180) -> muere. Se ejecuta la mecanica REAL con -Hoy anclada a 2026-07-21.
+#
+# Casos del LIMITE WIP (tools/estado-flujo.ps1 -Gate, el muro de entrada de /jidoka:planea;
+# fixtures con flujo.json SOLO con la clave estado): (w1) 1 gemba pendiente (aceptado:false)
+# -> exit 1, la salida NOMBRA el id y trae "ABRIR SPRINT NUEVO BLOQUEADO"; (w2) el mismo con
+# aceptado:true -> exit 0 "flujo despejado"; (w3) flujo.json sin clave estado -> "no aplica"
+# exit 0; (w4) flujo.json corrupto -> exit 2 (falla cerrado); (w5) entrada sin id -> AVISO +
+# cuenta como pendiente (exit 1, fail-safe: lo dudoso bloquea); (w6) estado presente pero
+# gembas_pendientes ausente -> exit 0 (lista vacia).
 
 # Continue (no Stop): este test hace shell-out al verificar real, y el caso corrupto (f)
 # hace que el hijo escriba a stderr (el error de ConvertFrom-Json). Con 2>&1 + Stop, PS 5.1
@@ -61,6 +69,8 @@ $veri = Join-Path $PSScriptRoot 'verificar.ps1'
 if (-not (Test-Path $veri)) { Write-Host "  [FALLA] no existe tools/verificar.ps1 (el gate que este test ejercita)" -ForegroundColor Red; exit 1 }
 $expi = Join-Path $PSScriptRoot 'expirar.ps1'
 if (-not (Test-Path $expi)) { Write-Host "  [FALLA] no existe tools/expirar.ps1 (la mecanica que este test ejercita)" -ForegroundColor Red; exit 1 }
+$esti = Join-Path $PSScriptRoot 'estado-flujo.ps1'
+if (-not (Test-Path $esti)) { Write-Host "  [FALLA] no existe tools/estado-flujo.ps1 (la mecanica que este test ejercita)" -ForegroundColor Red; exit 1 }
 
 $script:pass = 0; $script:fail = 0
 function Ok($m) { Write-Host "  [PASA]  $m"; $script:pass++ }
@@ -679,13 +689,104 @@ $roadmapY = Read-Text (Join-Path $dirY 'ROADMAP.md')
 $muertosY = Read-Text (Join-Path $dirY 'docs/MUERTOS.md')
 if ($rY.Code -eq 0 -and $roadmapY -notmatch 'Item del icebox vencido' -and $muertosY -match 'Item del icebox vencido' -and $muertosY -match "alta $alta200") { Ok "expira-algundia: el 'Algun dia' con 200 dias murio (ventana 180)" } else { No "expira-algundia: el icebox vencido no murio bien (exit $($rY.Code))`n$roadmapY`n$muertosY" }
 
+Write-Host ""
+Write-Host "== El limite WIP (tools/estado-flujo.ps1 -Gate, muro de entrada de planea): fixtures =="
+
+# flujo.json SOLO con la clave estado: los checks hermanos (handoff/roadmap/changelog) no
+# aplican y estado-flujo solo mira 'estado'. Fixture = dir con tools/flujo.json (nada mas:
+# estado-flujo no lee HANDOFF/ROADMAP/CHANGELOG).
+function New-EstadoFixture($nombre, $flujoTexto) {
+  $dir = Join-Path $tmpRoot $nombre
+  New-Item -ItemType Directory -Path (Join-Path $dir 'tools') -Force | Out-Null
+  if ($null -ne $flujoTexto) {
+    [System.IO.File]::WriteAllText((Join-Path $dir 'tools/flujo.json'), $flujoTexto, $utf8NoBom)
+  }
+  return $dir
+}
+function Invoke-EstadoFlujo($dir) {
+  $out = (& powershell -NoProfile -ExecutionPolicy Bypass -File $esti -Gate -Repo $dir 2>&1 | Out-String)
+  return @{ Out = $out; Code = $LASTEXITCODE }
+}
+
+# ------------------------------------------------------------------ (w1) 1 gemba pendiente -> BLOQUEA
+$estadoPendiente = @"
+{
+  "estado": {
+    "wip_limite": 8,
+    "sprint_activo": "prueba",
+    "gembas_pendientes": [
+      { "id": "FLU-1", "desde": "2026-07-21", "aceptado": false, "que_ver": "el limite WIP se planta" }
+    ]
+  }
+}
+"@
+$dirW1 = New-EstadoFixture 'wip-pendiente' $estadoPendiente
+$rW1 = Invoke-EstadoFlujo $dirW1
+if ($rW1.Code -eq 1) { Ok "wip-pendiente: exit 1 (BLOQUEA abrir sprint nuevo)" } else { No "wip-pendiente: esperaba exit 1, fue $($rW1.Code)`n$($rW1.Out)" }
+if ($rW1.Out -match '\[BLOQUEA\]' -and $rW1.Out -match 'FLU-1' -and $rW1.Out -match 'ABRIR SPRINT NUEVO BLOQUEADO') { Ok "wip-pendiente: la salida NOMBRA el id (FLU-1) y trae el muro 'ABRIR SPRINT NUEVO BLOQUEADO'" } else { No "wip-pendiente: esperaba [BLOQUEA] nombrando FLU-1 + 'ABRIR SPRINT NUEVO BLOQUEADO'`n$($rW1.Out)" }
+
+# ------------------------------------------------------------------ (w2) aceptado:true -> despejado
+$estadoAceptado = @"
+{
+  "estado": {
+    "wip_limite": 8,
+    "sprint_activo": "prueba",
+    "gembas_pendientes": [
+      { "id": "FLU-1", "desde": "2026-07-21", "aceptado": true, "aceptado_fecha": "2026-07-21", "que_ver": "ya lo vio el cliente" }
+    ]
+  }
+}
+"@
+$dirW2 = New-EstadoFixture 'wip-aceptado' $estadoAceptado
+$rW2 = Invoke-EstadoFlujo $dirW2
+if ($rW2.Code -eq 0) { Ok "wip-aceptado: exit 0 (aceptado:true no retiene)" } else { No "wip-aceptado: esperaba exit 0, fue $($rW2.Code)`n$($rW2.Out)" }
+if ($rW2.Out -match 'flujo despejado') { Ok "wip-aceptado: 'flujo despejado' (0 Gembas pendientes)" } else { No "wip-aceptado: esperaba 'flujo despejado'`n$($rW2.Out)" }
+
+# ------------------------------------------------------------------ (w3) sin clave estado -> no aplica
+$dirW3 = New-EstadoFixture 'wip-sin-estado' '{ "handoff": { "max_historicas": 2, "techo_lineas": 120 } }'
+$rW3 = Invoke-EstadoFlujo $dirW3
+if ($rW3.Code -eq 0 -and $rW3.Out -match 'no aplica') { Ok "wip-sin-estado: sin la clave estado -> 'no aplica' exit 0" } else { No "wip-sin-estado: esperaba 'no aplica' exit 0, fue $($rW3.Code)`n$($rW3.Out)" }
+
+# ------------------------------------------------------------------ (w4) corrupto -> falla cerrado
+$dirW4 = New-EstadoFixture 'wip-corrupto' "esto no es json valido {{{"
+$rW4 = Invoke-EstadoFlujo $dirW4
+if ($rW4.Code -eq 2) { Ok "wip-corrupto: exit 2 (falla cerrado -- un gate que no puede leer su contrato no aprueba)" } else { No "wip-corrupto: esperaba exit 2, fue $($rW4.Code)`n$($rW4.Out)" }
+
+# ------------------------------------------------------------------ (w5) entrada sin id -> AVISO + bloquea
+$estadoSinId = @"
+{
+  "estado": {
+    "wip_limite": 8,
+    "gembas_pendientes": [
+      { "desde": "2026-07-21", "aceptado": false, "que_ver": "sin id, malformada" }
+    ]
+  }
+}
+"@
+$dirW5 = New-EstadoFixture 'wip-sin-id' $estadoSinId
+$rW5 = Invoke-EstadoFlujo $dirW5
+if ($rW5.Code -eq 1 -and $rW5.Out -match '\[AVISO\]' -and $rW5.Out -match 'ABRIR SPRINT NUEVO BLOQUEADO') { Ok "wip-sin-id: entrada sin id -> AVISO + cuenta como pendiente (exit 1, fail-safe)" } else { No "wip-sin-id: esperaba AVISO + exit 1 (lo dudoso bloquea), fue $($rW5.Code)`n$($rW5.Out)" }
+
+# ------------------------------------------------------------------ (w6) gembas_pendientes ausente -> despejado
+$estadoSinLista = @"
+{
+  "estado": {
+    "wip_limite": 8,
+    "sprint_activo": "prueba"
+  }
+}
+"@
+$dirW6 = New-EstadoFixture 'wip-sin-lista' $estadoSinLista
+$rW6 = Invoke-EstadoFlujo $dirW6
+if ($rW6.Code -eq 0 -and $rW6.Out -match 'flujo despejado') { Ok "wip-sin-lista: estado presente pero gembas_pendientes ausente -> lista vacia, exit 0 despejado" } else { No "wip-sin-lista: esperaba exit 0 despejado (lista vacia), fue $($rW6.Code)`n$($rW6.Out)" }
+
 # ------------------------------------------------------------------ limpieza
 Remove-Item -LiteralPath $tmpRoot -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
 if ($script:fail -gt 0) {
-  Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion) INCOMPLETO: $($script:fail) fallo(s), $($script:pass) ok. ==" -ForegroundColor Red
+  Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion+WIP) INCOMPLETO: $($script:fail) fallo(s), $($script:pass) ok. ==" -ForegroundColor Red
   exit 1
 }
-Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion) sano: $($script:pass) verificaciones verdes. =="
+Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion+WIP) sano: $($script:pass) verificaciones verdes. =="
 exit 0

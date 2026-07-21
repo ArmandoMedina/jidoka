@@ -1,7 +1,7 @@
 ---
 description: Diseña el plan de un sprint con el QUÉ aprobado por el cliente ANTES de escribir código (rebanada R0 con STOP)
 argument-hint: "[nombre corto del sprint o la capacidad a planear]"
-allowed-tools: Read, Bash(git status:*)
+allowed-tools: Read, Bash(git status:*), Bash(test:*), Bash(powershell:*)
 ---
 
 Vas a **planear un sprint**, no a construirlo. El entregable de este comando es un plan aprobado —el contrato del sprint—, no código. La **Intención (el QUÉ)** se escribe y se aprueba antes que la Construcción.
@@ -23,6 +23,16 @@ El estado que el plan necesita queda inyectado **aquí mismo** — la garantía 
 
 - **El backlog** (hacia dónde va el proyecto; el orden de valor se defiende contra esto):
 @ROADMAP.md
+
+## El límite WIP (FLU-1): si hay un Gemba esperando tus ojos, NO se abre sprint nuevo
+
+> **Drum-buffer-rope: el ritmo lo marca la aceptación del cliente, no la producción.** Antes de
+> redactar R0, el gate del estado vivo se planta si hay un Gemba entregado que el cliente aún no
+> aceptó ni rechazó — y **nombra cuál**. Sin `tools/flujo.json` (o sin la clave `estado`) dirá «no
+> aplica»; corrupto → falla cerrado (exit 2).
+!`test -f tools/estado-flujo.ps1 && powershell -NoProfile -ExecutionPolicy Bypass -File tools/estado-flujo.ps1 -Gate || echo "[flujo] sin vista del limite WIP (tools/estado-flujo.ps1 no sembrado) -- corre instalar.ps1 -Actualizar; el limite WIP no se hace cumplir en este planea."`
+
+**Si arriba salió `[BLOQUEA]`, DETENTE aquí: no redactes R0.** El camino es correr el Gemba pendiente (`/jidoka:gemba`) o que el cliente lo acepte/rechace **con nombre**. Saltarse el muro = **decisión del cliente escrita, no iniciativa del agente**.
 
 ## R0 — el QUÉ, con STOP (lo primero, sin excepción)
 
