@@ -606,7 +606,7 @@ ovl.onclick=e=>{ if(e.target===ovl) wizClose(); };
 /* ================== Tour guiado ================== */
 const TOUR=[
  {tab:'tuberia', sel:'header', title:'Bienvenido — esto es la tubería de tu Jidoka',
-  text:'Todas las piezas son reales (censadas de tu repo); ningún botón escribe nada. El tour son 11 paradas por las 4 pestañas. Sal cuando quieras — puedes retomarlo con el mismo botón.'},
+  text:'Todas las piezas son reales (censadas de tu repo); ningún botón escribe nada. El tour son 13 paradas por las 4 pestañas. Sal cuando quieras — puedes retomarlo con el mismo botón.'},
  {tab:'tuberia', sel:'.leg', title:'Los 3 regímenes de gobierno (los colores)',
   text:'Cada pieza trae su contrato pintado: ROJO = motor sellado (solo Jidoka lo actualiza, por el lazo). ÁMBAR = contrato SAP (invariantes de fábrica + tus extensiones registradas). VERDE = libre (tuyo). El VIOLETA punteado marca las piezas que hoy están en el cajón equivocado.'},
  {tab:'tuberia', sel:'.chip[data-id="c-arranca"]', do:()=>select('c-arranca'), title:'Una pieza y su cableado real',
@@ -621,6 +621,10 @@ const TOUR=[
   text:'Este botón abre el alta completa: tipo, régimen, cajón, fuerza, quién lo lee, responsable, muro opt-in. Dos detalles a propósito: "motor sellado" NO se ofrece (camino absurdo, recortado) y al final te dice exactamente QUÉ escribiría. Dale clic al terminar el tour.'},
  {tab:'bandeja', sel:'#bandeja .bitem:nth-of-type(5)', title:'El estira y afloja, resuelto',
   text:'Alguien quitó el @PRODUCT_BRIEF del arranca por fuera. "Reconciliar" te da DOS salidas legales: restaurar el invariante, o aceptar la desviación CON FIRMA (garantía nula + badge permanente). Lo único que no existe es la desviación muda.'},
+ {tab:'flujos', sel:'#flujos .flowcard:nth-of-type(1)', title:'El wizard corto — el ancestro del formulario',
+  text:'El flujo rápido de 3 preguntas que nació del caso del glosario: aviso → qué tipo es → avisa o bloquea → quién lo lee. Es el MISMO acto que el formulario de la bandeja, en versión express. Decisión de diseño pendiente (tuya): ¿wizard corto en el momento del aviso y formulario completo en el alta consciente — o uno solo?'},
+ {tab:'flujos', sel:'#flujos .flowcard:nth-of-type(2)', title:'Alta de agente — el oficio decide todo',
+  text:'Fíjate en el truco de este flujo: te pregunta UNA cosa (el oficio) y deriva el resto — el modelo recomendado y las herramientas recortadas (buscar = solo lectura; juzgar = ejecuta pero no edita). No hay 20 preguntas. Eso es "bajar la cantidad de caminos" aplicado a la propia alta.'},
  {tab:'flujos', sel:'#flujos .flowcard:nth-of-type(3)', title:'La única mecánica genuinamente nueva',
   text:'"Esto NO se puede conectar con esto." Hoy ninguna ley de Jidoka sabe decir eso — merece diseño y ADR propios. Las otras dos tarjetas reusan mecánica que ya existe; esta es la nueva.'},
  {tab:'huecos', sel:'#huecos .hueco:nth-of-type(1)', title:'Lo que no estabas viendo — el hallazgo gordo',
