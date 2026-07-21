@@ -10,5 +10,9 @@
     "historico": "docs/roadmap-historico.md",
     "muertos": "docs/MUERTOS.md",
     "vencimiento_dias": { "urgente": 14, "normal": 90, "algun-dia": 180 }
+  },
+  "changelog": {
+    "tipos": ["feat", "fix", "test", "docs", "chore", "breaking"],
+    "max_prosa_lineas": 8
   }
 }

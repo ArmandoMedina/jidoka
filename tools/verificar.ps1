@@ -307,6 +307,89 @@ if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
   if (-not $rotoRoadmap) { Ok "[contrato-roadmap] ROADMAP.md dentro de contrato ($nItems items clasificados, $($rLineas.Count)/$rTecho lineas)" }
 }
 
+# Contrato del CHANGELOG (FLU-1, ADR 0045): el CHANGELOG es registro OPERATIVO, no
+# una carta entregable. Se mide SOLO la seccion TOPE (del primer '## [' al siguiente
+# '## [') -- NO es retroactivo: las versiones viejas quedan como historia. Solo aplica
+# si flujo.json trae la clave 'changelog' y existe CHANGELOG.md (un repo sin el pilar
+# no se bloquea). Reglas de la seccion tope: (a) header datado 'X.Y.Z <guion> AAAA-MM-DD'
+# (semver + fecha; guion largo U+2014 o guion simple); (b) todo bullet raiz ('^- ')
+# empieza con '- **' y un tipo permitido entre backticks o la palabra 'ADR ' (voz de la
+# casa); (c) la prosa entre el header/subtitulo y el PRIMER bullet no pasa de
+# max_prosa_lineas (los '### ' no cuentan). Config incompleta -> falla cerrado (exit 2).
+if ($flujoCfg -and $flujoCfg.changelog -and (Test-Path 'CHANGELOG.md')) {
+  $emDash = [char]0x2014   # guion largo: el header lo usa; se acepta tambien guion simple
+  $btick  = [char]0x60     # backtick: el tipo va entre backticks (- **`feat` ...)
+  # Falla CERRADO ante config incompleta (mismo criterio que handoff/roadmap): 'tipos'
+  # no-vacio y max_prosa_lineas entero no-negativo, o exit 2.
+  $tiposChg = @($flujoCfg.changelog.tipos | Where-Object { $_ })
+  $prosaParsed = 0
+  $prosaRaw = $flujoCfg.changelog.max_prosa_lineas
+  if ($tiposChg.Count -eq 0 -or $null -eq $prosaRaw -or
+      -not [int]::TryParse([string]$prosaRaw, [ref]$prosaParsed) -or
+      $prosaParsed -lt 0) {
+    Fail "tools/flujo.json: la clave changelog esta incompleta (tipos no-vacio y max_prosa_lineas entero no-negativo requeridos). Sin ellos el contrato no se puede medir."
+  }
+  $maxProsa = $prosaParsed
+  # -Encoding UTF8 obligatorio (mismo gotcha de acentos/guion largo que handoff/roadmap):
+  # sin el, PS 5.1 lee el UTF-8 sin BOM como ANSI y el guion largo del header no casa.
+  $cLineas = @(Get-Content 'CHANGELOG.md' -Encoding UTF8)
+  # Localiza la seccion TOPE: del primer '## [' al siguiente '## ['. Los subtitulos '### '
+  # y las menciones '## [' a media linea (dentro de backticks) NO son frontera (^ ancla).
+  $iStart = -1
+  for ($i = 0; $i -lt $cLineas.Count; $i++) {
+    if ($cLineas[$i] -match '^## \[') { $iStart = $i; break }
+  }
+  if ($iStart -ge 0) {
+    $iEnd = $cLineas.Count
+    for ($i = $iStart + 1; $i -lt $cLineas.Count; $i++) {
+      if ($cLineas[$i] -match '^## \[') { $iEnd = $i; break }
+    }
+    $rotoChangelog = $false
+    # (a) header datado. El guion es U+2014 o '-'; grupo explicito a proposito.
+    $ver = ''
+    if ($cLineas[$iStart] -match "^## \[(\d+\.\d+\.\d+)\] ($emDash|-) \d{4}-\d{2}-\d{2}") {
+      $ver = $matches[1]
+    }
+    else {
+      $hdr = $cLineas[$iStart].Trim()
+      if ($hdr.Length -gt 60) { $hdr = $hdr.Substring(0, 60) }
+      Block "[contrato-changelog] la seccion tope no cumple el header 'X.Y.Z $emDash AAAA-MM-DD' (semver + fecha): '$hdr'. El registro se data."
+      $rotoChangelog = $true
+    }
+    # (b) bullets raiz tipados. El tipo va entre backticks; 'ADR ' es voz de la casa.
+    $tipoAlt = ($tiposChg | ForEach-Object { [regex]::Escape([string]$_) }) -join '|'
+    $bulletPat = "^- \*\*($btick($tipoAlt)$btick|ADR )"
+    # (c) prosa: el primer bullet raiz cierra la ventana de prosa.
+    $iPrimerBullet = -1
+    for ($i = $iStart; $i -lt $iEnd; $i++) {
+      if ($cLineas[$i] -match '^- ') { $iPrimerBullet = $i; break }
+    }
+    $nBullets = 0
+    for ($i = $iStart; $i -lt $iEnd; $i++) {
+      $ln = $cLineas[$i]
+      if ($ln -notmatch '^- ') { continue }
+      if ($ln -match $bulletPat) { $nBullets++; continue }
+      $cNombre = $ln.Trim()
+      if ($cNombre.Length -gt 60) { $cNombre = $cNombre.Substring(0, 60) }
+      Block "[contrato-changelog] el bullet '$cNombre' no declara su tipo: todo bullet raiz empieza con '- **' y un tipo permitido entre backticks ($($tiposChg -join ', ')) o 'ADR '. El changelog es registro tipado."
+      $rotoChangelog = $true
+    }
+    $limiteProsa = if ($iPrimerBullet -ge 0) { $iPrimerBullet } else { $iEnd }
+    $nProsa = 0
+    for ($i = $iStart + 1; $i -lt $limiteProsa; $i++) {
+      $ln = $cLineas[$i]
+      if ($ln.Trim() -eq '') { continue }
+      if ($ln -match '^#') { continue }   # subtitulos '### ' (o mas profundos) no son prosa
+      $nProsa++
+    }
+    if ($nProsa -gt $maxProsa) {
+      Block "[contrato-changelog] la seccion tope trae $nProsa lineas de prosa antes del primer bullet; el techo es $maxProsa (tools/flujo.json). El changelog es registro operativo, no carta: comprime la prosa (mueve el detalle a sub-bullets tipados)."
+      $rotoChangelog = $true
+    }
+    if (-not $rotoChangelog) { Ok "[contrato-changelog] seccion [$ver] dentro de contrato ($nBullets bullets tipados, prosa $nProsa/$maxProsa)" }
+  }
+}
+
 # Costura .local: extension de mecanica ESPECIFICA del repo (p.ej. lint/tests de un
 # lenguaje: ruff, pytest). El motor generico NO se bifurca -- el hijo pone sus checks
 # aqui y siguen contando para $script:warn / $script:block (usa Note/Block/Ok). Es la

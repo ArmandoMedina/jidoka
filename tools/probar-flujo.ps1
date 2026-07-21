@@ -34,6 +34,15 @@
 # Referencia sin metadatos -> exit 0 (exento); (q) flujo.json sin clave roadmap -> el check
 # NO aplica, exit 0; (r) roadmap:{} incompleto (sin techo_lineas) -> exit 2 (falla cerrado).
 #
+# Casos del CHANGELOG (check [contrato-changelog], flujo.json SOLO con la clave changelog):
+# se mide SOLO la seccion TOPE (del primer '## [' al siguiente). (z1) tope conforme (header
+# datado con guion largo, bullets tipados + un ADR, prosa breve) -> exit 0 y conteo; (z2)
+# header sin fecha -> exit 1; (z3) bullet sin tipo ('- arregle cosas') -> exit 1 nombrandolo;
+# (z4) bullet '- **ADR 0099** - ...' -> ACEPTADO (exit 0); (z5) prosa de 12 lineas con max 8
+# -> exit 1 'no carta'; (z6) segunda seccion vieja con bullets sin tipo -> exit 0 (solo el
+# tope se mide, no es retroactivo); (z7) sin clave changelog -> el check no aplica, exit 0;
+# (z8) changelog:{} incompleto -> exit 2 (falla cerrado).
+#
 # Casos de la EXPIRACION (tools/expirar.ps1, el circuit breaker; fixtures con -Repo + -Hoy
 # inyectada): (s) 1 Normal vencido (alta hace 100 dias) -> expirar SIN -Simular: exit 0, el
 # item ya NO esta en ROADMAP, SI esta en MUERTOS con motivo y fecha, y el ROADMAP resultante
@@ -386,6 +395,152 @@ if ($rR.Code -eq 2) { Ok "roadmap-incompleto: exit 2 (falla cerrado, techo_linea
 if ($rR.Out -match 'incompleta') { Ok "roadmap-incompleto: acusa la clave roadmap incompleta" } else { No "roadmap-incompleto: esperaba mensaje de clave incompleta`n$($rR.Out)" }
 
 Write-Host ""
+Write-Host "== Contrato del CHANGELOG (check [contrato-changelog]): fixtures ROJO->VERDE =="
+
+# Guion largo (U+2014) y backtick reales, armados sin literal (esta fuente es ASCII a
+# proposito): asi el CHANGELOG-fixture trae el header datado y los tipos entre backticks
+# como el CHANGELOG real.
+$emd = [char]0x2014
+$bt2 = [char]0x60
+$tiposFull = '["feat","fix","test","docs","chore","breaking"]'
+
+function New-FlujoChangelog($tiposJson, $maxProsa) {
+  # JSON valido SOLO con la clave changelog: sin handoff/roadmap, los checks hermanos no aplican.
+  return @"
+{
+  "changelog": {
+    "tipos": $tiposJson,
+    "max_prosa_lineas": $maxProsa
+  }
+}
+"@
+}
+
+function New-ChangelogFixture($nombre, $flujoTexto, $changelogLines) {
+  $dir = Join-Path $tmpRoot $nombre
+  New-Item -ItemType Directory -Path (Join-Path $dir 'tools') -Force | Out-Null
+  if ($null -ne $flujoTexto) {
+    [System.IO.File]::WriteAllText((Join-Path $dir 'tools/flujo.json'), $flujoTexto, $utf8NoBom)
+  }
+  # HANDOFF trivial: sin la clave handoff el check hermano no aplica y no ensucia el veredicto.
+  [System.IO.File]::WriteAllLines((Join-Path $dir 'HANDOFF.md'), [string[]]@("# HANDOFF fixture"), $utf8NoBom)
+  [System.IO.File]::WriteAllLines((Join-Path $dir 'CHANGELOG.md'), [string[]]$changelogLines, $utf8NoBom)
+  return $dir
+}
+
+# ------------------------------------------------------------------ (z1) tope conforme
+# Header datado con guion largo real, un subtitulo '### ' (no cuenta como prosa), 1 linea de
+# prosa, y 3 bullets conformes (feat + fix tipados + un ADR). Conteo esperado: 3 bullets, prosa 1/8.
+$clConforme = @(
+  "# Changelog fixture",
+  "",
+  "## [1.2.0] $emd 2026-07-21",
+  "",
+  "### Subtitulo que no cuenta como prosa",
+  "",
+  "prosa breve de una sola linea",
+  "",
+  "- **${bt2}feat${bt2}** algo nuevo",
+  "- **${bt2}fix${bt2}** algo arreglado",
+  "- **ADR 0099** una decision de la casa"
+)
+$dirZ1 = New-ChangelogFixture 'changelog-conforme' (New-FlujoChangelog $tiposFull 8) $clConforme
+$rZ1 = Invoke-Verificar $dirZ1
+if ($rZ1.Code -eq 0) { Ok "changelog-conforme: exit 0" } else { No "changelog-conforme: esperaba exit 0, fue $($rZ1.Code)`n$($rZ1.Out)" }
+if ($rZ1.Out -match '\[contrato-changelog\]' -and $rZ1.Out -match 'dentro de contrato') { Ok "changelog-conforme: seccion tope dentro de contrato" } else { No "changelog-conforme: esperaba '[contrato-changelog] ... dentro de contrato'`n$($rZ1.Out)" }
+if ($rZ1.Out -match '3 bullets tipados' -and $rZ1.Out -match 'prosa 1/8') { Ok "changelog-conforme: conteo CORRECTO (3 bullets tipados, prosa 1/8 -- el '### ' no cuenta)" } else { No "changelog-conforme: esperaba '3 bullets tipados' y 'prosa 1/8'`n$($rZ1.Out)" }
+
+# ------------------------------------------------------------------ (z2) header sin fecha
+$clSinFecha = @(
+  "# Changelog fixture",
+  "",
+  "## [1.2.0]",
+  "",
+  "- **${bt2}feat${bt2}** algo nuevo"
+)
+$dirZ2 = New-ChangelogFixture 'changelog-sin-fecha' (New-FlujoChangelog $tiposFull 8) $clSinFecha
+$rZ2 = Invoke-Verificar $dirZ2
+if ($rZ2.Code -eq 1) { Ok "changelog-sin-fecha: exit 1 (BLOQUEA)" } else { No "changelog-sin-fecha: esperaba exit 1, fue $($rZ2.Code)`n$($rZ2.Out)" }
+if ($rZ2.Out -match 'contrato-changelog' -and $rZ2.Out -match 'header') { Ok "changelog-sin-fecha: acusa el header sin fecha" } else { No "changelog-sin-fecha: esperaba acusar el header`n$($rZ2.Out)" }
+
+# ------------------------------------------------------------------ (z3) bullet sin tipo
+$clSinTipo = @(
+  "# Changelog fixture",
+  "",
+  "## [1.2.0] $emd 2026-07-21",
+  "",
+  "- arregle cosas"
+)
+$dirZ3 = New-ChangelogFixture 'changelog-sin-tipo' (New-FlujoChangelog $tiposFull 8) $clSinTipo
+$rZ3 = Invoke-Verificar $dirZ3
+if ($rZ3.Code -eq 1) { Ok "changelog-sin-tipo: exit 1 (BLOQUEA)" } else { No "changelog-sin-tipo: esperaba exit 1, fue $($rZ3.Code)`n$($rZ3.Out)" }
+if ($rZ3.Out -match 'contrato-changelog' -and $rZ3.Out -match 'arregle cosas' -and $rZ3.Out -match 'no declara su tipo') { Ok "changelog-sin-tipo: acusa el bullet '- arregle cosas' por su tipo faltante" } else { No "changelog-sin-tipo: esperaba acusar el bullet por tipo faltante`n$($rZ3.Out)" }
+
+# ------------------------------------------------------------------ (z4) bullet ADR aceptado
+# Un unico bullet '- **ADR 0099** - ...': la voz de la casa se acepta como bullet tipado.
+$clADR = @(
+  "# Changelog fixture",
+  "",
+  "## [1.2.0] $emd 2026-07-21",
+  "",
+  "- **ADR 0099** $emd una decision de la casa"
+)
+$dirZ4 = New-ChangelogFixture 'changelog-adr' (New-FlujoChangelog $tiposFull 8) $clADR
+$rZ4 = Invoke-Verificar $dirZ4
+if ($rZ4.Code -eq 0) { Ok "changelog-adr: exit 0 (el bullet 'ADR ' se acepta)" } else { No "changelog-adr: esperaba exit 0, fue $($rZ4.Code)`n$($rZ4.Out)" }
+if ($rZ4.Out -match 'dentro de contrato' -and $rZ4.Out -match '1 bullets tipados') { Ok "changelog-adr: la seccion tope pasa con 1 bullet ADR" } else { No "changelog-adr: esperaba 'dentro de contrato' con 1 bullet`n$($rZ4.Out)" }
+
+# ------------------------------------------------------------------ (z5) prosa de carta
+# 12 lineas de prosa antes del primer bullet, con max 8 -> BLOQUEA 'no carta'.
+$clProsa = @(
+  "# Changelog fixture",
+  "",
+  "## [1.2.0] $emd 2026-07-21",
+  ""
+)
+1..12 | ForEach-Object { $clProsa += "linea de prosa numero $_" }
+$clProsa += ""
+$clProsa += "- **${bt2}feat${bt2}** al fin un bullet"
+$dirZ5 = New-ChangelogFixture 'changelog-prosa' (New-FlujoChangelog $tiposFull 8) $clProsa
+$rZ5 = Invoke-Verificar $dirZ5
+if ($rZ5.Code -eq 1) { Ok "changelog-prosa: exit 1 (BLOQUEA)" } else { No "changelog-prosa: esperaba exit 1, fue $($rZ5.Code)`n$($rZ5.Out)" }
+if ($rZ5.Out -match 'contrato-changelog' -and $rZ5.Out -match 'no carta') { Ok "changelog-prosa: acusa la prosa de carta (12 > 8)" } else { No "changelog-prosa: esperaba acusar la prosa 'no carta'`n$($rZ5.Out)" }
+
+# ------------------------------------------------------------------ (z6) solo el tope se mide
+# Tope [1.2.0] conforme; una segunda seccion vieja [1.1.0] con bullets sin tipo -> exit 0
+# (no es retroactivo: la historia no se re-mide).
+$clRetro = @(
+  "# Changelog fixture",
+  "",
+  "## [1.2.0] $emd 2026-07-21",
+  "",
+  "- **${bt2}feat${bt2}** el tope si cumple",
+  "",
+  "## [1.1.0] $emd 2026-07-20",
+  "- esto es historia vieja sin tipo",
+  "- tampoco esto tiene tipo"
+)
+$dirZ6 = New-ChangelogFixture 'changelog-retro' (New-FlujoChangelog $tiposFull 8) $clRetro
+$rZ6 = Invoke-Verificar $dirZ6
+if ($rZ6.Code -eq 0) { Ok "changelog-retro: exit 0 (solo la seccion tope se mide, no es retroactivo)" } else { No "changelog-retro: esperaba exit 0, fue $($rZ6.Code)`n$($rZ6.Out)" }
+if ($rZ6.Out -match 'dentro de contrato' -and $rZ6.Out -match '1 bullets tipados') { Ok "changelog-retro: solo el bullet del tope cuenta (1), la historia vieja no se mide" } else { No "changelog-retro: esperaba 'dentro de contrato' con 1 bullet del tope`n$($rZ6.Out)" }
+
+# ------------------------------------------------------------------ (z7) sin clave changelog -> no aplica
+# flujo.json sin la clave changelog (aqui: {}): el check NO aplica aunque el CHANGELOG exista.
+$dirZ7 = New-ChangelogFixture 'changelog-sin-clave' '{}' $clConforme
+$rZ7 = Invoke-Verificar $dirZ7
+if ($rZ7.Code -eq 0) { Ok "changelog-sin-clave: exit 0 (sin la clave changelog el check no aplica)" } else { No "changelog-sin-clave: esperaba exit 0, fue $($rZ7.Code)`n$($rZ7.Out)" }
+if ($rZ7.Out -notmatch 'contrato-changelog') { Ok "changelog-sin-clave: el check NO aparece sin la clave changelog" } else { No "changelog-sin-clave: el check no deberia aparecer sin la clave`n$($rZ7.Out)" }
+
+# ------------------------------------------------------------------ (z8) changelog:{} -> falla cerrado
+# changelog:{} sin tipos ni max_prosa_lineas: config incompleta es tan invalida como corrupta
+# -> exit 2 (falla cerrado). CHANGELOG conforme a proposito: lo dicta la config rota.
+$dirZ8 = New-ChangelogFixture 'changelog-incompleto' '{ "changelog": {} }' $clConforme
+$rZ8 = Invoke-Verificar $dirZ8
+if ($rZ8.Code -eq 2) { Ok "changelog-incompleto: exit 2 (falla cerrado, tipos/max_prosa_lineas requeridos)" } else { No "changelog-incompleto: esperaba exit 2, fue $($rZ8.Code)`n$($rZ8.Out)" }
+if ($rZ8.Out -match 'incompleta') { Ok "changelog-incompleto: acusa la clave changelog incompleta" } else { No "changelog-incompleto: esperaba mensaje de clave incompleta`n$($rZ8.Out)" }
+
+Write-Host ""
 Write-Host "== La expiracion (tools/expirar.ps1, circuit breaker): fixtures con -Hoy inyectada =="
 
 # Ancla de fecha para TODA la seccion: la mecanica se corre con -Hoy 2026-07-21 (no la del
@@ -529,8 +684,8 @@ Remove-Item -LiteralPath $tmpRoot -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
 if ($script:fail -gt 0) {
-  Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+expiracion) INCOMPLETO: $($script:fail) fallo(s), $($script:pass) ok. ==" -ForegroundColor Red
+  Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion) INCOMPLETO: $($script:fail) fallo(s), $($script:pass) ok. ==" -ForegroundColor Red
   exit 1
 }
-Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+expiracion) sano: $($script:pass) verificaciones verdes. =="
+Write-Host "== Pilar de flujo (HANDOFF+ROADMAP+CHANGELOG+expiracion) sano: $($script:pass) verificaciones verdes. =="
 exit 0

@@ -8,14 +8,25 @@ Estás **cerrando**. El cierre es donde el conocimiento se vuelve durable para l
 
 Qué se cierra: **$ARGUMENTS**
 
-## 1. Registra (el Registro se reparte por caducidad)
+## 1. Registra (el orden del cierre es FIJO — no depende de memoria)
 
-Cada cosa a su doc dueño (`kanban/lazo.md`):
+El registro se reparte por doc dueño (`kanban/lazo.md`) y se escribe **en este orden** — cada doc lleva su contrato que lo hace cumplir:
 
-- **`HANDOFF.md`** (efímero) — se **llena** al cerrar con el estado en vuelo y los pendientes; **se limpia** de lo ya atendido (una nota vieja que ya no es verdad es peor que no tenerla). Las decisiones de juicio del cliente van a su cola propia (`[PENDIENTE]` / `[DECIDIDA-REVISABLE]`).
-- **`CHANGELOG.md`** — qué cambió, versión a versión. Si tocaste el ritual o los gates, aquí se registra (lo pide la ley: áreas `metodo` y `ritual`).
-- **Un ADR** (`docs/decisions/`) por cada decisión no obvia — y **listada en su índice en el mismo commit** (único bloqueo duro). Si una regla gobierna decisiones futuras, asciende a un ADR: no la dejes enterrada en un checkbox.
-- Si hubo sprint: llena la entrega con `@kit/.jidoka/templates/sprint-entrega.md` en `docs/sprints/` — su Kaizen (1-5 lecciones) es lo único que el siguiente `planea` lee completo. La sección **Verificación (el demo que corre el cliente)** se cierra solo si el cliente pudo correr el demo **sin código ni terminal**; si solo corre por terminal, la rebanada no quedó vertical: dilo en "Pendiente que dejó", no la des por cumplida.
+1. **Poda primero — `tools/expirar.ps1` (ejecutar, no simular).** Corre **ANTES** de escribir cualquier doc: el circuit breaker **edita** el `ROADMAP.md` (mueve lo vencido a `docs/MUERTOS.md` con fecha y motivo, por clase de servicio — `tools/flujo.json`), así lo que registres abajo ya está podado. Lo caduco muere por script, no por juicio.
+
+   ```
+   powershell -NoProfile -ExecutionPolicy Bypass -File tools/expirar.ps1
+   ```
+
+2. **`HANDOFF.md`** — escribe la nueva **«Dónde estamos»**, degrada la anterior a **«Dónde estuvimos»**, y mueve la histórica sobrante **ÍNTEGRA** a `docs/handoff-historico.md` (que `/jidoka:arranca` nunca inyecta). El check **`[contrato-handoff]`** lo hace cumplir: UNA «Dónde estamos», máximo N históricas, techo de líneas — excedido **BLOQUEA** el push. Una nota vieja que ya no es verdad es peor que no tenerla; las decisiones de juicio del cliente van a su cola propia (`[PENDIENTE]` / `[DECIDIDA-REVISABLE]`).
+
+3. **`ROADMAP.md`** — todo pendiente nuevo entra **CLASIFICADO** en su clase de servicio con `[alta:AAAA-MM-DD · apetito:Nh]` (los «Con fecha» además `vence:AAAA-MM-DD`; el icebox «Algún día» solo `alta:`). El check **`[contrato-roadmap]`** **BLOQUEA** una sección fuera del contrato o un ítem sin sus metadatos.
+
+4. **`CHANGELOG.md`** — la sección de la versión bajo su contrato: **header datado** (`## [X.Y.Z] — AAAA-MM-DD`), **bullets tipados** (un tipo permitido entre backticks — `feat`/`fix`/`test`/`docs`/`chore`/`breaking` — o `ADR `, la voz de la casa) y **prosa al mínimo** (techo `max_prosa_lineas`). El check **`[contrato-changelog]`** mide **solo la sección tope** (no es retroactivo) y **BLOQUEA** lo que se salga: el changelog es registro operativo, no carta. Si tocaste el ritual o los gates, aquí se registra (lo pide la ley: áreas `metodo` y `ritual`).
+
+5. **Índices** — cada ADR nuevo (`docs/decisions/`) **listado en su índice `README.md` en el mismo commit** (único bloqueo duro del blast-radius); el sprint en `docs/sprints/README.md`. Un ADR por cada decisión no obvia; si una regla gobierna decisiones futuras, asciende a ADR (no la dejes en un checkbox). Si hubo sprint: llena la entrega con `@kit/.jidoka/templates/sprint-entrega.md` en `docs/sprints/` — su Kaizen (1-5 lecciones) es lo único que el siguiente `planea` lee completo. La sección **Verificación (el demo que corre el cliente)** se cierra solo si el cliente pudo correr el demo **sin código ni terminal**; si solo corrió por terminal, dilo en «Pendiente que dejó», no la des por cumplida.
+
+6. **«Cerrado» es veredicto de los gates, no frase del agente.** ANTES de declararlo cerrado: `tools/verificar.ps1` (sin drift ni contratos rotos), `tools/probar-flujo.ps1` (el pilar de flujo sano) y `tools/estado-docs.ps1` (estructura de docs) **verdes**. Un gate rojo significa que el cierre no terminó.
 
 ### El cuadro de cierre — los hechos medibles, versionado con los planes
 
@@ -50,11 +61,7 @@ Llena este cuadro con **hechos** (números, nombres, sí/no — nada de "creo qu
 
 Cierra con trazabilidad lo que ya no vive; borra solo el andamiaje que nunca fue contenido. **Si dudas entre borrar y marcar → marca.** El plan de trabajo del día (`/.jidoka/plan-actual.md`) se poda aquí.
 
-**El paso duro de la poda: corre `tools/expirar.ps1` (ejecutar, no simular).** El circuit breaker mueve lo vencido del `ROADMAP.md` a `docs/MUERTOS.md` con fecha y motivo, por clase de servicio (`tools/flujo.json`). Así la poda deja de depender de que alguien se acuerde: lo caduco muere por script, no por juicio, y revivir un muerto es re-proponerlo con alta nueva (nada vuelve solo).
-
-```
-powershell -NoProfile -ExecutionPolicy Bypass -File tools/expirar.ps1
-```
+**El paso duro de la poda ya corrió en §1 (1): `tools/expirar.ps1`** movió lo vencido del `ROADMAP.md` a `docs/MUERTOS.md` con fecha y motivo, por clase de servicio (`tools/flujo.json`). Así la poda deja de depender de que alguien se acuerde: lo caduco muere por script, no por juicio, y revivir un muerto es re-proponerlo con alta nueva (nada vuelve solo). Si aún no lo corriste, córrelo ahora (el comando está en §1).
 
 ## 3. Commitea la evidencia del Gemba (paso obligatorio, no cortesía)
 
