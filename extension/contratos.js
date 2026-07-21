@@ -41,6 +41,42 @@ function upsertContrato(p, contrato) {
   return (i >= 0) ? obj.contratos[i] : contrato;
 }
 
+// ---------------------------------------------------------------- overrides firmados (R6, ADR 0047)
+/**
+ * La firma DETERMINISTA de un override (ADR 0047): quien/email/cuando/motivo.
+ * quien+motivo derivan de git config + la deliberacion; NUNCA los inventa el agente.
+ * LANZA si falta 'quien' o 'motivo': una firma sin quien o sin porque es invalida
+ * (sin motivo no hay reclasificacion). email y cuando pueden ir vacios pero se incluyen.
+ */
+function firmaDeterminista(quien, email, cuando, motivo) {
+  if (!quien || !String(quien).trim()) throw new Error('la firma necesita "quien" (git config user.name)');
+  if (!motivo || !String(motivo).trim()) throw new Error('la firma necesita "motivo" (sin motivo no hay reclasificacion, ADR 0047)');
+  return { quien, email: email || '', cuando: cuando || '', motivo };
+}
+
+/**
+ * Escribe un override FIRMADO en contratos.json (merge por path, no duplica). La bandeja
+ * resta lo 'aceptado' con badge de firma; el hook candado-pretooluse lee 'candado'.
+ * accion: 'aceptar-desviacion' | 'candado-on' | 'candado-off' | 'reclasificar-estatuto' | 'reclasificar-libre'.
+ * NUNCA ofrece 'motor' (ese regimen solo lo trae Jidoka de fabrica). Devuelve el contrato final.
+ */
+function registrarOverride(contratosPath, { path, accion, firma }) {
+  if (!path) throw new Error('registrarOverride necesita "path"');
+  // Revalida la firma: un objeto con quien y motivo (reusa el contrato de firmaDeterminista).
+  if (!firma || typeof firma !== 'object') throw new Error('registrarOverride necesita una "firma"');
+  const firmaValida = firmaDeterminista(firma.quien, firma.email, firma.cuando, firma.motivo);
+  const porAccion = {
+    'aceptar-desviacion': { estado: 'aceptado' },
+    'candado-on': { candado: true },
+    'candado-off': { candado: false },
+    'reclasificar-estatuto': { regimen: 'estatuto' },
+    'reclasificar-libre': { regimen: 'libre' },
+  };
+  const cambio = porAccion[accion];
+  if (!cambio) throw new Error(`accion desconocida: '${accion}' (no se ofrece 'motor', solo lo trae Jidoka de fabrica)`);
+  return upsertContrato(contratosPath, { path, ...cambio, firma: firmaValida });
+}
+
 // ---------------------------------------------------------------- blast-radius.json (la ley)
 function leerLey(p) {
   if (!fs.existsSync(p)) throw new Error('no existe tools/blast-radius.json (la ley)');
@@ -74,4 +110,4 @@ function agregarAFuente(p, area, ruta) {
   return true;
 }
 
-module.exports = { escribir, leerContratos, upsertContrato, leerLey, agregarAFuente };
+module.exports = { escribir, leerContratos, upsertContrato, firmaDeterminista, registrarOverride, leerLey, agregarAFuente };

@@ -64,3 +64,46 @@ test('agregarAFuente: crea el area si no existe (cajon nuevo), sin tocar las dem
   assert.deepStrictEqual(nueva.fuente, ['docs/glosario.md']);
   assert.strictEqual(arr[0].nombre, 'guias', 'el area previa intacta');
 });
+
+// ------------------------------------------------------------------ R6: firma + override (ADR 0047)
+
+test('firmaDeterminista: lanza si falta quien o motivo (firma sin quien/porque es invalida)', () => {
+  assert.throws(() => contratos.firmaDeterminista('', 'a@b.c', '2026-07-21', 'porque si'), /quien/);
+  assert.throws(() => contratos.firmaDeterminista('Ana', 'a@b.c', '2026-07-21', ''), /motivo/);
+  assert.throws(() => contratos.firmaDeterminista(undefined, '', '', 'motivo'), /quien/);
+  assert.throws(() => contratos.firmaDeterminista('Ana', '', '', undefined), /motivo/);
+  // email y cuando pueden ir vacios pero se incluyen en la firma.
+  const f = contratos.firmaDeterminista('Ana', '', '', 'el porque');
+  assert.deepStrictEqual(f, { quien: 'Ana', email: '', cuando: '', motivo: 'el porque' });
+});
+
+test('registrarOverride aceptar-desviacion: estado aceptado + firma, y NO duplica por path', () => {
+  const p = tmp('contratos.json');
+  const firma = { quien: 'Ana', email: 'a@b.c', cuando: '2026-07-21T00:00:00Z', motivo: 'lo asumo' };
+  contratos.registrarOverride(p, { path: 'docs/x.md', accion: 'aceptar-desviacion', firma });
+  contratos.registrarOverride(p, { path: 'docs/x.md', accion: 'aceptar-desviacion', firma });
+  const obj = contratos.leerContratos(p);
+  assert.strictEqual(obj.contratos.length, 1, 'no debe duplicar por path');
+  assert.strictEqual(obj.contratos[0].estado, 'aceptado');
+  assert.strictEqual(obj.contratos[0].firma.quien, 'Ana');
+});
+
+test('registrarOverride candado-on luego candado-off: merge, un solo contrato', () => {
+  const p = tmp('contratos.json');
+  const firma = { quien: 'Ana', email: '', cuando: '', motivo: 'lo sello' };
+  contratos.registrarOverride(p, { path: 'docs/x.md', accion: 'candado-on', firma });
+  let obj = contratos.leerContratos(p);
+  assert.strictEqual(obj.contratos[0].candado, true, 'candado-on');
+  contratos.registrarOverride(p, { path: 'docs/x.md', accion: 'candado-off', firma: { quien: 'Ana', motivo: 'lo abro' } });
+  obj = contratos.leerContratos(p);
+  assert.strictEqual(obj.contratos.length, 1, 'un solo contrato (merge por path)');
+  assert.strictEqual(obj.contratos[0].candado, false, 'candado-off gana');
+});
+
+test('registrarOverride con firma incompleta (sin motivo) lanza', () => {
+  const p = tmp('contratos.json');
+  assert.throws(
+    () => contratos.registrarOverride(p, { path: 'docs/x.md', accion: 'candado-on', firma: { quien: 'Ana' } }),
+    /motivo/
+  );
+});

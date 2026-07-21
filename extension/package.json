@@ -49,6 +49,11 @@
         "command": "jidoka.verBandeja",
         "title": "Jidoka: ver la bandeja (pendiente de parametrizar)",
         "category": "Jidoka"
+      },
+      {
+        "command": "jidoka.reclasificar",
+        "title": "Jidoka: modo avanzado (reclasificar/firmar)...",
+        "category": "Jidoka"
       }
     ],
     "menus": {
@@ -67,6 +72,11 @@
           "command": "jidoka.quitarLiga",
           "when": "resourceScheme == file",
           "group": "9_jidoka@3"
+        },
+        {
+          "command": "jidoka.reclasificar",
+          "when": "resourceScheme == file",
+          "group": "9_jidoka@4"
         }
       ]
     }

@@ -458,13 +458,102 @@ async function parametrizar(uri, uris) {
   });
 }
 
+// ============================ R6: el modo avanzado (firma + reclasificar, ADR 0047) ============================
+
+/** git config <clave> en cwd=raiz; devuelve el valor trim o '' si git falla o no lo tiene. */
+function gitConfig(raiz, clave) {
+  try {
+    return cp.execFileSync('git', ['config', clave], { cwd: raiz, windowsHide: true }).toString().trim();
+  } catch (e) { return ''; }
+}
+
+/**
+ * Clic derecho -> "Jidoka: modo avanzado (reclasificar/firmar)...": escribe un override
+ * FIRMADO en contratos.json. Tres piezas del meta-gobierno (ADR 0047): contrasena-ritual
+ * (confirmacion tipeada), firma determinista (git config, no inventada), y la accion.
+ * Nada de exito falso: si la escritura falla, showErrorMessage (mismo criterio que parametrizar).
+ */
+async function reclasificar(uri, uris) {
+  const raiz = raizDelRepo();
+  if (!raiz) { vscode.window.showErrorMessage('Jidoka: abre primero la carpeta de un repo.'); return; }
+  const sel = archivosSeleccionados(uri, uris);
+  if (sel.length === 0) { vscode.window.showErrorMessage('Jidoka: selecciona el archivo a reclasificar.'); return; }
+  const doc = rutaRelativa(raiz, sel[0].fsPath);
+  if (doc === null) { vscode.window.showErrorMessage('Jidoka: el archivo vive fuera de la carpeta del repo.'); return; }
+
+  // 1. la ACCION.
+  const acciones = [
+    { label: 'Aceptar la desviacion', description: 'garantia nula, "bajo tu propio riesgo" — la bandeja lo resta con badge', accion: 'aceptar-desviacion' },
+    { label: 'Poner candado IA', description: 'el hook PreToolUse deniega que el agente edite esta pieza', accion: 'candado-on' },
+    { label: 'Quitar candado IA', description: 'la IA vuelve a poder editar esta pieza', accion: 'candado-off' },
+    { label: 'Reclasificar a estatuto', description: 'estructura gobernada; desviarse = DESVIADO', accion: 'reclasificar-estatuto' },
+    { label: 'Reclasificar a libre', description: 'tuyo; se registra pero no se opina del contenido', accion: 'reclasificar-libre' },
+  ];
+  const pick = await vscode.window.showQuickPick(acciones, { title: `Modo avanzado sobre ${doc} — ¿que accion?` });
+  if (!pick) return;
+
+  // 2. el MOTIVO — obligatorio (sin motivo no hay reclasificacion, ADR 0047).
+  const motivo = await vscode.window.showInputBox({
+    title: 'Motivo (obligatorio) — queda en la firma',
+    prompt: 'ADR 0047: sin motivo no hay reclasificacion',
+    ignoreFocusOut: true,
+  });
+  if (motivo === undefined) return;
+  if (!motivo.trim()) { vscode.window.showWarningMessage('Jidoka: sin motivo no hay reclasificacion — nada se cambio.'); return; }
+
+  // 3. contrasena-ritual: teclear el nombre de la carpeta del repo (deliberacion, no seguridad).
+  const nombreRepo = path.basename(raiz).trim();
+  const confirmacion = await vscode.window.showInputBox({
+    title: 'Confirmacion deliberada',
+    prompt: `Escribe el nombre del repo (${nombreRepo}) para confirmar que sabes lo que haces`,
+    ignoreFocusOut: true,
+  });
+  if (confirmacion === undefined) return;
+  if (confirmacion.trim() !== nombreRepo) {
+    vscode.window.showWarningMessage('Jidoka: confirmacion no coincide — nada se cambio.');
+    return;
+  }
+
+  // 4. la firma DETERMINISTA: git config user.name/email + fecha ISO (NO la inventa el agente).
+  const quien = gitConfig(raiz, 'user.name');
+  if (!quien || !quien.trim()) {
+    vscode.window.showErrorMessage('Jidoka: configura git (git config user.name) antes de firmar — la firma se deriva de git, no se inventa (ADR 0047).');
+    return;
+  }
+  const email = gitConfig(raiz, 'user.email');
+  const cuando = new Date().toISOString();
+  let firma;
+  try {
+    firma = contratos.firmaDeterminista(quien, email, cuando, motivo.trim());
+  } catch (e) {
+    vscode.window.showErrorMessage('Jidoka: no pude firmar: ' + (e && e.message ? e.message : String(e)));
+    return;
+  }
+
+  // 5. confirmacion MODAL final.
+  const resumen = `Jidoka: "${pick.label}" sobre ${doc}\nFirma: ${quien}${email ? ' <' + email + '>' : ''}\nMotivo: ${motivo.trim()}`;
+  const ok = await vscode.window.showWarningMessage(resumen, { modal: true }, 'Confirmar');
+  if (ok !== 'Confirmar') return;
+
+  // 6. escribir el override firmado. Nada de exito falso.
+  try {
+    contratos.registrarOverride(path.join(raiz, 'tools', 'contratos.json'), { path: doc, accion: pick.accion, firma });
+    vscode.window.setStatusBarMessage(`Jidoka: '${doc}' — ${pick.label} firmado por ${quien}. Escrito en tools/contratos.json.`, 8000);
+    if (panelBandeja) verBandeja();
+    refrescarGobierno();
+  } catch (e) {
+    vscode.window.showErrorMessage('Jidoka: no pude reclasificar: ' + (e && e.message ? e.message : String(e)));
+  }
+}
+
 function activate(context) {
   context.subscriptions.push(
     vscode.commands.registerCommand('jidoka.verGobierno', verGobierno),
     vscode.commands.registerCommand('jidoka.ligarCapacidad', ligarCapacidad),
     vscode.commands.registerCommand('jidoka.quitarLiga', quitarLiga),
     vscode.commands.registerCommand('jidoka.parametrizar', parametrizar),
-    vscode.commands.registerCommand('jidoka.verBandeja', verBandeja)
+    vscode.commands.registerCommand('jidoka.verBandeja', verBandeja),
+    vscode.commands.registerCommand('jidoka.reclasificar', reclasificar)
   );
 }
 
