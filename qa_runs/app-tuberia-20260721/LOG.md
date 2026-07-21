@@ -321,6 +321,8 @@ El gate bloquea borrar `tools/*.ps1` o `tools/blast-radius.json` sin un ADR NUEV
 - `kit/`: no mencionaba `extension/` ni `probar-extension` (verificado).
 - Manifiesto de siembra `kit/.jidoka/instalar/manifiesto.json`: nunca listó `extension/` (verificado — el invariante de probar-extension lo afirmaba; el de probar-app también lo afirma para `app/`).
 
+**Hallazgo post-R6 cazado por `probar-ligas` en el cierre:** `tools/ligas.json` seguía con la entrada `linterna-extension` apuntando a `extension/*` (que R6 borró) — puntero colgante que `probar-ligas.ps1` detectó al correr en el CI (`[FALLA] ledger real: hay ligas rotas`, 1/25). Curado en el mismo cierre: la entrada `linterna-extension` se retiró de `ligas.json` (array `ligas` queda vacío). `probar-ligas` 25/25 verde, `verificar` exit 0. El gate mordió de verdad.
+
 ---
 
 ## R7 — Empaquetado + v1.27.0 — VERDE

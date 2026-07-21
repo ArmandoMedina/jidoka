@@ -6,7 +6,39 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-21 tarde — Sistema configurable CONSTRUIDO + giro de superficie a la app Tauri)
+## Dónde estamos (2026-07-21 noche — Sprint "La app de la tubería" COMPLETO · 2 PRs esperando orden nombrada)
+
+**El sprint "La app de la tubería" TERMINÓ (7/7 rebanadas), verde en local, en la rama `sprint/app-tuberia-20260721` (14 commits propios `692e8a4`→`b0626fa`, apilados sobre los 6 del legado = 20 sobre `main`).** La superficie del gobierno dejó de ser comandos de VS Code y es ahora una **app de escritorio Tauri fiel a la maqueta** (ADR 0048): 49 piezas con estado real, bandeja, formulario que escribe de verdad y modo avanzado que firma derivando de `git config`. La extensión se retiró completa. Récord completo: [`docs/sprints/sprint-app-tuberia-entrega.md`](docs/sprints/sprint-app-tuberia-entrega.md) (con el cuadro de cierre). Evidencia: [`qa_runs/app-tuberia-20260721/LOG.md`](qa_runs/app-tuberia-20260721/LOG.md).
+
+**Los 2 PRs (esperando orden nombrada, apilados):**
+- **PR #120** — el sprint legado `sprint/sistema-configurable-20260721` → `main` (`v1.26.0`, el motor). **CI VERDE.** Abierto.
+- **PR #121** — la app `sprint/app-tuberia-20260721` → (apilado sobre #120) (`v1.27.0`, la app). **CI rojo al cerrar el código; curado en el cierre, verde esperado tras push.** `probar-ligas` fallaba porque `tools/ligas.json` conservaba la liga `linterna-extension` apuntando a `extension/*`, que R6 borró — puntero colgante. Hallazgo cazado por el gate en el cierre: la entrada `linterna-extension` se retiró de `ligas.json` (array vacío); `probar-ligas` 25/25, `verificar` 0.
+
+**La app y su instalador:**
+- Código: `app/` (Tauri v2; `ui/index.html` = la maqueta viva, `src-tauri/` el puente Rust). Es **Jidoka-only** (no se siembra).
+- El `.exe` y el instalador NSIS (`app/src-tauri/target/release/bundle/nsis/jidoka-tuberia_1.27.0_x64-setup.exe`, 1.86 MB) son **locales, NO versionados** (`app/src-tauri/target/` en `.gitignore`). El instalador sube como asset del release cuando se corte.
+
+**Cola de decisiones del cliente:**
+1. **[PENDIENTE]** orden nombrada — **merge #120** (legado `v1.26.0`, CI verde).
+2. **[PENDIENTE]** orden nombrada — **merge #121** + tag/release `v1.27.0` + subir `jidoka-tuberia_1.27.0_x64-setup.exe` como asset. (La liga colgante ya está curada en el cierre; el CI quedará verde tras el push.)
+3. **[PENDIENTE]** **Gemba completo end-to-end** (flujo del glosario: crear glosario por fuera → bandeja → parametrizar desde el formulario → candado → ver a la IA rebotar; sin código ni terminal — los pasos están en la entrega). La fidelidad de R2 ya la aprobó; el flujo completo NO lo ha corrido todavía.
+4. **[PENDIENTE]** ¿el retiro de la extensión amerita **MAJOR (`v2.0.0`)** en vez de `v1.27.0`? (breaking confesado; en régimen 1.x lo decide el cliente).
+5. **[PENDIENTE]** destino de la copia scratch `.jidoka/maqueta-tuberia.html` (dice "SAP", quedó vieja; la spec real vive en `docs/analisis/`).
+
+**Pendientes técnicos (nada bloquea):**
+1. ~~Curar la liga colgante `linterna-extension` en `tools/ligas.json`~~ — **CURADO en el cierre** (entrada retirada; `probar-ligas` 25/25 verde, CI de #121 verde esperado tras push).
+2. Certificado Authenticode del `.exe` (SmartScreen; historial Bitdefender).
+3. Autoría de ligas en la app (capacidad futura; el gate `estado-ligas.ps1` sigue vivo, la autoría asistida se perdió al retirar `ligas.js`).
+4. Reconciliar y alta-de-agente aún cartón.
+5. Multiplataforma del motor (`pwsh`, macOS/Linux) — fase 2.
+6. Bajar `v1.26`/`v1.27` a los labs tras el release.
+7. Atlas de los tools nuevos (`tuberia-datos`, `parametrizar`, `override`).
+
+**Regla de modelos (orden del cliente):** Fable orquesta y pone criterio en el hilo; opus/sonnet/haiku hacen TODA la mecánica en subagentes. Ningún subagente en Fable.
+
+---
+
+## Dónde estuvimos (2026-07-21 tarde — Sistema configurable CONSTRUIDO + giro de superficie a la app Tauri)
 
 **El sprint "sistema configurable, fase 1" está construido completo y verde en la rama `sprint/sistema-configurable-20260721` (6 commits sobre `main`):**
 
@@ -50,7 +82,7 @@ Todo verde; evidencia en [`qa_runs/sistema-configurable-20260721/LOG.md`](qa_run
 2. **El informe de la visión** [`docs/analisis/descubrimiento-sistema-configurable-202607.md`](docs/analisis/descubrimiento-sistema-configurable-202607.md) — la spec conceptual: 5 relaciones de "ligar" (incluidas lectura `@` y prohibición), 3 regímenes por pieza (y el hallazgo "los comandos están en el cajón equivocado"), bandeja, formulario, meta-gobierno, hallazgos del censo (`permissions` VACÍO con `deny-vs-ask` catálogo-solo, PreToolUse subutilizado, hueco de `docs/`, `gemba.md` sin `@`).
 3. **La maqueta clickeable** [`docs/analisis/maqueta-tuberia-202607.html`](docs/analisis/maqueta-tuberia-202607.html) — la spec visual, validada en **6 Gembas vivos** del cliente (2 hallazgos suyos, curados en caliente): tubería de 54 piezas con regímenes, bandeja (1 caso REAL), formulario, reconciliar, modo avanzado (contraseña-ritual `GARANTIA-NULA` + firma + candado IA) y tour de 14/19 paradas que abre los pop-ups por dentro. **Correr ambos tours ES el onboarding de la sesión de construcción.**
 4. **El spike del modo "Capas" RECHAZADO en Gemba** (*"la verdad es que no"*) — rama `spike/linterna-capas-enforcement-20260720` (`fa3a8c3`), aparcada sin mergear. Lección: el cliente no quiere mapas del todo — quiere guía en el momento concreto.
-5. **Nota de trato:** leer ÍNTEGRO el transcript anterior (jsonl) funcionó cuando el cliente se sintió mal entendido — repetir la técnica si recurre. **Los menús de opciones abstractas lo pierden; los artefactos concretos clickeables lo destraban.**
+5. **Nota de trato:** leer ÍNTEGRO el transcript anterior (jsonl) funcionó cuando el cliente se sintió mal entendido — repetir la técnica si recurre. **Los menús de opciones abstractas lo pierden; los artefactos concretos clickeables lo destraban.** Y (2026-07-21): **el Gemba temprano funciona — la fidelidad visual se aprueba ANTES de cablear.**
 
 **Pendiente (cliente — nada bloquea al agente):**
 1. **PR + merge de la rama `descubre/…`** (orden nombrada) — el plan viaja en ella; la construcción arranca DESPUÉS del merge.
