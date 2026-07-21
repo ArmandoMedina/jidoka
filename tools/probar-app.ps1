@@ -72,6 +72,26 @@ else {
     No "faltan los sentinelas JIDOKA:DATOS-INICIO/FIN (el bloque de datos debe estar marcado)"
   }
 
+  # R5-UI: la contrasena 'GARANTIA-NULA' YA NO existe (el modo avanzado compara contra el
+  # NOMBRE DEL REPO, patron GitHub, ADR 0047). Si reaparece, alguien revirtio el cableado.
+  if ($uiText -match 'GARANTIA-NULA') {
+    No "'GARANTIA-NULA' sigue en app/ui/index.html: el modo avanzado debe comparar contra el nombre del repo (R5-UI)"
+  } else {
+    Ok "'GARANTIA-NULA' ya no aparece (el modo avanzado teclea el nombre del repo, R5-UI)"
+  }
+
+  # R4/R5-UI: el JS invoca los dos motores de escritura (parametrizar y override_accion).
+  if ($uiText -match "invoke\('parametrizar'" -or $uiText -match "invoke\(`"parametrizar`"") {
+    Ok "el JS invoca 'parametrizar' (R4-UI: el formulario de alta escribe de verdad)"
+  } else {
+    No "el JS NO invoca 'parametrizar' (R4-UI: el formulario de alta no escribiria)"
+  }
+  if ($uiText -match "invoke\('override_accion'" -or $uiText -match "invoke\(`"override_accion`"") {
+    Ok "el JS invoca 'override_accion' (R5-UI: el modo avanzado reclasifica/firma/candado de verdad)"
+  } else {
+    No "el JS NO invoca 'override_accion' (R5-UI: el modo avanzado no escribiria)"
+  }
+
   # El <style> byte-identico al de la spec (el CSS no cambio; los botones nuevos son inline).
   $sUi = Get-StyleBlock $uiText
   $sSpec = Get-StyleBlock $specText
@@ -120,6 +140,26 @@ if (Test-Path -LiteralPath $cargoPath) { Ok "existe app/src-tauri/Cargo.toml" }
 else { No "no existe app/src-tauri/Cargo.toml (el cascaron no compilaria)" }
 if (Test-Path -LiteralPath $mainPath) { Ok "existe app/src-tauri/src/main.rs" }
 else { No "no existe app/src-tauri/src/main.rs (falta el punto de entrada)" }
+
+# R4/R5-UI: lib.rs registra los dos comandos nuevos de escritura (grep textual del handler).
+$libPath = Join-Path $dir 'src-tauri/src/lib.rs'
+if (-not (Test-Path -LiteralPath $libPath)) {
+  No "no existe app/src-tauri/src/lib.rs (falta el puente Rust)"
+} else {
+  $libText = Get-Content -LiteralPath $libPath -Raw
+  # Definidos como #[tauri::command] fn <nombre> Y registrados en generate_handler!.
+  $regHandler = [regex]::Match($libText, '(?s)generate_handler!\s*\[(.*?)\]')
+  $handlerBody = if ($regHandler.Success) { $regHandler.Groups[1].Value } else { '' }
+  foreach ($cmd in @('parametrizar', 'override_accion')) {
+    $definido = ($libText -match "fn\s+$cmd\s*\(")
+    $registrado = ($handlerBody -match "\b$cmd\b")
+    if ($definido -and $registrado) {
+      Ok "lib.rs define y registra el comando '$cmd' (R4/R5-UI: el puente de escritura existe)"
+    } else {
+      No "lib.rs NO $((if(-not $definido){'define'}else{'registra'})) el comando '$cmd' (falta en el handler)"
+    }
+  }
+}
 
 # (b) LA DECISION COMO INVARIANTE (ADR 0048): app/ es Jidoka-only. Es la cara de Jidoka,
 # no motor generico que se propaga a los hijos. Si alguien la agrega al manifiesto de

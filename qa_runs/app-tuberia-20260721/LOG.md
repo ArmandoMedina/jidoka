@@ -218,3 +218,61 @@ El plan R5 listaba `-Quien -Email` como parámetros de `override.ps1`. **Aquí N
 **Pendiente:** cablear las **escrituras** (R4-UI: `altaResumen`/wizard 'doc' → `parametrizar.ps1`; R5-UI: `reclasResumen` → `override.ps1`) — los comandos motor ya están verdes desde R4/R5-mitad-motor.
 
 ---
+
+## R4 (mitad UI) — el formulario de alta ESCRIBE de verdad — ✅ VERDE
+
+**Qué se entregó (cirugía mínima, `<style>` intacto):**
+- **`app/src-tauri/src/lib.rs`** — dos comandos nuevos calcando `cargar_datos` (helper compartido `correr_script_ps`: `std::process::Command`, args **SEPARADOS sin shell**, `CREATE_NO_WINDOW` en Windows). `parametrizar(repo, ruta, tipo, regimen, area, fuerza, comandos)` → `tools/parametrizar.ps1 -Json` (**omite `-Area` si viene vacía**; `-Comandos` como csv). Detalle honesto: cuando el motor sale `exit 1` con `{ok:false,error}` en **stdout** (validación), el puente devuelve ese stdout (no el stderr) para que el JS lea el error real. Ambos comandos registrados en `generate_handler!`.
+- **`app/ui/index.html`** — el paso final de `wizStart('alta')` (paso 2) gana el botón real **"✍️ Escribir el contrato"** → `altaEscribir()` invoca `parametrizar` con los datos de `W.r` (ruta/tipo/régimen/cajón→área/fuerza/comandos). El **preview "qué escribiría" se queda** (buena UX); el `.carton` se volvió honesto ("Esto escribe en tu repo de verdad: contratos.json, la ley y los @…"). Éxito → mensaje verde + **lista de `avisos`** del JSON si los hay (jamás éxito falso: `ok:false` o error del puente → error tal cual en rojo); **tras éxito re-invoca `jidokaRefrescar()`** (la bandeja resta la pieza). `FOTOREPO` (de `foto.repo`) es el `-Repo`.
+- El texto del **header** dejó de mentir ("El formulario de alta y el modo avanzado ya escriben de verdad… el resto siguen de teatro y lo confiesan").
+
+**Teatro CONFESADO (fuera de alcance del reuso limpio):**
+- **Wizard `'doc'`** (alta guiada de 3 preguntas): queda teatro. Su `W.r` tiene otra forma (sin `ruta`/`régimen`/`cajón` reales; caso fijo `glosario`), así que cablearlo sería **más invasivo que reutilizar el mismo invoke** (el escape del propio listón). Su `.carton` lo confiesa y su botón final ahora **lleva al formulario real** (`wizStart('alta',…)`), que sí escribe.
+
+**Evidencia (esta máquina, 2026-07-21):**
+
+| Gate | Exit | Nota |
+|---|---|---|
+| `npx tauri build --debug --no-bundle` (en `app/`) | **0** | El `.exe` **se regeneró** (assets embebidos): `app/src-tauri/target/debug/jidoka-tuberia.exe` (12.78 MB, 14:54). Único warning benigno de linker (MSVC en español al crear la import library), no error. |
+| `tools/probar-app.ps1` | **0** | **35/35** verdes. Asserts nuevos verdes: el JS invoca `parametrizar`; `lib.rs` define+registra `parametrizar`; **`<style>` byte-idéntico** (SHA256 `0BF53EE3…59AD7A`). |
+| `tools/probar-parametrizar.ps1` | **0** | 27/27 (el motor no se tocó, sigue verde). |
+| Smoke JS↔Rust↔motor | **—** | Corrí `parametrizar.ps1` **con los args exactos que arma el puente** (`-Repo … -Path docs/glosario-del-dominio.md -Tipo glosario -Regimen estatuto -Fuerza avisa -Comandos arranca,planea -Area dominio -Json`) → `ok:true`, contrato `estado=parametrizado`, **2 @ insertados**, aviso honesto ("el área 'dominio' no existe… no la agregué"). Escrituras del smoke **revertidas** (ledgers instancia + los .md de comandos). `node vm` del `<script>` → **SYNTAX OK**. |
+
+**Demo del cliente (owner: cliente):** doble clic al `.exe` → pestaña **La bandeja** → en un pendiente (ej. el glosario) darle **"Parametrizar →"** → llenar el formulario (tipo, régimen, cajón, fuerza, qué comandos lo leen) → **"✍️ Escribir el contrato"** → ver el mensaje de éxito con los @ insertados y **la pieza SALE de la bandeja** (refresco automático). El verde deja de mentir de verdad.
+
+---
+
+## R5 (mitad UI) — el modo avanzado reclasifica/firma/pone candado de verdad — ✅ VERDE
+
+**Qué se entregó (cirugía mínima, `<style>` intacto):**
+- **`app/src-tauri/src/lib.rs`** — `override_accion(repo, ruta, accion, motivo)` → `tools/override.ps1 -Json` (mismo helper `correr_script_ps`, args separados sin shell). Registrado en `generate_handler!`. La **firma NO viaja como parámetro**: el motor la deriva de `git config` (ADR 0047).
+- **`app/ui/index.html` — `rootCheck()`:** la contraseña dejó de ser `'GARANTIA-NULA'`. Ahora compara contra el **NOMBRE DEL REPO** (`nombreRepo()` = basename de `FOTOREPO`), con `norm()` **case-insensitive + tolerante a acentos** (NFD + strip de diacríticos, como ya hacía con la `Í`). Prompt y error del modal reescritos a **"teclea el nombre del repo"** (patrón GitHub, ADR 0047). Si **la foto no cargó** (`!FOTOREPO`), `rootToggle()` **no abre** el modo avanzado y avisa.
+- **`reclas` (`reclasResumen`/`reclasEscribir`):** el paso final gana **"✍️ Firmar y aplicar"** → invoca `override_accion` mapeando el form: régimen `estatuto`→`reclasificar-estatuto`, `libre`→`reclasificar-libre`; **`motor` se rechaza** (el motor no lo ofrece → botón deshabilitado + nota). Si el candado está marcado, encadena un segundo invoke `candado-on`. **Motivo obligatorio** (`rc-why`). **LA FIRMA NO SE TECLEA:** el `<input id="rc-firma">` se **eliminó** y se reemplazó por la nota *"La firma NO se teclea. Se deriva de tu `git config`…"*; tras el éxito se muestra la **firma REAL** devuelta por el motor (quien/email/cuando/motivo). Si el motor aborta (sin `user.name`) se muestra ese error tal cual. **Refresco tras éxito.**
+
+**Teatro CONFESADO:**
+- **Flujo `'rec'` (reconciliar):** queda teatro. Es un **ejemplo fijo del tour** (`arranca.md`) **sin pieza/ruta real ni campo de motivo**, así que no invoca el motor. Su `.carton` lo confiesa **y aclara que `aceptar-desviacion` SÍ existe** en `override.ps1` — se cablea cuando el detector traiga desviaciones reales con su ruta; "restaurar" (re-inyectar el @) **no tiene motor** aún.
+- **Wizard `'agente'` (crear agente):** teatro, **fuera de alcance** (no hay motor para dar de alta un agente). `.carton` lo confiesa.
+
+**Nota de corrección (comentario, no lógica, no `<style>`):** el `<script>` traía un typo pre-existente desde R3 — el comentario `…/REG*/AREAS/…` cerraba el bloque `/* */` antes de tiempo (`*/`), rompiendo el parseo JS. Corregido a `REGs/AREAS`. Es un comentario; no toca lógica ni el `<style>`.
+
+**Evidencia (esta máquina, 2026-07-21):**
+
+| Gate | Exit | Nota |
+|---|---|---|
+| `tools/probar-app.ps1` | **0** | **35/35**. Asserts nuevos verdes: **`'GARANTIA-NULA'` YA NO aparece**; el JS invoca `override_accion`; `lib.rs` define+registra `override_accion`. |
+| `tools/probar-override.ps1` | **0** | 26/26 (el motor no se tocó). |
+| `tools/probar-publicar.ps1` | **0** | 7/7. |
+| `tools/anti-pii.ps1` | **0** | 267 archivos, sin fugas. |
+| `tools/verificar.ps1` | **0** | Sin bloqueo. **2 avisos no bloqueantes** (área `app`: "registra en CHANGELOG"; `barreras`: grafo de producto). El CHANGELOG es del release (mismo patrón que R2–R4). |
+| Smoke JS↔Rust↔motor | **—** | Corrí `override.ps1` **con los args exactos del puente** (`-Repo … -Path tools/verificar.ps1 -Accion candado-on -Motivo "demo…" -Json`) → `ok:true`, `candado=true` + **firma REAL derivada de git** (`quien=ArmandoMedina`, email noreply, `cuando` ISO-UTC). Escritura revertida. `node vm` del `<script>` → **SYNTAX OK**. |
+
+**Confesión honesta (el click end-to-end):** no puedo clickear la ventana Tauri en headless. Verifiqué **por partes**: la app compila y el `.exe` se regeneró; el `<script>` parsea (`node vm`); y los **motores producen escrituras reales con los args exactos que arma el puente Rust** (smokes arriba). El **clic real** — teclear el nombre del repo, reclasificar/poner candado y ver la firma real + a la IA rebotar — **lo hace el cliente en su Gemba**.
+
+**Demo del cliente (owner: cliente):** doble clic al `.exe` → **🔒 Modo avanzado** → teclear **el nombre del repo** (p. ej. `jidoka`) para entrar → elegir una pieza → **⚙️ Reclasificar régimen** → marcar **🔒 Candado a la IA** + motivo → **"✍️ Firmar y aplicar"** → ver la **firma real** (tu nombre de git) y el candado ON; refrescar y ver el badge. Bonus: en una sesión de Claude Code, pedirle a la IA editar esa pieza → **rebota** (deny del harness + PreToolUse) y cae a la bandeja.
+
+**Fix de review (2026-07-21, misma sesión):** dos correcciones quirúrgicas en `reclasEscribir()` y el form del wizard `reclas` (`app/ui/index.html`; `<style>` intacto, hash SHA256 `0BF53EE3…59AD7A`):
+1. **Éxito parcial honesto:** el bucle de acciones rastreo qué se aplicó; en el fail, el mensaje dice explícitamente qué quedó aplicado y qué falló (p. ej. "reclasificar-estatuto: APLICADO — candado-on: FALLÓ: <error>"). Tras éxito parcial también refresca datos (el régimen ya cambió).
+2. **Candado-off desde la UI:** el checkbox `rc-lock` se inicializa con el estado real de la pieza (`P[id].candado`); al aplicar, se compara: marcado y no lo estaba → `candado-on`; desmarcado y lo estaba → `candado-off`; sin cambio de ninguno de los dos → "no hay cambios que aplicar" (sin invocar al motor). Si el régimen no cambió (comparado contra `P[id].regimen`) y la única acción es de candado, se emite solo esa. El resumen del paso 2 refleja las acciones reales que se emitirán.
+Evidencia: `node vm` SYNTAX OK + `tools/probar-app.ps1` 35/35 (hash intacto) + `npx tauri build --debug --no-bundle` recompilado a `jidoka-tuberia.exe` (12.8 MB, 21/07/2026 15:07:48).
+
+---

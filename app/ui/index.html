@@ -131,7 +131,7 @@
 
 <header>
   <h1>🗜️ La tubería de Jidoka — maqueta de cartón</h1>
-  <div class="sub">Todas las piezas son <b>reales</b> (censadas de tu repo hoy). Los botones de "configurar" son <b>teatro</b>: nada escribe nada. Es para que le des clic y reacciones.</div>
+  <div class="sub">Todas las piezas son <b>reales</b> (censadas de tu repo hoy). El <b>formulario de alta</b> y el <b>modo avanzado</b> ya escriben de verdad (contratos, ley, @, firma); el resto de flujos guiados siguen de <b>teatro</b> y lo confiesan al final. Solo con tu OK, nunca solos.</div>
 </header>
 
 <nav>
@@ -261,13 +261,15 @@ let REGTXT = {};       // { regimen -> [titulo, explicacion] } (regimenes.texto)
 let REGCOLOR = {};     // { regimen -> var(--...) } (regimenes.color)
 let AREAS = [];        // tabla de areas para el detalle de la ley: [nombre, disparaCon, exige]
 let BANDEJA = { cola:[], aceptados:[] };  // la foto real de la bandeja
+let FOTOREPO = '';     // ruta (forward-slash) del repo abierto -- el motor de escritura la usa
+                       // como -Repo, y su basename es la contrasena del modo avanzado (R5).
 
 /* regOf: el regimen efectivo de una pieza. La foto ya trae el regimen VIVO por pieza
    (override de contratos.json incluido), asi que lo preferimos; caemos al derivado por
    override-por-id o por-tipo (como hacia la maqueta) si faltara. Conserva la clase CSS r+regimen. */
 function regOf(id){ const p=P[id]; return (p&&p.regimen)||REGOVR[id]||(p&&REGBY[p.tipo])||'libre'; }
 
-/* jidokaCargar: reconstruye P/E/ADJ/REG*/AREAS/BANDEJA desde la foto consolidada del repo
+/* jidokaCargar: reconstruye P/E/ADJ/REGs/AREAS/BANDEJA desde la foto consolidada del repo
    (mismo shape que la maqueta) y repinta. Se llama al abrir y en cada Refrescar. */
 function jidokaCargar(foto){
   // --- piezas: pz() con la misma forma; ademas conservo path/regimen/candado/firma vivos ---
@@ -301,6 +303,8 @@ function jidokaCargar(foto){
   });
   // --- bandeja real ---
   BANDEJA = foto.bandeja||{ cola:[], aceptados:[] };
+  // --- la ruta del repo (para -Repo de los motores de escritura y el nombre-contrasena) ---
+  FOTOREPO = foto.repo||'';
   // --- repintar todo ---
   pintarTuberia();
   pintarBandeja();
@@ -433,16 +437,54 @@ let W={};
 function wizStart(tipo,pre){ W={tipo,paso:1,r:{},pre:pre||{}}; ovl.classList.add('on'); wizRender(); }
 function altaResumen(){
   const q=id=>document.getElementById(id);
-  W.r={tipo:q('f-tipo').value, reg:document.querySelector('input[name="f-reg"]:checked').value,
+  W.r={ruta:q('f-ruta').value, tipo:q('f-tipo').value, reg:document.querySelector('input[name="f-reg"]:checked').value,
        cajon:q('f-cajon').value.split(' ')[0], fz:document.querySelector('input[name="f-fz"]:checked').value,
        cmds:[['f-c1','arranca'],['f-c2','planea'],['f-c3','descubre']].filter(x=>q(x[0]).checked).map(x=>x[1]),
        ci:q('f-ci').checked};
   W.paso=2; wizRender();
 }
+/* altaEscribir (R4): el botón real. Invoca el comando Rust 'parametrizar' con los datos de W.r
+   (ya no teatro: escribe contratos.json + ley + los @). El motor emite {ok,contrato,avisos,arrobas}.
+   Éxito -> mensaje + lista de avisos si los hay + refresco de la foto (la bandeja resta la pieza).
+   ok:false o error del puente -> el error tal cual (JAMÁS éxito falso). */
+async function altaEscribir(){
+  const r=W.r, res=document.getElementById('alta-res'), btn=document.getElementById('alta-btn');
+  const ruta=r.ruta||W.pre.ruta;
+  // El cajón "— crear otro cajón…" o vacío -> sin -Area (el motor no crea áreas a ciegas).
+  const area=(r.cajon&&r.cajon!=='—')?r.cajon:'';
+  if(!FOTOREPO){ if(res) res.innerHTML=`<div class="carton" style="color:var(--bad)">No hay repo abierto — no puedo escribir.</div>`; return; }
+  if(btn){ btn.disabled=true; btn.textContent='Escribiendo…'; }
+  try{
+    const raw=await jidokaInvoke('parametrizar',{repo:FOTOREPO, ruta, tipo:r.tipo, regimen:r.reg, area, fuerza:r.fz, comandos:(r.cmds||[]).join(',')});
+    const out=JSON.parse(raw);
+    if(!out.ok){ throw new Error(out.error||'el motor no reportó ok'); }
+    let msg=`<div class="escribe"><b style="color:var(--ok)">✅ Contrato escrito: ${esc(ruta)}</b> (régimen ${esc((out.contrato&&out.contrato.regimen)||r.reg)}, @ insertados: ${out.arrobas||0}).`;
+    const avisos=out.avisos||[];
+    if(avisos.length){ msg+=`<div style="color:var(--warn);margin-top:6px">Avisos (el contrato quedó; esto NO se completó):<ul style="margin:4px 0">${avisos.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></div>`; }
+    msg+=`</div>`;
+    if(res) res.innerHTML=msg;
+    const c=document.getElementById('alta-carton'); if(c) c.style.display='none';
+    if(btn){ btn.textContent='Listo ✓'; btn.onclick=wizClose; btn.disabled=false; }
+    await jidokaRefrescar();  // la bandeja resta la pieza a la vista
+  }catch(e){
+    if(res) res.innerHTML=`<div class="carton" style="color:var(--bad)">✗ No se escribió: ${esc((e&&e.message)?e.message:String(e))}</div>`;
+    if(btn){ btn.disabled=false; btn.textContent='✍️ Reintentar'; }
+  }
+}
 
 /* ================== Modo avanzado (root) ================== */
 let rootMode=false, curSel=null;
-function rootToggle(){ if(rootMode){ rootMode=false; rootPaint(); } else { wizStart('root'); } }
+function rootToggle(){ if(rootMode){ rootMode=false; rootPaint(); } else {
+  // El modo avanzado exige la foto cargada: la contraseña ES el nombre del repo (basename de
+  // foto.repo). Sin foto no hay nombre contra el que comparar -> no abre, avisa.
+  if(!FOTOREPO){ jidokaMostrarAviso('El modo avanzado no abre: aún no cargó la foto del repo (no sé contra qué nombre comparar).'); return; }
+  wizStart('root'); } }
+/* nombreRepo: el basename del repo (última carpeta de foto.repo, forward-slash). Es la
+   contraseña del modo avanzado (patrón GitHub, ADR 0047: "teclea el nombre del repo"). */
+function nombreRepo(){ const s=(FOTOREPO||'').replace(/\/+$/,''); const i=s.lastIndexOf('/'); return (i>=0?s.slice(i+1):s); }
+/* norm: normaliza para comparar case-insensitive + tolerante a acentos (como hacía la maqueta
+   con la Í). Sirve para que "Jidoka"=="jidoka" y un repo acentuado tolere el acento. */
+function norm(s){ return (s||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim(); }
 function rootPaint(){
   const b=document.getElementById('rootBtn');
   b.textContent=rootMode?'🔓 Modo avanzado: ON':'🔒 Modo avanzado';
@@ -452,17 +494,97 @@ function rootPaint(){
   if(curSel) select(curSel);
 }
 function rootCheck(){
-  const v=(document.getElementById('r-pass').value||'').toUpperCase().replace('Í','I').trim();
-  if(v==='GARANTIA-NULA'){ rootMode=true; wizClose(); rootPaint(); }
-  else { document.getElementById('r-err').textContent='No es. Está escrita a la vista (en la versión real: en el README) — a propósito.'; }
+  // La contraseña ES el NOMBRE DEL REPO (basename de foto.repo), patrón GitHub (ADR 0047).
+  // Comparación case-insensitive + tolerante a acentos (norm): "Jidoka"=="jidoka".
+  const v=norm(document.getElementById('r-pass').value);
+  const nombre=norm(nombreRepo());
+  if(nombre && v===nombre){ rootMode=true; wizClose(); rootPaint(); }
+  else { document.getElementById('r-err').textContent='No es. Teclea el NOMBRE DEL REPO (la última carpeta de su ruta) — está a la vista, a propósito.'; }
 }
 function reclasResumen(){
+  // La firma YA NO se teclea: la deriva el motor de tu git config (ADR 0047). Aquí solo el
+  // régimen nuevo, el candado opt-in y el motivo (obligatorio: sin motivo no hay override).
   W.r={reg:document.querySelector('input[name="rc-reg"]:checked').value,
        lock:document.getElementById('rc-lock').checked,
-       why:document.getElementById('rc-why').value,
-       firma:document.getElementById('rc-firma').value,
-       fecha:new Date().toISOString().slice(0,10)};
+       why:(document.getElementById('rc-why').value||'').trim()};
   W.paso=2; wizRender();
+}
+/* reclasEscribir (R5 + fix review): el botón real del modo avanzado. Invoca 'override_accion'
+   por cada acción que DIFIERA del estado actual de la pieza (régimen y/o candado). Solo emite
+   las acciones necesarias; si nada cambió, avisa sin invocar al motor. Rastreo de éxito parcial:
+   si una acción triunfa y la siguiente falla, el mensaje dice explícitamente qué quedó aplicado
+   y qué falló. Tras éxito (total o parcial) refresca la foto (el régimen ya cambió). */
+async function reclasEscribir(){
+  const r=W.r, res=document.getElementById('reclas-res'), btn=document.getElementById('reclas-btn');
+  const pieza=P[W.pre.id], ruta=pieza&&pieza.path;
+  const fail=(m)=>{ if(res) res.innerHTML=`<div class="carton" style="color:var(--bad)">✗ ${esc(m)}</div>`; if(btn){ btn.disabled=false; btn.textContent='✍️ Reintentar'; } };
+  if(r.reg==='motor'){ return fail('No se aplicó: el régimen "motor sellado" no se fija desde la UI (solo Jidoka de fábrica).'); }
+  if(!ruta){ return fail('No se aplicó: esta pieza no tiene ruta de archivo (path) — el motor firma por ruta; no puedo reclasificarla.'); }
+  if(!r.why){ return fail('No se aplicó: el motivo es obligatorio (sin motivo no hay reclasificación, ADR 0047).'); }
+  if(!FOTOREPO){ return fail('No se aplicó: no hay repo abierto.'); }
+
+  // Comparar contra el estado REAL de la pieza para saber qué acciones emitir.
+  const regActual = pieza.regimen||'';
+  const candadoActual = !!pieza.candado;
+  const regNuevo = r.reg;          // 'estatuto' | 'libre' (nunca 'motor' — ya chequeado)
+  const candadoNuevo = !!r.lock;   // el checkbox del form, ya inicializado con el estado real
+
+  const acciones = [];
+  if(regNuevo!==regActual) acciones.push(regNuevo==='estatuto'?'reclasificar-estatuto':'reclasificar-libre');
+  if(candadoNuevo && !candadoActual) acciones.push('candado-on');
+  if(!candadoNuevo && candadoActual) acciones.push('candado-off');
+
+  if(!acciones.length){
+    fail('No hay cambios que aplicar: el régimen y el candado ya coinciden con el estado actual de la pieza.');
+    return;
+  }
+
+  if(btn){ btn.disabled=true; btn.textContent='Firmando…'; }
+
+  // Ejecutar acciones en orden: régimen primero, candado después. Rastrear éxito parcial.
+  const aplicadas=[], falladas=[];
+  let firma=null, contrato=null;
+  for(const accion of acciones){
+    try{
+      const raw=await jidokaInvoke('override_accion',{repo:FOTOREPO, ruta, accion, motivo:r.why});
+      const out=JSON.parse(raw);
+      if(!out.ok){ throw new Error(out.error||'el motor no reportó ok'); }
+      contrato=out.contrato; if(contrato&&contrato.firma) firma=contrato.firma;
+      aplicadas.push(accion);
+    }catch(e2){
+      falladas.push({accion, error:(e2&&e2.message)?e2.message:String(e2)});
+      break; // detenemos en el primer fallo; lo aplicado ya está escrito
+    }
+  }
+
+  if(!aplicadas.length){
+    // Nada se aplicó — fallo limpio
+    fail('No se aplicó nada: '+falladas[0].error);
+    return;
+  }
+
+  // Al menos una acción triunfó: refresca (el régimen / candado ya cambió en disco)
+  await jidokaRefrescar();
+
+  if(falladas.length){
+    // Éxito parcial honesto: lista qué quedó y qué falló
+    const resumen=aplicadas.map(a=>a+': APLICADO').concat(falladas.map(f=>f.accion+': FALLÓ: '+f.error)).join(' — ');
+    if(res) res.innerHTML=`<div class="carton" style="color:var(--warn)">⚠ Éxito parcial: ${esc(resumen)}</div>`;
+    if(btn){ btn.disabled=false; btn.textContent='✍️ Reintentar lo que falló'; }
+    return;
+  }
+
+  // Éxito total
+  let msg=`<div class="escribe"><b style="color:var(--ok)">✅ Aplicado: ${esc(ruta)}</b>`;
+  if(aplicadas.some(a=>a.startsWith('reclasificar'))) msg+=` → régimen "${esc((contrato&&contrato.regimen)||regNuevo)}"`;
+  if(aplicadas.includes('candado-on')) msg+=` · 🔒 candado ON`;
+  if(aplicadas.includes('candado-off')) msg+=` · 🔓 candado OFF`;
+  msg+=`.`;
+  if(firma){ msg+=`<div style="margin-top:6px">Firmado por <b>${esc(firma.quien)}</b>${firma.email?` &lt;${esc(firma.email)}&gt;`:''} · ${esc(firma.cuando)}<br><span class="hint">motivo: ${esc(firma.motivo)}</span></div>`; }
+  msg+=`</div>`;
+  if(res) res.innerHTML=msg;
+  const c=document.getElementById('reclas-carton'); if(c) c.style.display='none';
+  if(btn){ btn.textContent='Listo ✓'; btn.onclick=wizClose; btn.disabled=false; }
 }
 function wizClose(){ ovl.classList.remove('on'); }
 function pick(el,k,v,multi){
@@ -501,8 +623,8 @@ function wizRender(){
         ${cmds.map(c=>`<code>.claude/commands/jidoka/${c}.md → + @docs/glosario-del-dominio.md</code>`).join('')}
         <code>La linterna: el nodo deja de estar huérfano; el gate empieza a vigilar.</code>
       </div>
-      <div class="carton">Maqueta de cartón: NO escribió nada. Pero fíjate qué sentiste: 3 preguntas, cero JSON, cero opciones absurdas.</div>
-      <div class="acciones"><button class="atras" onclick="wizClose()">Cerrar</button><button class="sigue" onclick="wizClose()">Eso quiero 🙂</button></div>`;
+      <div class="carton">Cartón (flujo express, no cableado): este atajo de 3 preguntas usa un caso fijo (glosario) sin ruta ni régimen reales, así que no invoca el motor. El acto REAL de parametrizar vive en el formulario completo de la bandeja (botón "Parametrizar →"), que sí escribe contratos.json + la ley + los @. Fíjate qué sentiste: 3 preguntas, cero JSON, cero opciones absurdas.</div>
+      <div class="acciones"><button class="atras" onclick="wizClose()">Cerrar</button><button class="sigue" onclick="wizStart('alta',{ruta:'docs/glosario-del-dominio.md',tipo:'glosario'})">Hacerlo de verdad (formulario) →</button></div>`;
     }
   }
 
@@ -530,7 +652,7 @@ function wizRender(){
         <code>tools/asientos.ps1 lo imprime en el próximo /jidoka:arranca (el casting)</code>
         <code>probar-agentes.ps1 lo lintea (¿tier válido? ¿tools válidas?)</code>
       </div>
-      <div class="carton">Cartón: no escribió nada. Nota el truco: el OFICIO decide modelo y herramientas — no te pregunté 20 cosas.</div>
+      <div class="carton">Cartón (fuera de alcance): no hay motor para dar de alta un agente todavía — este flujo queda de teatro. Nota el truco: el OFICIO decide modelo y herramientas — no te pregunté 20 cosas.</div>
       <div class="acciones"><button class="atras" onclick="wizClose()">Cerrar</button><button class="sigue" onclick="wizClose()">Eso quiero 🙂</button></div>`;
   }
 
@@ -572,51 +694,66 @@ function wizRender(){
       <label class="ck" style="margin-top:12px"><input type="checkbox" id="f-ci">Endurecer en CI (-Estricto): la desviación se vuelve MURO en el PR</label>
       <div class="acciones"><button class="atras" onclick="wizClose()">Cancelar</button><button class="sigue" onclick="altaResumen()">Ver qué escribiría →</button></div>`;
     if(W.paso===2){const r=W.r;
-      h=`<h3>✅ Parametrizado (en cartón)</h3><div class="paso">La versión real escribiría, con tu OK:</div>
+      h=`<h3>📋 Vas a parametrizar — ${ruta.split('/').pop()}</h3><div class="paso">Esto es lo que el botón va a ESCRIBIR en tu repo de verdad (previsualización). Revísalo y confirma:</div>
       <div class="escribe">
-        ${r.reg==='libre'?`<code>registro → ${ruta} declarado LIBRE a propósito (sale de la bandeja; el verde deja de mentir)</code>`:
-        `<code>tools/blast-radius.json → cajón "${r.cajon}" · doc_${r.fz==='bloquea'?'bloquea':'avisa'}: ${ruta}</code>
-        <code>tools/docs-gobernados.json → estructura del molde "${r.tipo}"${r.ci?' · estricto:true (muro en CI)':''}</code>`}
+        ${r.reg==='libre'?`<code>tools/contratos.json → ${ruta} declarado LIBRE a propósito (sale de la bandeja; el verde deja de mentir)</code>`:
+        `<code>tools/contratos.json → ${ruta}: contrato ESTATUTO (estado parametrizado)</code>`}
+        ${(r.cajon&&r.cajon!=='—')?`<code>tools/blast-radius.json → área "${r.cajon}": fuente + ${ruta}</code>`:'<code>sin área de vigilancia (no toca la ley)</code>'}
         ${r.cmds.length?r.cmds.map(c=>`<code>.claude/commands/jidoka/${c}.md → + @${ruta} (extensión REGISTRADA — el sello no la acusa)</code>`).join(''):'<code>ningún comando lo inyecta (solo vigilancia)</code>'}
         <code>bandeja → este elemento SALE de pendientes · linterna → nodo gobernado de verdad</code>
       </div>
-      <div class="carton">Cartón: no escribió nada. Burocracia de UNA vez, determinismo para siempre.</div>
-      <div class="acciones"><button class="atras" onclick="nav(-1)">← Ajustar</button><button class="sigue" onclick="wizClose()">Eso quiero 🙂</button></div>`;}
+      <div class="carton" id="alta-carton">Esto escribe en tu repo de verdad: contratos.json, la ley y los @ de los comandos. Solo con tu OK, nunca solo. Burocracia de UNA vez, determinismo para siempre.</div>
+      <div id="alta-res"></div>
+      <div class="acciones"><button class="atras" onclick="nav(-1)">← Ajustar</button><button class="sigue" id="alta-btn" onclick="altaEscribir()">✍️ Escribir el contrato</button></div>`;}
   }
 
   if(W.tipo==='root'){
     if(W.paso===1) h=`<h3>🔒 Entrar al modo avanzado</h3><div class="paso">Aquí se cambia la ESTRUCTURA: regímenes, invariantes, candados. No es para el día a día.</div>
-      <div class="confbox"><b>Esto no es seguridad</b> — es un "no le muevas si no le sabes". La contraseña vive a la vista (en la versión real: en el README del repo). Teclearla no te autentica: te hace <b>firmar que sabes lo que haces</b>. Desde aquí adentro, garantía nula sobre lo que toques.</div>
-      <label class="f">Escribe la contraseña (pista: es exactamente lo que aceptas al entrar)</label>
-      <input type="text" id="r-pass" placeholder="…" autocomplete="off">
+      <div class="confbox"><b>Esto no es seguridad</b> — es un "no le muevas si no le sabes". La contraseña es el <b>nombre del repo</b> (a la vista, patrón GitHub). Teclearla no te autentica: te hace <b>firmar que sabes lo que haces</b>. Desde aquí adentro, garantía nula sobre lo que toques.</div>
+      <label class="f">Teclea el NOMBRE DEL REPO (la última carpeta de su ruta) para confirmar</label>
+      <input type="text" id="r-pass" placeholder="nombre-del-repo" autocomplete="off">
       <p class="hint" id="r-err"></p>
       <div class="acciones"><button class="atras" onclick="wizClose()">Cancelar</button><button class="sigue" onclick="rootCheck()">Entrar →</button></div>`;
   }
 
   if(W.tipo==='reclas'){
     const pp=P[W.pre.id], rg0=regOf(W.pre.id), rt0=REGTXT[rg0];
+    // Fix review: el form se inicializa con el estado REAL de la pieza (régimen + candado).
+    // Los radios reflejan el régimen actual; el checkbox refleja pp.candado.
+    // reclasEscribir() compara contra ese estado real y solo emite las acciones que difieran.
+    const candadoReal=!!pp.candado;
     if(W.paso===1) h=`<h3>⚙️ Reclasificar régimen — ${pp.nombre}</h3><div class="paso">Acto estructural (modo avanzado). Queda firmado y registrado — nunca mudo.</div>
-      <div class="confbox">Régimen actual: <b>${rt0[0]}</b></div>
+      <div class="confbox">Régimen actual: <b>${rt0[0]}</b>${candadoReal?' · 🔒 candado activo':''}</div>
       <label class="f">Nuevo régimen</label>
-      <label class="rr"><input type="radio" name="rc-reg" value="motor">🔴 Motor sellado <small>solo el lazo lo actualiza; borrarlo exige ADR</small></label>
-      <label class="rr"><input type="radio" name="rc-reg" value="estatuto" checked>🟡 Estatuto <small>invariantes fijos + extensiones registradas</small></label>
-      <label class="rr"><input type="radio" name="rc-reg" value="libre">🟢 Libre <small>registrado, sin opinión del gobierno</small></label>
-      <label class="ck" style="margin-top:12px"><input type="checkbox" id="rc-lock">🔒 <b>Candado a la IA</b> <small style="display:block;margin-left:22px;color:var(--dim)">deny determinista del harness + hook PreToolUse: el agente NO PUEDE tocar esta pieza — ni queriendo, ni "sin que nadie se dé cuenta". Todo intento se bloquea en el momento y se acusa en la bandeja. Este sí es muro real, y vive fuera del LLM.</small></label>
-      <label class="f">¿Por qué? (va al registro)</label>
+      <label class="rr"><input type="radio" name="rc-reg" value="motor"${rg0==='motor'?' checked':''}>🔴 Motor sellado <small>solo el lazo lo actualiza; borrarlo exige ADR</small></label>
+      <label class="rr"><input type="radio" name="rc-reg" value="estatuto"${rg0==='estatuto'?' checked':''}>🟡 Estatuto <small>invariantes fijos + extensiones registradas</small></label>
+      <label class="rr"><input type="radio" name="rc-reg" value="libre"${rg0==='libre'?' checked':''}>🟢 Libre <small>registrado, sin opinión del gobierno</small></label>
+      <label class="ck" style="margin-top:12px"><input type="checkbox" id="rc-lock"${candadoReal?' checked':''}>🔒 <b>Candado a la IA</b> <small style="display:block;margin-left:22px;color:var(--dim)">deny determinista del harness + hook PreToolUse: el agente NO PUEDE tocar esta pieza — ni queriendo, ni "sin que nadie se dé cuenta". Todo intento se bloquea en el momento y se acusa en la bandeja. Este sí es muro real, y vive fuera del LLM. (Inicializado con el estado real de la pieza — desmarcar para quitar el candado.)</small></label>
+      <label class="f">¿Por qué? (obligatorio — va al registro firmado)</label>
       <input type="text" id="rc-why" placeholder="p. ej. este comando ya quedó probado — lo sello">
-      <label class="f">Firma</label>
-      <input type="text" id="rc-firma" placeholder="tu nombre">
+      <div class="confbox"><b>La firma NO se teclea.</b> Se deriva de tu <code>git config user.name</code> / <code>user.email</code> (ADR 0047: la firma nunca se inventa). El motor la pone al escribir — y te la muestra abajo.</div>
       <div class="acciones"><button class="atras" onclick="wizClose()">Cancelar</button><button class="sigue" onclick="reclasResumen()">Ver qué escribiría →</button></div>`;
-    if(W.paso===2){const r=W.r;
-      h=`<h3>✍️ Reclasificado (en cartón)</h3><div class="paso">La versión real escribiría, con tu OK:</div>
+    if(W.paso===2){const r=W.r; const canReclas=(r.reg!=='motor');
+      // Fix review: calcular qué acciones se emitirán (espejo de reclasEscribir) para el resumen.
+      const regActual=pp.regimen||'', candadoActual2=!!pp.candado, candadoNuevo2=!!r.lock;
+      const accionesPreview=[];
+      if(canReclas && r.reg!==regActual) accionesPreview.push(r.reg==='estatuto'?'reclasificar-estatuto':'reclasificar-libre');
+      if(candadoNuevo2 && !candadoActual2) accionesPreview.push('candado-on');
+      if(!candadoNuevo2 && candadoActual2) accionesPreview.push('candado-off');
+      const sinCambios=!canReclas&&accionesPreview.length===0 || (canReclas&&!accionesPreview.length&&!(!r.lock!==!candadoActual2));
+      h=`<h3>⚙️ Vas a aplicar — ${pp.nombre}</h3><div class="paso">Esto es lo que el botón va a ESCRIBIR (firmado con tu git config). Revísalo y confirma:</div>
       <div class="escribe">
-        <code>ledger de contratos → ${pp.nombre}: régimen "${r.reg}"</code>
-        <code>registro estructural → firmó: ${r.firma||'(sin firma — la versión real NO dejaría pasar esto)'} · ${r.fecha} · "${r.why||'sin motivo declarado'}"</code>
-        ${r.lock?`<code>settings.json → permissions.deny: Edit sobre la pieza — muro del harness, fuera del LLM</code><code>hook PreToolUse → cualquier intento del agente: BLOQUEADO al momento + acusado en la bandeja</code>`:''}
-        <code>la pieza carga el badge "reclasificada (firmada)" en la tubería — visible, nunca muda</code>
+        ${!canReclas?`<code style="color:var(--warn)">⚠ "motor sellado" no se puede fijar desde aquí — ese régimen solo lo trae Jidoka de fábrica. Elige estatuto o libre.</code>`
+          : r.reg!==regActual?`<code>tools/contratos.json → ${esc(pp.nombre)}: régimen "${r.reg}" (antes: "${regActual}") + firma derivada de git</code>`
+          : `<code style="color:var(--dim)">(sin cambio de régimen — ya es "${regActual}")</code>`}
+        ${candadoNuevo2 && !candadoActual2?`<code>tools/contratos.json → candado=true + firma (deny del harness + PreToolUse: la IA no puede tocarla)</code>`:''}
+        ${!candadoNuevo2 && candadoActual2?`<code>tools/contratos.json → candado=false + firma (se levanta el deny y el hook PreToolUse)</code>`:''}
+        ${accionesPreview.length===0&&canReclas?`<code style="color:var(--warn)">⚠ No hay cambios que aplicar — el régimen y el candado ya coinciden con el estado actual.</code>`:''}
+        <code>registro estructural → motivo: "${esc(r.why||'(sin motivo — el motor lo rechazará)')}"</code>
       </div>
-      <div class="carton">Cartón: nada se escribió. Nota la división del trabajo: la contraseña te dejó ENTRAR (deliberación), la firma te hace RESPONSABLE (atribución), y el candado es el único MURO (harness, no README).</div>
-      <div class="acciones"><button class="atras" onclick="nav(-1)">← Ajustar</button><button class="sigue" onclick="wizClose()">Eso quiero 🙂</button></div>`;}
+      <div class="carton" id="reclas-carton">Esto escribe en tu repo de verdad: aplica solo las acciones que difieren del estado real (reclasificar y/o candado). Todo va firmado con tu identidad de git.</div>
+      <div id="reclas-res"></div>
+      <div class="acciones"><button class="atras" onclick="nav(-1)">← Ajustar</button><button class="sigue" id="reclas-btn" onclick="reclasEscribir()"${canReclas?'':' disabled style="opacity:.5"'}>✍️ Firmar y aplicar</button></div>`;}
   }
 
   if(W.tipo==='rec'){
@@ -629,7 +766,7 @@ function wizRender(){
       h=`<h3>${rest?'↩️ Restaurado':'✍️ Desviación aceptada'} (en cartón)</h3><div class="paso">La versión real escribiría:</div>
       <div class="escribe">${rest?`<code>arranca.md → re-inyecta @product/PRODUCT_BRIEF.md</code><code>estado → CONFORME · bandeja → resuelto</code>`:
       `<code>registro de desviaciones → arranca.md sin el QUÉ · decidió: Armando · 2026-07-20 · garantía nula sobre la orientación de sesión</code><code>bandeja → sale de pendientes · la pieza conserva el badge DESVIADO en la tubería</code>`}</div>
-      <div class="carton">Cartón. Fíjate: las DOS salidas son legales — lo único ilegal es la desviación MUDA.</div>
+      <div class="carton">Cartón (ejemplo del tour, no cableado): este flujo ilustra un caso fijo de arranca.md — no está atado a una pieza real ni pide motivo, así que no invoca el motor. "Aceptar la desviación" firmada SÍ existe de verdad en el motor (override.ps1 -Accion aceptar-desviacion); se cablea cuando el detector traiga desviaciones reales con su ruta. "Restaurar" (re-inyectar el @) no tiene motor aún. Fíjate: las DOS salidas son legales — lo único ilegal es la desviación MUDA.</div>
       <div class="acciones"><button class="atras" onclick="nav(-1)">← Atrás</button><button class="sigue" onclick="wizClose()">Eso quiero 🙂</button></div>`;}
   }
   wiz.innerHTML=h;
