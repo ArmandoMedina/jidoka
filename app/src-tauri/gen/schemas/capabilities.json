@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Capacidades por defecto de la ventana principal. R2: solo el core. R3+ suma los permisos de shell/dialog que el motor necesite.","local":true,"windows":["main"],"permissions":["core:default","shell:allow-open","dialog:default"]}}

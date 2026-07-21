@@ -104,6 +104,16 @@
     "rol": "escribano"
   },
   {
+    "nombre": "app",
+    "desc": "la app de escritorio de la tuberia (app/): la superficie del gobierno hecha app Tauri v2 cuya interfaz ES la maqueta (ADR 0048, supersede 0044 en la superficie). Cascaron Rust/Tauri + ui/index.html fiel a la spec congelada; Jidoka-only (no se siembra a los hijos)",
+    "fuente": ["app/*"],
+    "doc_bloquea": [],
+    "doc_avisa": ["CHANGELOG.md"],
+    "revisa": true,
+    "mensaje": "cambiaste la app de la tuberia: registra el cambio en CHANGELOG.md y corre tools/probar-app.ps1 (afirma la fidelidad de app/ui/index.html a la maqueta congelada y que app/ sigue siendo Jidoka-only; el CI no tiene Rust, el build local es la evidencia del .exe). Si solo corregiste typos o formato, este aviso no es para ti",
+    "rol": "escribano"
+  },
+  {
     "nombre": "raiz",
     "desc": "tierra de nadie: un archivo suelto en la raiz casi siempre tiene un lugar con dueno en otra parte (patron heredado del laboratorio de campo)",
     "fuente": ["*"],

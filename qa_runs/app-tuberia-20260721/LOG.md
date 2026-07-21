@@ -36,3 +36,33 @@
 **Pendiente del cliente (nada bloquea al agente):** orden nombrada para el PR + merge del sprint legado (`sprint/sistema-configurable-20260721` a `main`, corta `v1.26.0`); Gemba de fidelidad en R2.
 
 ---
+
+## R2 — El cascarón fiel (GEMBA temprano) — ✅ VERDE
+
+**Qué se entregó (el cascarón Tauri v2 en `app/`; la maqueta se vuelve el producto):**
+- `app/ui/index.html` — **copia byte-fiel** de la maqueta congelada `docs/analisis/maqueta-tuberia-202607.html` (copiada con `Copy-Item`, no regenerada; datos aún hardcodeados = teatro). El original NO se tocó (spec congelada, la vara del Gemba).
+- `app/src-tauri/` — cascarón Rust/Tauri v2: `Cargo.toml` (tauri v2 + `tauri-plugin-shell` + `tauri-plugin-dialog` ya registrados en `lib.rs` aunque R2 no los use — R3+ los necesita), `tauri.conf.json` (frontendDist `../ui`, título "Jidoka - la tuberia", identifier neutro `com.jidoka.tuberia`, ventana 1280x800 resizable), `capabilities/default.json`, `build.rs`, `src/main.rs` + `src/lib.rs`, `icons/` (set default generado por `tauri icon`, sin warnings).
+- `app/package.json` (version `0.0.0`, sin confundir el SSOT del repo) + `app/README.md` (cómo compilar; Jidoka-only, no se siembra).
+- `tools/probar-app.ps1` — lint del cascarón (fidelidad byte-fiel + invariante "app/ no se siembra" + config Tauri + piezas Rust; NO invoca cargo, el CI no tiene Rust). ASCII puro.
+- **Cableado (las DOS listas + ley + gitignore):** `tools/publicar.ps1` (foreach del preflight) y `.github/workflows/andon.yml` (smoke condicional if-exists) ganan `probar-app`; `tools/blast-radius.json` gana el área nueva `app` (`fuente:["app/*"]`, `revisa:true`, `doc_avisa:["CHANGELOG.md"]`, calcando el área `extension`); `.gitignore` gana `app/src-tauri/target/` + `app/node_modules/`. El manifiesto de siembra NO se tocó.
+
+**Fidelidad (la vara del Gemba):** `Get-FileHash` SHA256 idéntico original vs copia:
+`AA2F6268C73AC168D71782EF1AF95B287C7957D2CD4A6182E33E0FD1E5286CCC` (byte-fiel confirmado).
+
+**El `.exe` (build local de verificación):** `npx tauri build --debug --no-bundle` compiló a la primera (~400 crates, 8m30s). Ruta verificada:
+`app/src-tauri/target/debug/jidoka-tuberia.exe` (17.16 MB, existe; sin cuarentena de AV). Un único warning benigno de linker (mensaje MSVC en español al crear la import library del `.dll`), no error.
+
+**Evidencia (esta máquina, 2026-07-21):**
+
+| Gate | Exit | Nota |
+|---|---|---|
+| `tools/probar-app.ps1` | **0** | 8/8 verdes: fidelidad byte-fiel, config Tauri parsea + frontendDist a la UI, Cargo.toml/main.rs presentes, app/ NO se siembra (ADR 0048). |
+| `tools/probar-publicar.ps1` | **0** | 7/7. El meta-test exige TODOS los `probar-*.ps1` en la lista de `publicar.ps1`: `probar-app` ya está → verde. |
+| `tools/probar-extension.ps1` | **0** | 26/26. La extensión no se toca en R2; sigue sana. |
+| `tools/verificar.ps1` | **0** | Sin bloqueo. **3 avisos no bloqueantes** por tocar el cableado del motor (`publicar.ps1`, `andon.yml`, `blast-radius.json` → áreas `barreras`/`atlas`): "actualiza andon/README.md", "sin tocar el grafo de producto", "docs/atlas/". Son consecuencia de cablear un test nuevo en las listas del motor, no doc-drift accionable en R2; el CHANGELOG del release es R7. |
+
+**Demo del cliente (owner: cliente):** doble clic al `.exe` (`app/src-tauri/target/debug/jidoka-tuberia.exe`) → ver la maqueta tal cual en ventana propia (tubería, bandeja, flujos, huecos, modo avanzado); **STOP de fidelidad** — el cliente aprueba con sus ojos que la app ES su maqueta ANTES de que se cablee un solo dato (R3).
+
+**Pendiente del cliente:** Gemba de fidelidad (doble clic al `.exe`, aprobar con los ojos). Nada bloquea al agente para R3 salvo esa aprobación de fidelidad (STOP del plan).
+
+---
