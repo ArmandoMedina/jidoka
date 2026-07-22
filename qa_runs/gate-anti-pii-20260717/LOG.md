@@ -4,6 +4,15 @@
 - **Máquina:** Windows 11 / PowerShell 5.1 (el mismo intérprete del CI)
 - **Qué se verifica:** el gate `tools/anti-pii.ps1` muerde (ROJO→VERDE), no da falsos positivos en el repo real, y la suite completa sigue verde con las piezas nuevas.
 
+## Método reproducible
+
+1. Corre `probar-anti-pii.ps1` sobre 11 casos de prueba (emails reales, rutas de entorno, handles, placeholders, dominios sintéticos).
+2. Corre `anti-pii.ps1` sobre los 206 archivos tracked del repo real.
+3. Verifica que cero falsos positivos y cero fugas.
+4. Corre la suite completa (`publicar -SoloVerificar`) con el nuevo disparo cableado.
+
+## Resultados
+
 ## Self-test del gate — `probar-anti-pii.ps1` (11/11)
 
 ```
@@ -52,6 +61,10 @@ auditar            exit 0
 - `[disparos] -> doctrina`: **atendido** — respaldo del disparo agregado en `doctrina/00-tesis.md`.
 - `[atlas] -> docs/atlas/*`: no aplica — no cambió el flujo de ningún comando (solo bump de conteo en `probar-disparos`).
 - `[barreras] -> product grafo`: no aplica — refuerza la capacidad existente [[AND-1-muro-andon]] (el muro), no estrena capacidad.
+
+## Veredicto
+
+El gate anti-PII muerde correctamente sin falsos positivos. Cero fugas en 206 archivos. El disparo se cablea en CI.
 
 ## Pendiente de verificación server-side
 

@@ -3,7 +3,14 @@
 > Evidencia de la construcción de las ligas código↔capacidad (`v1.25.0`, ADR 0044).
 > Plan-contrato: `docs/sprints/sprint-editor-gobierno-2-plan.md` (aprobado en plan mode 2026-07-20).
 
-## Suites (esta máquina, 2026-07-20)
+## Método reproducible
+
+1. Corre `tools/probar-ligas.ps1` (26/26 casos de co-ocurrencia, fuerza, rotura).
+2. Corre `node --test extension/ligas.test.js` (9/9 tests de upsert, merge, UTF-8).
+3. Corre `tools/probar-linterna.ps1` (58/58 casos de nodo, arista, dogfood).
+4. En Gemba: abre VS Code, pulsa F5, clic derecho sobre archivo, "Jidoka: ligar a capacidad..." → elige acción/fuerza → ve la liga en el grafo.
+
+## Resultados (esta máquina, 2026-07-20)
 
 | Suite | Resultado |
 |---|---|
@@ -71,6 +78,10 @@ de rama sin mergear, no cosecha). Un segundo review adversarial sobre el rework 
   hashtable case-insensitive (dos áreas `Docs`/`docs` se fundirían en el treemap — ultra-borde).
 
 Regresión post-curas: `probar-linterna` **58/58**.
+
+## Veredicto
+
+Las ligas código↔capacidad están cableadas: el gate muerde nombrando la capacidad exacta. R2–R4 todos verdes. Listo para merge a v1.25.0.
 
 ## Pendiente que deja esta corrida (Gemba del cliente, sin código ni terminal)
 

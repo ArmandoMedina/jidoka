@@ -3,14 +3,18 @@
 - **Fecha:** 2026-07-22
 - **Rama:** `consolida-tuberia-adrs-20260722`
 - **Incremento:** `flu-1-pilar-de-flujo` (entregado en `v1.28.0`, PR #122; su Gemba quedó pendiente de aceptación desde 2026-07-21).
-- **Método reproducible (sin código para el cliente — doble clic / abrir archivo):**
-  1. Abre `HANDOFF.md` y `ROADMAP.md` — cada uno cabe en una pantalla.
-  2. Abre `docs/MUERTOS.md` — el cementerio del roadmap existe.
-  3. Abre `.jidoka/reporte-avance.html` con doble clic — se entiende en 5 min, sin jerga.
-  4. Abre `product/casting.md` — responde quién hace qué.
-  5. (Ya visto en vivo) `/jidoka:planea` se plantó por este mismo Gemba.
 
-## Evidencia (artefactos de la corrida, no palabra)
+## Método reproducible
+
+Sin código para el cliente — doble clic / abrir archivo:
+
+1. Abre `HANDOFF.md` y `ROADMAP.md` — cada uno cabe en una pantalla.
+2. Abre `docs/MUERTOS.md` — el cementerio del roadmap existe.
+3. Abre `.jidoka/reporte-avance.html` con doble clic — se entiende en 5 min, sin jerga.
+4. Abre `product/casting.md` — responde quién hace qué.
+5. (Ya visto en vivo) `/jidoka:planea` se plantó por este mismo Gemba.
+
+## Resultados (artefactos de la corrida, no palabra)
 
 | # | Caso | Check | Resultado |
 |---|---|---|---|

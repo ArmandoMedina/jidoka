@@ -4,6 +4,14 @@
 **Rebanada:** R1 — la app pinta la foto del repo sin romperse por acentos ni flechas.
 **Plan-contrato:** este sprint (fix del banner rojo "la foto del repo no es JSON válido").
 
+## Método reproducible
+
+1. Abre la app Tauri apuntando a este repo.
+2. La pestaña "La tubería" muestra un banner rojo: "la foto del repo no es JSON válido: Bad control character in string literal..."
+3. Analiza el stdout de `powershell.exe` sin consola para detectar caracteres de control (0x1A) causados por CP437.
+4. Porta el emit UTF-8 a `Emit-Utf8Json` en `tuberia-datos.ps1`, `parametrizar.ps1`, `override.ps1`.
+5. Endurecerá `probar-app.ps1` para verificar bytes crudos + ausencia de control-chars.
+
 ## El síntoma (lo que veía el cliente)
 
 La app Tauri abría con un banner rojo en "1 · La tubería":
@@ -70,6 +78,8 @@ NODE EXIT: 0
 ```
 La `desc` que rompía ahora se lee perfecta, con acentos y flechas.
 
+## Resultados
+
 ### 3. Gates de contrato y sintaxis
 
 - `tools/verificar.ps1` → **EXIT 0** (3 avisos no bloqueantes de doc-drift: atlas/barreras/producto).
@@ -106,3 +116,7 @@ bandeja o un `faltan` de ritual se volvería `?` en silencio bajo modo sin-conso
   renderizada sin banner rojo. Es la aceptación final (sin código ni terminal).
 - **Cierre:** CHANGELOG, doc-drift (escribano: atlas/barreras/producto si aplica), y la decisión
   de versión/merge coordinada con el frente FLU-1 en paralelo (PATCH `v1.27.1` vs. plegar a `v1.28.0`).
+
+## Veredicto
+
+El banner rojo desaparece. El encoding UTF-8 se emite sin control-chars. La app pinta "1 · La tubería" sin errores de parseo JSON.

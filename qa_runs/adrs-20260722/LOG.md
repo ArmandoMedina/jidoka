@@ -4,6 +4,12 @@
 - **Rama / worktree:** `review/adrs-20260722` en worktree aislado `C:\Repositorio personal\jidoka-adrs` (otro agente en paralelo en FLU-1; ver la nota de aislamiento en el plan).
 - **Contrato:** [`docs/sprints/sprint-molde-adrs-plan.md`](../../docs/sprints/sprint-molde-adrs-plan.md) · Decisión: [ADR 0050](../../docs/decisions/0050-molde-unico-de-los-adrs.md).
 
+## Método reproducible
+
+1. Corre `tools/probar-adrs.ps1` sobre el corpus de 49 ADRs en `docs/decisions/`.
+2. Verifica que cada ADR tenga las 5 secciones requeridas (Qué, Por qué, El camino que NO se toma, Cambios y Conclusión) y estado enum coherente.
+3. Compara secciones faltantes contra el índice en `docs/decisions/README.md` y descarta huérfanos en disco.
+
 ## R1 — Molde canónico único
 
 `docs/decisions/0000-plantilla.md` reconciliado con `kit/.jidoka/templates/adr.md`. Diff de estructura → `MOLDES ALINEADOS` (mismas 5 secciones requeridas + estado enum + `Qué NO resuelve` opcional).
@@ -51,6 +57,18 @@ Renombres (0027 `El principio`, 0040/0042 `Razones` → `Por qué`), extracción
 - **La decisión:** [ADR 0050](../../docs/decisions/0050-molde-unico-de-los-adrs.md), escrito bajo el molde nuevo (dogfood; pasa el propio guardián), listado en el índice.
 - **Diferido al cierre/release:** el CHANGELOG y `version.txt` (el `[contrato-changelog]` exige versión válida en la sección tope y la versión se coordina con FLU-1 — probable `v1.29.0`). El re-sello ocurre al liberar.
 
+## Resultados
+
+| Gate / suite | Resultado |
+|---|---|
+| `probar-adrs.ps1` (corpus real) | 9/9 verde. 51 ADRs conforman (secciones + estado coherente + sin huérfanos). |
+| `verificar.ps1` | exit 0 |
+| `auditar.ps1` | grafo íntegro |
+
 ## Suite (evidencia-no-palabra)
 
 Ver el bloque de corrida al pie (verificar.ps1 + suite de self-tests, incluido probar-adrs).
+
+## Veredicto
+
+Los 49 ADRs conforman el molde único. El guardián `probar-adrs.ps1` pasa a verde y corre en CI (always-run).

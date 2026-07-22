@@ -4,6 +4,13 @@
 > (tubería + ADRs) fusionadas sobre `main` (v1.28.0) en `consolida-tuberia-adrs-20260722`.
 > Evidencia de que la reconciliación quedó **verde de verdad**, no de palabra.
 
+## Método reproducible
+
+1. Fusionar 5 commits del sprint de ADRs + 2 commits de tubería sobre `main` v1.28.0 (FLU-1).
+2. Resolver colisión de ADRs: renumerar 0050 → 0051 (tubería); ADRs 0045-0047 (nuevo, sistema configurable).
+3. Unificar versión a `v1.29.0` en los 3 sitios SSOT (version.txt, package.json, tope del CHANGELOG).
+4. Correr la suite completa de tests en `andon` (verificar, probar-adrs, probar-app, probar-flujo, gates, etc.).
+
 ## Qué se consolidó
 
 Rama nueva desde `origin/main` (v1.28.0, ya con FLU-1 / PR #122). Encima:
@@ -23,7 +30,7 @@ Rama nueva desde `origin/main` (v1.28.0, ya con FLU-1 / PR #122). Encima:
   (FLU-1 v1.28.0, app v1.27.0) = 37/120 líneas — dentro del contrato `[contrato-handoff]`.
 - **Índices** de ADRs y de sprints reconciliados con el estado real (git gana).
 
-## Suite (esta máquina, 2026-07-22) — todo lo que corre el check `andon`
+## Resultados (esta máquina, 2026-07-22) — todo lo que corre el check `andon`
 
 | Gate / suite | Resultado |
 |---|---|
@@ -52,6 +59,10 @@ Rama nueva desde `origin/main` (v1.28.0, ya con FLU-1 / PR #122). Encima:
 
 **No corridos localmente:** `instalar.ps1` / `probar-instalador.ps1` — en cuarentena por el
 AV (Bitdefender); el CI los corre limpio en `windows-latest`. No los tocó esta consolidación.
+
+## Veredicto
+
+Consolidación verde: 51 ADRs conformes, 387 piezas de la tubería censuadas, flujo reconciliado con v1.29.0. Listo para merge y release.
 
 ## Pendiente (del cliente)
 

@@ -3,6 +3,18 @@
 > El listón de evidencia de la corrida (evidencia-no-palabra). Se llena **por rebanada**, no al cierre.
 > Rama: `sprint/sistema-configurable-20260721` (R1 cierra el legado sobre la misma rama; la rama `sprint/app-tuberia-<fecha>` nace desde `main` tras el merge). Plan-contrato: `docs/sprints/sprint-app-tuberia-plan.md`.
 
+## Método reproducible
+
+7 rebanadas (R1–R7) de construcción de la app Tauri v2:
+1. **R1:** Cerrar el legado (ADRs + CHANGELOG + versión) y ratificar la ley nueva (ADR 0048).
+2. **R2:** Cascarón Tauri byte-fiel a la maqueta; Gemba del cliente aprueba fidelidad.
+3. **R3–R5 motor:** Contrato de datos app↔motor; escritor único (`parametrizar.ps1`); firma derivada de git (`override.ps1`).
+4. **R3–R5 UI:** Mitad UI cablea lecturas y escrituras reales vía `invoke` (Rust↔PS).
+5. **R6:** VS Code limpio (extensión retirada).
+6. **R7:** Empaquetado NSIS + v1.27.0.
+
+Cada rebanada corre su suite de tests; el motor y tests cablean en `.github/workflows/andon.yml`.
+
 ## Contexto de la sesión
 
 - **R0 ratificado** por el cliente el 2026-07-21 en plan mode formal ("en plan mode porfa y te autorizo"); STOP 2 del plan aprobado el mismo día.
@@ -378,6 +390,8 @@ El `.exe` de debug (`target/debug/jidoka-tuberia.exe`) ya arrancó y fue aprobad
 
 ---
 
+## Resultados
+
 ## Resumen del sprint completo (tabla R1-R7)
 
 | Rebanada | Qué | Evidencia | Exit |
@@ -416,3 +430,7 @@ Descrito en R6 arriba: `tools/ligas.json` quedó con la entrada `linterna-extens
 2. Los dos asserts de Parte B se reemplazaron por un SKIP honesto cuando `tools/ligas.json` tiene 0 ligas: `[SKIP] R2c dogfood liga real (ledger real sin ligas tras ADR 0048 - la cobertura vive en el fixture Parte A)`. Si en el futuro el ledger tiene ligas, los asserts corren — pero sin exigir el nombre `linterna-extension` (exigen que ALGUNA liga real produzca su arista tipada).
 
 **Resultado:** `probar-linterna` pasa 57/57 (1 SKIP honesto, 0 fallos). El mecanismo liga+arista sigue cubierto por el fixture; el assert del repo real es honesto sobre el estado actual.
+
+## Veredicto
+
+La app Tauri v2 está lista para `v1.27.0`. R1–R7 todos verdes: cascarón fiel, datos reales cargados dinámicamente, lecturas y escrituras cableadas via `invoke`, extensión retirada, empaquetado NSIS completo.

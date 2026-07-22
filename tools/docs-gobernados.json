@@ -36,6 +36,12 @@
       "molde": "kit/.jidoka/templates/sprint-entrega.md",
       "requeridas": ["Que se entrego", "Verificacion", "Lo aprendido"],
       "estricto": false
+    },
+    {
+      "doc": "qa_runs/*/LOG.md",
+      "molde": "kit/.jidoka/templates/qa-log.md",
+      "requeridas": ["Metodo reproducible", "Resultados", "Veredicto"],
+      "estricto": false
     }
   ],
   "capa3": ["CODE_OF_CONDUCT.md", "LICENSE"]

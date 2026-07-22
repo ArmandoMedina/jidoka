@@ -4,6 +4,14 @@
 **Plan-contrato:** [`docs/sprints/sprint-tuberia-por-carpetas-plan.md`](../../docs/sprints/sprint-tuberia-por-carpetas-plan.md)
 **Apilada sobre:** el commit del fix de encoding `3e99a0d`.
 
+## Método reproducible
+
+1. Ejecuta `tools/tuberia-datos.ps1` sin mano de obra — escanea TODO vía `git ls-files` + tabla de convención `$TIPOS` + catch-all por carpeta.
+2. La app carga la foto dinámica al abrir y renderiza 360 piezas agrupadas.
+3. Correr `tools/probar-app.ps1` verificando completitud (360 = 360) + tipos bonitos + encoding UTF-8.
+4. Refresca la app (botón ↻) para cargar nombres derivados (H1 de cada `.md`).
+5. Gemba: el cliente ve el árbol completo del repo en la tubería sin cablear nada.
+
 ## R1 — El escáner completo (todo aparece, agrupado, colapsable)
 
 ### Qué se hizo
@@ -42,6 +50,10 @@
 ### Nota para el Gemba
 El cambio de **datos** (`tuberia-datos.ps1`) lo toma la app en runtime, pero el **colapso** (UI,
 `index.html`) está embebido en el `.exe` → se **recompiló** el `.exe` para el Gemba.
+
+## Resultados
+
+**`tools/probar-app.ps1` → 41/41 verde** — completitud (360 piezas), tipos bonitos, catch-all por carpeta, filtro motor, encoding UTF-8 sin BOM. R1–R3 todos verdes.
 
 ## Revisión (`/code-review` high effort) — R1 · 2026-07-22
 
@@ -94,6 +106,10 @@ Delta revisado: `Get-Nombre` en `tuberia-datos.ps1` (el resto ya se revisó en R
   derivados. No se corrige aquí (cambio de UI fuera del alcance de datos de R3).
 - **Correcto:** `try/catch` con fallback al nombre de archivo; `$repoRoot` en scope; el regex solo
   casa un `# H1` real; comandos con su nombre canónico antes del genérico.
+
+## Veredicto
+
+La tubería es el mapa completo del repo: 360 piezas derivadas de `git ls-files`, agrupadas por convención, con nombres derivados de H1. R1–R3 todos verdes.
 
 ## Pendiente
 - **Gemba de R3** (owner: cliente): Refrescar la app (sin recompilar) → los nombres son títulos reales.
