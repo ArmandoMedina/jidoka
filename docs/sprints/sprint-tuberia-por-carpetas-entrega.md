@@ -6,7 +6,7 @@
 ## Qué se entregó
 
 La tubería (tab 1 de la app) dejó de leer una lista curada a mano (49 piezas) y ahora **deriva el
-censo de las carpetas**: **360 piezas = `git ls-files` exacto, nada invisible** (ADR 0050). Aparecen
+censo de las carpetas**: **360 piezas = `git ls-files` exacto, nada invisible** (ADR 0051). Aparecen
 los sprints, los ADRs, los análisis, las guías, los dominios, los módulos y la 5ª capacidad (CFG-1);
 la Extensión VS Code retirada desaparece sola. Los nombres se derivan del propio archivo; las
 secciones grandes colapsan; las aristas quedan vacías a propósito (para cablearlas desde la app).
@@ -29,11 +29,11 @@ consola emitía CP437 y `→` caía a un carácter de control) — su propio com
 | Pruebas automáticas: altas/cambios/bajas · suites | +4 aserciones nuevas en `probar-app.ps1` (completitud + convención) + endurecimiento del bloque de encoding · `probar-app.ps1` **41/41** |
 | Pruebas E2E | No aplica — app Tauri sin harness headless en CI (el `.exe` local es la evidencia; el Gemba lo corre el cliente) |
 | Evidencia en `qa_runs/` | 2 corridas con `LOG.md` (fix + sprint), citadas y commiteadas con `git add -f` |
-| Archivos: creados / editados | Creados: ADR 0050, plan y entrega del sprint, 2 `qa_runs/LOG.md`. Editados: `tuberia-datos.ps1`, `app/ui/index.html`, `probar-app.ps1`, `override.ps1`+`parametrizar.ps1` (fix), CHANGELOG, índice ADR, `sprints/README.md`, HANDOFF |
+| Archivos: creados / editados | Creados: ADR 0051, plan y entrega del sprint, 2 `qa_runs/LOG.md`. Editados: `tuberia-datos.ps1`, `app/ui/index.html`, `probar-app.ps1`, `override.ps1`+`parametrizar.ps1` (fix), CHANGELOG, índice ADR, `sprints/README.md`, HANDOFF |
 | Gates: verificar / probar-gate / self-tests | (se corren en el paso 4 del cierre, ver LOG) · avisos de doc-drift atendidos por el escribano (este cierre toca los docs dueño) |
 | ¿Compactación? | No |
-| ADRs | **0050** creado (tubería = mapa completo por convención). Numerado 0050 para **evitar la colisión con FLU-1** (que tomó 0049) |
-| CHANGELOG · versión | Al día bajo `[Sin liberar]` · versión y orden **pendientes** (coordinar con FLU-1 / orden del cliente): fix=PATCH, sprint=MINOR |
+| ADRs | **0051** creado (tubería = mapa completo por convención). Renumerado 0050→0051 al consolidar en el PR único (el sprint de ADRs se quedó con 0050; FLU-1 tomó 0049) |
+| CHANGELOG · versión | Consolidado en el PR único bajo `[1.29.0]` junto al sprint de ADRs: fix=PATCH, sprint=MINOR → `v1.29.0` |
 | Issues/hallazgos | Review: encoding verde-en-falso (curado), CP437 latente en bandeja (anotado), globs que cruzan `/` (anotado), nombres en `innerHTML` (anotado) |
 | Fricción (Kaizen crudo) | Colisión de working tree con el agente en paralelo (resuelto: el otro agente a su worktree) · 1 error mío de sintaxis PS (`$delta:`) cazado y corregido · cambio de detalle del plan (aristas) flagueado al cliente, no mudo |
 | Pendientes al HANDOFF | merge/release + versión (con FLU-1) · derivar aristas reales (sprint) · optimizar ~2s de latencia · escapar nombres en la UI · glob recursivo-vs-directo |
@@ -43,7 +43,7 @@ consola emitía CP437 y `→` caía a un carácter de control) — su propio com
 
 1. **La lista curada es el drift que Jidoka combate — no la repitas dentro de la app.** El censo a
    mano se desincronizó (faltaban dominios/módulos/CFG-1, sobraba la extensión retirada). Derivar de
-   la estructura real (convención + catch-all) elimina la clase entera de bug. Regla que sube a ADR 0050.
+   la estructura real (convención + catch-all) elimina la clase entera de bug. Regla que sube a ADR 0051.
 2. **El vacío puede ser una feature, si lo dices.** Las aristas vacías no son una carencia: muestran
    lo "sin cablear" para autorarlo desde la app (reframe del cliente). Igual que la bandeja muestra
    lo "pendiente de parametrizar". Un estado incompleto **visible y honesto** > uno oculto.
