@@ -1,6 +1,6 @@
 # Sprint «El pilar de flujo» — FLU-1 · plan aprobado
 
-> **Plan aprobado en plan mode el 2026-07-21.** **Este plan ES el sprint**: lo que no está aquí, no entra (frontera en «Lo que NO entra»). El QUÉ se recuperó de la sesión anterior del mismo día (alcance aprobado con «quiero todo»), más dos adiciones aprobadas en esta: el reparto de roles humanos/agentes (R8a) y el contrato del CHANGELOG (R4). Versión objetivo: `v1.26.0` (MINOR) + ADR 0045.
+> **Plan aprobado en plan mode el 2026-07-21.** **Este plan ES el sprint**: lo que no está aquí, no entra (frontera en «Lo que NO entra»). El QUÉ se recuperó de la sesión anterior del mismo día (alcance aprobado con «quiero todo»), más dos adiciones aprobadas en esta: el reparto de roles humanos/agentes (R8a) y el contrato del CHANGELOG (R4). Versión objetivo: `v1.28.0` (MINOR) + ADR 0049. *(Nota del merge 2026-07-21: nacieron como `v1.26.0` + ADR 0045; main los usó primero —sistema configurable/app de la tubería— y se renumeraron al reconciliar, sin cambio de contenido.)*
 
 ## Contexto (por qué)
 
@@ -50,7 +50,7 @@ La Casa del TPS tiene dos pilares; el método construyó Jidoka (parar ante el d
 
 - **Nuevos (mecánica):** `tools/estado-flujo.ps1` · `tools/expirar.ps1` · `tools/reporte-avance.ps1` · `tools/flujo.json` (instancia) · `tools/probar-flujo.ps1` (tests de los 3).
 - **Nuevos (docs):** `docs/handoff-historico.md` · `docs/MUERTOS.md` · `product/casting.md` · `docs/analisis/reparto-enti-202607.md` · `kit/.jidoka/templates/casting.md`.
-- **Se tocan:** `HANDOFF.md`, `ROADMAP.md` (migraciones R1/R2) · `tools/verificar.ps1` (checks R1/R2) · `tools/docs-gobernados.json` + `tools/estado-docs.ps1` si hace falta (R4/R8a) · `.claude/commands/jidoka/{arranca,planea,cierra}.md` · `.claude/settings.json` + hook nuevo `SessionStart` (R6) · `.claude/agents/*.md` (R8b) · `tools/probar-agentes.ps1`, `tools/probar-hooks.ps1`, `tools/probar-preflight.ps1` · manifiesto del kit (siembra de piezas nuevas) · `product/capacidades/FLU-1-pilar-de-flujo.md` (nueva, con Gherkin — el auditor la exige) · `CHANGELOG.md`, ADR 0045 + índice.
+- **Se tocan:** `HANDOFF.md`, `ROADMAP.md` (migraciones R1/R2) · `tools/verificar.ps1` (checks R1/R2) · `tools/docs-gobernados.json` + `tools/estado-docs.ps1` si hace falta (R4/R8a) · `.claude/commands/jidoka/{arranca,planea,cierra}.md` · `.claude/settings.json` + hook nuevo `SessionStart` (R6) · `.claude/agents/*.md` (R8b) · `tools/probar-agentes.ps1`, `tools/probar-hooks.ps1`, `tools/probar-preflight.ps1` · manifiesto del kit (siembra de piezas nuevas) · `product/capacidades/FLU-1-pilar-de-flujo.md` (nueva, con Gherkin — el auditor la exige) · `CHANGELOG.md`, ADR 0049 + índice.
 - **Ley (`tools/blast-radius.json`):** las piezas nuevas caen en áreas ya vigiladas (`barreras`/`ritual`/`raiz`); si `verificar` acusa hueco, se declara área `flujo` en el mismo commit (dogfooding — como hizo la linterna con `extension`).
 
 ## Pruebas por rebanada (evidencia-no-palabra, declarada de antemano)

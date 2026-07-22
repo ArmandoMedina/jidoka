@@ -167,7 +167,7 @@ foreach ($del in @($eliminados | Where-Object { $_ })) {
   }
 }
 
-# Contrato del HANDOFF (FLU-1, ADR 0045): el relevo se JALA (lo que la sesion
+# Contrato del HANDOFF (FLU-1, ADR 0049): el relevo se JALA (lo que la sesion
 # entrante necesita), no se EMPUJA (el diario de la que sale). El contrato es dato
 # de instancia en tools/flujo.json (clave 'handoff'); sin el archivo o sin la clave,
 # el check no aplica (un repo sin el pilar de flujo no se bloquea). Es invariante de
@@ -229,7 +229,7 @@ if ($flujoCfg -and $flujoCfg.handoff -and (Test-Path 'HANDOFF.md')) {
   if (-not $rotoHandoff) { Ok "[contrato-handoff] HANDOFF.md dentro de contrato ($nHistoricas/$maxHist historicas, $($hLineas.Count)/$techoLin lineas)" }
 }
 
-# Contrato del ROADMAP (FLU-1, ADR 0045): el ROADMAP es una cola de trabajo
+# Contrato del ROADMAP (FLU-1, ADR 0049): el ROADMAP es una cola de trabajo
 # CLASIFICADA, no un diario. Espejo del contrato del HANDOFF -- misma semantica de
 # falla-cerrado, mismo caracter de invariante de ESTADO (no de diff): se mide siempre.
 # Solo aplica si flujo.json trae la clave 'roadmap' y existe ROADMAP.md (un repo sin el
@@ -307,7 +307,7 @@ if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
   if (-not $rotoRoadmap) { Ok "[contrato-roadmap] ROADMAP.md dentro de contrato ($nItems items clasificados, $($rLineas.Count)/$rTecho lineas)" }
 }
 
-# Contrato del CHANGELOG (FLU-1, ADR 0045): el CHANGELOG es registro OPERATIVO, no
+# Contrato del CHANGELOG (FLU-1, ADR 0049): el CHANGELOG es registro OPERATIVO, no
 # una carta entregable. Se mide SOLO la seccion TOPE (del primer '## [' al siguiente
 # '## [') -- NO es retroactivo: las versiones viejas quedan como historia. Solo aplica
 # si flujo.json trae la clave 'changelog' y existe CHANGELOG.md (un repo sin el pilar

@@ -434,3 +434,76 @@ Refinamientos del lazo #1 y #2 (sello bootstrap, `estado-motor -Detallado`): ✅
 2. **El lote de hallazgos del ROADMAP** en sesión dedicada corriendo el método.
 3. **Sprint 3 · Fase 3.C** (por valor: CLI npm/SSOT de versión, multiplataforma) y **grietas 2 y 5**.
 4. **Sprint 4 — Beta estable** (incluye el resto de la grieta 4: evidencia pública del linaje).
+
+---
+
+# Archivado 2026-07-21 (merge con main v1.27.0 — la app de la tubería, PRs #120/#121/#123)
+
+> Secciones ÍNTEGRAS del HANDOFF de main al momento del segundo merge del sprint FLU-1 (la sesión de la app las escribió sin el contrato del relevo; aquí viven completas).
+
+## Dónde estamos (2026-07-21 noche — Sprint "La app de la tubería" COMPLETO · MERGEADO Y LIBERADO `v1.27.0`)
+
+**El sprint "La app de la tubería" TERMINÓ (7/7 rebanadas), verde en local, en la rama `sprint/app-tuberia-20260721` (14 commits propios `692e8a4`→`b0626fa`, apilados sobre los 6 del legado = 20 sobre `main`).** La superficie del gobierno dejó de ser comandos de VS Code y es ahora una **app de escritorio Tauri fiel a la maqueta** (ADR 0048): 49 piezas con estado real, bandeja, formulario que escribe de verdad y modo avanzado que firma derivando de `git config`. La extensión se retiró completa. Récord completo: [`docs/sprints/sprint-app-tuberia-entrega.md`](docs/sprints/sprint-app-tuberia-entrega.md) (con el cuadro de cierre). Evidencia: [`qa_runs/app-tuberia-20260721/LOG.md`](qa_runs/app-tuberia-20260721/LOG.md).
+
+**Los 2 PRs — MERGEADOS el 2026-07-22 con orden nombrada del cliente ("pr y merge, release y poda, autorizado"):**
+- **PR #121** — la app `sprint/app-tuberia-20260721` a `main`. **MERGEADO** (merge `0d921ac`, CI verde: la liga colgante curada en el cierre pasó el gate).
+- **PR #120** — el sprint legado. GitHub lo marcó **MERGED** automáticamente al entrar #121 (su rama quedó 100% contenida en la de la app). `v1.26.0` queda **sin tag propio a propósito** (subsumida en `v1.27.0`, mismo precedente que `v1.24.0` dentro de `v1.25.0`).
+- **Release `v1.27.0`** cortado: tag anotado + GitHub release con el instalador NSIS como asset. **Poda** hecha (ramas del sprint y del legado borradas, local y remoto). `sprint/pilar-de-flujo-20260721` (PR #122) sigue viva — es el sprint paralelo FLU-1, no era parte de esta orden.
+
+**La app y su instalador:**
+- Código: `app/` (Tauri v2; `ui/index.html` = la maqueta viva, `src-tauri/` el puente Rust). Es **Jidoka-only** (no se siembra).
+- El `.exe` y el instalador NSIS (`app/src-tauri/target/release/bundle/nsis/jidoka-tuberia_1.27.0_x64-setup.exe`, 1.86 MB) son **locales, NO versionados** (`app/src-tauri/target/` en `.gitignore`). El instalador sube como asset del release cuando se corte.
+
+**Cola de decisiones del cliente:**
+1. ~~orden nombrada — merge #120~~ ✅ **HECHO 2026-07-22** (subsumido en #121, marcado MERGED).
+2. ~~orden nombrada — merge #121 + tag/release `v1.27.0` + asset~~ ✅ **HECHO 2026-07-22** (merge `0d921ac`, release con el instalador como asset).
+3. **[PENDIENTE]** **Gemba completo end-to-end** (flujo del glosario: crear glosario por fuera → bandeja → parametrizar desde el formulario → candado → ver a la IA rebotar; sin código ni terminal — los pasos están en la entrega). La fidelidad de R2 ya la aprobó; el flujo completo NO lo ha corrido todavía.
+4. ~~¿MAJOR (`v2.0.0`) en vez de `v1.27.0`?~~ ✅ **RESUELTO por la orden del release 2026-07-22**: el cliente ordenó liberar el corte tal cual — quedó `v1.27.0` con el breaking confesado en el CHANGELOG.
+5. **[PENDIENTE]** destino de la copia scratch `.jidoka/maqueta-tuberia.html` (dice "SAP", quedó vieja; la spec real vive en `docs/analisis/`).
+
+**Pendientes técnicos (nada bloquea):**
+1. ~~Curar la liga colgante `linterna-extension` en `tools/ligas.json`~~ — **CURADO en el cierre** (entrada retirada; `probar-ligas` 25/25 verde, CI de #121 verde esperado tras push).
+2. Certificado Authenticode del `.exe` (SmartScreen; historial Bitdefender).
+3. Autoría de ligas en la app (capacidad futura; el gate `estado-ligas.ps1` sigue vivo, la autoría asistida se perdió al retirar `ligas.js`).
+4. Reconciliar y alta-de-agente aún cartón.
+5. Multiplataforma del motor (`pwsh`, macOS/Linux) — fase 2.
+6. Bajar `v1.26`/`v1.27` a los labs tras el release.
+7. Atlas de los tools nuevos (`tuberia-datos`, `parametrizar`, `override`).
+
+**Regla de modelos (orden del cliente):** Fable orquesta y pone criterio en el hilo; opus/sonnet/haiku hacen TODA la mecánica en subagentes. Ningún subagente en Fable.
+
+---
+
+## Dónde estuvimos (2026-07-21 tarde — Sistema configurable CONSTRUIDO + giro de superficie a la app Tauri)
+
+**El sprint "sistema configurable, fase 1" está construido completo y verde en la rama `sprint/sistema-configurable-20260721` (6 commits sobre `main`):**
+
+1. `587e133` — **R1**: los 3 ADRs (0045 identidad · 0046 contratos/regímenes · 0047 meta-gobierno) + CFG-1, y el rename que retira la marca "SAP" por `estatuto`.
+2. `afde41b` — **R2**: la bandeja "pendiente de parametrizar" (`tools/bandeja.ps1`, 15/15).
+3. `3e6ad5f` — **R3**: el estatuto del ritual (`tools/estado-ritual.ps1`, 13/13).
+4. `4b5fd84` — **R5**: el candado IA (hook `PreToolUse`, `.claude/hooks/candado-pretooluse.ps1`, hooks 42/42, `deny-vs-ask` cableado).
+5. `ba522fe` — **R4**: el formulario para parametrizar (webview fiel a la maqueta en la extensión).
+6. `c9bf5c9` — **R6**: el modo avanzado (firma + reclasificar, extensión 26/26).
+
+Todo verde; evidencia en [`qa_runs/sistema-configurable-20260721/LOG.md`](qa_runs/sistema-configurable-20260721/LOG.md).
+
+**Pero el Gemba del cliente REPROBÓ la superficie.** El motor quedó bien; la cara quedó fragmentada en comandos de VS Code (paleta + clic derecho + webviews sueltos) — lo contrario de lo que el cliente validó en 6 Gembas: **la maqueta como UNA app navegable**. La retro del transcript encontró la causa en el plan: decía a la vez "la maqueta ES la spec visual" y "no se porta", y esa exclusión de la cara visible **nunca se le resaltó** al cliente al aprobar.
+
+**Decisión del cliente (2026-07-21):** la superficie del gobierno es una **app de escritorio Tauri fiel a la maqueta** — una sola ventana navegable, no comandos dispersos. Registrada en el **[ADR 0048](docs/decisions/0048-superficie-app-tuberia.md)** (supersede el 0044 **en la superficie**; el principio "la UI autora, el gate ejecuta" sigue vivo). El motor PowerShell del sprint pasado (R1/R2/R3/R5) es la **base de la app**; la extensión se retira.
+
+**Sprint nuevo "La app de la tubería"** con plan aprobado en [`docs/sprints/sprint-app-tuberia-plan.md`](docs/sprints/sprint-app-tuberia-plan.md):
+- **R1** — cerrar el legado + la ley nueva (ADR 0048, CHANGELOG `v1.26.0`, HANDOFF reconciliado, PR del sprint legado).
+- **R2** — el cascarón fiel con **GEMBA TEMPRANO** (doble clic al `.exe` a ver la maqueta tal cual, antes de cablear datos).
+- **R3** — las lecturas (datos reales a la app).
+- **R4** — las escrituras (parametrizar de verdad).
+- **R5** — el modo avanzado real (firma + candado desde la app).
+- **R6** — retiro de la extensión (VS Code limpio).
+- **R7** — empaquetado + release `v1.27.0`.
+
+**Regla de modelos (orden del cliente):** Fable orquesta y pone criterio en el hilo; opus/sonnet/haiku hacen TODA la mecánica en subagentes. Ningún subagente en Fable.
+
+**Pendientes del cliente (nada bloquea al agente):**
+1. **Orden nombrada para el merge del PR del sprint legado** (`sprint/sistema-configurable-20260721` a `main`, corta `v1.26.0`).
+2. **Gemba de fidelidad en R2** (aprobar la cara de la app con sus ojos antes de cablear datos) — es el criterio de "hecho" de esa rebanada.
+
+---

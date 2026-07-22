@@ -1,4 +1,4 @@
-# Plan de sprint — Documentos gobernados (gobierno por estructura, modelo SAP)
+# Plan de sprint — Documentos gobernados (gobierno por estructura, el régimen estatuto)
 
 > Contrato del sprint (aprobado 2026-07-17, R0 nombrado + STOP 2 en plan mode). El QUÉ + el CÓMO.
 
@@ -12,7 +12,7 @@ El cliente hace análisis de flujos en el hijo **enti** (`entisoft-rescate`, mot
 
 **Causa raíz:** el motor se gobierna por **hash** (sello + `estado-motor -Detallado`), pero los documentos **instancia-de-template** tienen contenido que varía a propósito — el hash es la herramienta equivocada. Falta el **hermano estructural**: gobernar las **secciones**. El ritual inyecta esos docs con `@`; si el hijo vació o reestructuró CONTRIBUTING, la lógica del `arranca`/`planea` opera sobre basura y el preflight actual (que solo checa **existencia**) no lo caza.
 
-**Modelo mental (cliente):** SAP. El hijo puede llenar/configurar, pero si **altera la estructura gobernada**, "garantía nula" — el método declara que ya no garantiza que su lógica inyectada funcione. *"No se pueda (bloquea) o no se recomiende (avisa) desviar."*
+**Modelo mental (cliente):** el estatuto. El hijo puede llenar/configurar, pero si **altera la estructura gobernada**, "garantía nula" — el método declara que ya no garantiza que su lógica inyectada funcione. *"No se pueda (bloquea) o no se recomiende (avisa) desviar."*
 
 ## Encuadre de producto
 

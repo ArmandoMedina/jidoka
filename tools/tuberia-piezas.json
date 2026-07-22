@@ -1,0 +1,123 @@
+{
+  "_comment": "CENSO CURADO de la maqueta docs/analisis/maqueta-tuberia-202607.html (spec congelada 2026-07-20): las 49 piezas (pz), las 57 aristas (E) y los regimenes de gobierno (REGBY/REGOVR/REGTXT/REGCOLOR), extraidos VERBATIM UNA sola vez a esta semilla versionada. Es la parte CONGELADA del contrato: la superpone el estado VIVO que calcula tools/tuberia-datos.ps1 (regimen efectivo, candado, firma, cola y conformidad, leidos frescos de tools/contratos.json + la ley + los ledgers). Campo path: la ruta REAL en el repo cuando la pieza conceptual tiene una traza evidente (deducida con Test-Path sobre este repo Jidoka; comandos -> .claude/commands/jidoka/*.md, asientos -> .claude/agents/*.md, skills -> .claude/skills/*/SKILL.md, ley/ledgers/motor -> tools/* o kit/*, docs de instancia -> su canonico); path=null cuando la pieza es un concepto sin un archivo unico dueno (git/GitHub/CI vive fuera del repo o en varios archivos, disparos/templates/capacidades son directorios). Los overrides de contratos.json SOLO aplican a piezas con path no-null. Acentos permitidos: esto es CONTENIDO (texto de la maqueta), no motor; el archivo se escribe UTF-8 SIN BOM.",
+  "piezas": [
+    { "id": "c-arranca", "tipo": "Ritual — comandos", "nombre": "/jidoka:arranca", "tag": "", "desc": "Abre la sesión: git → QUÉ → CÓMO → DÓNDE. Inyecta 4 docs con @, corre 3 scripts del motor (preflight, router, casting) y fija las reglas duras.", "confHoy": "Editando arranca.md a mano (qué @ lee, qué ! corre).", "confVision": "Checkboxes: qué docs lee este comando. Dar de alta un doc y marcarle \"lo lee arranca\" escribe el @ aquí.", "path": ".claude/commands/jidoka/arranca.md" },
+    { "id": "c-planea", "tipo": "Ritual — comandos", "nombre": "/jidoka:planea", "tag": "", "desc": "Diseña el sprint con R0 (el QUÉ) + STOP humano antes de una línea de código. Lee relevo, backlog, brief y la plantilla del plan.", "confHoy": "Editando planea.md a mano.", "confVision": "Igual: la lista de lectura se cablea desde la UI.", "path": ".claude/commands/jidoka/planea.md" },
+    { "id": "c-descubre", "tipo": "Ritual — comandos", "nombre": "/jidoka:descubre", "tag": "", "desc": "La entrevista cuando el QUÉ está borroso: hechos pasados, no hipotéticos. Lee el brief (si existe) y el kit de entrevista.", "confHoy": "Editando descubre.md.", "confVision": "—", "path": ".claude/commands/jidoka/descubre.md" },
+    { "id": "c-gemba", "tipo": "Ritual — comandos", "nombre": "/jidoka:gemba", "tag": "⚠ no lee nada", "desc": "Corre el demo y produce evidencia en qa_runs/. DATO del censo: es el ÚNICO comando que no inyecta ningún doc ni corre ningún script. ¿A propósito? Nada lo declara.", "confHoy": "Editando gemba.md.", "confVision": "La UI mostraría este \"no lee nada\" en rojo para que decidas si es hueco o diseño.", "path": ".claude/commands/jidoka/gemba.md" },
+    { "id": "c-cierra", "tipo": "Ritual — comandos", "nombre": "/jidoka:cierra", "tag": "", "desc": "Cierra sprint/sesión: corre probar-gate y verificar, llena el HANDOFF, cuadro de cierre, poda.", "confHoy": "Editando cierra.md.", "confVision": "—", "path": ".claude/commands/jidoka/cierra.md" },
+    { "id": "c-quesigue", "tipo": "Ritual — comandos", "nombre": "/jidoka:que-sigue", "tag": "", "desc": "Propone el siguiente paso en orden de valor. Lee HANDOFF + ROADMAP.", "confHoy": "Editando que-sigue.md.", "confVision": "—", "path": ".claude/commands/jidoka/que-sigue.md" },
+    { "id": "c-desatendido", "tipo": "Ritual — comandos", "nombre": "/jidoka:desatendido", "tag": "", "desc": "El pase autónomo: reparte lanes [agente]/[humano]. Lee su plantilla.", "confHoy": "Editando desatendido.md.", "confVision": "—", "path": ".claude/commands/jidoka/desatendido.md" },
+
+    { "id": "a-explorador", "tipo": "Asientos — agentes", "nombre": "explorador", "tag": "haiku", "desc": "Barridos de lectura y localización. Herramientas: SOLO Read, Glob, Grep — no puede editar ni ejecutar nada. Eso ES \"bajar caminos\": está cableado para que no pueda romper nada.", "confHoy": "Frontmatter de .claude/agents/explorador.md.", "confVision": "Checkboxes de herramientas + dropdown de modelo (flujo 2 de la maqueta).", "path": ".claude/agents/explorador.md" },
+    { "id": "a-mecanico", "tipo": "Asientos — agentes", "nombre": "mecanico", "tag": "haiku", "desc": "Edits mecánicos bien especificados. Tiene Edit pero NO tiene Bash: puede cambiar archivos, no ejecutar comandos.", "confHoy": "Frontmatter de mecanico.md.", "confVision": "—", "path": ".claude/agents/mecanico.md" },
+    { "id": "a-auditor", "tipo": "Asientos — agentes", "nombre": "auditor", "tag": "sonnet", "desc": "Juicio acotado: revisar contra spec, correr UN test y leer su salida. Tiene Bash (puede ejecutar) pero NO tiene Edit (no puede tocar lo que juzga). Juez que no es parte — cableado, no prometido.", "confHoy": "Frontmatter de auditor.md.", "confVision": "—", "path": ".claude/agents/auditor.md" },
+    { "id": "a-arquitecto", "tipo": "Asientos — agentes", "nombre": "arquitecto", "tag": "opus", "desc": "Decisiones con trade-offs. SOLO lectura (Read/Glob/Grep): el que decide no pica código. El tier más caro, el camino más angosto.", "confHoy": "Frontmatter de arquitecto.md.", "confVision": "—", "path": ".claude/agents/arquitecto.md" },
+
+    { "id": "s-escribano", "tipo": "Skills — oficios", "nombre": "escribano", "tag": "", "desc": "Sincroniza docs con código según la ley. Es el rol que responde por las 11 áreas hoy.", "confHoy": "SKILL.md a mano.", "confVision": "La UI mostraría qué áreas responde cada oficio.", "path": ".claude/skills/escribano/SKILL.md" },
+    { "id": "s-revisor", "tipo": "Skills — oficios", "nombre": "revisor-visual", "tag": "", "desc": "Produce evidencia visual en qa_runs/ para tus ojos. Pareja natural del gate gemba-stop (hoy dormido).", "confHoy": "SKILL.md.", "confVision": "—", "path": ".claude/skills/revisor-visual/SKILL.md" },
+    { "id": "s-validador", "tipo": "Skills — oficios", "nombre": "validador", "tag": "", "desc": "Corre pruebas y juzga solo lo ambiguo. Pareja del gate validador-stop (hoy dormido).", "confHoy": "SKILL.md.", "confVision": "—", "path": ".claude/skills/validador/SKILL.md" },
+    { "id": "s-arqdoc", "tipo": "Skills — oficios", "nombre": "arquitecto-doc", "tag": "", "desc": "Cuida el grafo de docs en repos doc-heavy (frontmatter, wikilinks, estados).", "confHoy": "SKILL.md.", "confVision": "—", "path": ".claude/skills/arquitecto-doc/SKILL.md" },
+
+    { "id": "h-nomemorias", "tipo": "Hooks de Claude", "nombre": "no-memorias", "tag": "PreToolUse", "desc": "El ÚNICO hook que frena EN EL MOMENTO (antes de cada Write/Edit/Bash): prohíbe memorias de IA fuera del repo. La confesión fundacional: se cableó porque repetirlo 4 veces no funcionó.", "confHoy": "settings.json + su .ps1.", "confVision": "PreToolUse da para mucho más — ver pestaña 3.", "path": ".claude/settings.json" },
+    { "id": "h-andon", "tipo": "Hooks de Claude", "nombre": "andon-stop", "tag": "Stop · VIVO", "desc": "Al decir \"terminé\": corre la ley del blast-radius sobre el diff. Doc-drift → no cierras.", "confHoy": "settings.json + la ley.", "confVision": "—", "path": ".claude/settings.json" },
+    { "id": "h-review", "tipo": "Hooks de Claude", "nombre": "review-stop", "tag": "Stop · VIVO", "desc": "Al cerrar: si tocaste un área con revisa:true (kit, barreras, extension), exige code-review.", "confHoy": "La ley (campo revisa).", "confVision": "—", "path": ".claude/settings.json" },
+    { "id": "h-gemba", "tipo": "Hooks de Claude", "nombre": "gemba-stop", "tag": "Stop · DORMIDO", "desc": "Exigiría evidencia visual fresca en qa_runs/ — pero ninguna área declara rol revisor-visual. Configurado, apagado.", "confHoy": "Se despierta declarando un área visual en la ley.", "confVision": "La UI te diría: \"tienes este gate en la bodega, ¿lo despierto?\"", "path": ".claude/settings.json" },
+    { "id": "h-validadorstop", "tipo": "Hooks de Claude", "nombre": "validador-stop", "tag": "Stop · DORMIDO", "desc": "Exigiría corrida de validación para specs/datos — ninguna área declara rol validador.", "confHoy": "Ídem.", "confVision": "—", "path": ".claude/settings.json" },
+
+    { "id": "g-prepush", "tipo": "git — el cinturón local", "nombre": "pre-push", "tag": "bypaseable", "desc": "Antes de cada push corre 3 gates: verificar (la ley), anti-pii, estado-ligas -Estricto. Se salta con --no-verify (disparo: eso es teatro y solo pospone el rojo).", "confHoy": ".githooks/pre-push (shell).", "confVision": "—", "path": ".githooks/pre-push" },
+
+    { "id": "gh-ci", "tipo": "GitHub — el muro", "nombre": "andon.yml (CI)", "tag": "7 pasos", "desc": "El check requerido: humo de 14 probar-*, la ley DESDE LA RAMA BASE (un PR no puede editar la regla que lo juzga), docs -Estricto, ligas, anti-pii, la costura ci.local.ps1, y el auditor del grafo.", "confHoy": ".github/workflows/andon.yml.", "confVision": "—", "path": ".github/workflows/andon.yml" },
+    { "id": "gh-branch", "tipo": "GitHub — el muro", "nombre": "branch protection", "tag": "server-side", "desc": "Lo que convierte el check en MURO: required + sin bypass. Estado que vive en GitHub y que NI la ley NI la linterna pueden ver (pestaña 3).", "confHoy": "Configuración del repo en GitHub (a mano, el dueño).", "confVision": "Un check \"el muro sigue en pie\" vía gh api.", "path": null },
+
+    { "id": "l-ley", "tipo": "La ley y los ledgers", "nombre": "blast-radius.json", "tag": "11 áreas", "desc": "LA ley única: 11 áreas de \"si tocas X, mantén Y fresco\". La leen el verificador, el router, los Stop hooks, el CI (desde la base) y la linterna. 1 sola área bloquea (decisiones); 10 avisan.", "confHoy": "Editando el JSON a mano (justo lo que tu visión mata).", "confVision": "Cada regla se AUTORA desde la UI: área, fuente, doc, fuerza. La extensión ya empezó (ligas); esto es el resto.", "extra": { "tabla": "areas" }, "path": "tools/blast-radius.json" },
+    { "id": "l-ligas", "tipo": "La ley y los ledgers", "nombre": "ligas.json", "tag": "1 liga", "desc": "El ledger granular código↔capacidad. Hoy: 1 liga (linterna-extension → AND-1, avisa). La única pieza que YA se autora desde UI (clic derecho en VS Code).", "confHoy": "La extensión de VS Code (¡ya!).", "confVision": "El molde a copiar para todo lo demás.", "path": "tools/ligas.json" },
+    { "id": "l-docsgob", "tipo": "La ley y los ledgers", "nombre": "docs-gobernados.json", "tag": "3 docs", "desc": "El gobierno por SECCIONES (gobierno por estatuto): brief, infra y CONTRIBUTING deben conservar su estructura; el contenido es libre. estricto:false = aviso.", "confHoy": "JSON a mano.", "confVision": "Checkbox \"gobernar estructura\" al dar de alta un doc.", "path": "tools/docs-gobernados.json" },
+    { "id": "l-manifiesto", "tipo": "La ley y los ledgers", "nombre": "manifiesto de siembra", "tag": "36 piezas", "desc": "Qué baja a los repos hijos: 36 piezas de mecánica, 2 arquetipos de ley (docs-as-code, code-first), 5-6 stubs. La extensión es Jidoka-only a propósito.", "confHoy": "kit/.jidoka/instalar/manifiesto.json a mano.", "confVision": "La UI mostraría qué pieza viaja y cuál no — y por qué.", "path": "kit/.jidoka/instalar/manifiesto.json" },
+
+    { "id": "m-verificar", "tipo": "El motor (tools/)", "nombre": "verificar.ps1", "tag": "el gate", "desc": "El verificador de la ley: diff contra blast-radius. Corre en pre-push, en andon-stop y en CI (desde la base). Incluye no-borres-el-motor.", "confHoy": "Es motor: no se toca sin ADR.", "confVision": "—", "path": "tools/verificar.ps1" },
+    { "id": "m-rutear", "tipo": "El motor (tools/)", "nombre": "rutear.ps1", "tag": "el router", "desc": "Imprime el preview de gates de la sesión (la tabla del arranca). Falla cerrado sin ley.", "confHoy": "Motor.", "confVision": "—", "path": "tools/rutear.ps1" },
+    { "id": "m-asientos", "tipo": "El motor (tools/)", "nombre": "asientos.ps1", "tag": "el casting", "desc": "Imprime el casting vivo desde .claude/agents/ (la tabla de asientos del arranca). El artefacto manda, no la prosa.", "confHoy": "Motor.", "confVision": "—", "path": "tools/asientos.ps1" },
+    { "id": "m-auditar", "tipo": "El motor (tools/)", "nombre": "auditar.ps1", "tag": "el grafo", "desc": "Audita product/: frontmatter, wikilinks rotos, capacidades vigentes sin Gherkin. scanDirsExtra viene de la ley.", "confHoy": "Motor.", "confVision": "—", "path": "tools/auditar.ps1" },
+    { "id": "m-antipii", "tipo": "El motor (tools/)", "nombre": "anti-pii.ps1", "tag": "", "desc": "Bloquea formas de PII de entorno (email real, ruta de usuario). Detector público + denylist local gitignoreada.", "confHoy": "Motor + denylist local.", "confVision": "—", "path": "tools/anti-pii.ps1" },
+    { "id": "m-linterna", "tipo": "El motor (tools/)", "nombre": "estado-gobierno.ps1", "tag": "la linterna", "desc": "La linterna: deriva el grafo del gobierno de la ley real → HTML autocontenido. 5 modos (Foco/Agrupado/Clusters/Reparto/Capas-spike). Vista, NO gate. Aquí vive el hueco de docs/ (línea 132).", "confHoy": "Motor.", "confVision": "—", "path": "tools/estado-gobierno.ps1" },
+    { "id": "m-estados", "tipo": "El motor (tools/)", "nombre": "estado-motor · estado-docs · estado-ligas", "tag": "3 detectores", "desc": "Los detectores de drift: motor divergente (sello), estructura de docs (secciones), ligas código↔capacidad. Aviso local, muro en CI según config.", "confHoy": "Motor.", "confVision": "—", "path": null },
+    { "id": "m-siembra", "tipo": "El motor (tools/)", "nombre": "sembrar-manual · publicar · reportar-leccion", "tag": "el lazo", "desc": "La bajada AV-segura a los hijos, el release derivado del SSOT, y el canal de subida de lecciones. instalar.ps1 vive en git (cuarentena AV local).", "confHoy": "Motor.", "confVision": "—", "path": null },
+    { "id": "m-probar", "tipo": "El motor (tools/)", "nombre": "probar-* (14 self-tests)", "tag": "prueba de vida", "desc": "Cada gate tiene su prueba de vida: gate, hooks, auditor, disparos, preflight, docs, ligas, linterna, anti-pii, agentes, extensión, versión, publicar, sembrar. Corren en preflight y en CI.", "confHoy": "Motor.", "confVision": "—", "path": null },
+
+    { "id": "d-disparos", "tipo": "Doctrina ejecutable", "nombre": "disparos", "tag": "16", "desc": "La doctrina compilada a mensajes de gate. 14 cableados en hooks/comandos/motor + 2 catálogo-solo: capacita-desde-el-artefacto y… deny-vs-ask — el que pediría usar los permisos del harness que están VACÍOS (pestaña 3).", "confHoy": "kit/.jidoka/disparos/*.md; la ley exige que la tesis los respalde.", "confVision": "—", "path": null },
+
+    { "id": "t-templates", "tipo": "Templates del kit", "nombre": "templates", "tag": "23", "desc": "1 de raíz + 22 de producto: brief, ADR, plan/entrega de sprint, qa-log, y el vocabulario del grafo (capacidad, módulo, dominio, glosario, proceso, requerimiento…). Son los \"tipos de cosa\" que tu ligar genérico conectaría.", "confHoy": "Archivos del kit.", "confVision": "El wizard de alta de doc elige el TIPO desde este catálogo.", "path": null },
+
+    { "id": "cap-and1", "tipo": "Producto — capacidades", "nombre": "AND-1 muro-andon", "tag": "13 links", "desc": "Cuando el agente dice \"listo\" y no es cierto, algo lo para. La capacidad ancla del método; la liga linterna-extension apunta aquí.", "confHoy": "product/capacidades/*.md con wikilinks.", "confVision": "—", "path": "product/capacidades/AND-1-muro-andon.md" },
+    { "id": "cap-rit1", "tipo": "Producto — capacidades", "nombre": "RIT-1 ritual-ejecutable", "tag": "8 links", "desc": "El método deja de ser prosa: comandos + asientos.", "confHoy": "Ídem.", "confVision": "—", "path": "product/capacidades/RIT-1-ritual-ejecutable.md" },
+    { "id": "cap-kit1", "tipo": "Producto — capacidades", "nombre": "KIT-1 lazo-sincronizacion", "tag": "13 links", "desc": "Instalar en repos ajenos + la lección sube, la máquina baja.", "confHoy": "Ídem.", "confVision": "—", "path": "product/capacidades/KIT-1-lazo-sincronizacion.md" },
+    { "id": "cap-kit2", "tipo": "Producto — capacidades", "nombre": "KIT-2 gobierno-documental", "tag": "7 links", "desc": "La estructura de los docs de instancia, gobernada por secciones.", "confHoy": "Ídem.", "confVision": "—", "path": "product/capacidades/KIT-2-gobierno-documental.md" },
+
+    { "id": "x-ext", "tipo": "Extensión VS Code", "nombre": "el editor del gobierno", "tag": "3 comandos", "desc": "\"ver el gobierno\" (la linterna en webview), \"ligar código a capacidad…\", \"quitar liga…\". AUTORA la ley, no la ejecuta (ADR 0044). Es el embrión de TODA tu visión: hoy sabe escribir 1 de los ~6 tipos de liga.", "confHoy": "extension/ (JS plano, sin build).", "confVision": "Crece hasta autorar toda la tubería: docs, @, agentes, prohibiciones.", "path": "extension/extension.js" },
+
+    { "id": "doc-brief", "tipo": "Docs de instancia", "nombre": "PRODUCT_BRIEF", "tag": "", "desc": "El QUÉ. Lo leen arranca, planea y descubre — tu ejemplo exacto de \"un doc que varios comandos leen\". Estructura gobernada (KIT-2).", "confHoy": "A mano.", "confVision": "—", "path": "product/PRODUCT_BRIEF.md" },
+    { "id": "doc-infra", "tipo": "Docs de instancia", "nombre": "infra.md", "tag": "", "desc": "El CÓMO operativo + el casting. Lo lee arranca. Gobernado por secciones.", "confHoy": "A mano.", "confVision": "—", "path": "product/infra.md" },
+    { "id": "doc-contributing", "tipo": "Docs de instancia", "nombre": "CONTRIBUTING", "tag": "", "desc": "Cómo se trabaja + el modelo de amenaza. Lo lee arranca. Gobernado.", "confHoy": "A mano.", "confVision": "—", "path": "CONTRIBUTING.md" },
+    { "id": "doc-handoff", "tipo": "Docs de instancia", "nombre": "HANDOFF", "tag": "efímero", "desc": "El relevo: se llena al cerrar, se lee y limpia al abrir. Lo leen arranca, planea y que-sigue. Es también el doc_bloquea del área raiz.", "confHoy": "El ritual lo mantiene.", "confVision": "—", "path": "HANDOFF.md" },
+    { "id": "doc-roadmap", "tipo": "Docs de instancia", "nombre": "ROADMAP", "tag": "", "desc": "Hacia dónde va. Lo leen planea y que-sigue.", "confHoy": "A mano.", "confVision": "—", "path": "ROADMAP.md" },
+    { "id": "doc-changelog", "tipo": "Docs de instancia", "nombre": "CHANGELOG", "tag": "", "desc": "El doc_avisa de 6 de las 11 áreas: casi todo cambio pide registrarse aquí.", "confHoy": "El ritual.", "confVision": "—", "path": "CHANGELOG.md" }
+  ],
+  "aristas": [
+    { "de": "c-arranca", "a": "doc-brief", "rel": "lee @" }, { "de": "c-arranca", "a": "doc-contributing", "rel": "lee @" }, { "de": "c-arranca", "a": "doc-infra", "rel": "lee @" }, { "de": "c-arranca", "a": "doc-handoff", "rel": "lee @" },
+    { "de": "c-planea", "a": "doc-handoff", "rel": "lee @" }, { "de": "c-planea", "a": "doc-roadmap", "rel": "lee @" }, { "de": "c-planea", "a": "doc-brief", "rel": "lee @" }, { "de": "c-planea", "a": "t-templates", "rel": "lee @ sprint-plan" },
+    { "de": "c-descubre", "a": "doc-brief", "rel": "lee @ (si existe)" }, { "de": "c-descubre", "a": "t-templates", "rel": "lee @ kit-entrevista" },
+    { "de": "c-quesigue", "a": "doc-handoff", "rel": "lee @" }, { "de": "c-quesigue", "a": "doc-roadmap", "rel": "lee @" },
+    { "de": "c-cierra", "a": "t-templates", "rel": "lee @ sprint-entrega" }, { "de": "c-desatendido", "a": "t-templates", "rel": "lee @ desatendido" },
+    { "de": "c-arranca", "a": "m-estados", "rel": "corre ! estado-docs" }, { "de": "c-arranca", "a": "m-rutear", "rel": "corre ! el router" }, { "de": "c-arranca", "a": "m-asientos", "rel": "corre ! el casting" },
+    { "de": "c-cierra", "a": "m-probar", "rel": "corre ! probar-gate" }, { "de": "c-cierra", "a": "m-verificar", "rel": "corre ! verificar" },
+    { "de": "m-asientos", "a": "a-explorador", "rel": "imprime" }, { "de": "m-asientos", "a": "a-mecanico", "rel": "imprime" }, { "de": "m-asientos", "a": "a-auditor", "rel": "imprime" }, { "de": "m-asientos", "a": "a-arquitecto", "rel": "imprime" },
+    { "de": "h-andon", "a": "l-ley", "rel": "hace cumplir" }, { "de": "h-review", "a": "l-ley", "rel": "lee revisa:true" }, { "de": "h-gemba", "a": "l-ley", "rel": "esperaría rol revisor-visual" }, { "de": "h-validadorstop", "a": "l-ley", "rel": "esperaría rol validador" },
+    { "de": "h-andon", "a": "m-verificar", "rel": "usa" },
+    { "de": "s-escribano", "a": "l-ley", "rel": "responde por las áreas" }, { "de": "s-revisor", "a": "h-gemba", "rel": "pareja del gate" }, { "de": "s-validador", "a": "h-validadorstop", "rel": "pareja del gate" },
+    { "de": "g-prepush", "a": "m-verificar", "rel": "corre" }, { "de": "g-prepush", "a": "m-antipii", "rel": "corre" }, { "de": "g-prepush", "a": "m-estados", "rel": "corre estado-ligas -Estricto" },
+    { "de": "gh-ci", "a": "m-probar", "rel": "corre los 14" }, { "de": "gh-ci", "a": "m-verificar", "rel": "desde la BASE" }, { "de": "gh-ci", "a": "m-estados", "rel": "estado-docs -Estricto · ligas base" }, { "de": "gh-ci", "a": "m-antipii", "rel": "desde la base" }, { "de": "gh-ci", "a": "m-auditar", "rel": "desde la base" },
+    { "de": "gh-branch", "a": "gh-ci", "rel": "lo vuelve MURO" },
+    { "de": "m-verificar", "a": "l-ley", "rel": "lee" }, { "de": "m-rutear", "a": "l-ley", "rel": "lee" }, { "de": "m-linterna", "a": "l-ley", "rel": "deriva de" }, { "de": "m-linterna", "a": "l-ligas", "rel": "deriva de" }, { "de": "m-linterna", "a": "l-docsgob", "rel": "deriva de" },
+    { "de": "m-estados", "a": "l-docsgob", "rel": "lee" }, { "de": "m-estados", "a": "l-ligas", "rel": "lee" }, { "de": "m-siembra", "a": "l-manifiesto", "rel": "siembra según" }, { "de": "m-auditar", "a": "cap-and1", "rel": "audita el grafo" },
+    { "de": "x-ext", "a": "l-ligas", "rel": "AUTORA" }, { "de": "x-ext", "a": "m-linterna", "rel": "muestra (webview)" }, { "de": "l-ligas", "a": "cap-and1", "rel": "liga linterna-extension → avisa" },
+    { "de": "l-ley", "a": "doc-changelog", "rel": "doc_avisa de 6 áreas" }, { "de": "l-ley", "a": "doc-handoff", "rel": "doc_bloquea del área raiz" },
+    { "de": "d-disparos", "a": "h-nomemorias", "rel": "anti-memoria vive aquí" }, { "de": "d-disparos", "a": "m-verificar", "rel": "no-borres-el-motor vive aquí" }, { "de": "d-disparos", "a": "m-antipii", "rel": "sin-pii vive aquí" }
+  ],
+  "regimenes": {
+    "porTipo": {
+      "Ritual — comandos": "mal",
+      "Asientos — agentes": "estatuto",
+      "Skills — oficios": "motor",
+      "Hooks de Claude": "motor",
+      "git — el cinturón local": "motor",
+      "GitHub — el muro": "motor",
+      "La ley y los ledgers": "estatuto",
+      "El motor (tools/)": "motor",
+      "Doctrina ejecutable": "motor",
+      "Templates del kit": "motor",
+      "Producto — capacidades": "libre",
+      "Extensión VS Code": "motor",
+      "Docs de instancia": "estatuto"
+    },
+    "override": {
+      "l-ligas": "libre",
+      "l-manifiesto": "motor",
+      "doc-handoff": "libre",
+      "doc-roadmap": "libre",
+      "doc-changelog": "libre"
+    },
+    "texto": {
+      "motor": ["motor sellado", "Invariante de fábrica: lo actualiza el lazo (-Actualizar). Editarlo por fuera = DIVERGE; borrarlo sin ADR = BLOQUEA (no-borres-el-motor)."],
+      "estatuto": ["estatuto", "Invariantes de fábrica (probados por Jidoka) + tus extensiones, registradas y legales. Romper un invariante = DESVIADO, garantía nula — aviso local, muro opt-in en CI."],
+      "libre": ["libre", "Tuyo. Jidoka lo registra (para que el verde no mienta) pero no opina de su contenido."],
+      "mal": ["⚠ mal cajón hoy", "HOY se gobierna por hash como si fuera motor: agregar un @ legal se acusa IGUAL que quitar el brief. DEBERÍA ser estatuto: los @ de fábrica y los pasos del ritual son invariantes; tus @ extra, extensiones registradas."]
+    },
+    "color": {
+      "motor": "var(--bad)",
+      "estatuto": "var(--warn)",
+      "libre": "var(--ok)",
+      "mal": "var(--violet)"
+    }
+  }
+}

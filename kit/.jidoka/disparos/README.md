@@ -64,7 +64,9 @@ el mensaje llega en el momento del disparo y no puede asumir que la IA leyó nad
 > Boeing) para lo que requiere juicio humano. Mezclar filosofías por tipo de acción, no elegir
 > una sola.
 
-**Catalogo-solo:** principio de diseño del muro (documentado en `andon/README.md` y `doctrina/03-aviacion.md`); no es un mensaje de gate en runtime, es el eje con que se eligen los otros gates.
+**Cableado en:** `.claude/hooks/candado-pretooluse.ps1`
+
+El eje se documenta en `andon/README.md` y `doctrina/03-aviacion.md`; desde `v1.26.0` gana un punto de runtime que **ejerce el lado DENY**: el candado IA (ADR 0047) deniega en el momento —bloqueo duro, sin preguntar— la edición de una pieza que el humano marcó intocable en `tools/contratos.json`. El lado *ask* (override con juicio humano) queda para acciones que lo requieran.
 
 ### prueba-de-vida-del-gate
 > ¿Cuándo fue la última vez que este gate rechazó algo real? Si la respuesta es nunca, el gate

@@ -7,7 +7,7 @@ dominio: Metodo
 ---
 # Capacidad — El pilar de flujo
 
-Del módulo [[MOD-andon]], dominio [[Metodo]]. La Casa del TPS tiene dos pilares; el método ya tenía Jidoka (parar ante el defecto) pero el pilar de flujo (JIT) no existía. Esta capacidad lo estrena: **los documentos que cargan el estado dejan de crecer solos, el trabajo entra con límite, y el avance y el reparto se ven sin terminal** — y todo es código que rechaza la acción, no prosa que dependa de que alguien se acuerde (plan-contrato: [`docs/sprints/sprint-pilar-de-flujo-plan.md`](../../docs/sprints/sprint-pilar-de-flujo-plan.md), aprobado 2026-07-21; ADR 0045).
+Del módulo [[MOD-andon]], dominio [[Metodo]]. La Casa del TPS tiene dos pilares; el método ya tenía Jidoka (parar ante el defecto) pero el pilar de flujo (JIT) no existía. Esta capacidad lo estrena: **los documentos que cargan el estado dejan de crecer solos, el trabajo entra con límite, y el avance y el reparto se ven sin terminal** — y todo es código que rechaza la acción, no prosa que dependa de que alguien se acuerde (plan-contrato: [`docs/sprints/sprint-pilar-de-flujo-plan.md`](../../docs/sprints/sprint-pilar-de-flujo-plan.md), aprobado 2026-07-21; ADR 0049).
 
 Las piezas:
 
@@ -27,4 +27,4 @@ El ritual [[RIT-1-ritual-ejecutable]] ganó pasos por esto: `/jidoka:planea` se 
 - Dado que un ítem del `ROADMAP.md` venció (su `vence:` ya pasó, o `alta` + la ventana de su clase en `vencimiento_dias` es anterior a hoy), cuando corro `tools/expirar.ps1` (paso duro de `/jidoka:cierra`), entonces se mueve a `docs/MUERTOS.md` con **fecha y motivo** (clase, alta y fecha en que vencía), preservando el resto del ROADMAP byte-igual; revive solo si se re-propone con alta nueva.
 - Dado que abro una sesión nueva, cuando corre el hook `SessionStart` (`.claude/hooks/flujo-sessionstart.ps1`, cableado en `.claude/settings.json`), entonces se inyecta el resumen de `tools/estado-flujo.ps1` —qué sigue (los 3 siguientes por clase de servicio), qué espera a terceros, los gembas pendientes— **sin que nadie lo pida**: el estado se empuja a la vista, ya no depende de que un comando se acuerde.
 
-Verificado por `tools/probar-flujo.ps1` (fixtures ROJO→VERDE de los 3 contratos + expiración por clase, `-Gate`, `-Json` y la degradación con gracia) y la prueba de vida del hook en `tools/probar-hooks.ps1`. Entregado en `v1.26.0`.
+Verificado por `tools/probar-flujo.ps1` (fixtures ROJO→VERDE de los 3 contratos + expiración por clase, `-Gate`, `-Json` y la degradación con gracia) y la prueba de vida del hook en `tools/probar-hooks.ps1`. Entregado en `v1.28.0`.

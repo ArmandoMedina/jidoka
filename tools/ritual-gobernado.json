@@ -1,0 +1,12 @@
+{
+  "_comment": "El ESTATUTO del ritual: los @-includes de fabrica de cada comando /jidoka:*. Hermano de docs-gobernados.json (aquel gobierna la ESTRUCTURA de los docs de instancia por secciones; este gobierna los @ de FABRICA del ritual). Motor: se siembra y converge por -Actualizar. Un @ EXTRA que el cliente agregue es CONFORME (aditiva legal); quitar un @ de fabrica es DESVIADO (garantia nula). Detector: tools/estado-ritual.ps1. arrobas_requeridas vacio = el comando NO inyecta nada A PROPOSITO (deja de ser ambiguo).",
+  "comandos": [
+    { "comando": ".claude/commands/jidoka/arranca.md", "arrobas_requeridas": ["product/PRODUCT_BRIEF.md", "CONTRIBUTING.md", "product/infra.md", "HANDOFF.md"], "estricto": false },
+    { "comando": ".claude/commands/jidoka/planea.md", "arrobas_requeridas": ["HANDOFF.md", "ROADMAP.md", "product/PRODUCT_BRIEF.md"], "estricto": false },
+    { "comando": ".claude/commands/jidoka/que-sigue.md", "arrobas_requeridas": ["HANDOFF.md", "ROADMAP.md"], "estricto": false },
+    { "comando": ".claude/commands/jidoka/gemba.md", "arrobas_requeridas": [], "estricto": false },
+    { "comando": ".claude/commands/jidoka/descubre.md", "arrobas_requeridas": [], "estricto": false },
+    { "comando": ".claude/commands/jidoka/cierra.md", "arrobas_requeridas": [], "estricto": false },
+    { "comando": ".claude/commands/jidoka/desatendido.md", "arrobas_requeridas": [], "estricto": false }
+  ]
+}

@@ -62,7 +62,7 @@ El censo de la tubería (54 piezas en 13 categorías) mostró **tres regímenes 
 
 - **Motor sellado** (por hash): los `tools/*.ps1`, hooks, pre-push, CI. Editar por fuera = `DIVERGE`;
   borrar sin ADR = `BLOQUEA`. Solo Jidoka lo actualiza (el lazo).
-- **Contrato SAP** (por estructura, KIT-2): invariantes de fábrica + extensiones del cliente,
+- **Estatuto** (por estructura, KIT-2): invariantes de fábrica + extensiones del cliente,
   registradas y legales. Romper un invariante = `DESVIADO`, *garantía nula* — aviso local, muro
   opt-in en CI. Hoy solo cubre 3 docs (brief, infra, CONTRIBUTING).
 - **Libre**: instancia del cliente (HANDOFF, ROADMAP, capacidades…). Se registra, no se opina.
@@ -70,7 +70,7 @@ El censo de la tubería (54 piezas en 13 categorías) mostró **tres regímenes 
 **El hallazgo:** los comandos del ritual están en el cajón equivocado. Viajan como `mecanica`
 (gobernados por hash), así que **agregar un `@` legal a tu arranca se acusa IGUAL que quitarle el
 brief** — la máquina no distingue extensión legítima de mutilación. Eso produce rigidez o fatiga de
-aviso. La cura: contrato SAP para los comandos — los `@` de fábrica y los pasos del ritual son
+aviso. La cura: estatuto para los comandos — los `@` de fábrica y los pasos del ritual son
 invariantes; los `@` que el cliente agrega son extensiones registradas.
 
 **El estira y afloja, resuelto con la escalera de dureza que ya es doctrina:** (1) la UI no ofrece el
@@ -124,7 +124,7 @@ responsable, y el opt-in de muro en CI. Principios validados en la maqueta:
 1. **La bandeja mínima real** — unir los detectores existentes en una cola visible ("pendiente de
    parametrizar"). Sin mecánica nueva: es presentación de señales que ya existen. De paso cura el
    hueco de `docs/` (lo no-parametrizado deja de contar como cubierto).
-2. **Contrato SAP para los comandos del ritual** — ledger de invariantes por comando (los `@` de
+2. **Estatuto para los comandos del ritual** — ledger de invariantes por comando (los `@` de
    fábrica, los pasos) + registro de extensiones del cliente; el sello deja de acusar la extensión
    legal. Cura el "cajón equivocado".
 3. **El formulario de alta en la extensión** — el flujo del glosario de verdad: escribe la regla en

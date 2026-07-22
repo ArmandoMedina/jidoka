@@ -5,9 +5,9 @@ clave: KIT-2
 modulo: MOD-instalador
 dominio: Metodo
 ---
-# Capacidad — Gobierno documental por estructura (SAP)
+# Capacidad — Gobierno documental por estructura (el régimen estatuto)
 
-Del módulo [[MOD-instalador]], dominio [[Metodo]]. El hermano estructural de [[KIT-1-lazo-sincronizacion]]: aquel gobierna el **motor** por **hash** (byte a byte); este gobierna los documentos **instancia-de-template** por **secciones**. Modelo SAP: el hijo llena el contenido libre, pero si **altera la estructura gobernada** de un doc que el ritual inyecta con `@`, el método declara *garantía nula* — no puede asegurar que su lógica inyectada funcione. Respeta la regla dura de KIT-1: la instancia nunca se sobrescribe; el detector **declara**, no muta. Piezas: el ledger sembrado (`tools/docs-gobernados.json`: capa-1/2/3 + secciones requeridas congeladas), el detector (`tools/estado-docs.ps1`, aviso en `/jidoka:arranca`; `-Estricto` = muro opt-in en CI), y el template real de `CONTRIBUTING`. Ver [ADR 0042](../../docs/decisions/0042-gobierno-documental-por-estructura.md).
+Del módulo [[MOD-instalador]], dominio [[Metodo]]. El hermano estructural de [[KIT-1-lazo-sincronizacion]]: aquel gobierna el **motor** por **hash** (byte a byte); este gobierna los documentos **instancia-de-template** por **secciones**. Gobierno por estatuto: el hijo llena el contenido libre, pero si **altera la estructura gobernada** de un doc que el ritual inyecta con `@`, el método declara *garantía nula* — no puede asegurar que su lógica inyectada funcione. Respeta la regla dura de KIT-1: la instancia nunca se sobrescribe; el detector **declara**, no muta. Piezas: el ledger sembrado (`tools/docs-gobernados.json`: capa-1/2/3 + secciones requeridas congeladas), el detector (`tools/estado-docs.ps1`, aviso en `/jidoka:arranca`; `-Estricto` = muro opt-in en CI), y el template real de `CONTRIBUTING`. Ver [ADR 0042](../../docs/decisions/0042-gobierno-documental-por-estructura.md).
 
 ## Criterios de aceptación
 

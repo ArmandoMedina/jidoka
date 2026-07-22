@@ -45,6 +45,9 @@ El estado que el plan necesita queda inyectado **aquí mismo** — la garantía 
 2. **Redacta la capacidad con criterios de aceptación** en lenguaje llano: `Dado que… cuando… entonces…`. Esta es la mitad que casi todos se saltan. Cada criterio debe poder demostrarse **sin código ni terminal** (disparo `demo-que-corre-el-cliente`): si la única forma de verlo funcionar es corriendo un script, la rebanada no es vertical todavía.
 3. **STOP — checkpoint humano.** Presenta el QUÉ y **espera la aprobación explícita del cliente** antes de diseñar el CÓMO. Automatiza alto la propuesta; mantén baja la decisión (disparo `decision-queda-en-humano`): tú propones, el cliente elige y firma. Y la aprobación **nombra lo que aprueba** (disparo `aprobacion-nombrada`): un "dale" o un "a tu criterio" no cierran un R0 — pide que el cliente diga con nombre qué aprueba. No es un muro determinista —es un checkpoint— pero es la regla: nada irreversible se construye sin el QUÉ aprobado.
 
+<!-- Punto de insercion de @ del cliente (parametrizar desde la extension). Aditiva legal: el estatuto del ritual acepta un @ extra. No borres el marcador. -->
+<!-- jidoka:arrobas -->
+
 ## El plan (una vez aprobado el QUÉ)
 
 Copia la plantilla `@kit/.jidoka/templates/sprint-plan.md` y llénala con:

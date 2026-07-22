@@ -120,6 +120,7 @@ try {
   # R2c: las ligas codigo<->capacidad se pintan (nodo propio, arista tipada, rota en rojo).
   if ($html1 -match '"liga:buena"') { Ok "R2c: la liga declarada es un nodo propio (liga:buena)" } else { No "R2c: falta el nodo liga:buena" }
   if ($html1 -match '"kind":"liga-bloquea"') { Ok "R2c: arista liga->capacidad tipada por fuerza (liga-bloquea)" } else { No "R2c: falta la arista liga-bloquea" }
+  if ($html1 -match '"kind":"liga-avisa"') { Ok "R2c: arista liga-avisa (liga fantasma, fuerza avisa, cap valida)" } else { No "R2c: falta la arista liga-avisa del fixture (liga fantasma)" }
   if ($html1 -match '"tipo":"liga-rota"') { Ok "R2c: la liga con codigo inexistente se pinta ROTA (rojo)" } else { No "R2c: la liga fantasma deberia ser tipo liga-rota" }
   if ($html1 -match '"s":"area:motor","t":"liga:buena","kind":"liga"') { Ok "R2c: ancla area->liga (el cumulo del area la adopta)" } else { No "R2c: falta la arista ancla area:motor -> liga:buena" }
   if ($html1 -match '"s":"gate:andon-stop","t":"area:motor","kind":"vigila"') { Ok "RW: la arista vigila sale del GATE hacia el area (B7: el gate vigila, no al reves)" } else { No "RW: vigila deberia ir gate->area" }
@@ -215,8 +216,24 @@ try {
   if ($htmlR -match 'id="tabla"') { Ok "RW: la tabla del gobierno (para leer) esta bajo el grafo" } else { No "RW: falta la tabla del gobierno" }
   if ($htmlR -match 'setAttribute\(.viewBox.') { Ok "RW: fit-to-viewport (viewBox) activo -- nada se corta fuera de pantalla" } else { No "RW: falta el fit del viewBox" }
   if ($htmlR -match '\.node\.suelto') { Ok "RW: los sueltos no-huerfanos llevan trazo propio (no parecen huerfanos)" } else { No "RW: falta el estilo .node.suelto" }
-  if ($htmlR -match '"liga:linterna-extension"') { Ok "R2c: la liga dogfood del repo real aparece en el grafo" } else { No "R2c: falta la liga dogfood linterna-extension" }
-  if ($htmlR -match '"kind":"liga-avisa"') { Ok "R2c: la arista de la liga dogfood va tipada (liga-avisa)" } else { No "R2c: falta la arista liga-avisa en el repo real" }
+  # R2c dogfood sobre el repo real: solo corre si hay ligas declaradas.
+  # Tras ADR 0048 la autoria quedo manual (ligas.js se retiro con extension/); el ledger
+  # real hoy tiene "ligas":[] legitimamente. La cobertura de nodo+arista vive en la Parte A
+  # (fixture con liga "buena" liga-bloquea + liga "fantasma" liga-avisa + liga-rota).
+  $ligasRealPath = Join-Path $raiz 'tools/ligas.json'
+  $ligasRealCount = 0
+  if (Test-Path -LiteralPath $ligasRealPath) {
+    try {
+      $ligasRealObj = Get-Content -LiteralPath $ligasRealPath -Raw | ConvertFrom-Json
+      $ligasRealCount = @($ligasRealObj.ligas).Count
+    } catch { $ligasRealCount = 0 }
+  }
+  if ($ligasRealCount -eq 0) {
+    Write-Host "  [SKIP]  R2c dogfood liga real (ledger real sin ligas tras ADR 0048 - la cobertura vive en el fixture Parte A)" -ForegroundColor DarkGray
+  } else {
+    if ($htmlR -match '"liga:') { Ok "R2c: hay nodos liga en el grafo real" } else { No "R2c: el grafo real deberia tener nodos liga (ligas.json no vacio)" }
+    if ($htmlR -match '"kind":"liga-avisa"|"kind":"liga-bloquea"') { Ok "R2c: hay aristas liga tipadas por fuerza en el grafo real" } else { No "R2c: faltan aristas liga tipadas (liga-avisa o liga-bloquea)" }
+  }
   $colgR = Get-AristasColgadasCount $htmlR
   if ($colgR -eq 0) { Ok "R2: ninguna arista cuelga de un nodo inexistente (repo real)" } else { No "R2: $colgR arista(s) colgadas en el grafo real (-1 = no parseo)" }
   # los 3 modos de vista (Foco / Agrupado / Clusters): sin ellos el grafo denso es una marana.
