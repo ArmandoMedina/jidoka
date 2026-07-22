@@ -6,28 +6,26 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x`. Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-22 — sprint «El molde único de los ADRs» · CONSTRUIDO en worktree aislado · Gemba + PR + release pendientes)
+## Dónde estamos (2026-07-22 — PR único de consolidación `consolida-tuberia-adrs-20260722` · dos sprints + el fix, todo hacia `v1.29.0` · listo para push)
 
-**El QUÉ aprobado (plan mode, 2026-07-22):** los ADRs salen y se mantienen con un molde único, y el mecanismo que lo garantiza deja de ser una skill personal fuera del repo — un **guardián residente que bloquea**. Enfoque del cliente: *"campo completo y alinea de una vez la plantilla… bloquea todo"*. Plan: [`docs/sprints/sprint-molde-adrs-plan.md`](docs/sprints/sprint-molde-adrs-plan.md) · Entrega: [`sprint-molde-adrs-entrega.md`](docs/sprints/sprint-molde-adrs-entrega.md) · Decisión: [ADR 0050](docs/decisions/0050-molde-unico-de-los-adrs.md).
+**Un solo PR consolida sobre `main` (v1.28.0) dos sprints paralelos ya construidos y verdes + un fix — por orden del cliente ("todos los cambios a un solo PR").**
 
-**Las 4 rebanadas CONSTRUIDAS y verdes** (evidencia `qa_runs/adrs-20260722/LOG.md`):
-- ✅ R1 molde único (`0000-plantilla.md` ↔ `kit/.jidoka/templates/adr.md`) · R2 guardián `tools/probar-adrs.ps1` (MURO: secciones + estado header↔índice + huérfanos; self-test 9/9; falla-suave sin ADRs).
-- ✅ R3 los 49 ADRs alineados sin reescribir decisiones (0044 estado corregido) · R4 cableado a `andon.yml` + `publicar.ps1` + sembrado (mecánica), ADR 0050, tablero `conformidad-adrs.html`.
-- ✅ `/code-review` corrido: 6 hallazgos del guardián curados (el clave: no tumbar el CI de un hijo sin ADRs). Suite verde (probar-adrs 9/9, docs 27, flujo 94, gate 14).
+1. **El molde único de los ADRs (ADR 0050, MINOR):** guardián residente `tools/probar-adrs.ps1` que **BLOQUEA** (5 secciones canónicas + estado header↔índice + huérfanos; self-test 9/9; falla-suave sin ADRs), los 49 ADRs alineados al molde sin reescribir decisiones (0044 corregido), molde `0000` ↔ kit reconciliado, cableado a `andon.yml`+`publicar.ps1`+sembrado. Récord: [`sprint-molde-adrs-entrega.md`](docs/sprints/sprint-molde-adrs-entrega.md).
+2. **La tubería = mapa completo del repo (ADR 0051, MINOR):** `tuberia-datos.ps1` deriva el censo de las carpetas — 49 piezas a mano → 360 = `git ls-files` exacto; `probar-app.ps1` 41/41; **2 Gembas del cliente aprobados**. Récord: [`sprint-tuberia-por-carpetas-entrega.md`](docs/sprints/sprint-tuberia-por-carpetas-entrega.md).
+3. **Fix de encoding de la foto (PATCH):** los 5 emits a stdout escriben bytes UTF-8 crudos (`Emit-Utf8Json`); ya no cae a CP437. `probar-app.ps1` endurecido. Evidencia: `qa_runs/curas-tuberia-20260722/LOG.md`.
 
-**Aislamiento (otro agente en paralelo en FLU-1):** se trabaja en el worktree `C:\Repositorio personal\jidoka-adrs` (rama `review/adrs-20260722`, 4 commits desde `5a464bc`). Lección: rama propia NO basta con un escritor paralelo — hace falta `git worktree add` (un `checkout -b` en el árbol compartido colisionó).
+**Reconciliación hecha en la rama:** el ADR de tubería se renumeró **0050 → 0051** (el sprint de ADRs se quedó con 0050); versión unificada **`v1.29.0`**; CHANGELOG y HANDOFF fusionados bajo un solo corte y el HANDOFF migrado al contrato FLU-1. FLU-1 (`v1.28.0`, ADR 0049) ya está en `main` (PR #122) — deja de estar suelto.
 
-**Falta (cierre del sprint):**
-- **Gemba del cliente** (sin terminal): abrir `conformidad-adrs.html` + ojear 0044/0001/0028 + el ADR 0050 (pasos en la entrega).
-- **PR + merge (orden nombrada) + release `v1.29.0`** (MINOR) — **coordinar el orden de merge con FLU-1**: FLU-1 toma `v1.28.0`, este sprint `v1.29.0`; deben mergear en ese orden (misma lección del renumerado 0045→0049).
-- **Restaurar** `tools/instalar.ps1` y `tools/probar-instalador.ps1` — el AV (Bitdefender) los puso en cuarentena al intentar `-Sellar`; intactos en git (`git checkout HEAD -- <archivos>` cuando el AV libere). El sello no se trackea en Jidoka; el re-sello NO era paso del sprint.
-- **Opcional:** reconciliar `~/.claude/skills/adr-helper` (skill personal, `Razones`→`Por qué`) — higiene local fuera del repo.
+**Cola de decisiones del cliente:**
+1. **[PENDIENTE] Gemba** de ambos sprints sin terminal (ADRs: `conformidad-adrs.html` + ojear 0044/0001/0028; tubería: abrir la app y ver el censo completo). La fidelidad de la tubería ya la aprobó en 2 Gembas.
+2. **[PENDIENTE] Merge del PR + release `v1.29.0`** con **orden nombrada** (los merges la siguen necesitando).
+3. **[PENDIENTE] Cerrar la PR #124** (la de ADRs, del otro agente) apuntando a este PR consolidado — su trabajo viaja aquí.
 
-**Regla de modelos (orden del cliente):** Fable orquesta y pone criterio en el hilo; opus/sonnet/haiku hacen TODA la mecánica en subagentes. Ningún subagente en Fable.
+**Follow-ups técnicos (nada bloquea):** aristas reales de la tubería (otro sprint) · latencia ~2s del refresco · `textContent` para nombres derivados en la UI · adelgazar `tuberia-piezas.json` a overrides · reconciliar `~/.claude/skills/adr-helper` (higiene local) · restaurar `instalar.ps1`/`probar-instalador.ps1` si el AV los dejó en cuarentena (intactos en git).
 
-## Dónde estuvimos (2026-07-22 — «El pilar de flujo» FLU-1 · CONSTRUIDO, rama paralela `sprint/pilar-de-flujo-20260721`, aún sin merge)
+## Dónde estuvimos (2026-07-22 — «El pilar de flujo» FLU-1 · MERGEADO A `main`, `v1.28.0`, PR #122)
 
-**FLU-1 (el pilar JIT) está CONSTRUIDO (9/9 rebanadas verdes)** y reconciliado bajo `main` v1.27.0; lo lleva el **agente paralelo**. Su ADR se renumeró 0045→0049 al reconciliar (main tomó 0045-0048); versión objetivo **`v1.28.0`**. Plan/entrega: [`sprint-pilar-de-flujo-plan.md`](docs/sprints/sprint-pilar-de-flujo-plan.md). **Pendiente de FLU-1:** su Gemba (`flu-1-pilar-de-flujo`, `aceptado:false` — planta a `planea`), PR, merge con orden nombrada, release `v1.28.0`. **Kaizen vigente:** ante «voy más lento que tú», el agente por defecto se detiene — el ritmo lo marca quien absorbe.
+**FLU-1 (el pilar JIT) se construyó (9/9 rebanadas verdes) y se MERGEÓ a `main`** (PR #122, `v1.28.0`, ADR 0049) — su ADR se renumeró 0045→0049 al reconciliar (main tomó 0045-0048). Introdujo los contratos con gate de HANDOFF/ROADMAP/CHANGELOG (`tools/flujo.json`), la expiración a `MUERTOS.md`, el límite WIP y la vista `estado-flujo`. Plan/entrega: [`sprint-pilar-de-flujo-plan.md`](docs/sprints/sprint-pilar-de-flujo-plan.md). **Kaizen vigente:** ante «voy más lento que tú», el agente por defecto se detiene — el ritmo lo marca quien absorbe.
 
 ## Dónde estuvimos (2026-07-21 — «La app de la tubería» · MERGEADO Y LIBERADO `v1.27.0`, PR #121)
 

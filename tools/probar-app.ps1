@@ -219,7 +219,32 @@ else {
     $claves = @('version', 'repo', 'generado', 'piezas', 'aristas', 'regimenes', 'bandeja', 'ritual', 'areas')
     $faltan = @($claves | Where-Object { -not $foto.PSObject.Properties[$_] })
     if ($faltan.Count -eq 0) { Ok "la foto trae sus claves raiz (version/repo/generado/piezas/aristas/regimenes/bandeja/ritual/areas)" } else { No "la foto pierde clave(s) raiz: $($faltan -join ', ')" }
-    if (@($foto.piezas).Count -ge 37) { Ok "la foto trae >=37 piezas (censo curado: $(@($foto.piezas).Count))" } else { No "la foto trae solo $(@($foto.piezas).Count) piezas (esperaba >=37)" }
+    if (@($foto.piezas).Count -ge 37) { Ok "la foto trae >=37 piezas (censo: $(@($foto.piezas).Count))" } else { No "la foto trae solo $(@($foto.piezas).Count) piezas (esperaba >=37)" }
+    # --- R1: el censo se DERIVA de git ls-files (nada invisible) + convencion por carpeta. ---
+    Push-Location $raiz
+    $gitCount = @(@(git -c core.quotepath=false ls-files) + @(git -c core.quotepath=false ls-files --others --exclude-standard) | Where-Object { $_ } | Sort-Object -Unique).Count
+    Pop-Location
+    $pzCount = @($foto.piezas).Count
+    # Tolerancia a churn menor: tuberia-datos y este test corren 'git ls-files' en momentos
+    # distintos; un archivo creado/borrado entremedio (hook, IDE, build concurrente) no debe
+    # dar falso rojo. Un delta grande SI es perdida real de piezas.
+    $delta = [Math]::Abs($pzCount - $gitCount)
+    if ($delta -eq 0) { Ok "completitud: 1 pieza por archivo de git ls-files ($pzCount) -- nada invisible" }
+    elseif ($delta -le 3) { Ok "completitud: piezas ($pzCount) ~= git ls-files ($gitCount), delta $delta tolerado (churn del arbol)" }
+    else { No "completitud: la foto trae $pzCount piezas pero git ls-files ve $gitCount (delta ${delta}: algo queda invisible o de mas)" }
+    # un archivo conocido cae en su tipo bonito (Asientos)
+    $agente = @($foto.piezas | Where-Object { $_.id -eq '.claude/agents/explorador.md' })
+    if ($agente.Count -eq 1 -and $agente[0].tipo -like '*Asientos*') { Ok "tipo bonito: .claude/agents/explorador.md cae en Asientos" }
+    else { No "tipo bonito: .claude/agents/explorador.md no cayo en Asientos ($($agente.Count) match)" }
+    # catch-all: los sprints caen enteros en el cajon 'Sprints'
+    $sprints = @($foto.piezas | Where-Object { $_.id -like 'docs/sprints/*' })
+    $sprintsOk = @($sprints | Where-Object { $_.tipo -eq 'Sprints' })
+    if ($sprints.Count -gt 0 -and $sprintsOk.Count -eq $sprints.Count) { Ok "catch-all: los $($sprints.Count) de docs/sprints/ caen en el cajon Sprints" }
+    else { No "catch-all: docs/sprints no cayo entero en Sprints ($($sprintsOk.Count)/$($sprints.Count))" }
+    # filtro del motor: ningun probar-* aparece como 'El motor'
+    $probarEnMotor = @($foto.piezas | Where-Object { $_.tipo -like '*El motor*' -and (Split-Path $_.id -Leaf) -like 'probar-*' })
+    if ($probarEnMotor.Count -eq 0) { Ok "filtro del motor: ningun probar-* aparece en El motor" }
+    else { No "filtro del motor: $($probarEnMotor.Count) probar-* colados en El motor" }
     # areas: objetos con nombre (no solo strings) y al menos uno con doc_bloquea o doc_avisa
     $areasArr = @($foto.areas)
     $areasConNombre = @($areasArr | Where-Object { $_.PSObject.Properties['nombre'] -and "$($_.nombre)" -ne '' })

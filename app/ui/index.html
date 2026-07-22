@@ -325,6 +325,10 @@ const ORDER = ['Ritual — comandos','Asientos — agentes','Skills — oficios'
 const cats = document.getElementById('cats');
 /* pintarTuberia: mismo render que la maqueta corria al cargar, ahora reinvocable (Refrescar).
    Limpia #cats y repinta las categorias/chips desde P (poblado por jidokaCargar). */
+/* Secciones con mas de COLAPSA_SI piezas nacen COLAPSADAS (un mapa completo del repo tiene
+   cientos de piezas; sin colapsar, ADRs/Sprints/Atlas ahogan la vista). El encabezado con
+   caret las abre/cierra. */
+const COLAPSA_SI = 12;
 function pintarTuberia(){
   cats.innerHTML='';
   const tipos = ORDER.slice();
@@ -333,8 +337,16 @@ function pintarTuberia(){
     const items=Object.values(P).filter(p=>p.tipo===cat);
     if(!items.length) return;
     const div=document.createElement('div'); div.className='cat';
-    div.innerHTML=`<h3>${cat} <span class="n">${items.length}</span></h3>`;
+    const grande = items.length > COLAPSA_SI;
+    const h=document.createElement('h3');
+    h.innerHTML=(grande?'<span class="caret">▸</span> ':'')+cat+` <span class="n">${items.length}</span>`;
+    div.appendChild(h);
     const box=document.createElement('div'); box.className='chips';
+    if(grande){
+      box.style.display='none'; h.style.cursor='pointer';
+      h.onclick=()=>{ const oculto=box.style.display==='none'; box.style.display=oculto?'':'none';
+        const cr=h.querySelector('.caret'); if(cr) cr.textContent=oculto?'▾':'▸'; };
+    }
     items.forEach(p=>{
       const c=document.createElement('span');
       c.className='chip r'+regOf(p.id)+(p.tag&&p.tag.includes('DORMIDO')?' dorm':'');

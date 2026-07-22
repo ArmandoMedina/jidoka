@@ -1,4 +1,4 @@
-#Requires -Version 5
+﻿#Requires -Version 5
 # tuberia-datos.ps1 - EL CONSOLIDADOR: la foto UNICA que la app (mitad UI) lee al abrir.
 # Reune en UNA llamada las piezas+aristas+regimenes de la semilla curada
 # (tools/tuberia-piezas.json, spec congelada) SUPERPUESTAS con el estado VIVO del repo
@@ -83,45 +83,131 @@ if (Test-Path -LiteralPath $contratosPath) {
   catch { }   # contrato ilegible: se ignora (instancia mal formada no debe tumbar la foto)
 }
 
-# --- Regimenes de la semilla: porTipo (+ override por id) es el DEFAULT; contratos.json
-#     puede sobrescribir el regimen POR PATH (el estado vivo manda sobre la spec). ---
-$regPorTipo = $semilla.regimenes.porTipo
-$regOverride = $semilla.regimenes.override
-if (-not $regOverride) { $regOverride = [PSCustomObject]@{} }
-function Get-RegimenSemilla($pieza) {
-  # override por id (la semilla) tiene prioridad sobre el default por tipo.
-  $ovr = $regOverride.PSObject.Properties[$pieza.id]
-  if ($ovr) { return "$($ovr.Value)" }
-  $porTipo = $regPorTipo.PSObject.Properties["$($pieza.tipo)"]
-  if ($porTipo) { return "$($porTipo.Value)" }
-  return 'libre'
+# --- LA CONVENCION (el censo se DERIVA de las carpetas, no de una lista a mano): cada archivo
+#     del repo se clasifica por su ruta. Los arboles conocidos -> su TIPO BONITO con su regimen
+#     por defecto; TODO lo demas cae en un cajon por carpeta (catch-all) para que nada quede
+#     invisible. El estado vivo (contratos.json) sigue mandando el regimen POR PATH encima.
+#     Editar una fila aqui = un tipo nuevo; soltar un archivo en su carpeta = aparece solo. ---
+$TIPOS = @(
+  @{ tipo = 'Ritual — comandos';       glob = @('.claude/commands/jidoka/*.md');                          regimen = 'mal' }
+  @{ tipo = 'Asientos — agentes';      glob = @('.claude/agents/*.md');                                   regimen = 'estatuto' }
+  @{ tipo = 'Skills — oficios';        glob = @('.claude/skills/*/SKILL.md');                             regimen = 'motor' }
+  @{ tipo = 'Hooks de Claude';         glob = @('.claude/hooks/*.ps1');                                   regimen = 'motor' }
+  @{ tipo = 'git — el cinturón local'; glob = @('.githooks/*');                                           regimen = 'motor' }
+  @{ tipo = 'GitHub — el muro';        glob = @('.github/workflows/*');                                   regimen = 'motor' }
+  @{ tipo = 'La ley y los ledgers';    glob = @('tools/*.json', 'kit/.jidoka/instalar/manifiesto.json'); excluye = @('tuberia-piezas.json', 'jidoka-motor.json'); regimen = 'estatuto' }
+  @{ tipo = 'El motor (tools/)';       glob = @('tools/*.ps1'); excluye = @('probar-*', 'tuberia-*', 'parametrizar.ps1', 'override.ps1'); regimen = 'motor' }
+  @{ tipo = 'Doctrina ejecutable';     glob = @('kit/.jidoka/disparos/*.md');                             regimen = 'motor' }
+  @{ tipo = 'Doctrina';                glob = @('doctrina/*.md');                                         regimen = 'motor' }
+  @{ tipo = 'Templates del kit';       glob = @('kit/.jidoka/templates/*');                               regimen = 'motor' }
+  @{ tipo = 'Producto — capacidades';  glob = @('product/capacidades/*.md');                              regimen = 'libre' }
+  @{ tipo = 'Dominio';                 glob = @('product/dominios/*.md');                                 regimen = 'libre' }
+  @{ tipo = 'Módulo';                  glob = @('product/modulos/*.md');                                  regimen = 'libre' }
+  @{ tipo = 'Docs de instancia';       glob = @('product/PRODUCT_BRIEF.md', 'product/infra.md', 'product/casting.md', 'CONTRIBUTING.md', 'HANDOFF.md', 'ROADMAP.md', 'CHANGELOG.md'); regimen = 'estatuto' }
+)
+
+# Nombre lindo para el cajon catch-all segun su carpeta (lo no-mapeado). Sin acentos en las
+# CLAVES (rutas), con acentos en los VALORES (contenido; el .ps1 se graba UTF-8 con BOM).
+$BUCKETS = @{
+  'docs/sprints'   = 'Sprints';       'docs/analisis' = 'Análisis';   'docs/decisions' = 'ADRs'
+  'docs/guias'     = 'Guías';         'docs/atlas'    = 'Atlas';       'docs/assets'    = 'Assets'
+  'docs'           = 'Docs (otros)';  'kanban'        = 'Kanban';      'qa_runs'        = 'Evidencia (qa_runs)'
+  'app'            = 'App (código)';  'kit'           = 'Kit';         'product'        = 'Producto (otros)'
+  'tools'          = 'Tools (otros)'; '.github'       = 'GitHub (otros)'; '.claude'     = 'Claude (otros)'
+}
+$ASSET_EXT = @('.png', '.gif', '.ico', '.jpg', '.jpeg', '.svg', '.webp', '.pdf', '.zip', '.vsix', '.woff', '.woff2', '.ttf', '.mp4')
+
+function Get-CatchAll($path) {
+  $ext = [System.IO.Path]::GetExtension($path).ToLower()
+  if ($ASSET_EXT -contains $ext) { return @{ tipo = 'Otros / assets'; regimen = 'libre' } }
+  $parts = $path -split '/'
+  if ($parts.Count -eq 1) { return @{ tipo = 'Raíz'; regimen = 'libre' } }
+  # docs/<sub>/... -> su subcarpeta; docs/<archivo> -> 'docs'. El resto -> su carpeta tope.
+  $key = if ($parts[0] -eq 'docs' -and $parts.Count -ge 3) { 'docs/' + $parts[1] } elseif ($parts[0] -eq 'docs') { 'docs' } else { $parts[0] }
+  $tipo = if ($BUCKETS.ContainsKey($key)) { $BUCKETS[$key] } else { $key }
+  return @{ tipo = $tipo; regimen = 'libre' }
 }
 
-# --- Superponer estado vivo sobre cada pieza: regimen (con override de contrato por path),
-#     candado (bool), firma (si el contrato la trae). Piezas con path=null nunca overridean. ---
+function Resolve-Tipo($path) {
+  foreach ($t in $TIPOS) {
+    foreach ($g in $t.glob) {
+      if ($path -like $g) {
+        $excl = $false
+        if ($t.excluye) {
+          $base = Split-Path $path -Leaf
+          foreach ($e in $t.excluye) { if ($base -like $e) { $excl = $true; break } }
+        }
+        if (-not $excl) { return @{ tipo = $t.tipo; regimen = $t.regimen } }
+      }
+    }
+  }
+  return (Get-CatchAll $path)
+}
+
+# Nombre lindo para la pieza (que no se vea 'arranca.md' pelon): los comandos con su nombre
+# canonico /jidoka:<x>; los .md con su primer encabezado H1 (tras el frontmatter); el resto,
+# el nombre de archivo. Lee UTF-8 (acentos). Si algo falla, cae al nombre de archivo.
+function Get-Nombre($path) {
+  if ($path -like '.claude/commands/jidoka/*.md') {
+    return '/jidoka:' + [System.IO.Path]::GetFileNameWithoutExtension($path)
+  }
+  if ($path -like '*.md') {
+    try {
+      $abs = Join-Path $repoRoot $path
+      foreach ($l in (Get-Content -LiteralPath $abs -TotalCount 40 -Encoding UTF8 -ErrorAction Stop)) {
+        $m = [regex]::Match($l, '^#\s+(.+?)\s*$')
+        if ($m.Success) { return $m.Groups[1].Value }
+      }
+    }
+    catch { }
+    return [System.IO.Path]::GetFileNameWithoutExtension($path)
+  }
+  return (Split-Path $path -Leaf)
+}
+
+# --- Enumerar TODOS los archivos del repo (trackeados + no-trackeados no-ignorados), como
+#     bandeja.ps1: la foto incluye lo recien soltado por el agente. -c core.quotepath=false
+#     para que las rutas no-ASCII casen contra los globs. Cada archivo -> una pieza (nada
+#     invisible). El regimen vivo de contratos.json manda por path sobre el default del tipo. ---
+Push-Location $repoRoot
+$tracked = @(git -c core.quotepath=false ls-files 2>$null)
+$untracked = @(git -c core.quotepath=false ls-files --others --exclude-standard 2>$null)
+Pop-Location
+$allFiles = @(@($tracked + $untracked) | Where-Object { $_ } | Sort-Object -Unique)
+
 $piezasVivas = @()
-foreach ($p in $semilla.piezas) {
-  $regimen = Get-RegimenSemilla $p
+foreach ($f in $allFiles) {
+  $rt = Resolve-Tipo $f
+  $regimen = $rt.regimen
   $candado = $false
   $firma = $null
-  $pathReal = if ($p.PSObject.Properties['path']) { $p.path } else { $null }
-  if ($pathReal -and $ctrRegimen.ContainsKey("$pathReal")) { $regimen = $ctrRegimen["$pathReal"] }
-  if ($pathReal -and $ctrCandado.ContainsKey("$pathReal")) { $candado = $ctrCandado["$pathReal"] }
-  if ($pathReal -and $ctrFirma.ContainsKey("$pathReal")) { $firma = $ctrFirma["$pathReal"] }
+  if ($ctrRegimen.ContainsKey("$f")) { $regimen = $ctrRegimen["$f"] }
+  if ($ctrCandado.ContainsKey("$f")) { $candado = $ctrCandado["$f"] }
+  if ($ctrFirma.ContainsKey("$f"))   { $firma = $ctrFirma["$f"] }
 
   $piezasVivas += [ordered]@{
-    id         = "$($p.id)"
-    tipo       = "$($p.tipo)"
-    nombre     = "$($p.nombre)"
-    tag        = "$($p.tag)"
-    desc       = "$($p.desc)"
-    confHoy    = "$($p.confHoy)"
-    confVision = "$($p.confVision)"
-    path       = $pathReal
+    id         = "$f"
+    tipo       = "$($rt.tipo)"
+    nombre     = (Get-Nombre $f)
+    tag        = ''
+    desc       = ''
+    confHoy    = ''
+    confVision = ''
+    path       = "$f"
     regimen    = $regimen
     candado    = $candado
     firma      = $firma
   }
+}
+
+# porTipo derivado de la convencion (para la leyenda/fallback de la UI); texto/color se conservan.
+$porTipoObj = [ordered]@{}
+foreach ($t in $TIPOS) { if (-not $porTipoObj.Contains($t.tipo)) { $porTipoObj[$t.tipo] = $t.regimen } }
+$regimenesObj = [ordered]@{
+  porTipo  = $porTipoObj
+  override = [ordered]@{}
+  texto    = $semilla.regimenes.texto
+  color    = $semilla.regimenes.color
 }
 
 # --- Invocar bandeja.ps1 -Json y estado-ritual.ps1 -Json en proceso aparte (ver cabecera).
@@ -156,8 +242,8 @@ $foto = [ordered]@{
   repo      = $repoFwd
   generado  = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
   piezas    = @($piezasVivas)
-  aristas   = @($semilla.aristas)
-  regimenes = $semilla.regimenes
+  aristas   = @()
+  regimenes = $regimenesObj
   bandeja   = $bandeja
   ritual    = @($ritual)
   areas     = @($areasObjetos)
