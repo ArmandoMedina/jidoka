@@ -12,6 +12,7 @@
 
 ## Normal
 
+- **Homologar `docs/sprints/` y `qa_runs/` a molde único (patrón ADRs)** `[alta:2026-07-22 · apetito:8h]` — enumerar los sprints en orden (hoy sin número canónico), auditar en varias direcciones con agentes, definir molde y plantilla homologados, homologar los existentes sin reescribir contenido, skill generadora más guardián residente que BLOQUEA el drift (el equivalente a `probar-adrs.ps1`); mismo tratamiento a los `LOG.md` de `qa_runs/`. Cableado a `andon`, `publicar` y sembrado. Pedido del cliente 2026-07-22.
 - **Gemba end-to-end de la app de la tubería** `[alta:2026-07-21 · apetito:1h · espera:cliente]` — el flujo del glosario completo (crear por fuera → bandeja → parametrizar desde el formulario → candado → ver a la IA rebotar), sin código ni terminal; pasos en `docs/sprints/sprint-app-tuberia-entrega.md`. La fidelidad de R2 ya se aprobó; el flujo completo no se ha corrido.
 - **Autoría de ligas en la app** `[alta:2026-07-21 · apetito:4h]` — al retirar la extensión se perdió `ligas.js`; el gate `estado-ligas.ps1` sigue vivo pero la autoría asistida quedó manual (capacidad futura de la app).
 - **Completar los cartones de la app** `[alta:2026-07-21 · apetito:4h]` — «reconciliar» y «alta de agente» siguen siendo teatro confesado; cablearlos de verdad.
