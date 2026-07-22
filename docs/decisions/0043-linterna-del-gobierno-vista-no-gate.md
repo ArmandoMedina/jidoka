@@ -49,7 +49,7 @@ Tres invariantes de diseño:
 ## El camino que NO se toma
 
 - **Una UI/servidor/MCP como capa de gobierno** — lo prohíbe [ADR 0002](0002-motor-andon.md) (y su
-  ancestro doctrinal `doctrina/decisiones/0002`): una API que la IA llama voluntariamente tiene el
+  ancestro doctrinal [ADR 0053](0053-sin-api-propia-como-gobierno.md)): una API que la IA llama voluntariamente tiene el
   mismo modo de falla que las memorias (depende de cooperación → no es muro). Una vista estática que
   nadie invoca para decidir **no** es capa de gobierno; es un reporte, como `estado-docs.ps1` o los
   SVG del atlas. La restricción se respeta mientras no haya servidor/servicio del que dependa un gate.

@@ -37,4 +37,4 @@ Todo aviso local se asume bypaseable; **el único muro real es el required check
 
 ## Frontera de confidencialidad
 
-Nada de nombres de clientes, personas o datos de entorno personal en commits ni docs: los casos internos se citan como "caso N" / "laboratorio de campo" (ver `doctrina/decisiones/0004`).
+Nada de nombres de clientes, personas o datos de entorno personal en commits ni docs: los casos internos se citan como "caso N" / "laboratorio de campo" (ver `docs/decisions/0055`).
