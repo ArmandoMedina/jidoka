@@ -76,7 +76,7 @@ Los pasos del flujo completo, para cuando el cliente lo corra (sin código, sin 
 ## Lo aprendido (Kaizen)
 
 1. **Un plan que excluye algo visible que el cliente ya validó debe resaltarlo en una línea** ("NO verás X"). La cura estructural fue el **Gemba temprano**: la fidelidad visual se aprobó en R2, antes de cablear un solo dato — y funcionó (cero retrabajo visual).
-2. **Los gates corren desde la base en el CI a propósito.** La primera cura del CI rojo (excluir el archivo en el detector del PR) era doblar el gate y no curaba nada; la cura real fue arreglar los fixtures (que no parezcan emails) y revertir la exclusión. Corolario: fixtures de tests jamás con forma `letra@dominio.punto`.
+2. **Los gates corren desde la base en el CI a propósito.** La primera cura del CI rojo (excluir el archivo en el detector del PR) era doblar el gate y no curaba nada; la cura real fue arreglar los fixtures (que no parezcan emails) y revertir la exclusión. Corolario: fixtures de tests jamás con forma de email (letra, arroba, dominio, punto, TLD).
 3. **El escritor único es dueño de las reglas.** La firma se deriva de `git config` DENTRO de `override.ps1`, no por parámetros — si la UI pudiera pasar el firmante, podría inventarlo (ADR 0047 con dientes).
 4. **PS 5.1 muerde en los bordes de JSON**: colapso de arrays de 1 elemento (`ConvertTo-Json` y también el retorno de funciones que desenvuelve `@($x)`), BOM, `-Depth`. Los self-tests con el caso de 1 elemento cazaron un bug real antes de cablear.
 5. **Los assets del frontend van embebidos en el exe de Tauri**: todo cambio de UI exige recompilar o el Gemba ve la versión vieja.
