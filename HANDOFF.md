@@ -6,31 +6,34 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x`. Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-21 — sprint «El pilar de flujo» FLU-1 · CONSTRUIDO, en cierre · PR #122)
+## Dónde estamos (2026-07-22 — sprint «El molde único de los ADRs» · CONSTRUIDO en worktree aislado · Gemba + PR + release pendientes)
 
-**El QUÉ aprobado (plan mode, 2026-07-21):** el pilar JIT de la Casa — los documentos de estado dejan de crecer solos, el trabajo entra con límite, y el avance y el reparto de roles se ven sin terminal. Plan-contrato: [`docs/sprints/sprint-pilar-de-flujo-plan.md`](docs/sprints/sprint-pilar-de-flujo-plan.md). **Apetito: 6 horas de revisión del cliente, muerte por defecto.** Rama: `sprint/pilar-de-flujo-20260721`. Insumos: el diagnóstico y el benchmark en `docs/analisis/`.
+**El QUÉ aprobado (plan mode, 2026-07-22):** los ADRs salen y se mantienen con un molde único, y el mecanismo que lo garantiza deja de ser una skill personal fuera del repo — un **guardián residente que bloquea**. Enfoque del cliente: *"campo completo y alinea de una vez la plantilla… bloquea todo"*. Plan: [`docs/sprints/sprint-molde-adrs-plan.md`](docs/sprints/sprint-molde-adrs-plan.md) · Entrega: [`sprint-molde-adrs-entrega.md`](docs/sprints/sprint-molde-adrs-entrega.md) · Decisión: [ADR 0050](docs/decisions/0050-molde-unico-de-los-adrs.md).
 
-**Avance — las 9 rebanadas CONSTRUIDAS y verdes:**
-- ✅ **M1**: R1 contrato del HANDOFF (419→40 líneas, gate mordiendo) · R2 contrato del ROADMAP (140→55, 32 vivos en 4 clases) · R3 expiración automática (`expirar.ps1` → `docs/MUERTOS.md`).
-- ✅ **M2**: R4 cierre con orden fijo + `[contrato-changelog]` · R5 límite WIP (`estado-flujo.ps1 -Gate` planta a `planea`).
-- ✅ **M3**: R6 vista `-Json` + primer hook `SessionStart` · R7 reporte sin jerga con hill chart · R8a reparto (`product/casting.md`: autoridad-del-dominio ≠ dueño-operador) · R8b los 4 asientos piensan distinto («Lo que noté por mi cuenta» obligatorio).
-- ✅ Kit cableado (mordida real: los stubs viejos violaban los contratos — un hijo nacía bloqueado; curado, `probar-sembrar` 38/38, `probar-instalador` 67/67) · capacidad `FLU-1` al grafo (`auditar` íntegro) · review adversarial de la rama (MERGEABLE, 6 BAJOS: 4 curados) · PR #122 abierto, primer CI verde.
-- ✅ **Dos merges de `main` reconciliados bajo los contratos nuevos**: PR #119 (el descubrimiento) y `v1.27.0` (la app de la tubería) — este último renumeró el sprint: **ADR 0045→0049, versión `v1.26.0`→`v1.28.0`** (main ya había usado ambos números).
-- ✅ Suite completa post-merge (16/16 + auditar) · evidencia `qa_runs/flujo-20260721/LOG.md` · **Gemba del sprint REGISTRADO en `flujo.json`** (`flu-1-pilar-de-flujo`, aceptado:false — `planea` queda plantado hasta que el cliente lo acepte: el muro mordiéndose la cola a propósito).
-- 🔨 **Falta:** CI del merge con `v1.27.0` en verde · el Gemba del cliente (pasos en el plan, sin terminal) · **merge de PR #122 con orden nombrada**.
+**Las 4 rebanadas CONSTRUIDAS y verdes** (evidencia `qa_runs/adrs-20260722/LOG.md`):
+- ✅ R1 molde único (`0000-plantilla.md` ↔ `kit/.jidoka/templates/adr.md`) · R2 guardián `tools/probar-adrs.ps1` (MURO: secciones + estado header↔índice + huérfanos; self-test 9/9; falla-suave sin ADRs).
+- ✅ R3 los 49 ADRs alineados sin reescribir decisiones (0044 estado corregido) · R4 cableado a `andon.yml` + `publicar.ps1` + sembrado (mecánica), ADR 0050, tablero `conformidad-adrs.html`.
+- ✅ `/code-review` corrido: 6 hallazgos del guardián curados (el clave: no tumbar el CI de un hijo sin ADRs). Suite verde (probar-adrs 9/9, docs 27, flujo 94, gate 14).
 
-**Kaizen vigente:** ante la señal «voy más lento que tú», el agente por defecto se detiene en vez de absorber más trabajo — el ritmo lo marca quien absorbe; el volumen, no.
+**Aislamiento (otro agente en paralelo en FLU-1):** se trabaja en el worktree `C:\Repositorio personal\jidoka-adrs` (rama `review/adrs-20260722`, 4 commits desde `5a464bc`). Lección: rama propia NO basta con un escritor paralelo — hace falta `git worktree add` (un `checkout -b` en el árbol compartido colisionó).
 
-## Dónde estuvimos (2026-07-21/22 — La app de la tubería · `v1.27.0` MERGEADA Y LIBERADA · PRs #120/#121/#123)
+**Falta (cierre del sprint):**
+- **Gemba del cliente** (sin terminal): abrir `conformidad-adrs.html` + ojear 0044/0001/0028 + el ADR 0050 (pasos en la entrega).
+- **PR + merge (orden nombrada) + release `v1.29.0`** (MINOR) — **coordinar el orden de merge con FLU-1**: FLU-1 toma `v1.28.0`, este sprint `v1.29.0`; deben mergear en ese orden (misma lección del renumerado 0045→0049).
+- **Restaurar** `tools/instalar.ps1` y `tools/probar-instalador.ps1` — el AV (Bitdefender) los puso en cuarentena al intentar `-Sellar`; intactos en git (`git checkout HEAD -- <archivos>` cuando el AV libere). El sello no se trackea en Jidoka; el re-sello NO era paso del sprint.
+- **Opcional:** reconciliar `~/.claude/skills/adr-helper` (skill personal, `Razones`→`Por qué`) — higiene local fuera del repo.
 
-**La superficie del gobierno dejó de ser comandos de VS Code y es una app de escritorio Tauri fiel a la maqueta** (ADR 0048; la extensión se retiró completa). El camino en dos sprints de la otra sesión: «sistema configurable, fase 1» construyó el motor (ADRs 0045–0047: bandeja, estatuto del ritual, candado IA PreToolUse, `contratos.json` con firma) pero **su Gemba reprobó la superficie fragmentada** → giro a la app (`app/`, Jidoka-only, 49 piezas con estado real, formulario que escribe de verdad, firma derivada de `git config`, instalador NSIS como asset del release). Mergeado y liberado el 2026-07-22 con orden nombrada; `v1.26.0` quedó subsumida sin tag propio. Récord: [`sprint-app-tuberia-entrega.md`](docs/sprints/sprint-app-tuberia-entrega.md) · evidencia `qa_runs/app-tuberia-20260721/LOG.md` · secciones íntegras en el [histórico](docs/handoff-historico.md). **Pendientes → clasificados en el ROADMAP** (Gemba end-to-end de la app —espera:cliente—, certificado Authenticode, autoría de ligas en la app, cartones de reconciliar/alta, atlas de los tools nuevos, destino de la copia scratch de la maqueta).
+**Regla de modelos (orden del cliente):** Fable orquesta y pone criterio en el hilo; opus/sonnet/haiku hacen TODA la mecánica en subagentes. Ningún subagente en Fable.
 
-## Dónde estuvimos (2026-07-21 — El descubrimiento del sistema configurable · CERRADO · mergeado en PR #119)
+## Dónde estuvimos (2026-07-22 — «El pilar de flujo» FLU-1 · CONSTRUIDO, rama paralela `sprint/pilar-de-flujo-20260721`, aún sin merge)
 
-**La visión aterrizada por la otra sesión:** Jidoka evoluciona de metodología a **sistema de gobierno configurable con UI guiada** (la UI autora, el gate ejecuta — ADRs 0002/0044 intactos). Artefactos: el plan-contrato [`sprint-sistema-configurable-plan.md`](docs/sprints/sprint-sistema-configurable-plan.md) (6 rebanadas, 3 trampas confesadas, trae su «Arranque en el chat nuevo»), el informe [`descubrimiento-sistema-configurable-202607.md`](docs/analisis/descubrimiento-sistema-configurable-202607.md), la maqueta clickeable validada en 6 Gembas, y el cierre [`cierre-20260721.md`](docs/sprints/cierre-20260721.md). Nota de trato que funcionó: ante un malentendido, leer ÍNTEGRO el transcript; artefactos concretos clickeables > menús abstractos; **el Gemba temprano funciona — la fidelidad visual se aprueba ANTES de cablear.** Pendientes → ya clasificados en el ROADMAP.
+**FLU-1 (el pilar JIT) está CONSTRUIDO (9/9 rebanadas verdes)** y reconciliado bajo `main` v1.27.0; lo lleva el **agente paralelo**. Su ADR se renumeró 0045→0049 al reconciliar (main tomó 0045-0048); versión objetivo **`v1.28.0`**. Plan/entrega: [`sprint-pilar-de-flujo-plan.md`](docs/sprints/sprint-pilar-de-flujo-plan.md). **Pendiente de FLU-1:** su Gemba (`flu-1-pilar-de-flujo`, `aceptado:false` — planta a `planea`), PR, merge con orden nombrada, release `v1.28.0`. **Kaizen vigente:** ante «voy más lento que tú», el agente por defecto se detiene — el ritmo lo marca quien absorbe.
+
+## Dónde estuvimos (2026-07-21 — «La app de la tubería» · MERGEADO Y LIBERADO `v1.27.0`, PR #121)
+
+**El sprint "La app de la tubería" TERMINÓ (7/7)**, mergeado y liberado el 2026-07-22 con orden nombrada. La superficie del gobierno es ahora una **app de escritorio Tauri fiel a la maqueta** (ADR 0048); la extensión VS Code se retiró (`v1.26.0` subsumida, PR #120). Récord: [`sprint-app-tuberia-entrega.md`](docs/sprints/sprint-app-tuberia-entrega.md). **[PENDIENTE del cliente] Gemba end-to-end** (la fidelidad de R2 ya la aprobó; el flujo completo no). Pendientes técnicos (nada bloquea): cert Authenticode del `.exe`, autoría de ligas en la app, atlas de los tools nuevos, multiplataforma del motor (fase 2).
 
 ## Autorizaciones vigentes del cliente (dichas con nombre)
 
 - **Publicar releases de GitHub** (2026-07-10): «Eres libre y autorizado para publicar versiones» — tag + release del cierre no necesita re-autorización.
 - **Merges de PR y cambios de configuración/permisos**: SIGUEN necesitando orden nombrada cada vez («no me muevas configuración», dicho explícito).
-- **Regla de modelos** (2026-07-21): Fable orquesta y pone criterio en el hilo; opus/sonnet/haiku hacen la mecánica en subagentes — ningún subagente en Fable.

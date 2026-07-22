@@ -2,6 +2,15 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.29.0] — 2026-07-22
+
+### El molde único de los ADRs (ADR 0050)
+
+- **`feat` — el guardián `tools/probar-adrs.ps1`:** MURO que valida por ADR las **5 secciones canónicas**, la **coherencia de la clase de estado** (header↔índice) y los **huérfanos**; `exit 1` ante desvío. Self-test 9/9, **falla-suave** (no aplica) en repos sin ADRs. Cableado en `.github/workflows/andon.yml` (CI) y el preflight de `tools/publicar.ps1`; **sembrado** (mecánica) en `manifiesto.json` — la disciplina de ADR baja con la máquina. Segundo muro real del repo (antes solo bloqueaba el índice de ADRs).
+- **`feat` — molde canónico único:** `docs/decisions/0000-plantilla.md` reconciliado con `kit/.jidoka/templates/adr.md` (5 secciones + estado enum + `Qué NO resuelve` opcional). La causa raíz curada: la skill personal `adr-helper` que creaba ADRs vivía fuera del repo y había divergido (`Razones` vs `Por qué`).
+- **`fix` — los 49 ADRs alineados al molde** sin reescribir decisiones (extracción de lo embebido, renombre de headings, enmienda fechada donde faltaba); estado de 0044 corregido a `reemplazado` por [0048] — cerró el bug de doble fuente de verdad header↔índice.
+- **ADR 0050** — El molde único de los ADRs: un guardián residente que bloquea, no una skill personal.
+
 ## [1.28.0] — 2026-07-21
 
 ### El pilar de flujo, movimiento 1 — los documentos dejan de crecer (FLU-1, ADR 0049)
