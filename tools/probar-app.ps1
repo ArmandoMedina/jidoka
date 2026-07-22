@@ -184,21 +184,34 @@ if (-not (Test-Path -LiteralPath $datosScript)) {
 }
 else {
   Ok "existe tools/tuberia-datos.ps1 (el contrato de datos app<->motor)"
-  # stdout como bytes: sin BOM.
+  # Captura EXACTA como la del puente Rust: Process con pipe, leyendo los BYTES CRUDOS del
+  # stdout -- SIN forzar StandardOutputEncoding. lib.rs lee los bytes tal cual y hace
+  # from_utf8_lossy; forzar UTF8 aqui enmascararia el bug de encoding (sin consola, PS 5.1
+  # emite su stdout en CP437: el '->' U+2192 se vuelve el byte 0x1A, un caracter de control).
   $psi = New-Object System.Diagnostics.ProcessStartInfo
   $psi.FileName = 'powershell'
   $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$datosScript`""
   $psi.RedirectStandardOutput = $true
   $psi.UseShellExecute = $false
-  $psi.StandardOutputEncoding = New-Object System.Text.UTF8Encoding($false)
+  $psi.CreateNoWindow = $true
   $pd = [System.Diagnostics.Process]::Start($psi)
-  $datosTxt = $pd.StandardOutput.ReadToEnd()
+  $ms = New-Object System.IO.MemoryStream
+  $pd.StandardOutput.BaseStream.CopyTo($ms)
   $pd.WaitForExit()
+  $datosBytes = $ms.ToArray()
   $datosExit = $pd.ExitCode
-  $datosBytes = (New-Object System.Text.UTF8Encoding($false)).GetBytes($datosTxt)
+  # UTF-8 lossy: identico a String::from_utf8_lossy de Rust (byte malo -> U+FFFD).
+  $datosTxt = [System.Text.Encoding]::UTF8.GetString($datosBytes)
 
   if ($datosExit -eq 0) { Ok "tuberia-datos.ps1 corre sobre el repo real (exit 0)" } else { No "tuberia-datos.ps1: esperaba exit 0, fue $datosExit" }
   if ($datosBytes.Length -ge 1 -and $datosBytes[0] -ne 0xEF) { Ok "tuberia-datos stdout sin BOM (el JS que lo parsea no tolera BOM)" } else { No "tuberia-datos: el stdout empieza con BOM (0xEF)" }
+  # LA asercion que replica a JSON.parse de JS: ningun caracter de control (<0x20 salvo TAB/LF/CR)
+  # dentro del stdout -- exactamente lo que rompia la app ("Bad control character in string literal").
+  $ctrl = $null
+  foreach ($ch in $datosTxt.ToCharArray()) { $cc = [int][char]$ch; if ($cc -lt 32 -and $cc -ne 9 -and $cc -ne 10 -and $cc -ne 13) { $ctrl = $cc; break } }
+  if ($null -eq $ctrl) { Ok "tuberia-datos stdout SIN caracteres de control (JSON.parse de JS lo aceptaria)" } else { No ("tuberia-datos stdout trae un caracter de control (0x{0:X2}): JSON.parse de JS lo rechaza (Bad control character)" -f $ctrl) }
+  # Los acentos y flechas sobreviven el viaje PS->Rust: ningun replacement char U+FFFD.
+  if ($datosTxt.IndexOf([char]0xFFFD) -lt 0) { Ok "tuberia-datos stdout sin replacement chars (acentos y flechas intactos)" } else { No "tuberia-datos stdout trae U+FFFD: un acento/flecha se corrompio en el encoding" }
   $foto = $null
   try { $foto = $datosTxt | ConvertFrom-Json } catch { }
   if ($foto) {

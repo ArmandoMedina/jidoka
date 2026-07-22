@@ -163,6 +163,14 @@ $foto = [ordered]@{
   areas     = @($areasObjetos)
 }
 
-# stdout SIN BOM: Write-Output del string de ConvertTo-Json (no Out-File, que mete BOM en PS 5.1).
-Write-Output ($foto | ConvertTo-Json -Depth 8)
+# stdout SIN BOM y UTF-8 REAL: escribimos los bytes UTF-8 directo al stream crudo del stdout.
+# NO Write-Output: la app spawnea PS sin consola (CREATE_NO_WINDOW), asi [Console]::OutputEncoding
+# cae a la code page OEM (CP437) y ConvertTo-Json emitido asi corrompe '->' (byte 0x1A, un control)
+# y los acentos (bytes invalidos) -> el JSON.parse de la app los rechaza ("Bad control character").
+# Los bytes crudos cruzan el pipe fieles a Rust (que lee from_utf8_lossy). Ni Out-File (mete BOM).
+$json = ($foto | ConvertTo-Json -Depth 8)
+if (-not $json.EndsWith("`n")) { $json = $json + "`n" }
+$stdout = [Console]::OpenStandardOutput()
+$bytes = (New-Object System.Text.UTF8Encoding($false)).GetBytes($json)
+$stdout.Write($bytes, 0, $bytes.Length); $stdout.Flush()
 exit 0
