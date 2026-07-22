@@ -36,6 +36,9 @@ Thumbs.db
 # Temporales
 *.tmp
 *.log
+# Mensaje de commit temporal (patron del entorno: git commit -F .commit-msg-tmp.txt,
+# borrado tras commitear -- nunca debe versionarse).
+.commit-msg-tmp.txt
 
 # Capturas PNG de inspeccion del atlas: scratch para ver a ojo. El render
 # versionado es el .svg (npm run atlas:render); los PNG son desechables.
