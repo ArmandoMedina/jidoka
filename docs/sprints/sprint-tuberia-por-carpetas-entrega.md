@@ -39,7 +39,7 @@ consola emitía CP437 y `→` caía a un carácter de control) — su propio com
 | Pendientes al HANDOFF | merge/release + versión (con FLU-1) · derivar aristas reales (sprint) · optimizar ~2s de latencia · escapar nombres en la UI · glob recursivo-vs-directo |
 | Resumen (3-5 líneas) | La app de gobierno dejó de mentir por omisión: su censo se deriva del repo real, no de una lista a mano. Se arregló antes el bug de encoding que la dejaba ciega. Todo aparece "sin cablear" — el trabajo por hacer, visible, para autorarlo desde la app. |
 
-## Kaizen (lo que el próximo `planea` debe leer)
+## Lo aprendido (Kaizen) — lo que el próximo `planea` debe leer
 
 1. **La lista curada es el drift que Jidoka combate — no la repitas dentro de la app.** El censo a
    mano se desincronizó (faltaban dominios/módulos/CFG-1, sobraba la extensión retirada). Derivar de

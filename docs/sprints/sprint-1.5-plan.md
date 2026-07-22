@@ -13,6 +13,8 @@ La auditoría externa (BMAD + panorama 2026) confirmó que el nicho de Jidoka �
 
 Regla de clasificación (protocolo de homologación del linaje): **asciende-ya** (conocimiento, templates, hardening puntual) / **espera-con-registro** (maquinaria que exige el ritual ejecutable → Sprints 2-3) / **no-asciende** (PII, específico de dominio). **Frontera NDA:** nada de nombres propios del casting de los repos privados, ni clientes, ni correo personal; origen = "caso N" / "laboratorio de campo". Barrido `git grep` antes de cada commit.
 
+## Alcance (rebanadas — en bloques)
+
 ## Bloque V — Vitrina (en español, con bandera)
 
 - **V1. Topics** (`gh repo edit --add-topic`): `ai-agents`, `claude-code`, `methodology`, `quality-gates`, `ci`, `toyota-production-system`, `jidoka`, `andon`, `espanol`, `spanish` (keywords mixtas EN/ES a propósito: que nos encuentren ambos mundos aunque el contenido sea ES).
@@ -77,7 +79,7 @@ Tres docs nuevos en `kanban/`, voz de jidoka:
 5. `andon-stop` con ALTO-04: simular git roto (PATH sin git) → el hook avisa en vez de callar.
 6. Barrido NDA: `git grep` de términos sensibles sobre la rama → cero resultados.
 
-## Fuera de alcance
+## Lo que NO entra (Fuera de alcance)
 
 - Skills/hooks/comandos ejecutables, auditor de grafo, `product_avisa`, barreras extra → **Sprint 2** (registrado en ADR 0004 + ROADMAP).
 - Instalador, `.sh`, `setup -Yes`, CI de release, jerarquía completa de templates de producto → **Sprint 3**.

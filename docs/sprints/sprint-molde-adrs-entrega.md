@@ -18,7 +18,7 @@ Los ADRs de Jidoka salen y se mantienen con **un molde único**, y el mecanismo 
 2. Abrir en GitHub `0044` (estado + enlace a 0048), `0001` (fundacional alineado) y `0028` → mismas secciones.
 3. Abrir `docs/decisions/0050-molde-unico-de-los-adrs.md` → la decisión, ya con el molde nuevo.
 
-## Kaizen (lo que sube de esta sesión)
+## Lo aprendido (Kaizen) — lo que sube de esta sesión
 
 1. **Rama propia ≠ worktree propio (la lección cara).** Con un agente paralelo, `git checkout -b` en el MISMO working tree no aísla: el otro agente cambió la rama del árbol debajo del trabajo y los cambios de R1/R2 flotaron huérfanos. La regla dura "una sesión escritora por working tree" exige `git worktree add`, no solo una rama. Recuperación: worktree aislado + limpieza quirúrgica de la pollución en el árbol compartido.
 2. **Un check determinista es mejor worklist que un juicio de subagente.** El auditor de integridad miscontó los archivos (dijo 0000-0049; eran 0000-0048) y omitió 0004; `probar-adrs` dio la lista exacta de 13 desvíos. El muro que construyes es su propia herramienta de diagnóstico.

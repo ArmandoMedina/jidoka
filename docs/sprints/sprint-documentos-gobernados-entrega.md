@@ -10,7 +10,7 @@ El **hermano estructural del sello**: el motor se gobierna por hash; los documen
 - **R2 — Detector** `tools/estado-docs.ps1` (hermano de `estado-motor`): aviso en `/jidoka:arranca`; muro opt-in (`-Estricto` en CI, apagado por defecto). `tools/probar-docs.ps1` (24/24).
 - **R3 — CONTRIBUTING** gana template real + stub estructurado; `CODE_OF_CONDUCT` confirmado capa-3.
 
-## Kaizen (las lecciones — lo único que el próximo `planea` lee completo)
+## Lo aprendido (Kaizen) — las lecciones — lo único que el próximo `planea` lee completo
 
 1. **La premisa del cliente puede estar medio equivocada — mide antes de construir.** El cliente sintió "los docs del ritual divergen"; la medición (solo-lectura) mostró que **NO** (son motor, gobernados por hash) y encontró el hueco real: los docs de **instancia** sin gobierno de estructura. Medir el drift antes de planear evitó construir el mecanismo equivocado (endurecer el ritual) en vez del correcto (gobernar la estructura de la instancia).
 2. **Dos regímenes de gobierno, dos herramientas.** El hash es correcto para lo que debe ser idéntico (motor); es la herramienta **equivocada** para un doc cuyo contenido debe variar a propósito. Las secciones son el eje correcto para la instancia. No forzar una sola herramienta sobre ambos.

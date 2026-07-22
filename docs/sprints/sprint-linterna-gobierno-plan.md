@@ -4,7 +4,7 @@
 > El QUE se descubrio con hechos, no hipoteticos. Este documento es el contrato archivado; la
 > evidencia de cada rebanada vive en `qa_runs/` y en los self-tests.
 
-## R0 — El QUE (aprobado, con nombre)
+## Contexto (R0 — el QUÉ aprobado)
 
 **Aprobacion nombrada del cliente:** *"la linterna del gobierno: ver toda la infraestructura
 determinista (gates, hooks, CI, blast-radius, docs) y los caminitos de validacion en un grafo de
@@ -41,7 +41,7 @@ Nace **vista, no muro** (regla 2-3), como el atlas (ADR 0035).
 - **Primer corte:** toda la topologia del gobierno (no solo docs).
 - **La linterna NO inventa verdad:** deriva el grafo de las fuentes que ya existen (misma fuente que gatea).
 
-## Las rebanadas (verticales; cada una se ve corriendo)
+## Alcance (las rebanadas — verticales; cada una se ve corriendo)
 
 ### R1 — La linterna: esqueleto + huerfanos
 `tools/estado-gobierno.ps1` lee `blast-radius.json` + `docs-gobernados.json`, deriva areas/gates/docs,
@@ -68,6 +68,10 @@ filtrar por tipo, hover con el "por que" (campo `desc`/`mensaje`), clic que resa
 - **NO cablear a Andon** todavia (regla 2-3): que pruebe valor como vista antes de ganarse un gate.
 - **Pruebas/evidencia:** suite completa verde en preflight; `-Actualizar` sobre un hijo-fixture baja la linterna.
 
-## Fuera de este sprint (horizonte, registrado)
+## Verificación (el demo que corre el cliente)
+
+El demo vive dentro de cada rebanada — «cada una se ve corriendo» (arriba): R1 abre la linterna y se ven los huérfanos en rojo; R2 la topología completa navegable; R3 la siembra baja a un hijo-fixture. Sin código ni terminal: abrir el `.html` generado y mirar. El criterio de «hecho» está en el bloque de Contexto (Autoridad y criterio de "hecho").
+
+## Lo que NO entra (fuera de este sprint)
 Caminitos animados (trazar un cambio por los gates) · atlas vivo que jubile al BPMN dibujado a mano ·
 edicion desde la UI (solo si la vista prueba valor; toca ADR 0002 de frente y sube la barrera que se busca bajar).

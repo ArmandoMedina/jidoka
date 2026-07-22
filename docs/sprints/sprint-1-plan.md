@@ -23,7 +23,7 @@ Jidoka ya tenía la doctrina, el discurso y su identidad (Sprint 0, público), p
 
 Fiel a la doctrina anti-fatiga: el manifiesto arranca casi todo en `avisa`, con **un único `doc_bloquea` real** — un ADR nuevo debe listarse en `docs/decisions/README.md`. Alto valor (un ADR fuera del índice es una decisión perdida), baja fatiga (los ADR son append-only). El camino de bloqueo se guarda además con un manifiesto sintético en `probar-gate.ps1`. (Ver ADR 0002.)
 
-## Fuera de alcance (por qué)
+## Lo que NO entra (Fuera de alcance, por qué)
 
 - **Gemelos `.sh`** → Sprint 3 (instalador multiplataforma). Aquí PS 5.1 + CI `windows-latest`, idéntico a poka-yoke.
 - **`auditar.ps1` / auditor de grafo** → Jidoka aún no tiene grafo de producto que auditar.

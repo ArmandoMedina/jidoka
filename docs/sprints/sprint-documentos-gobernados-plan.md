@@ -2,7 +2,7 @@
 
 > Contrato del sprint (aprobado 2026-07-17, R0 nombrado + STOP 2 en plan mode). El QUÉ + el CÓMO.
 
-## Context — por qué ahora
+## Contexto — por qué ahora
 
 El cliente hace análisis de flujos en el hijo **enti** (`entisoft-rescate`, motor 1.21.1) y percibe que "los documentos de los hijos están super diferentes". La medición (solo-lectura) desmintió la premisa inicial pero encontró la real:
 

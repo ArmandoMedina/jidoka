@@ -21,7 +21,7 @@ Nota sobre #63 (`regla-2-3`, "primera ocurrencia"): se construye porque **el cli
 - **2026-07-14** — el casting de la nave nodriza usa nombres neutrales a propósito (se preserva: el casting **nombrado** sobrevive solo como plantilla en `kit/`).
 - El matiz del #74 ("PLD/CNBV no confirmado") no entra aquí.
 
-## Rebanadas (cada una commiteable y verde por sí sola)
+## Alcance (rebanadas — cada una commiteable y verde por sí sola)
 
 ### R1 — Agentes-asiento tiereados + lint (cierra #63) — ADR 0033 · **toca la ley**
 - **`.claude/agents/{explorador,mecanico,auditor,arquitecto}.md`** (nuevos): frontmatter con `model:` y `tools:` fijos — `explorador → haiku` (barridos de lectura), `mecanico → haiku` (edits mecánicos), `auditor → sonnet` (juicio acotado), `arquitecto → opus` (trade-offs). `description` con el criterio de cuándo usarlo (para que el orquestador elija por nombre de asiento, no por iniciativa). El cuerpo, mínimo: el asiento, lo que NO hace, y el retorno esperado (datos, no prosa).

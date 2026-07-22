@@ -6,6 +6,8 @@ El contrato del sprint (`docs/sprints/sprint-editor-gobierno-plan.md`, R0 aproba
 
 **El QUÉ (sin cambios, ya aprobado):** *el usuario declara, desde una interfaz visual, qué código sostiene qué capacidad — y con qué fuerza y en qué dirección se vigila esa relación — sin editar JSON a mano.* Métrica: el aviso de "cambié código" pasa de **89 capacidades** (caso entisoft) a **las declaradas (1–5)**. Línea doctrinal: **la extensión AUTORA, el gate EJECUTA** (ADR 0002 intacto).
 
+## Alcance (rebanadas R2–R4)
+
 ## R2 — El modelo de ligas + el gate que las hace cumplir
 
 **`tools/ligas.json`** (nace semilla `{"ligas":[]}`): `{ "ligas": [ { "id", "codigo": [globs], "capacidades": [rutas .md], "direccion": "codigo-a-capacidad|capacidad-a-codigo|ambas", "fuerza": "avisa|bloquea" } ] }`.
