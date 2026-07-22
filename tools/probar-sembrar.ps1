@@ -105,7 +105,7 @@ try {
   git add -A 2>&1 | Out-Null
   git -c user.email='smoke@jidoka.local' -c user.name='smoke' -c commit.gpgsign=false commit -q -m 'sembrado fallback' 2>&1 | Out-Null
   Pop-Location
-  foreach ($t in @('probar-gate', 'probar-hooks', 'probar-auditor', 'probar-disparos')) {
+  foreach ($t in @('probar-gate', 'probar-hooks', 'probar-auditor', 'probar-disparos', 'probar-adrs')) {
     $code = Run-PS (Join-Path $tmp "tools/$t.ps1")
     Check "self-test sembrado '$t' pasa en el destino" ($code -eq 0) "exit $code"
   }
