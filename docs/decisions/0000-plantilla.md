@@ -1,7 +1,14 @@
 # ADR NNNN — [decisión en una frase, en voz activa]
 
-- **Estado:** propuesta | aceptado | reemplazado por [NNNN]
+- **Estado:** propuesta | aceptado | aceptado (tomada bajo delegación · **revisable**) | reemplazado por [NNNN]
 - **Fecha:** AAAA-MM-DD
+
+<!-- Si el orquestador decidió por delegación explícita del cliente, decláralo en el estado y déjalo
+     "revisable" hasta el veredicto humano: la delegación no se disfraza de aprobación. -->
+
+<!-- Enmienda (cuando la decisión se AFINA sin invalidarse — no la reemplaces):
+     agrega aquí arriba un banner "**Enmienda (ADR NNNN, AAAA-MM-DD):** … sigue vigente sin cambio:
+     lo que cambia es …", y registra la enmienda con fecha en el índice. -->
 
 ## Contexto
 
@@ -23,6 +30,11 @@
 ## Consecuencias
 
 [Qué se vuelve más fácil, qué se vuelve más difícil, qué deuda queda abierta.]
+
+## Qué NO resuelve *(opcional — recomendada en decisiones correctivas)*
+
+[Autocrítica sin sesgo de confirmación: las grietas que esta decisión deja abiertas, cada una convertida
+en deuda rastreable (ROADMAP/backlog), en vez de declarar la decisión "cerrada".]
 
 ---
 
