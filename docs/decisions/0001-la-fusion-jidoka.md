@@ -24,6 +24,16 @@ Sub-decisiones:
 - **Nombre = sistema TPS.** Jidoka (método) · Andon (gates) · Kanban (sprint) · Kaizen (retro) · Gemba (demo) · Poka-yoke (doctrina). Coherente y memorable.
 - **Técnicas prestadas del ecosistema agentic** (crédito neutral, sin definirnos contra nadie): ownership por sección en artefactos, sharding de contexto (`devLoadAlwaysFiles`) y los estados de tarjeta. Se descartan los patrones pesados: planificación ceremoniosa, enjambre de roles, gates que no bloquean.
 
+## Por qué
+
+- Los frameworks agentic actuales dejan dos huecos: el control de calidad depende de que el agente coopere, y no hay ceremonia de demo visual para quien no lee código.
+- Los tres activos ya cubrían exactamente esos dos huecos: gates deterministas fuera del LLM + revisión por demo visual.
+- Fusionarlos en un repo público e instalable elimina la dispersión que impedía usar la metodología en repos ajenos.
+
+## El camino que NO se toma (y por qué tienta)
+
+Los patrones pesados del ecosistema agentic —planificación ceremoniosa, enjambre de roles, gates que no bloquean— tientan porque prometen estructura y cobertura. Se descartan: un gate que no bloquea es una sugerencia, no un muro (la tesis del método), y la ceremonia pesada reintroduce la fricción que el ritual mínimo evita.
+
 ## Consecuencias
 
 - `project-starter` y `poka-yoke-ia` quedan como **fuentes internas**; no se publican tal cual. `tracker-financiero` sigue privado (solo se toma el patrón del ritual).

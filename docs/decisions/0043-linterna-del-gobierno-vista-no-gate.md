@@ -40,6 +40,12 @@ Tres invariantes de diseño:
    "cero huérfanos" con cero archivos (la mentira verde que esta vista existe para matar).
 3. **Es vista, NO gate.** No bloquea nada, nadie la llama para que un gate decida.
 
+## Por qué
+
+- El grafo del gobierno ya existía disperso en texto, pero nadie lo renderizaba junto ni mostraba los huérfanos: la única linterna era la narración del propio agente (juez y parte).
+- Una vista que deriva de las mismas fuentes que gatean no puede mentir por construcción; una que las reinterpreta o resume crearía un segundo oráculo.
+- Falla cerrado: un "cero huérfanos" con cero archivos enumerados es la mentira verde que esta herramienta existe para matar.
+
 ## El camino que NO se toma
 
 - **Una UI/servidor/MCP como capa de gobierno** — lo prohíbe [ADR 0002](0002-motor-andon.md) (y su

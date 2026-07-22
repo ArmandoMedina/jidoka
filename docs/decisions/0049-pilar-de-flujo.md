@@ -58,6 +58,12 @@ límite → avance y roles visibles), cada una commiteable y verde sola. Plan-co
 plan mode el 2026-07-21: `docs/sprints/sprint-pilar-de-flujo-plan.md`. Este ADR registra el
 **movimiento 1** entregado (R1, el contrato del HANDOFF) y la dirección del pilar completo.
 
+## Por qué
+
+- El diagnóstico es medido, no opinado: el HANDOFF llegó a 419 líneas aunque pedía por escrito limpiarse, el ROADMAP creció decenas de veces en un lab, y había cola de Gembas vencidos sin límite. La disciplina sola no bastó.
+- "Si depende de que el modelo coopere, no es muro": la misma regla de los gates aplica al flujo — Kanban clásico se apoya en presión social que con agentes no existe.
+- El benchmark de 4 frentes descartó Scrum con fuentes (puntos y velocity son ceremonias de coordinación humana, no medición de flujo con agentes); de Kanban/Lean se toma solo lo mecánico.
+
 ## El camino que NO se toma
 
 - **Un asiento PM / capataz que persiga el trabajo a mano** — en Toyota ese rol **no existe**: el

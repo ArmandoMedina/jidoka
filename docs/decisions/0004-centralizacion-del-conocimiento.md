@@ -39,6 +39,12 @@ Se homologa con tres destinos, según la regla del protocolo de homologación de
 - Todo lo específico de dominio de los repos (código de apps, datos, casting con nombres propios — los roles de Jidoka son genéricos a propósito).
 - Lo que jidoka ya evolucionó mejor río abajo (no se retrocede): fail-closed, parametrización del verificador, self-test, juez-desde-la-base, mensaje del Stop hook en `reason`.
 
+## Por qué
+
+- Los tres activos del linaje centralizaron doctrina y motor, pero no el conocimiento alrededor (el lazo, la jerarquía QUÉ/CÓMO, los roles, los porqués de la doctrina): esa dispersión bloquea el uso real en repos ajenos.
+- El protocolo de homologación lo exige: "el conocimiento no espera a la máquina".
+- Jidoka debe ser self-contained en lo conceptual para que ningún pilar del método viva solo en un repo privado.
+
 ## Lecciones de campo que este ADR deja citables (anonimizadas)
 
 1. **La mayor:** varios sprints del linaje se construyeron sin criterios de aceptación aprobados por el cliente — la IA decidió nombres y defaults sola y el cliente no pudo alinear lo entregado con lo pedido. Correctivo permanente: **el QUÉ se escribe y aprueba ANTES de construir** (por eso el lazo empieza en Intención).

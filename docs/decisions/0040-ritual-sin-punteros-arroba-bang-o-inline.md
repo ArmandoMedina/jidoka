@@ -32,7 +32,7 @@ del mismo hecho, drift garantizado el día que una cambie.
    corre una vez por sprint (planea) tolera inyecciones más gordas (ROADMAP) que uno que
    corre en cada sesión (arranca).
 
-## Razones
+## Por qué
 
 - **Un puntero es una esperanza** — la misma razón de ADR 0034, extendida de la §1 del arranca
   al ritual entero: su cumplimiento es probabilístico, y el cliente dirige sin leer el código;

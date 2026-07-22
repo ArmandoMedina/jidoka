@@ -50,6 +50,12 @@ Cuatro agentes de extracción exprimieron los cuatro repos (129 archivos el anda
 - **Se archivan** (GitHub archive, read-only, reversible) los dos repos de **método**: el de doctrina y el andamio. Antes del archivado, cada uno recibe una lápida en su README apuntando a Jidoka como sucesor, y el andamio corrige sus enlaces públicos a la antigua URL de la doctrina (hoy 404) para que apunten a `jidoka/doctrina/`.
 - **NO se archivan** los dos casos de éxito: siguen siendo proyectos vivos. Sus lecciones futuras llegarán a Jidoka por el canal normal: la [homologación](../../kanban/homologacion.md).
 
+## Por qué
+
+- El ADR 0004 dejó saldo: piezas que Jidoka cita por nombre sin contenerlas y producción posterior a la primera pasada — la fuente de verdad seguía fragmentada.
+- Los repos de método cumplieron su propósito al ser absorbidos; mantenerlos vivos confundiría migración con metodología.
+- Los casos de éxito siguen produciendo lecciones que la homologación cosecha: archivarlos cortaría el canal de retroalimentación del método vivo.
+
 ## Lecciones de campo nuevas que este ADR deja citables (anonimizadas — continúan la lista del ADR 0004)
 
 9. Una regla enterrada en un ítem tachado del backlog no la lee nadie: **se asciende a donde se decide.**
