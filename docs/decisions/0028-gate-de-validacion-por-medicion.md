@@ -34,6 +34,17 @@ Cuando por fin se corrió un motor determinista, **desmintió el acta**. El acta
 
 Cuando los golden-masters son **PII** (gitignored, fuera del remoto), el motor **no puede correr en CI** (el runner no los tiene). Por eso el gate es **local, tipo Gemba** (corre en `Stop`, no en el push) y exige la **evidencia commiteada saneada** (la tabla sin los datos sensibles), no la corrida en el servidor. Es el caso natural de cualquier repo con datos reales de por medio.
 
+## Por qué
+
+- El deliverable de datos/spec (números, fórmulas) caía fuera de lo que la ley vigilaba: ni review-stop (solo código) ni gemba-stop (solo UI) lo alcanzaban.
+- Un sprint cerró declarando "validado al centavo" en prosa —un acta auto-firmada— sin que ningún gate lo atrapara; el motor determinista la desmintió al correrlo.
+- Reconstrucción, migración de datos e ingeniería inversa son el caso natural del hueco: no cubrirlo era una laguna estructural, no un caso de borde.
+
+## El camino que NO se toma (y por qué tienta)
+
+- Extender review-stop o gemba-stop para cubrir el caso tienta por reuso, pero son gates específicos a código y UI; ampliarlos mezclaría responsabilidades.
+- Confiar en el acta en prosa con validación manual tienta por rapidez, pero es justo el anti-patrón que evidencia-no-palabra existe para cerrar.
+
 ## Consecuencias
 
 - El hueco por el que un *"validado al centavo"* en prosa se colaba **queda cerrado**: un deliverable de datos/spec ya tiene maquinaria equivalente a la que ya tenían código y UI.

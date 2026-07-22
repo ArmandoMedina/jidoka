@@ -24,6 +24,12 @@ Cada uno declara en su `description` el criterio de CUÁNDO usarlo, para que el 
 
 Un lint nuevo, `tools/probar-agentes.ps1`, vigila la instalación: existen los 4 asientos esperados, cada `.md` tiene frontmatter con `name:`, `description:`, `model:` y `tools:`, `name:` coincide con el archivo, y — el caso que motivó el ADR — `model:` es un alias real y cerrado del harness (`haiku` | `sonnet` | `opus`). Un id inventado o un typo ya no cae en silencio: el lint lo bloquea antes de que el agente se estrene. El área `ritual` de la ley (`tools/blast-radius.json`) se extiende con `.claude/agents/*` — los agentes-asiento son ritual ejecutable, la misma familia que los comandos `/jidoka:*` y las skills.
 
+## Por qué
+
+- Una regla de model-routing en prosa depende de que el agente la recuerde y aplique bien cada vez; falla en silencio y el harness cae al default (el modelo caro) sin avisar.
+- El cliente la cazó a ojo revisando el gasto de una sesión: sin mecánica, la regla es auditable solo a posteriori y a mano.
+- El ADR 0029 ya cerró la misma forma de falla (regla correcta en prosa sin mecánica que la sostenga) para la conciencia de ruteo; este ADR aplica el patrón al tier de modelo.
+
 ## El camino que NO se toma (y por qué tienta)
 
 - **Un cue en prosa dentro de `arranca.md`** ("recuerda elegir el modelo según la tarea"). Tienta porque es el cambio más barato. Se descarta: es exactamente lo que el issue #63 acusa — una regla que depende de que el agente la recuerde y la aplique bien cada vez, sin nada que la haga cumplirse. Ya falló una vez; repetirla en otro archivo no la arregla.

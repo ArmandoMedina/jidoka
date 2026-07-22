@@ -28,7 +28,7 @@ Se añade el **hermano estructural** del sello: gobierno por **secciones**, no p
 - **(dec. 3) La ejecución es aviso por defecto; el muro es opt-in y nace apagado.** El `-Estricto` bloquea (exit 1) **solo** si un doc marcado `estricto:true` pierde una requerida, y se cablea en el **required-check de CI** (`andon.yml`), **nunca** en `verificar.ps1` (no clobbear el verificar customizado del hijo). El "no se pueda" del cliente llega como **palanca que él enciende** flipando el flag en su ledger, no como muro impuesto.
 - **(dec. 5) El detector gobierna solo los 3 singletons inyectados.** El grafo de producto (`capacidades/`, `procesos/`, `dominios/`) **se queda con `auditar.ps1`**, que ya gobierna su estructura (frontmatter, links, Gherkin) con regla risk-scaled — y cuyas plantillas se auto-declaran de secciones opcionales. Doble-gobernarlo inundaría de falsos positivos.
 
-## Razones
+## Por qué
 
 - **El hash no sirve para lo que varía a propósito.** El motor debe ser idéntico byte a byte (hash); el doc de instancia debe variar en contenido pero no en estructura (secciones). Dos herramientas para dos regímenes.
 - **Congelar el contrato en el ledger, no leerlo del template vivo.** Si el detector derivara las requeridas de los `##` del molde, el día que un template gane una sección **todos los hijos** quedarían DESVIADO de golpe en la próxima `-Actualizar` (el molde converge como motor; la instancia no). El ledger congela un contrato mínimo; el template crece libre y sus secciones nuevas entran como opcionales.
