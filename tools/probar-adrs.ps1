@@ -224,7 +224,10 @@ if (Test-Path -LiteralPath $plantillaPath) {
   }
 }
 else {
-  Check "plantilla 0000-plantilla.md existe (el molde del que se copia)" $false "falta docs/decisions/0000-plantilla.md"
+  # Sin plantilla (hijo recien sembrado, brownfield sin corpus de ADRs): el guard
+  # del molde no aplica -- solo tiene sentido donde el molde existe. 'no aplica', no
+  # falla, como el corpus real de arriba. Un repo sin la plantilla NO se bloquea.
+  Write-Host "  [N/A]   sin docs/decisions/0000-plantilla.md: el guard del molde no aplica (no hay molde que atar)." -ForegroundColor DarkGray
 }
 
 # --- Self-test sintetico: DEBE cazar cada tipo de desvio y NO marcar el sano. ---
