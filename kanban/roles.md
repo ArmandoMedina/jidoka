@@ -62,6 +62,8 @@ El orquestador elige el modelo según la tarea: **pequeño** para lo mecánico, 
 
 Estos cuatro viven instalados como agentes-asiento en `.claude/agents/` con su `model:` fijo en el frontmatter — la elección del tier deja de depender de la iniciativa del agente (ADR [0033](../docs/decisions/0033-tiers-como-agentes-asiento.md)); el lint `tools/probar-agentes.ps1` vigila que cada `model:` sea un alias real del harness.
 
+Y **cada asiento tiene enfoque conductual propio** — no comparten el prompt genérico: el explorador piensa en *cobertura*, el mecánico en *fidelidad*, el auditor en *refutar*, el arquitecto en *caminos*; y todo reporte trae la sección obligatoria **«Lo que noté por mi cuenta»** (el hallazgo no pedido). Esa carta conductual **vive en cada agente** (`.claude/agents/*.md`, secciones `## Cómo piensas` / `## Tu reporte`, que el lint hace cumplir); el reparto de una línea por asiento vive en `product/casting.md`. Misma pieza en todos los proyectos: baja por el manifiesto.
+
 ## Las reglas duras (pagadas con incidentes reales del linaje)
 
 1. **La lectura voluminosa SIEMPRE va a un subagente.** El subagente quema *su* contexto y devuelve solo el veredicto. Caso real: dos transcripts de ~250 KB leídos en el hilo principal degradaron la sesión entera.

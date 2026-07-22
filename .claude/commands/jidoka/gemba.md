@@ -26,3 +26,12 @@ Incremento a demostrar: **$ARGUMENTS**
 La evidencia es el **insumo** de la revisión, no la revisión. Para lo visual/subjetivo, **"¿se ve bien?" la responde el cliente con sus propios ojos** — tú surtes las capturas y dejas la corrida lista. Para lo objetivo, el veredicto lo da el artefacto (test verde, tabla N/N).
 
 Recuerda: el bulto de `qa_runs/` está gitignored; **commitear la evidencia citada es paso obligatorio del cierre** (`/jidoka:cierra` lo hace con `git add -f`), no cortesía — en el linaje se descubrió una vez que 0 artefactos habían llegado a git.
+
+## Registra el veredicto en el estado (el booleano que desbloquea `planea`)
+
+El veredicto del cliente no es solo prosa en el HANDOFF: es el **booleano que abre la línea** (límite WIP, FLU-1). Cuando el cliente ya vio el demo:
+
+- **Si el veredicto es OK** (aceptación **nombrada** — no un "dale" a secas): marca ese Gemba como **aceptado** en `tools/flujo.json` → `estado.gembas_pendientes`: pon `"aceptado": true` y agrega `"aceptado_fecha": "AAAA-MM-DD"`. Eso es lo que desbloquea `/jidoka:planea` — con el Gemba aceptado, el gate del límite WIP deja abrir el siguiente sprint.
+- **Si es rechazo**, el Gemba **se queda pendiente** (`aceptado: false`): el rework **hereda el mismo `id`** (no se abre uno nuevo por cada vuelta) y `planea` sigue plantado hasta que el cliente acepte lo corregido.
+
+El registro del Gemba **nuevo** (cuando un sprint entrega algo que el cliente debe ver) lo hace el cierre (`/jidoka:cierra`); aquí solo se **mueve el booleano** del que ya existía.

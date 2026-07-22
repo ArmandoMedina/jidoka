@@ -46,6 +46,7 @@ Las capacidades vigentes viven en el grafo (`product/capacidades/`, auditado por
 - [[AND-1-muro-andon]] — cuando el agente dice «listo» y no es cierto, algo lo para: la ley única (`tools/blast-radius.json`), el verificador que falla cerrado, los hooks de cierre y el auditor del grafo; el muro real es el required check server-side.
 - [[RIT-1-ritual-ejecutable]] — el método deja de ser prosa que hay que recordar: comandos `/jidoka:arranca|planea|gemba|cierra|que-sigue|desatendido` y los asientos como skills que se autoinvocan.
 - [[KIT-1-lazo-sincronizacion]] — el método se instala en repos ajenos (instalador + sello + actualización de tres vías) y las lecciones de los hijos suben por canal: *la lección sube, la máquina baja*.
+- [[FLU-1-pilar-de-flujo]] — el pilar JIT: los documentos de estado dejan de crecer solos (contratos con gate en el HANDOFF/ROADMAP/CHANGELOG), el trabajo entra con límite (WIP + Gemba pendiente que planta a `/jidoka:planea`), lo vencido muere solo a `docs/MUERTOS.md`, y el avance se ve sin terminal (hook `SessionStart` + reporte sin jerga).
 - **La memoria vive en artefactos, no en el modelo**: el `HANDOFF.md` como relevo entre sesiones, los ADRs con el camino que NO se tomó, el plan aprobado como contrato archivado (README; Jidoka Core, issue #71).
 - **Y si el QUÉ está borroso, el método te saca la sopa**: `/jidoka:descubre` — entrevista con hechos pasados, nunca hipotéticos, más el kit de entrevista portátil para el experto que no usa la IA (familia Discovery: 1 caso real; demo de campo pendiente).
 

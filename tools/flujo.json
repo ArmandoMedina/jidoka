@@ -1,0 +1,30 @@
+{
+  "_comentario": "El contrato del pilar de flujo (FLU-1, ADR 0049). Dato de INSTANCIA: cada repo declara sus limites y el motor los hace cumplir (verificar.ps1: check contrato-handoff; estado-flujo.ps1: la vista). Sin este archivo, los checks de flujo no aplican (un repo sin el pilar no se bloquea). ASCII a proposito.",
+  "handoff": {
+    "max_historicas": 2,
+    "techo_lineas": 120,
+    "historico": "docs/handoff-historico.md"
+  },
+  "roadmap": {
+    "techo_lineas": 90,
+    "historico": "docs/roadmap-historico.md",
+    "muertos": "docs/MUERTOS.md",
+    "vencimiento_dias": { "urgente": 14, "normal": 90, "algun-dia": 180 }
+  },
+  "changelog": {
+    "tipos": ["feat", "fix", "test", "docs", "chore", "breaking"],
+    "max_prosa_lineas": 8
+  },
+  "estado": {
+    "wip_limite": 8,
+    "sprint_activo": "pilar-de-flujo (rama sprint/pilar-de-flujo-20260721)",
+    "gembas_pendientes": [
+      {
+        "id": "flu-1-pilar-de-flujo",
+        "desde": "2026-07-21",
+        "aceptado": false,
+        "que_ver": "El demo del plan, sin terminal: HANDOFF y ROADMAP caben en una pantalla, MUERTOS.md existe, planea se planta por ESTE mismo Gemba, reporte-avance.html se entiende en 5 min, casting.md responde quien hace que, y los 4 asientos piensan distinto"
+      }
+    ]
+  }
+}
