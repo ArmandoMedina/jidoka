@@ -209,6 +209,24 @@ else {
   }
 }
 
+# --- El template 0000-plantilla.md es el molde del que se copia: cada seccion
+#     REQUERIDA debe existir en el. Asi, tocar la plantilla (quitar/renombrar una
+#     seccion canonica) TRUENA aqui -- el template no gobierna solo, pero tampoco
+#     puede desviarse en silencio del guardian. La regla vive en $REQUERIDAS; este
+#     check la ata al molde (como probar-docs Parte B ata el ledger al template).
+$plantillaPath = Join-Path $decisionsDir '0000-plantilla.md'
+if (Test-Path -LiteralPath $plantillaPath) {
+  $secPlantilla = Get-Secciones $plantillaPath
+  foreach ($req in $script:REQUERIDAS) {
+    $hit = $false
+    foreach ($s in $secPlantilla) { if ($s.StartsWith($req)) { $hit = $true; break } }
+    Check ("plantilla 0000: la seccion requerida '$req' esta en el molde") $hit "la plantilla y `$REQUERIDAS divergieron: el molde no tiene '$req'"
+  }
+}
+else {
+  Check "plantilla 0000-plantilla.md existe (el molde del que se copia)" $false "falta docs/decisions/0000-plantilla.md"
+}
+
 # --- Self-test sintetico: DEBE cazar cada tipo de desvio y NO marcar el sano. ---
 $tmp = Join-Path $env:TEMP ("jidoka-adrs-prueba-" + [guid]::NewGuid().ToString('N').Substring(0, 8))
 New-Item -ItemType Directory -Path $tmp -Force | Out-Null

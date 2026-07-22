@@ -136,6 +136,17 @@ $r = Run $g
 Check 'modula: modulo en_definicion sin Capacidades no bloquea' ($r.code -eq 0 -and -not $r.out.Contains('[BLOQUEA]')) "code=$($r.code) out=$($r.out)"
 Remove-Item $g -Recurse -Force -ErrorAction SilentlyContinue
 
+# 12-13. Los templates del grafo (producto/modulo.md, producto/dominio.md) son el molde:
+#        su seccion nucleo debe existir, para que tocar el template (quitarla) TRUENE
+#        aqui -- ata auditar.ps1 <-> template (como probar-docs Parte B ata ledger<->template).
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$modTpl = Join-Path $repoRoot 'kit/.jidoka/templates/producto/modulo.md'
+$domTpl = Join-Path $repoRoot 'kit/.jidoka/templates/producto/dominio.md'
+$modOk = (Test-Path -LiteralPath $modTpl) -and ([System.IO.File]::ReadAllText($modTpl) -match '(?im)^##\s+Capacidades')
+Check 'template modulo.md conserva su seccion nucleo (## Capacidades)' $modOk 'kit/.jidoka/templates/producto/modulo.md sin ## Capacidades: el molde y auditar.ps1 divergieron'
+$domOk = (Test-Path -LiteralPath $domTpl) -and ([System.IO.File]::ReadAllText($domTpl) -match '(?im)^##\s+M.dulos')
+Check 'template dominio.md conserva su seccion nucleo (## Modulos)' $domOk 'kit/.jidoka/templates/producto/dominio.md sin ## Modulos: el molde y auditar.ps1 divergieron'
+
 Write-Host ""
 if ($script:fallos -gt 0) {
   Write-Host "== $($script:fallos) de $($script:casos) caso(s) fallidos. El auditor tiene un bug: no lo estrenes. ==" -ForegroundColor Red
