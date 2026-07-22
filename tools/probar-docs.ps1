@@ -45,7 +45,9 @@ $ledgerFix = @'
     { "doc": "aditiva.md",   "molde": "m.md", "requeridas": ["Alpha"],         "estricto": false },
     { "doc": "acento.md",    "molde": "m.md", "requeridas": ["Que hace"],      "estricto": false },
     { "doc": "fence.md",     "molde": "m.md", "requeridas": ["Alpha"],         "estricto": false },
-    { "doc": "estricto.md",  "molde": "m.md", "requeridas": ["Alpha"],         "estricto": true }
+    { "doc": "estricto.md",  "molde": "m.md", "requeridas": ["Alpha"],         "estricto": true },
+    { "doc": "fam/*-plan.md",   "molde": "m.md", "requeridas": ["Alpha"],      "estricto": false },
+    { "doc": "vacia/*-plan.md", "molde": "m.md", "requeridas": ["Alpha"],      "estricto": false }
   ],
   "capa3": ["libre.md"]
 }
@@ -72,6 +74,12 @@ sin encabezado real
 '@
 Set-Content -LiteralPath (Join-Path $fix 'fence.md') -Value $fenceDoc -Encoding UTF8
 
+# familia-glob: dos miembros en fam/ (uno conforme, uno desviado) + una familia
+# 'vacia/' SIN miembros -> prueba que un glob que no matchea AVISA, no da CONFORME.
+New-Item -ItemType Directory -Path (Join-Path $fix 'fam') -Force | Out-Null
+Set-Content -LiteralPath (Join-Path $fix 'fam/a-plan.md') -Value "# t`n## Alpha`ncuerpo conforme" -Encoding UTF8
+Set-Content -LiteralPath (Join-Path $fix 'fam/b-plan.md') -Value "# t`n## Otra`nle falta Alpha" -Encoding UTF8
+
 $scriptFix = Join-Path $fix 'tools/estado-docs.ps1'
 
 # corrida NO estricta: exit 0 siempre; verifica etiquetas.
@@ -84,6 +92,9 @@ if ($out -match '\[CONFORME\]\s+aditiva\.md') { Ok "aditiva.md -> CONFORME (adit
 if ($out -match '\[CONFORME\]\s+acento\.md') { Ok "acento.md -> CONFORME (fold de acentos: 'Que hace' ~ 'Que hace (...)')" } else { No "acento.md deberia CONFORME por fold de acentos + prefijo" }
 if ($out -match 'estricto\.md.*falta.*[Aa]lpha') { Ok "estricto.md -> DESVIADO nombrando Alpha" } else { No "estricto.md deberia DESVIADO por Alpha" }
 if ($out -match 'fence\.md.*falta.*[Aa]lpha') { Ok "fence.md -> DESVIADO (## dentro de code-fence no cuenta como encabezado)" } else { No "fence.md: un ## dentro de un fence NO deberia contar como seccion (falso CONFORME)" }
+if ($out -match '\[CONFORME\]\s+fam[\\/]a-plan\.md') { Ok "familia: fam/a-plan.md -> CONFORME (glob expandido, miembro conforme)" } else { No "familia: fam/a-plan.md deberia CONFORME (glob de familia)" }
+if ($out -match 'fam[\\/]b-plan\.md.*falta.*[Aa]lpha') { Ok "familia: fam/b-plan.md -> DESVIADO nombrando Alpha" } else { No "familia: fam/b-plan.md deberia DESVIADO por Alpha" }
+if ($out -match 'FAMILIA VACIA.*vacia') { Ok "familia sin miembros -> [FAMILIA VACIA] (glob que no matchea AVISA, no da CONFORME en falso)" } else { No "familia vacia: esperaba aviso [FAMILIA VACIA], no un pase silencioso" }
 
 # corrida ESTRICTA: estricto.md desviado -> exit 1 (muro opt-in).
 & powershell -NoProfile -File $scriptFix -Estricto 2>&1 | Out-Null

@@ -1,8 +1,8 @@
 # 0044 — El editor del gobierno: la extensión AUTORA, el gate EJECUTA
 
-- **Estado:** aceptado
+- **Estado:** reemplazado (en la superficie) por [ADR 0048](0048-superficie-app-tuberia.md) — el principio "la UI autora, el gate ejecuta" sigue vigente
 - **Fecha:** 2026-07-20
-- **Sprint:** El editor del gobierno, parte 2 (`docs/sprints/sprint-editor-gobierno-2-plan.md`; R1 en `sprint-editor-gobierno-plan.md`)
+- **Sprint:** El editor del gobierno, parte 2 (`docs/sprints/sprint-19-editor-gobierno-2-plan.md`; R1 en `sprint-18-editor-gobierno-plan.md`)
 
 ## Contexto
 
@@ -38,6 +38,12 @@ valor (Gemba GO del F5, 2026-07-20) y el cliente pidió la autoría.
 
 El contrato entre stacks (JS escribe, PS lee) es UTF-8 **sin BOM** + newline final, y lo vigila
 un caso de `probar-ligas.ps1` que escribe con `node -e` y evalúa con el `.ps1`.
+
+## Por qué
+
+- La linterna devolvió los ojos al cliente, y con ellos dos hallazgos medidos: el grafo se satura (132 objetos) y el aviso del gobierno es grueso (avisa sobre las 89 capacidades sin nombrar cuál).
+- El juicio de qué ligar con qué es del humano, no de la IA: la herramienta deja que el cliente declare las ligas, no las adivina.
+- Concreta el principio ya establecido "la UI autora, el gate ejecuta" (ADR 0002) al grafo de ligas: clic entonces JSON en git entonces gate determinista; nada depende del modelo.
 
 ## El camino que NO se toma
 

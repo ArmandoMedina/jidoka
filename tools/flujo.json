@@ -17,13 +17,21 @@
   },
   "estado": {
     "wip_limite": 8,
-    "sprint_activo": "pilar-de-flujo (rama sprint/pilar-de-flujo-20260721)",
+    "sprint_activo": "molde-sprints-qa (rama sprint/molde-sprints-qa-20260722)",
     "gembas_pendientes": [
       {
         "id": "flu-1-pilar-de-flujo",
         "desde": "2026-07-21",
-        "aceptado": false,
+        "aceptado": true,
+        "aceptado_fecha": "2026-07-22",
         "que_ver": "El demo del plan, sin terminal: HANDOFF y ROADMAP caben en una pantalla, MUERTOS.md existe, planea se planta por ESTE mismo Gemba, reporte-avance.html se entiende en 5 min, casting.md responde quien hace que, y los 4 asientos piensan distinto"
+      },
+      {
+        "id": "molde-sprints-qa",
+        "desde": "2026-07-22",
+        "aceptado": true,
+        "aceptado_fecha": "2026-07-22",
+        "que_ver": "El molde sin terminal: docs/sprints/README.md numerado en orden (sprint-NN); dos -entrega.md con las mismas secciones; dos LOG.md de qa_runs con misma estructura (Metodo, Resultados, Veredicto); kit/.jidoka/templates/README.md dice donde vive la regla de cada familia; y el reporte de conformidad marca CONFORME/DESVIADO por familia (50 CONFORME hoy)"
       }
     ]
   }

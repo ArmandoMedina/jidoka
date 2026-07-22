@@ -24,7 +24,7 @@ Corolarios probados en la práctica (el laboratorio de campo del linaje):
   reaprenderlo cada sesión). Cualquier sustrato alternativo debe proveer los tres.
 - Construir una API/MCP propia como capa de gobierno **reintroduce el problema que se resolvió**:
   la IA no la conoce de fábrica → la reaprende cada sesión → amnesia y bifurcación de vuelta.
-  (Decisión congelada en `../decisiones/0002-sin-api-propia-como-gobierno.md`.)
+  (Decisión congelada en [ADR 0053](../docs/decisions/0053-sin-api-propia-como-gobierno.md).)
 
 ## La tesis dual (los dos pájaros)
 

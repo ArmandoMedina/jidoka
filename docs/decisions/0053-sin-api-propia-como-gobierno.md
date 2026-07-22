@@ -1,6 +1,8 @@
-# ADR 0002 — Nada de API/MCP propio como capa de gobierno; sustrato git/GitHub + hooks
+# ADR 0053 — Nada de API/MCP propio como capa de gobierno; sustrato git/GitHub + hooks
 
-- Estado: aceptada (2026-07-04) · heredado del repo interno de doctrina
+- **Estado:** aceptado
+- **Fecha:** 2026-07-04
+- **Nota:** heredado del repo interno de doctrina (número original: 0002); consolidado en `docs/decisions/` el 2026-07-22.
 
 ## Contexto
 
@@ -19,7 +21,7 @@ Vale/JSON Schema/linters como validadores de forma en hook y CI.
 ## Por qué
 
 1. Una API propia que la IA llama voluntariamente tiene el mismo modo de falla que las memorias:
-   depende de cooperación del modelo → no es muro (ley del muro, [`../00-tesis.md`](../00-tesis.md)).
+   depende de cooperación del modelo → no es muro (ley del muro, [`../../doctrina/00-tesis.md`](../../doctrina/00-tesis.md)).
 2. La IA no conoce la API de fábrica → la reaprende cada sesión → reintroduce amnesia y
    bifurcación, exactamente lo que los gates resolvieron.
 3. No existe a 2026 sustrato multi-persona con gate inmutable que la IA domine mejor que
@@ -37,3 +39,12 @@ convencional.
 - API/MCP de validación que la IA "debe llamar".
 - Meter a la IA a operar Jira/ServiceNow/Zendesk como sustrato primario (los conoce mucho peor
   que git; obliga a construir el MCP que se quería evitar).
+
+## Consecuencias
+
+El gobierno de Jidoka se apoya **solo** en primitivas git/GitHub + hooks del agente: no hay una
+capa de servicio propia que mantener, versionar ni que la IA deba reaprender. La contrapartida
+aceptada es que Jidoka queda **acoplado a lo que git/GitHub ofrecen** (branch protection, required
+checks, CODEOWNERS) y que la integración con sistemas propietarios se hace por un puente MCP
+delgado —nunca como muro—. Es la decisión congelada que la tesis del método (`doctrina/00-tesis.md`)
+cita como su piso: *el punto de control vive FUERA del LLM*.

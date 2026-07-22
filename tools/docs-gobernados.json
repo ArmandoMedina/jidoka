@@ -24,6 +24,24 @@
       "molde": "kit/.jidoka/templates/casting.md",
       "requeridas": ["El reparto humano", "Los asientos-agente"],
       "estricto": false
+    },
+    {
+      "doc": "docs/sprints/*-plan.md",
+      "molde": "kit/.jidoka/templates/sprint-plan.md",
+      "requeridas": ["Contexto", "Alcance", "Verificacion", "Lo que NO entra"],
+      "estricto": false
+    },
+    {
+      "doc": "docs/sprints/*-entrega.md",
+      "molde": "kit/.jidoka/templates/sprint-entrega.md",
+      "requeridas": ["Que se entrego", "Verificacion", "Lo aprendido"],
+      "estricto": false
+    },
+    {
+      "doc": "qa_runs/*/LOG.md",
+      "molde": "kit/.jidoka/templates/qa-log.md",
+      "requeridas": ["Metodo reproducible", "Resultados", "Veredicto"],
+      "estricto": false
     }
   ],
   "capa3": ["CODE_OF_CONDUCT.md", "LICENSE"]

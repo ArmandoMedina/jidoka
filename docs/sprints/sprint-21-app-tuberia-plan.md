@@ -57,7 +57,7 @@ fidelidad visual ANTES de cablear datos**. Fase 1 = Windows.
 6. **`app/` es Jidoka-only** (no se siembra; invariante en `probar-app.ps1`, migrado del de
    `probar-extension.ps1:87-98`). Área nueva **`app`** en la ley con `revisa:true`.
 
-## Rebanadas (orden de dependencia; cada una commiteable y verde)
+## Alcance (rebanadas — orden de dependencia; cada una commiteable y verde)
 
 ### R1 — Cerrar el legado + la ley nueva (talla S) — toca `decisiones`
 - **ADR 0048**: superficie = app Tauri, supersede 0044; alternativas descartadas (web local,
@@ -138,9 +138,9 @@ Sin código, sin terminal, sin VS Code.
 4. **rustup**: instalación nueva en la máquina del dev (sin admin); si el AV molesta al
    toolchain, se confiesa y se resuelve antes de R2.
 
-## Archivos críticos
+## Rebanadas (orden de dependencia; cada una commiteable y verde)
 
-`docs/analisis/maqueta-tuberia-202607.html` (spec congelada) · `tools/bandeja.ps1` ·
+### R1 — Cerrar el legado + la ley nueva (talla S) — toca `decisiones`
 `tools/estado-ritual.ps1` · `extension/contratos.js`+`ritual.js` (a portar) ·
 `extension/extension.js`+`package.json` (a retirar) · `tools/publicar.ps1:79` ·
 `.github/workflows/andon.yml:54` · `tools/blast-radius.json` · `kit/.jidoka/instalar/manifiesto.json` ·

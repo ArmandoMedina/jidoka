@@ -17,6 +17,17 @@ Una auditoría independiente del Sprint 1 (motor + procedimiento + superficies p
 5. **Los commits públicos no llevan trailer de sesión** (`Claude-Session: ...`): es un identificador privado del operador en un repo público. Regla de método.
 6. **Line endings gobernados por `.gitattributes`**, no por convención: `.githooks/*` siempre LF (los ejecuta `sh`), `*.ps1` CRLF. El `.editorconfig` guía al editor; git no lo lee en checkout.
 
+## Por qué
+
+- Un muro que ante fallo interno se abre no es muro: el verificador fallando-abierto desmentía la tesis central del método.
+- El juez no puede viajar en el PR que juzga: era el modo de falla probado empíricamente (un PR podía vaciar la ley que lo juzga).
+- El nombre `jidoka` en npm estaba ocupado desde 2017; anunciarlo regalaba el one-liner del instalador a un paquete ajeno.
+
+## El camino que NO se toma (y por qué tienta)
+
+- Dejar el fallo-abierto como estaba tienta por simplicidad, pero la coherencia con la doctrina exige que el motor no apruebe ante error interno (falla cerrado).
+- Parchear el nombre con un scoped package o un alias tienta, pero el espejo del patrón `bmad-method` (`jidoka-method`) es directo y sin ambigüedad.
+
 ## Decisión abierta (para Sprint 3) — ✅ RESUELTA en [ADR 0024](0024-el-motor-se-lee-del-arbol.md)
 
 Hoy `tools/` es la **copia maestra provisional** del motor y `kit/` solo trae los disparos. Dos copias de una ley driftean: en Sprint 3 el motor debe vivir **solo en `kit/`** y este repo **instalarse su propio kit** (`npx jidoka-method init` corrido sobre Jidoka mismo). El dogfood completo: el repo de la metodología como primera instalación de su propio instalador.
@@ -27,4 +38,4 @@ Hoy `tools/` es la **copia maestra provisional** del motor y `kit/` solo trae lo
 
 - El README deja de anunciar capacidades inexistentes: tabla "Dónde va la beta" + `ROADMAP.md` con los sprints 2–4.
 - `andon/README.md` gana la sección **"Fronteras del muro"**: los límites conocidos, dichos de frente (`doctrina/06`).
-- Las lecciones de procedimiento van al Kaizen del sprint (`docs/sprints/sprint-1-plan.md`), no a la memoria de nadie.
+- Las lecciones de procedimiento van al Kaizen del sprint (`docs/sprints/sprint-01-motor-andon-plan.md`), no a la memoria de nadie.

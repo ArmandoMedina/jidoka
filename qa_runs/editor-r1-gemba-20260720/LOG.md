@@ -2,6 +2,15 @@
 
 > Corrida del cierre de sesión 2026-07-20. El pendiente crítico del HANDOFF era: *"nadie ha visto correr la extensión"*. Este LOG registra que **el cliente la vio correr con sus ojos** — el go/no-go del stack VS Code salió **GO**.
 
+## Método reproducible
+
+1. Corre `tools/probar-extension.ps1` sobre el código de la extensión.
+2. Corre `node --check extension/extension.js` para verificar sintaxis.
+3. Corre `tools/estado-gobierno.ps1` (la cadena que la extensión ejecuta) para verificar el grafo.
+4. En Gemba: abre `jidoka.code-workspace` en VS Code, pulsa F5, y ejecuta `Ctrl+Shift+P` → "Jidoka: ver el gobierno".
+
+## Resultados
+
 ## Lo que corrió la máquina (esta sesión, esta máquina)
 
 | Verificación | Resultado |
@@ -27,4 +36,4 @@
 
 ## Veredicto
 
-**GO.** El stack VS Code (extensión JS plano → PowerShell → webview) quedó demostrado de punta a punta. R2 (ledger `tools/ligas.json` + gate) queda desbloqueado; su plan vive en `docs/sprints/sprint-editor-gobierno-plan.md`.
+**GO.** El stack VS Code (extensión JS plano → PowerShell → webview) quedó demostrado de punta a punta. R2 (ledger `tools/ligas.json` + gate) queda desbloqueado; su plan vive en `docs/sprints/sprint-18-editor-gobierno-plan.md`.

@@ -12,7 +12,7 @@ El camino enseñó qué **no** es: se intentó resolver con visualización (un s
 
 ## Decisión
 
-Jidoka **es un sistema de gobierno configurable con UI guiada**, no solo una metodología con comandos fijos. El usuario parametriza el gobierno de su repo desde la interfaz —qué se vigila, qué se lee, qué régimen tiene cada pieza y qué no puede tocar la IA— sin editar JSON a mano, y todo lo que nazca por fuera cae a una bandeja de pendientes. Esta es la capacidad ancla **[[CFG-1-gobierno-configurable]]**, construida en fase 1 por seis rebanadas (contrato del sprint en `docs/sprints/sprint-sistema-configurable-plan.md`).
+Jidoka **es un sistema de gobierno configurable con UI guiada**, no solo una metodología con comandos fijos. El usuario parametriza el gobierno de su repo desde la interfaz —qué se vigila, qué se lee, qué régimen tiene cada pieza y qué no puede tocar la IA— sin editar JSON a mano, y todo lo que nazca por fuera cae a una bandeja de pendientes. Esta es la capacidad ancla **[[CFG-1-gobierno-configurable]]**, construida en fase 1 por seis rebanadas (contrato del sprint en `docs/sprints/sprint-20-sistema-configurable-plan.md`).
 
 La línea doctrinal **no se dobla**: la UI **autora**, el gate **ejecuta**. La interfaz nunca es el muro; el único enforcement sigue siendo el gate determinista *fuera* del LLM (ADR 0002). Clic en la UI → escribe un ledger en git → el gate lo hace cumplir. Nada depende de que el modelo coopere.
 

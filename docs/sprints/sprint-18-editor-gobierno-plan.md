@@ -3,7 +3,7 @@
 > Contrato R0 aprobado por el cliente el **2026-07-19** en plan mode (STOP 2 del ritual).
 > Sucede al sprint de la linterna (`v1.24.0`, ADR 0043): aquella **muestra**, este **deja configurar**.
 
-## R0 — El QUE (aprobado)
+## Contexto (R0 — el QUÉ aprobado)
 
 **La capacidad:** *el usuario declara, desde una interfaz visual, que codigo sostiene que capacidad
 — y con que fuerza y en que direccion se vigila esa relacion — sin editar JSON a mano.*
@@ -19,6 +19,8 @@ herramienta no te va a decir con que ligar — eso lo sabes tu. Pero yo poder de
 estas 5 capacidades**, y poder decir que **el trigger es el cambio de codigo**... o al reves, o en
 ambas direcciones"*. Y: *"la UI donde vea el arbol de archivos y los pueda relacionar ahi, y que se
 edite el blast-radius al mismo tiempo"*. Sobre los 3 modos de grafo: *"vale la pena conservar las 3"*.
+
+## Verificación (criterios de aceptación — el demo que corre el cliente)
 
 ### Criterios de aceptacion (demostrables sin codigo ni terminal)
 - Dado que abro VS Code en un repo con Jidoka, cuando ejecuto **"Jidoka: ver el gobierno"**, entonces
@@ -68,7 +70,7 @@ Forma del ledger:
     "fuerza": "avisa" } ] }
 ```
 
-## Rebanadas (cada una commiteable, verde y demostrable)
+## Alcance (rebanadas — cada una commiteable, verde y demostrable)
 
 ### R1 — Los 3 modos + la extension que muestra el grafo
 Portar **Foco / Agrupado / Clusters** a `tools/estado-gobierno.ps1` (Foco por defecto) + `extension/`

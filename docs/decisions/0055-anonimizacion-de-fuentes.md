@@ -1,11 +1,13 @@
-# ADR 0004 — Las fuentes se anonimizan mecánicamente in-place antes de publicar
+# ADR 0055 — Las fuentes se anonimizan mecánicamente in-place antes de publicar
 
-- Estado: aceptada (2026-07-09) · heredado del repo interno de doctrina
+- **Estado:** aceptado
+- **Fecha:** 2026-07-09
+- **Nota:** heredado del repo interno de doctrina (número original: 0004); consolidado en `docs/decisions/` el 2026-07-22.
 
 ## Contexto
 
 El repo de doctrina es privado, diseñado para publicarse. La auditoría de confidencialidad
-previa a la publicación (la pasada que exige [`../07-receta-de-traslado.md`](../07-receta-de-traslado.md),
+previa a la publicación (la pasada que exige [`../../doctrina/07-receta-de-traslado.md`](../../doctrina/07-receta-de-traslado.md),
 §frontera NDA) encontró datos del entorno personal del autor dentro de las fuentes: el nombre de
 usuario local en rutas, el UUID de la sesión del agente y una ruta de disco con el nombre de una
 carpeta local. Nada de eso es contenido NDA del trabajo (se verificó: no hay clientes, montos ni
@@ -33,8 +35,8 @@ slugs aleatorios de sesión) se quedan como están.
 
 - **Menos destructivo y reversible.** El original queda en la historia privada de git; la
   anonimización es un commit revertible. Excluir las fuentes (b) amputaría la trazabilidad que
-  el propio método predica: [`../citas-verificadas.md`](../citas-verificadas.md) manda resolver
-  discrepancias contra el chat fuente, y el ADR 0001 justifica el repo porque "fuente y síntesis
+  el propio método predica: [`../../doctrina/citas-verificadas.md`](../../doctrina/citas-verificadas.md) manda resolver
+  discrepancias contra el chat fuente, y el ADR 0052 justifica el repo porque "fuente y síntesis
   viajan juntas".
 - **La inmutabilidad protege el contenido, no las rutas.** El valor de la fuente es qué se
   investigó y qué respondió el modelo — ninguna cita de la doctrina carga peso sobre un nombre
@@ -49,9 +51,18 @@ pasada de confidencialidad exige revisar "contenido E historial", así que **la 
 publicación del historial (historia nueva, squash o filter-repo) es una decisión pendiente del
 humano** — es irreversible y no la toma un agente.
 
+## Consecuencias
+
+El HEAD del repo de doctrina queda publicable (identificadores del entorno reemplazados, tabla de
+sustituciones a la vista), pero el **historial** de git sigue arrastrando los datos originales:
+por eso publicar las fuentes queda condicionado a una decisión humana irreversible sobre la
+historia (filter-repo / historia nueva), aún **pendiente**. Corolario directo en Jidoka: el
+corpus de fuentes **no ascendió** a este repo, y Jidoka nació con historial limpio y commits
+públicos sin trailer de sesión.
+
 ---
 
 *Posdata de Jidoka (2026-07-10): esta es la razón por la que el corpus de fuentes NO ascendió a
-Jidoka (ADR [0004 de Jidoka](../../docs/decisions/0004-centralizacion-del-conocimiento.md)) — su
+Jidoka (ADR [0004 de Jidoka](0004-centralizacion-del-conocimiento.md)) — su
 historial de origen sigue sin limpiarse. Y es el mismo principio por el que Jidoka nació con
 historial limpio y sus commits públicos no llevan trailer de sesión (ADR 0003 de Jidoka).*

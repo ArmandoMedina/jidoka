@@ -44,7 +44,7 @@ de `instalar.ps1`**:
 3. **La guía lo hace de primera clase.** `docs/guias/mantener-el-motor-al-dia.md` documenta el fallback como
    camino guiado (antes se infería de `estado-motor.ps1`).
 
-## El principio
+## Por qué
 
 > **El mecanismo por el que el método se mantiene al día no debe ser a la vez el único punto de falla y el
 > artefacto más sospechoso del kit.** Un `deny` o una cuarentena de terceros sobre una pieza no debe dejar al

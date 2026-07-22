@@ -1,6 +1,6 @@
 # Sprint — La app de la tubería: la maqueta se vuelve el producto (Tauri) · Entrega
 
-> El récord del sprint (`v1.27.0`, ADR 0048). Plan-contrato: [sprint-app-tuberia-plan.md](sprint-app-tuberia-plan.md) (aprobado en plan mode 2026-07-21, STOP 2). Evidencia: [`qa_runs/app-tuberia-20260721/LOG.md`](../../qa_runs/app-tuberia-20260721/LOG.md).
+> El récord del sprint (`v1.27.0`, ADR 0048). Plan-contrato: [sprint-21-app-tuberia-plan.md](sprint-21-app-tuberia-plan.md) (aprobado en plan mode 2026-07-21, STOP 2). Evidencia: [`qa_runs/app-tuberia-20260721/LOG.md`](../../qa_runs/app-tuberia-20260721/LOG.md).
 
 ## Objetivo
 

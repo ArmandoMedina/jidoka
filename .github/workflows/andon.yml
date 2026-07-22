@@ -45,6 +45,7 @@ jobs:
           .\tools\probar-bandeja.ps1;  if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-ritual.ps1;   if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-anti-pii.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-adrs.ps1;     if ($LASTEXITCODE -ne 0) { exit 1 }
           # Self-tests Jidoka-only (no sembrados): corren solo si estan presentes
           # (un hijo instalado no los tiene, y este mismo workflow se siembra).
           # probar-instalador y probar-sembrar corren AQUI a proposito: en Windows

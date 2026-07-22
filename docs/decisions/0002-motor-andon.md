@@ -19,6 +19,17 @@ Sembrar el arquetipo **doc-first** completo: una ley única + verificador + self
 - **PS 5.1 solo en este sprint.** Los scripts son PowerShell 5.1 y el CI corre en `windows-latest` (mismo intérprete que el hook local). Los **gemelos `.sh`** llegan con el instalador (Sprint 3), donde el multiplataforma sí importa. No se adelanta complejidad que hoy nadie usa.
 - **Autoridad creciente.** `andon-stop` (Stop hook, frena el cierre si falta un doc dueño) → `pre-push` (UX local, saltable con `--no-verify`) → **check `andon` en CI + branch protection** (el único muro infranqueable). El required check en la protección de `main` es un **paso humano** documentado en `andon/README.md`.
 
+## Por qué
+
+- La tesis sin motor es prosa: Jidoka predicaba que un gate solo es muro si vive fuera del LLM, pero no corría ningún gate.
+- Reusar el motor ya probado en el linaje (verificar.ps1, probar-gate.ps1) es literalmente lo que el método predica (dogfooding).
+- Arrancar con "casi todo avisa, un solo doc_bloquea real" sigue la doctrina anti-fatiga: endurecer con evidencia, no con supuesto.
+
+## El camino que NO se toma (y por qué tienta)
+
+- Adelantar los gemelos `.sh` y el multiplataforma tienta por completitud, pero se posterga al Sprint 3 (el instalador): no se adelanta complejidad que hoy nadie usa.
+- Sumar el auditor del grafo (`auditar.ps1`) desde ya tienta por cobertura, pero no entra: Jidoka aún no tiene grafo de producto que auditar (`product/` es solo ejemplos).
+
 ## Consecuencias
 
 - Jidoka corre sus propios gates en cada push y cada PR. Cambiar un artefacto sin tocar su doc dueño **avisa**; agregar un ADR sin índice **bloquea**.

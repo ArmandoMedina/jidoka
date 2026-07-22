@@ -93,4 +93,4 @@ Registradas en `ROADMAP.md`; decide el cliente:
 
 ## Aprobación del QUÉ
 
-Este brief **no estrena un QUÉ nuevo — consolida el vigente**, ya aprobado y entregándose (la `v1.0.0` cumplida en 2 labs ajenos, ADR 0017; la frontera Core declarada el 2026-07-15, issue #71). Consolidado el **2026-07-16** como rebanada R2 del sprint «Conciencia del agente» (`docs/sprints/sprint-conciencia-del-agente-plan.md`), bajo la decisión del cliente del 2026-07-16 («adelante con el siguiente sprint», #75).
+Este brief **no estrena un QUÉ nuevo — consolida el vigente**, ya aprobado y entregándose (la `v1.0.0` cumplida en 2 labs ajenos, ADR 0017; la frontera Core declarada el 2026-07-15, issue #71). Consolidado el **2026-07-16** como rebanada R2 del sprint «Conciencia del agente» (`docs/sprints/sprint-13-conciencia-del-agente-plan.md`), bajo la decisión del cliente del 2026-07-16 («adelante con el siguiente sprint», #75).

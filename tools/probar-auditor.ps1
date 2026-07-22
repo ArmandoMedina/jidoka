@@ -108,6 +108,45 @@ $r = Run $g
 Check 'jidoka#42: con scanDirsExtra, el wikilink a engineering/ resuelve (no bloquea)' ($r.code -eq 0 -and -not $r.out.Contains('[BLOQUEA]')) "code=$($r.code) out=$($r.out)"
 Remove-Item $g -Recurse -Force -ErrorAction SilentlyContinue
 
+# 8. Modulo vigente sin '## Capacidades' -> BLOQUEA (molde de secciones, 3d).
+$g = New-Graph
+Write-Note $g 'product/modulos/MOD-x.md' "---`ntipo: modulo`nestado: vigente`n---`n# MOD-x`n`nsin la seccion nucleo."
+$r = Run $g
+Check 'bloquea: modulo vigente sin seccion Capacidades' ($r.code -eq 1 -and $r.out.Contains('modulo vigente sin')) "code=$($r.code) out=$($r.out)"
+Remove-Item $g -Recurse -Force -ErrorAction SilentlyContinue
+
+# 9. Dominio vigente sin '## Modulos' -> BLOQUEA.
+$g = New-Graph
+Write-Note $g 'product/dominios/Dom.md' "---`ntipo: dominio`nestado: vigente`n---`n# Dom`n`nsin listar los modulos."
+$r = Run $g
+Check 'bloquea: dominio vigente sin seccion Modulos' ($r.code -eq 1 -and $r.out.Contains('dominio vigente sin')) "code=$($r.code) out=$($r.out)"
+Remove-Item $g -Recurse -Force -ErrorAction SilentlyContinue
+
+# 10. Modulo vigente CON '## Capacidades' -> no bloquea.
+$g = New-Graph
+Write-Note $g 'product/modulos/MOD-y.md' "---`ntipo: modulo`nestado: vigente`n---`n# MOD-y`n`n## Capacidades`n`ncuerpo."
+$r = Run $g
+Check 'valido: modulo vigente con Capacidades no bloquea' ($r.code -eq 0 -and -not $r.out.Contains('[BLOQUEA]')) "code=$($r.code) out=$($r.out)"
+Remove-Item $g -Recurse -Force -ErrorAction SilentlyContinue
+
+# 11. Modulacion por estado: modulo en_definicion sin la seccion NO bloquea (stub legitimo).
+$g = New-Graph
+Write-Note $g 'product/modulos/MOD-z.md' "---`ntipo: modulo`nestado: en_definicion`n---`n# MOD-z`n`nstub en exploracion, sin seccion aun."
+$r = Run $g
+Check 'modula: modulo en_definicion sin Capacidades no bloquea' ($r.code -eq 0 -and -not $r.out.Contains('[BLOQUEA]')) "code=$($r.code) out=$($r.out)"
+Remove-Item $g -Recurse -Force -ErrorAction SilentlyContinue
+
+# 12-13. Los templates del grafo (producto/modulo.md, producto/dominio.md) son el molde:
+#        su seccion nucleo debe existir, para que tocar el template (quitarla) TRUENE
+#        aqui -- ata auditar.ps1 <-> template (como probar-docs Parte B ata ledger<->template).
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$modTpl = Join-Path $repoRoot 'kit/.jidoka/templates/producto/modulo.md'
+$domTpl = Join-Path $repoRoot 'kit/.jidoka/templates/producto/dominio.md'
+$modOk = (Test-Path -LiteralPath $modTpl) -and ([System.IO.File]::ReadAllText($modTpl) -match '(?im)^##\s+Capacidades')
+Check 'template modulo.md conserva su seccion nucleo (## Capacidades)' $modOk 'kit/.jidoka/templates/producto/modulo.md sin ## Capacidades: el molde y auditar.ps1 divergieron'
+$domOk = (Test-Path -LiteralPath $domTpl) -and ([System.IO.File]::ReadAllText($domTpl) -match '(?im)^##\s+M.dulos')
+Check 'template dominio.md conserva su seccion nucleo (## Modulos)' $domOk 'kit/.jidoka/templates/producto/dominio.md sin ## Modulos: el molde y auditar.ps1 divergieron'
+
 Write-Host ""
 if ($script:fallos -gt 0) {
   Write-Host "== $($script:fallos) de $($script:casos) caso(s) fallidos. El auditor tiene un bug: no lo estrenes. ==" -ForegroundColor Red

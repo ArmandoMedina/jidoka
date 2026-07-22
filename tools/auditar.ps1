@@ -163,6 +163,22 @@ foreach ($t in $targets) {
       Note "$rel : capacidad vigente sin test referenciado ni disclaimer 'no existe test'"
     }
   }
+
+  # 3d. Molde de secciones de modulo/dominio (backbone; solo los vigentes). Un modulo
+  #     vigente lista sus capacidades; un dominio vigente, sus modulos. Es el minimo
+  #     canonico: no fuerza contenido a los stubs, pero impide que un modulo/dominio
+  #     futuro pierda su seccion nucleo. El grafo de product/ lo gobierna auditar
+  #     (ADR 0042), NO el ledger docs-gobernados.json (evita el doble-gobierno).
+  if ($tipo -eq 'modulo' -and $estado -eq 'vigente') {
+    if ($text -notmatch '(?im)^##\s+Capacidades') {
+      Block "$rel : modulo vigente sin seccion '## Capacidades'"
+    }
+  }
+  if ($tipo -eq 'dominio' -and $estado -eq 'vigente') {
+    if ($text -notmatch '(?im)^##\s+M.dulos') {
+      Block "$rel : dominio vigente sin seccion '## Modulos'"
+    }
+  }
 }
 
 # --- 4. Huerfanos: notas sin ningun enlace entrante [[...]] o ](...md) ----------

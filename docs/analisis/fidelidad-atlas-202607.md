@@ -2,7 +2,7 @@
 
 > **Qué es esto:** el careo de cada diagrama AS-IS del atlas (`docs/atlas/`) contra su **fuente real** (el comando `.md`, el script `.ps1` o el doc de método que declara en su `<bpmn:documentation>`). El atlas es AS-IS: debe reflejar lo que el método hace, no lo que sería bonito. Cada desvío lleva su cita de la fuente.
 >
-> **Por qué existe este archivo:** el hallazgo se re-descubrió a golpes en 3 sesiones porque vivía enterrado en transcripts. Aquí queda durable. Es la base del sprint «El atlas dice la verdad» (`docs/sprints/sprint-atlas-fiel-plan.md`).
+> **Por qué existe este archivo:** el hallazgo se re-descubrió a golpes en 3 sesiones porque vivía enterrado en transcripts. Aquí queda durable. Es la base del sprint «El atlas dice la verdad» (`docs/sprints/sprint-15-atlas-fiel-plan.md`).
 
 ## Método
 

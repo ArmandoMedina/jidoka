@@ -2,7 +2,7 @@
 
 - **Estado:** aceptado
 - **Fecha:** 2026-07-19
-- **Sprint:** La linterna del gobierno (`docs/sprints/sprint-linterna-gobierno-plan.md`)
+- **Sprint:** La linterna del gobierno (`docs/sprints/sprint-17-linterna-gobierno-plan.md`)
 
 ## Contexto
 
@@ -40,10 +40,16 @@ Tres invariantes de diseño:
    "cero huérfanos" con cero archivos (la mentira verde que esta vista existe para matar).
 3. **Es vista, NO gate.** No bloquea nada, nadie la llama para que un gate decida.
 
+## Por qué
+
+- El grafo del gobierno ya existía disperso en texto, pero nadie lo renderizaba junto ni mostraba los huérfanos: la única linterna era la narración del propio agente (juez y parte).
+- Una vista que deriva de las mismas fuentes que gatean no puede mentir por construcción; una que las reinterpreta o resume crearía un segundo oráculo.
+- Falla cerrado: un "cero huérfanos" con cero archivos enumerados es la mentira verde que esta herramienta existe para matar.
+
 ## El camino que NO se toma
 
 - **Una UI/servidor/MCP como capa de gobierno** — lo prohíbe [ADR 0002](0002-motor-andon.md) (y su
-  ancestro doctrinal `doctrina/decisiones/0002`): una API que la IA llama voluntariamente tiene el
+  ancestro doctrinal [ADR 0053](0053-sin-api-propia-como-gobierno.md)): una API que la IA llama voluntariamente tiene el
   mismo modo de falla que las memorias (depende de cooperación → no es muro). Una vista estática que
   nadie invoca para decidir **no** es capa de gobierno; es un reporte, como `estado-docs.ps1` o los
   SVG del atlas. La restricción se respeta mientras no haya servidor/servicio del que dependa un gate.

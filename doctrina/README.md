@@ -1,6 +1,6 @@
 # Doctrina — el porqué (Poka-yoke)
 
-> El **porqué** citable de Jidoka. La IA **no lee esto** en su trabajo diario ([ADR 0003 de la doctrina](decisiones/0003-doctrina-se-consume-via-disparos.md)): la doctrina le llega compilada como **disparos** — mensajes de gate en el momento del disparo (`kit/.jidoka/disparos/`). Esto es para los humanos: el fundamento verificable del método.
+> El **porqué** citable de Jidoka. La IA **no lee esto** en su trabajo diario ([ADR 0054](../docs/decisions/0054-doctrina-se-consume-via-disparos.md)): la doctrina le llega compilada como **disparos** — mensajes de gate en el momento del disparo (`kit/.jidoka/disparos/`). Esto es para los humanos: el fundamento verificable del método.
 
 ## La tesis en una línea
 

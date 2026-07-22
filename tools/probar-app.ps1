@@ -184,21 +184,34 @@ if (-not (Test-Path -LiteralPath $datosScript)) {
 }
 else {
   Ok "existe tools/tuberia-datos.ps1 (el contrato de datos app<->motor)"
-  # stdout como bytes: sin BOM.
+  # Captura EXACTA como la del puente Rust: Process con pipe, leyendo los BYTES CRUDOS del
+  # stdout -- SIN forzar StandardOutputEncoding. lib.rs lee los bytes tal cual y hace
+  # from_utf8_lossy; forzar UTF8 aqui enmascararia el bug de encoding (sin consola, PS 5.1
+  # emite su stdout en CP437: el '->' U+2192 se vuelve el byte 0x1A, un caracter de control).
   $psi = New-Object System.Diagnostics.ProcessStartInfo
   $psi.FileName = 'powershell'
   $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$datosScript`""
   $psi.RedirectStandardOutput = $true
   $psi.UseShellExecute = $false
-  $psi.StandardOutputEncoding = New-Object System.Text.UTF8Encoding($false)
+  $psi.CreateNoWindow = $true
   $pd = [System.Diagnostics.Process]::Start($psi)
-  $datosTxt = $pd.StandardOutput.ReadToEnd()
+  $ms = New-Object System.IO.MemoryStream
+  $pd.StandardOutput.BaseStream.CopyTo($ms)
   $pd.WaitForExit()
+  $datosBytes = $ms.ToArray()
   $datosExit = $pd.ExitCode
-  $datosBytes = (New-Object System.Text.UTF8Encoding($false)).GetBytes($datosTxt)
+  # UTF-8 lossy: identico a String::from_utf8_lossy de Rust (byte malo -> U+FFFD).
+  $datosTxt = [System.Text.Encoding]::UTF8.GetString($datosBytes)
 
   if ($datosExit -eq 0) { Ok "tuberia-datos.ps1 corre sobre el repo real (exit 0)" } else { No "tuberia-datos.ps1: esperaba exit 0, fue $datosExit" }
   if ($datosBytes.Length -ge 1 -and $datosBytes[0] -ne 0xEF) { Ok "tuberia-datos stdout sin BOM (el JS que lo parsea no tolera BOM)" } else { No "tuberia-datos: el stdout empieza con BOM (0xEF)" }
+  # LA asercion que replica a JSON.parse de JS: ningun caracter de control (<0x20 salvo TAB/LF/CR)
+  # dentro del stdout -- exactamente lo que rompia la app ("Bad control character in string literal").
+  $ctrl = $null
+  foreach ($ch in $datosTxt.ToCharArray()) { $cc = [int][char]$ch; if ($cc -lt 32 -and $cc -ne 9 -and $cc -ne 10 -and $cc -ne 13) { $ctrl = $cc; break } }
+  if ($null -eq $ctrl) { Ok "tuberia-datos stdout SIN caracteres de control (JSON.parse de JS lo aceptaria)" } else { No ("tuberia-datos stdout trae un caracter de control (0x{0:X2}): JSON.parse de JS lo rechaza (Bad control character)" -f $ctrl) }
+  # Los acentos y flechas sobreviven el viaje PS->Rust: ningun replacement char U+FFFD.
+  if ($datosTxt.IndexOf([char]0xFFFD) -lt 0) { Ok "tuberia-datos stdout sin replacement chars (acentos y flechas intactos)" } else { No "tuberia-datos stdout trae U+FFFD: un acento/flecha se corrompio en el encoding" }
   $foto = $null
   try { $foto = $datosTxt | ConvertFrom-Json } catch { }
   if ($foto) {
@@ -206,7 +219,32 @@ else {
     $claves = @('version', 'repo', 'generado', 'piezas', 'aristas', 'regimenes', 'bandeja', 'ritual', 'areas')
     $faltan = @($claves | Where-Object { -not $foto.PSObject.Properties[$_] })
     if ($faltan.Count -eq 0) { Ok "la foto trae sus claves raiz (version/repo/generado/piezas/aristas/regimenes/bandeja/ritual/areas)" } else { No "la foto pierde clave(s) raiz: $($faltan -join ', ')" }
-    if (@($foto.piezas).Count -ge 37) { Ok "la foto trae >=37 piezas (censo curado: $(@($foto.piezas).Count))" } else { No "la foto trae solo $(@($foto.piezas).Count) piezas (esperaba >=37)" }
+    if (@($foto.piezas).Count -ge 37) { Ok "la foto trae >=37 piezas (censo: $(@($foto.piezas).Count))" } else { No "la foto trae solo $(@($foto.piezas).Count) piezas (esperaba >=37)" }
+    # --- R1: el censo se DERIVA de git ls-files (nada invisible) + convencion por carpeta. ---
+    Push-Location $raiz
+    $gitCount = @(@(git -c core.quotepath=false ls-files) + @(git -c core.quotepath=false ls-files --others --exclude-standard) | Where-Object { $_ } | Sort-Object -Unique).Count
+    Pop-Location
+    $pzCount = @($foto.piezas).Count
+    # Tolerancia a churn menor: tuberia-datos y este test corren 'git ls-files' en momentos
+    # distintos; un archivo creado/borrado entremedio (hook, IDE, build concurrente) no debe
+    # dar falso rojo. Un delta grande SI es perdida real de piezas.
+    $delta = [Math]::Abs($pzCount - $gitCount)
+    if ($delta -eq 0) { Ok "completitud: 1 pieza por archivo de git ls-files ($pzCount) -- nada invisible" }
+    elseif ($delta -le 3) { Ok "completitud: piezas ($pzCount) ~= git ls-files ($gitCount), delta $delta tolerado (churn del arbol)" }
+    else { No "completitud: la foto trae $pzCount piezas pero git ls-files ve $gitCount (delta ${delta}: algo queda invisible o de mas)" }
+    # un archivo conocido cae en su tipo bonito (Asientos)
+    $agente = @($foto.piezas | Where-Object { $_.id -eq '.claude/agents/explorador.md' })
+    if ($agente.Count -eq 1 -and $agente[0].tipo -like '*Asientos*') { Ok "tipo bonito: .claude/agents/explorador.md cae en Asientos" }
+    else { No "tipo bonito: .claude/agents/explorador.md no cayo en Asientos ($($agente.Count) match)" }
+    # catch-all: los sprints caen enteros en el cajon 'Sprints'
+    $sprints = @($foto.piezas | Where-Object { $_.id -like 'docs/sprints/*' })
+    $sprintsOk = @($sprints | Where-Object { $_.tipo -eq 'Sprints' })
+    if ($sprints.Count -gt 0 -and $sprintsOk.Count -eq $sprints.Count) { Ok "catch-all: los $($sprints.Count) de docs/sprints/ caen en el cajon Sprints" }
+    else { No "catch-all: docs/sprints no cayo entero en Sprints ($($sprintsOk.Count)/$($sprints.Count))" }
+    # filtro del motor: ningun probar-* aparece como 'El motor'
+    $probarEnMotor = @($foto.piezas | Where-Object { $_.tipo -like '*El motor*' -and (Split-Path $_.id -Leaf) -like 'probar-*' })
+    if ($probarEnMotor.Count -eq 0) { Ok "filtro del motor: ningun probar-* aparece en El motor" }
+    else { No "filtro del motor: $($probarEnMotor.Count) probar-* colados en El motor" }
     # areas: objetos con nombre (no solo strings) y al menos uno con doc_bloquea o doc_avisa
     $areasArr = @($foto.areas)
     $areasConNombre = @($areasArr | Where-Object { $_.PSObject.Properties['nombre'] -and "$($_.nombre)" -ne '' })

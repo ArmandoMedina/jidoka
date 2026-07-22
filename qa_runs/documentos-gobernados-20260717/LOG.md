@@ -4,7 +4,14 @@
 - **Rama:** `sprint/documentos-gobernados-20260717` (sobre `main` = 904c05e + el preflight 45aa926)
 - **Qué se verifica:** el gobierno documental por estructura (capa-2) — detector, ledger, template, muro opt-in.
 
-## Suite de self-tests (evidencia-no-palabra) — TODA VERDE
+## Método reproducible
+
+1. Corre `probar-docs.ps1` sobre la nave nodriza (jidoka) verificando conformidad de 3 docs estructurales.
+2. Crea fixtures hijo-1 (conforme) e hijo-2 (desviado, modo estricto) para probar el detector.
+3. Corre la copia SOLO-LECTURA del caso enti para diagnóstico real sin modificar.
+4. En Gemba: corre `/jidoka:arranca` sobre un hijo-fixture con CONTRIBUTING destripado y ve el aviso `[DESVIADO]`.
+
+## Resultados (evidencia-no-palabra)
 
 | Test | Resultado |
 |---|---|
@@ -63,3 +70,7 @@ Confirma el diagnóstico con máquina: enti renumeró CONTRIBUTING ("## 2. El fl
 ## El Gemba que corre el cliente (owner: cliente)
 
 Sin código ni terminal: sembrar un hijo-fixture desechable, destripar su `CONTRIBUTING.md`, y correr **`/jidoka:arranca`** → ver el aviso `[DESVIADO] CONTRIBUTING.md -- falta(n): El flujo` en la apertura de la sesión. En un doc conforme → `[CONFORME]`. (enti NO se usa para el Gemba: lo trabaja otro agente.)
+
+## Veredicto
+
+El detector de conformidad documental funciona: detecta desviaciones por secciones faltantes y es configurable opt-in (muro estricto). La nave nodriza y enti casan con su diagnóstico automático.

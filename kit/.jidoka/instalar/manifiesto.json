@@ -29,6 +29,7 @@
     { "origen": "tools/probar-hooks.ps1", "destino": "tools/probar-hooks.ps1", "clase": "mecanica" },
     { "origen": "tools/probar-auditor.ps1", "destino": "tools/probar-auditor.ps1", "clase": "mecanica" },
     { "origen": "tools/probar-disparos.ps1", "destino": "tools/probar-disparos.ps1", "clase": "mecanica" },
+    { "origen": "tools/probar-adrs.ps1", "destino": "tools/probar-adrs.ps1", "clase": "mecanica" },
     { "origen": "tools/probar-agentes.ps1", "destino": "tools/probar-agentes.ps1", "clase": "mecanica" },
     { "origen": "tools/probar-preflight.ps1", "destino": "tools/probar-preflight.ps1", "clase": "mecanica" },
     { "origen": "tools/anti-pii.ps1", "destino": "tools/anti-pii.ps1", "clase": "mecanica" },

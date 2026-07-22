@@ -53,11 +53,24 @@ param(
 
 $repoRoot = if ($Repo) { $Repo } else { Split-Path -Parent $PSScriptRoot }
 
+# --- Emisor de JSON a stdout: bytes UTF-8 REALES al stream crudo (sin BOM, newline final). ---
+# NO usar Write-Output: la app spawnea PS sin consola (CREATE_NO_WINDOW), asi [Console]::Output-
+# Encoding cae a la code page OEM (CP437) y ConvertTo-Json emitido asi corrompe '->' (byte 0x1A,
+# un control) y los acentos (bytes invalidos), que el JSON.parse de la app rechaza. Los bytes
+# crudos cruzan el pipe fieles a Rust (que lee from_utf8_lossy). Los WriteAllText a archivo no
+# tienen este problema (ya fijan UTF8Encoding($false)); esto es solo para el stdout que Rust lee.
+function Emit-Utf8Json($json) {
+  if (-not $json.EndsWith("`n")) { $json = $json + "`n" }
+  $stdout = [Console]::OpenStandardOutput()
+  $bytes = (New-Object System.Text.UTF8Encoding($false)).GetBytes($json)
+  $stdout.Write($bytes, 0, $bytes.Length); $stdout.Flush()
+}
+
 # --- Salida de error: JSON {ok:false,error} + exit 1 (con -Json) o texto (sin -Json). ---
 function Salir-Error($msg) {
   if ($Json) {
     $obj = @{ ok = $false; error = "$msg" }
-    Write-Output ($obj | ConvertTo-Json -Depth 8 -Compress)
+    Emit-Utf8Json ($obj | ConvertTo-Json -Depth 8 -Compress)
   } else {
     Write-Host "[ERROR] $msg" -ForegroundColor Red
   }
@@ -198,7 +211,7 @@ if ($Json) {
     ok       = $true
     contrato = $contratoFinal
   }
-  Write-Output ($salida | ConvertTo-Json -Depth 8)
+  Emit-Utf8Json ($salida | ConvertTo-Json -Depth 8)
   exit 0
 }
 

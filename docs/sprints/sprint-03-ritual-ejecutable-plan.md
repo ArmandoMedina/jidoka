@@ -34,7 +34,7 @@ Quien instale Jidoka gana **el ritual como comandos que se invocan** (`/jidoka:*
 - **Comandos:** `.claude/commands/jidoka/{arranca,planea,gemba,cierra,que-sigue}.md`.
 - **Skills:** `.claude/skills/{escribano,validador,revisor-visual,arquitecto-doc}/SKILL.md`.
 - **Plantillas / instancias:** `kit/.jidoka/templates/recursos-del-proyecto.md`, `product/recursos-del-proyecto.md`, `kit/.jidoka/templates/plan-de-trabajo.md`.
-- **Registro:** `docs/decisions/0006-plan-efimero.md` (+ índice), `docs/sprints/sprint-2a-plan.md` (+ `README.md`), `CHANGELOG.md`, `andon/README.md`.
+- **Registro:** `docs/decisions/0006-plan-efimero.md` (+ índice), `docs/sprints/sprint-03-ritual-ejecutable-plan.md` (+ `README.md`), `CHANGELOG.md`, `andon/README.md`.
 
 ## Verificación (el demo que corre el cliente) — `owner: cliente`
 

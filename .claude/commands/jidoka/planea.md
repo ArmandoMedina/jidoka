@@ -50,7 +50,13 @@ El estado que el plan necesita queda inyectado **aquí mismo** — la garantía 
 
 ## El plan (una vez aprobado el QUÉ)
 
-Copia la plantilla `@kit/.jidoka/templates/sprint-plan.md` y llénala con:
+Genera el plan **ya conforme al molde** con el scaffolder determinista (así no se desvía del formato que el guardián `tools/estado-docs.ps1` vigila sobre la familia `docs/sprints/*-plan.md`). El molde vive en `@kit/.jidoka/templates/sprint-plan.md`; el generador lo copia con el título puesto y sin drift:
+
+```
+tools/nuevo-sprint.ps1 -Nombre "<nombre corto del incremento>" -Slug "NN-<slug>"
+```
+
+`NN` es el siguiente número del índice [`docs/sprints/README.md`](../../../docs/sprints/README.md) (orden canónico); con `-Entrega` genera además el récord de cierre. Regístralo en el índice con su `#`. Luego llénalo con:
 
 - **Contexto** (por qué ahora), **Encuadre de producto** (validado con el cliente), **Decisiones del cliente** (con fecha; las gordas van además a un ADR).
 - **Alcance en rebanadas verticales** — cada una commiteable y verde por sí sola, ordenadas por dependencia y valor. Marca las que tocan la ley (`tools/blast-radius.json`).
