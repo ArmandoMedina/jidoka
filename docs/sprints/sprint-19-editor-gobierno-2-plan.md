@@ -2,7 +2,7 @@
 
 ## Contexto
 
-El contrato del sprint (`docs/sprints/sprint-editor-gobierno-plan.md`, R0 aprobado 2026-07-19 en plan mode) definió 4 rebanadas. **R1 ya se entregó** (3 modos de grafo + extensión VS Code, PR #114 mergeado, Gemba del cliente **GO** el 2026-07-20). Este plan ejecuta **lo que falta del mismo QUÉ aprobado**: R2 (ledger de ligas + gate), R3 (la extensión autora) y R4 (empaquetado y gobierno).
+El contrato del sprint (`docs/sprints/sprint-18-editor-gobierno-plan.md`, R0 aprobado 2026-07-19 en plan mode) definió 4 rebanadas. **R1 ya se entregó** (3 modos de grafo + extensión VS Code, PR #114 mergeado, Gemba del cliente **GO** el 2026-07-20). Este plan ejecuta **lo que falta del mismo QUÉ aprobado**: R2 (ledger de ligas + gate), R3 (la extensión autora) y R4 (empaquetado y gobierno).
 
 **El QUÉ (sin cambios, ya aprobado):** *el usuario declara, desde una interfaz visual, qué código sostiene qué capacidad — y con qué fuerza y en qué dirección se vigila esa relación — sin editar JSON a mano.* Métrica: el aviso de "cambié código" pasa de **89 capacidades** (caso entisoft) a **las declaradas (1–5)**. Línea doctrinal: **la extensión AUTORA, el gate EJECUTA** (ADR 0002 intacto).
 

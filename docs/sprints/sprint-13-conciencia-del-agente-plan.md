@@ -46,7 +46,7 @@ Nota sobre #63 (`regla-2-3`, "primera ocurrencia"): se construye porque **el cli
 
 ### R4 — Cierre
 - `CHANGELOG.md` v1.16.0 + `tools/version.txt` + `package.json` (probar-version exige los tres).
-- Plan archivado (`docs/sprints/sprint-conciencia-del-agente-plan.md`) + fila en `docs/sprints/README.md`.
+- Plan archivado (`docs/sprints/sprint-13-conciencia-del-agente-plan.md`) + fila en `docs/sprints/README.md`.
 - Evidencia: `qa_runs/conciencia-del-agente-20260716/LOG.md` (ROJO→VERDE del lint `probar-agentes`, corrida de suite completa, y el render del arranca nuevo).
 - HANDOFF honesto (pide el #75: sin la narrativa "falso positivo de AV" que enmascaró el borrado original).
 - Acuse del lazo: #75 y #63 se cierran con el PR; #68 recibe comentario (la familia queda con el reframe instalado; el issue sigue como lente).

@@ -1,6 +1,6 @@
 # Sprint Descubre — La capa de consultoría · Entrega
 
-> El récord del sprint (`v1.13.0`, 2026-07-14). Plan-contrato: [`sprint-descubre-plan.md`](sprint-descubre-plan.md). Las lecciones viajan al siguiente `planea`.
+> El récord del sprint (`v1.13.0`, 2026-07-14). Plan-contrato: [`sprint-10-descubre-plan.md`](sprint-10-descubre-plan.md). Las lecciones viajan al siguiente `planea`.
 
 ## Objetivo
 

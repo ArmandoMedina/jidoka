@@ -1,6 +1,6 @@
 # Entrega — Sprint "La tubería = mapa completo del repo (nada invisible)"
 
-> Récord de cierre. Plan-contrato: [`sprint-tuberia-por-carpetas-plan.md`](sprint-tuberia-por-carpetas-plan.md).
+> Récord de cierre. Plan-contrato: [`sprint-24-tuberia-por-carpetas-plan.md`](sprint-24-tuberia-por-carpetas-plan.md).
 > Evidencia: [`qa_runs/tuberia-carpetas-20260722/LOG.md`](../../qa_runs/tuberia-carpetas-20260722/LOG.md).
 
 ## Qué se entregó

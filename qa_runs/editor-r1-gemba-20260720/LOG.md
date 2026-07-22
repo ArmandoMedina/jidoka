@@ -36,4 +36,4 @@
 
 ## Veredicto
 
-**GO.** El stack VS Code (extensión JS plano → PowerShell → webview) quedó demostrado de punta a punta. R2 (ledger `tools/ligas.json` + gate) queda desbloqueado; su plan vive en `docs/sprints/sprint-editor-gobierno-plan.md`.
+**GO.** El stack VS Code (extensión JS plano → PowerShell → webview) quedó demostrado de punta a punta. R2 (ledger `tools/ligas.json` + gate) queda desbloqueado; su plan vive en `docs/sprints/sprint-18-editor-gobierno-plan.md`.

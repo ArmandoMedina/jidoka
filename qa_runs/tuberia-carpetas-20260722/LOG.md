@@ -1,7 +1,7 @@
 # LOG — Sprint "La tubería = mapa completo del repo" (rama `sprint/tuberia-por-carpetas-20260722`)
 
 **Fecha:** 2026-07-22
-**Plan-contrato:** [`docs/sprints/sprint-tuberia-por-carpetas-plan.md`](../../docs/sprints/sprint-tuberia-por-carpetas-plan.md)
+**Plan-contrato:** [`docs/sprints/sprint-24-tuberia-por-carpetas-plan.md`](../../docs/sprints/sprint-24-tuberia-por-carpetas-plan.md)
 **Apilada sobre:** el commit del fix de encoding `3e99a0d`.
 
 ## Método reproducible

@@ -1,6 +1,6 @@
 # Sprint — El editor del gobierno, parte 2 (R2–R4) · Entrega
 
-> El récord del sprint (`v1.25.0`, ADR 0044). Plan-contrato: [sprint-editor-gobierno-2-plan.md](sprint-editor-gobierno-2-plan.md) (aprobado en plan mode 2026-07-20). R1 viajó aparte en el PR #114.
+> El récord del sprint (`v1.25.0`, ADR 0044). Plan-contrato: [sprint-19-editor-gobierno-2-plan.md](sprint-19-editor-gobierno-2-plan.md) (aprobado en plan mode 2026-07-20). R1 viajó aparte en el PR #114.
 
 ## Objetivo
 

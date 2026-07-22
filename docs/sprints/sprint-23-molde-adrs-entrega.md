@@ -1,6 +1,6 @@
 # Entrega — El molde único de los ADRs
 
-> Récord de cierre del sprint `molde-adrs`. Plan-contrato: [`sprint-molde-adrs-plan.md`](sprint-molde-adrs-plan.md) · Decisión: [ADR 0050](../decisions/0050-molde-unico-de-los-adrs.md) · Evidencia: [`qa_runs/adrs-20260722/`](../../qa_runs/adrs-20260722/LOG.md).
+> Récord de cierre del sprint `molde-adrs`. Plan-contrato: [`sprint-23-molde-adrs-plan.md`](sprint-23-molde-adrs-plan.md) · Decisión: [ADR 0050](../decisions/0050-molde-unico-de-los-adrs.md) · Evidencia: [`qa_runs/adrs-20260722/`](../../qa_runs/adrs-20260722/LOG.md).
 
 ## Qué se entregó
 

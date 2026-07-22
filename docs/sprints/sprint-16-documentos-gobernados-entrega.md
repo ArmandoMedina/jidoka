@@ -1,6 +1,6 @@
 # Entrega — Sprint "Documentos gobernados" (KIT-2, ADR 0042)
 
-> Récord de cierre. El contrato está en [`sprint-documentos-gobernados-plan.md`](sprint-documentos-gobernados-plan.md). Cerrado 2026-07-17, `v1.23.0`.
+> Récord de cierre. El contrato está en [`sprint-16-documentos-gobernados-plan.md`](sprint-16-documentos-gobernados-plan.md). Cerrado 2026-07-17, `v1.23.0`.
 
 ## Qué se entregó
 

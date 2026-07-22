@@ -2,7 +2,7 @@
 
 - **Estado:** aceptado
 - **Fecha:** 2026-07-19
-- **Sprint:** La linterna del gobierno (`docs/sprints/sprint-linterna-gobierno-plan.md`)
+- **Sprint:** La linterna del gobierno (`docs/sprints/sprint-17-linterna-gobierno-plan.md`)
 
 ## Contexto
 

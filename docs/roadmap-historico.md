@@ -29,7 +29,7 @@ núcleo; el estado de madurez se declara (`experimental` / `1 caso real` / `2-3 
 
 ## Sprint 1 — El motor Andon · ✅ Mergeado (`v0.2.0-beta`)
 - La ley única (`tools/blast-radius.json`), verificador que **falla cerrado**, self-test con caso que DEBE bloquear, hooks (`no-memorias`, `andon-stop`), `pre-push`, check `andon` en CI **con la ley leída desde la rama base** (un PR no puede editar la ley que lo juzga — ADR 0003).
-- Cierre auditado: ver ADR 0003 y el Kaizen en `docs/sprints/sprint-1-plan.md`.
+- Cierre auditado: ver ADR 0003 y el Kaizen en `docs/sprints/sprint-01-motor-andon-plan.md`.
 
 ## Sprint 1.5 — Vitrina + centralización del conocimiento · ✅ Mergeado (`v0.3.0-beta`)
 - Vitrina en español con bandera (badges, release, topics); el andamio documentado (`kanban/lazo|jerarquia|roles|auditoria`); los 4 ADRs de la doctrina; templates y `qa_runs/` al kit; hardening ALTO-04 + área `raiz`. Ver ADR 0004.

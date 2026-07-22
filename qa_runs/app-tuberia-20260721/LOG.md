@@ -1,7 +1,7 @@
 # LOG — Sprint "La app de la tubería"
 
 > El listón de evidencia de la corrida (evidencia-no-palabra). Se llena **por rebanada**, no al cierre.
-> Rama: `sprint/sistema-configurable-20260721` (R1 cierra el legado sobre la misma rama; la rama `sprint/app-tuberia-<fecha>` nace desde `main` tras el merge). Plan-contrato: `docs/sprints/sprint-app-tuberia-plan.md`.
+> Rama: `sprint/sistema-configurable-20260721` (R1 cierra el legado sobre la misma rama; la rama `sprint/app-tuberia-<fecha>` nace desde `main` tras el merge). Plan-contrato: `docs/sprints/sprint-21-app-tuberia-plan.md`.
 
 ## Método reproducible
 
@@ -32,7 +32,7 @@ Cada rebanada corre su suite de tests; el motor y tests cablean en `.github/work
 - `tools/version.txt` → `1.26.0` (SSOT).
 - `package.json` (raíz) → `version` `1.26.0`.
 - `HANDOFF.md` — sección nueva "Dónde estamos (2026-07-21 tarde — Sistema configurable CONSTRUIDO + giro de superficie a la app Tauri)" insertada antes de la del descubrimiento; la vieja renombrada a "Dónde estuvimos" con la nota "git gana: mergeada vía PR #119".
-- `docs/sprints/sprint-app-tuberia-plan.md` — plan archivado (blockquote de archivo); fila agregada a `docs/sprints/README.md`.
+- `docs/sprints/sprint-21-app-tuberia-plan.md` — plan archivado (blockquote de archivo); fila agregada a `docs/sprints/README.md`.
 - `qa_runs/app-tuberia-20260721/LOG.md` — este listón.
 
 **Evidencia (esta máquina, 2026-07-21):**

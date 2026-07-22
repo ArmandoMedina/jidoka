@@ -1,7 +1,7 @@
 # LOG — Sprint "El sistema configurable, fase 1"
 
 > El listón de evidencia de la corrida (evidencia-no-palabra). Se llena **por rebanada**, no al cierre.
-> Rama: `sprint/sistema-configurable-20260721`. Plan-contrato: `docs/sprints/sprint-sistema-configurable-plan.md`.
+> Rama: `sprint/sistema-configurable-20260721`. Plan-contrato: `docs/sprints/sprint-20-sistema-configurable-plan.md`.
 
 ## Método reproducible
 

@@ -2,7 +2,7 @@
 
 - **Estado:** aceptado
 - **Fecha:** 2026-07-21
-- **Sprint:** El pilar de flujo (`docs/sprints/sprint-pilar-de-flujo-plan.md`)
+- **Sprint:** El pilar de flujo (`docs/sprints/sprint-22-pilar-de-flujo-plan.md`)
 
 ## Contexto
 
@@ -55,7 +55,7 @@ con los límites como **dato de instancia** (`tools/flujo.json`) y los checks en
 
 Se entrega en **9 rebanadas, M1→M2→M3** por dependencia (documentos que no crecen → trabajo con
 límite → avance y roles visibles), cada una commiteable y verde sola. Plan-contrato aprobado en
-plan mode el 2026-07-21: `docs/sprints/sprint-pilar-de-flujo-plan.md`. Este ADR registra el
+plan mode el 2026-07-21: `docs/sprints/sprint-22-pilar-de-flujo-plan.md`. Este ADR registra el
 **movimiento 1** entregado (R1, el contrato del HANDOFF) y la dirección del pilar completo.
 
 ## Por qué

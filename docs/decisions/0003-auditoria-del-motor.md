@@ -38,4 +38,4 @@ Hoy `tools/` es la **copia maestra provisional** del motor y `kit/` solo trae lo
 
 - El README deja de anunciar capacidades inexistentes: tabla "Dónde va la beta" + `ROADMAP.md` con los sprints 2–4.
 - `andon/README.md` gana la sección **"Fronteras del muro"**: los límites conocidos, dichos de frente (`doctrina/06`).
-- Las lecciones de procedimiento van al Kaizen del sprint (`docs/sprints/sprint-1-plan.md`), no a la memoria de nadie.
+- Las lecciones de procedimiento van al Kaizen del sprint (`docs/sprints/sprint-01-motor-andon-plan.md`), no a la memoria de nadie.

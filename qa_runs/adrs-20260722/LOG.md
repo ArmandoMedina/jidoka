@@ -2,7 +2,7 @@
 
 - **Fecha:** 2026-07-22
 - **Rama / worktree:** `review/adrs-20260722` en worktree aislado `C:\Repositorio personal\jidoka-adrs` (otro agente en paralelo en FLU-1; ver la nota de aislamiento en el plan).
-- **Contrato:** [`docs/sprints/sprint-molde-adrs-plan.md`](../../docs/sprints/sprint-molde-adrs-plan.md) · Decisión: [ADR 0050](../../docs/decisions/0050-molde-unico-de-los-adrs.md).
+- **Contrato:** [`docs/sprints/sprint-23-molde-adrs-plan.md`](../../docs/sprints/sprint-23-molde-adrs-plan.md) · Decisión: [ADR 0050](../../docs/decisions/0050-molde-unico-de-los-adrs.md).
 
 ## Método reproducible
 

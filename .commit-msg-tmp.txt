@@ -1,0 +1,8 @@
+refactor(sprints): numera los archivos a NN y actualiza todas las refs
+
+Renombra los 25 docs de sprint a sprint-NN-<slug>-plan/entrega.md (NN =
+orden canonico del indice) y actualiza 92 referencias en 32 archivos,
+incluidos los historicos (handoff/roadmap-historico, LOGs) por pedido
+del cliente. El ledger docs/sprints/*-plan.md sigue matcheando; los
+cierre-* (no son sprints) conservan su fecha. estado-docs 50 CONFORME;
+probar-hooks 47/47.

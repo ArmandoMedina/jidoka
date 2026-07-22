@@ -7,7 +7,7 @@ dominio: Metodo
 ---
 # Capacidad — El pilar de flujo
 
-Del módulo [[MOD-andon]], dominio [[Metodo]]. La Casa del TPS tiene dos pilares; el método ya tenía Jidoka (parar ante el defecto) pero el pilar de flujo (JIT) no existía. Esta capacidad lo estrena: **los documentos que cargan el estado dejan de crecer solos, el trabajo entra con límite, y el avance y el reparto se ven sin terminal** — y todo es código que rechaza la acción, no prosa que dependa de que alguien se acuerde (plan-contrato: [`docs/sprints/sprint-pilar-de-flujo-plan.md`](../../docs/sprints/sprint-pilar-de-flujo-plan.md), aprobado 2026-07-21; ADR 0049).
+Del módulo [[MOD-andon]], dominio [[Metodo]]. La Casa del TPS tiene dos pilares; el método ya tenía Jidoka (parar ante el defecto) pero el pilar de flujo (JIT) no existía. Esta capacidad lo estrena: **los documentos que cargan el estado dejan de crecer solos, el trabajo entra con límite, y el avance y el reparto se ven sin terminal** — y todo es código que rechaza la acción, no prosa que dependa de que alguien se acuerde (plan-contrato: [`docs/sprints/sprint-22-pilar-de-flujo-plan.md`](../../docs/sprints/sprint-22-pilar-de-flujo-plan.md), aprobado 2026-07-21; ADR 0049).
 
 Las piezas:
 

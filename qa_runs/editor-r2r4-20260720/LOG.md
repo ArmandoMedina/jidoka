@@ -1,7 +1,7 @@
 # Corrida — El editor del gobierno, parte 2 (R2–R4) · 2026-07-20
 
 > Evidencia de la construcción de las ligas código↔capacidad (`v1.25.0`, ADR 0044).
-> Plan-contrato: `docs/sprints/sprint-editor-gobierno-2-plan.md` (aprobado en plan mode 2026-07-20).
+> Plan-contrato: `docs/sprints/sprint-19-editor-gobierno-2-plan.md` (aprobado en plan mode 2026-07-20).
 
 ## Método reproducible
 

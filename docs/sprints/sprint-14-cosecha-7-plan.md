@@ -1,6 +1,6 @@
 # Cosecha #7 — «La bajada que dolió» (issues #86–#91 + #82)
 
-> Plan-contrato del sprint. R0 aprobado con nombre por el cliente (2026-07-16): alcance R1+R2+R3, **cura B completa** para R1. Al aprobarse este plan se archiva como `docs/sprints/sprint-cosecha-7-plan.md` y se registra en `docs/sprints/README.md`. Versión objetivo: **v1.17.0** (MINOR — agrega sin romper).
+> Plan-contrato del sprint. R0 aprobado con nombre por el cliente (2026-07-16): alcance R1+R2+R3, **cura B completa** para R1. Al aprobarse este plan se archiva como `docs/sprints/sprint-14-cosecha-7-plan.md` y se registra en `docs/sprints/README.md`. Versión objetivo: **v1.17.0** (MINOR — agrega sin romper).
 
 ## Contexto (por qué)
 
@@ -53,7 +53,7 @@ Una bajada real 1.13.0 → 1.16.1 en un hijo instalado («caso 1», hoy 15:27) d
 
 ### Cierre
 - **ADR 0035** (+ índice en el mismo commit — bloqueo duro de la ley).
-- `CHANGELOG.md` (v1.17.0), `docs/sprints/sprint-cosecha-7-plan.md` (este contrato) + fila en `docs/sprints/README.md`.
+- `CHANGELOG.md` (v1.17.0), `docs/sprints/sprint-14-cosecha-7-plan.md` (este contrato) + fila en `docs/sprints/README.md`.
 - Acusar los 7 issues uno por uno (3er paso del lazo): cerrar #86/#87/#88/#89/#90/#91 con el release; #82 comentar qué quedó (validación `tools:` del lint).
 - Evidencia: `qa_runs/cosecha-7-20260716/LOG.md` (plantilla `qa-log.md`).
 

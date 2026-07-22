@@ -2,7 +2,7 @@
 
 - **Estado:** reemplazado (en la superficie) por [ADR 0048](0048-superficie-app-tuberia.md) — el principio "la UI autora, el gate ejecuta" sigue vigente
 - **Fecha:** 2026-07-20
-- **Sprint:** El editor del gobierno, parte 2 (`docs/sprints/sprint-editor-gobierno-2-plan.md`; R1 en `sprint-editor-gobierno-plan.md`)
+- **Sprint:** El editor del gobierno, parte 2 (`docs/sprints/sprint-19-editor-gobierno-2-plan.md`; R1 en `sprint-18-editor-gobierno-plan.md`)
 
 ## Contexto
 

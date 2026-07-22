@@ -61,7 +61,7 @@ Tres docs nuevos en `kanban/`, voz de jidoka:
 - **R1. ADR `docs/decisions/0004-centralizacion-del-conocimiento.md`** + índice en el mismo commit (el `doc_bloquea` lo exige).
 - **R2. ROADMAP** enriquecido: Sprint 2 con nombres reales de lo inventariado; Sprint 3 suma `setup -Yes` y CI de release; backlog poda CONTRIBUTING (cumplido).
 - **R3. CHANGELOG + HANDOFF** al día (checklist humana: release vía `!`, social preview, merge PR #1 → tag `v0.2.0-beta`, luego abrir PR #2).
-- **R4.** Este plan se archiva como `docs/sprints/sprint-1.5-plan.md` (el plan aprobado ES el sprint).
+- **R4.** Este plan se archiva como `docs/sprints/sprint-02-vitrina-plan.md` (el plan aprobado ES el sprint).
 
 ## Bloque G — Git / ops
 
