@@ -6,23 +6,24 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-21 noche — Sprint "La app de la tubería" COMPLETO · 2 PRs esperando orden nombrada)
+## Dónde estamos (2026-07-21 noche — Sprint "La app de la tubería" COMPLETO · MERGEADO Y LIBERADO `v1.27.0`)
 
 **El sprint "La app de la tubería" TERMINÓ (7/7 rebanadas), verde en local, en la rama `sprint/app-tuberia-20260721` (14 commits propios `692e8a4`→`b0626fa`, apilados sobre los 6 del legado = 20 sobre `main`).** La superficie del gobierno dejó de ser comandos de VS Code y es ahora una **app de escritorio Tauri fiel a la maqueta** (ADR 0048): 49 piezas con estado real, bandeja, formulario que escribe de verdad y modo avanzado que firma derivando de `git config`. La extensión se retiró completa. Récord completo: [`docs/sprints/sprint-app-tuberia-entrega.md`](docs/sprints/sprint-app-tuberia-entrega.md) (con el cuadro de cierre). Evidencia: [`qa_runs/app-tuberia-20260721/LOG.md`](qa_runs/app-tuberia-20260721/LOG.md).
 
-**Los 2 PRs (esperando orden nombrada, apilados):**
-- **PR #120** — el sprint legado `sprint/sistema-configurable-20260721` → `main` (`v1.26.0`, el motor). **CI VERDE.** Abierto.
-- **PR #121** — la app `sprint/app-tuberia-20260721` → (apilado sobre #120) (`v1.27.0`, la app). **CI rojo al cerrar el código; curado en el cierre, verde esperado tras push.** `probar-ligas` fallaba porque `tools/ligas.json` conservaba la liga `linterna-extension` apuntando a `extension/*`, que R6 borró — puntero colgante. Hallazgo cazado por el gate en el cierre: la entrada `linterna-extension` se retiró de `ligas.json` (array vacío); `probar-ligas` 25/25, `verificar` 0.
+**Los 2 PRs — MERGEADOS el 2026-07-22 con orden nombrada del cliente ("pr y merge, release y poda, autorizado"):**
+- **PR #121** — la app `sprint/app-tuberia-20260721` a `main`. **MERGEADO** (merge `0d921ac`, CI verde: la liga colgante curada en el cierre pasó el gate).
+- **PR #120** — el sprint legado. GitHub lo marcó **MERGED** automáticamente al entrar #121 (su rama quedó 100% contenida en la de la app). `v1.26.0` queda **sin tag propio a propósito** (subsumida en `v1.27.0`, mismo precedente que `v1.24.0` dentro de `v1.25.0`).
+- **Release `v1.27.0`** cortado: tag anotado + GitHub release con el instalador NSIS como asset. **Poda** hecha (ramas del sprint y del legado borradas, local y remoto). `sprint/pilar-de-flujo-20260721` (PR #122) sigue viva — es el sprint paralelo FLU-1, no era parte de esta orden.
 
 **La app y su instalador:**
 - Código: `app/` (Tauri v2; `ui/index.html` = la maqueta viva, `src-tauri/` el puente Rust). Es **Jidoka-only** (no se siembra).
 - El `.exe` y el instalador NSIS (`app/src-tauri/target/release/bundle/nsis/jidoka-tuberia_1.27.0_x64-setup.exe`, 1.86 MB) son **locales, NO versionados** (`app/src-tauri/target/` en `.gitignore`). El instalador sube como asset del release cuando se corte.
 
 **Cola de decisiones del cliente:**
-1. **[PENDIENTE]** orden nombrada — **merge #120** (legado `v1.26.0`, CI verde).
-2. **[PENDIENTE]** orden nombrada — **merge #121** + tag/release `v1.27.0` + subir `jidoka-tuberia_1.27.0_x64-setup.exe` como asset. (La liga colgante ya está curada en el cierre; el CI quedará verde tras el push.)
+1. ~~orden nombrada — merge #120~~ ✅ **HECHO 2026-07-22** (subsumido en #121, marcado MERGED).
+2. ~~orden nombrada — merge #121 + tag/release `v1.27.0` + asset~~ ✅ **HECHO 2026-07-22** (merge `0d921ac`, release con el instalador como asset).
 3. **[PENDIENTE]** **Gemba completo end-to-end** (flujo del glosario: crear glosario por fuera → bandeja → parametrizar desde el formulario → candado → ver a la IA rebotar; sin código ni terminal — los pasos están en la entrega). La fidelidad de R2 ya la aprobó; el flujo completo NO lo ha corrido todavía.
-4. **[PENDIENTE]** ¿el retiro de la extensión amerita **MAJOR (`v2.0.0`)** en vez de `v1.27.0`? (breaking confesado; en régimen 1.x lo decide el cliente).
+4. ~~¿MAJOR (`v2.0.0`) en vez de `v1.27.0`?~~ ✅ **RESUELTO por la orden del release 2026-07-22**: el cliente ordenó liberar el corte tal cual — quedó `v1.27.0` con el breaking confesado en el CHANGELOG.
 5. **[PENDIENTE]** destino de la copia scratch `.jidoka/maqueta-tuberia.html` (dice "SAP", quedó vieja; la spec real vive en `docs/analisis/`).
 
 **Pendientes técnicos (nada bloquea):**
