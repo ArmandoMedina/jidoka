@@ -5,6 +5,9 @@
 # tools/docs-gobernados.json (que doc, su molde, sus secciones requeridas) y, para
 # cada doc capa-2 presente, verifica que sus encabezados '## ' contengan las
 # requeridas. Faltante -> DESVIADO (garantia nula); aditiva -> OK (no importa).
+# El campo 'doc' puede ser un archivo singleton (product/infra.md) o un GLOB de
+# FAMILIA (docs/sprints/*-plan.md, qa_runs/*/LOG.md): el glob se expande y se valida
+# cada miembro; 0 miembros -> AVISO [FAMILIA VACIA], nunca un CONFORME en falso.
 # exit 0 por defecto (aviso, no muro). -Estricto -> exit 1 si un doc 'estricto:true'
 # pierde una requerida (el muro OPT-IN; se cablea en CI, nunca en verificar.ps1,
 # para no clobbear el verificar customizado del hijo). Se siembra en cada hijo
@@ -56,28 +59,54 @@ if (-not (Test-Path -LiteralPath $ledgerPath)) {
 }
 $ledger = Get-Content -LiteralPath $ledgerPath -Raw | ConvertFrom-Json
 
-$conf = 0; $desv = 0; $estrictoRoto = 0
-foreach ($e in $ledger.capa2) {
-  $docAbs = Join-Path $raiz $e.doc
-  if (-not (Test-Path -LiteralPath $docAbs)) { continue }   # no presente en este arquetipo/hijo: se salta
+# Valida UN doc contra sus requeridas: imprime su linea y devuelve un codigo
+#   0 = CONFORME | 1 = DESVIADO (no estricto) | 2 = DESVIADO estricto.
+# Comparte la mecanica entre el doc singleton y cada miembro de una familia-glob.
+function Check-Doc($docAbs, $label, $requeridas, $estricto) {
   $secciones = Get-Secciones $docAbs
   $faltan = @()
-  foreach ($req in $e.requeridas) {
+  foreach ($req in $requeridas) {
     $reqN = Normaliza $req
     $hit = $false
     foreach ($sec in $secciones) { if ($sec.StartsWith($reqN)) { $hit = $true; break } }
     if (-not $hit) { $faltan += $req }
   }
   if ($faltan.Count -eq 0) {
-    Write-Host ("  [CONFORME]  {0}" -f $e.doc) -ForegroundColor Green
-    $conf++
+    Write-Host ("  [CONFORME]  {0}" -f $label) -ForegroundColor Green
+    return 0
+  }
+  if ($estricto) { $etq = '[DESVIADO*]' } else { $etq = '[DESVIADO] ' }
+  Write-Host ("  {0} {1} -- falta(n): {2}" -f $etq, $label, ($faltan -join ', ')) -ForegroundColor Yellow
+  Write-Host "               garantia nula: la logica que el ritual inyecta con @ no se garantiza sobre este doc."
+  if ($estricto) { return 2 } else { return 1 }
+}
+
+$conf = 0; $desv = 0; $estrictoRoto = 0
+foreach ($e in $ledger.capa2) {
+  # 'doc' puede ser una ruta singleton (product/infra.md) o un GLOB de familia
+  # (docs/sprints/*-plan.md, qa_runs/*/LOG.md). El glob se detecta por *, ? o [.
+  $esFamilia = ($e.doc -match '[\*\?\[]')
+  if ($esFamilia) {
+    # Familia: se expande el glob y se valida CADA miembro por separado. 0 miembros
+    # -> AVISO visible, NUNCA un CONFORME en falso: un glob que no matchea es una
+    # senal (patron roto o carpeta vacia), no un pase silencioso (el verde mentiroso).
+    $glob = Join-Path $raiz $e.doc
+    $miembros = @(Get-ChildItem -Path $glob -File -ErrorAction SilentlyContinue | Sort-Object FullName)
+    if ($miembros.Count -eq 0) {
+      Write-Host ("  [FAMILIA VACIA]  {0} -- 0 miembros: el glob no matcheo ningun archivo (revisa el patron)." -f $e.doc) -ForegroundColor Yellow
+      continue
+    }
+    foreach ($m in $miembros) {
+      $label = $m.FullName.Substring($raiz.Length).TrimStart('\', '/')
+      $r = Check-Doc $m.FullName $label $e.requeridas $e.estricto
+      if ($r -eq 0) { $conf++ } elseif ($r -eq 2) { $desv++; $estrictoRoto++ } else { $desv++ }
+    }
   }
   else {
-    if ($e.estricto) { $etq = '[DESVIADO*]' } else { $etq = '[DESVIADO] ' }
-    Write-Host ("  {0} {1} -- falta(n): {2}" -f $etq, $e.doc, ($faltan -join ', ')) -ForegroundColor Yellow
-    Write-Host "               garantia nula: la logica que el ritual inyecta con @ no se garantiza sobre este doc."
-    $desv++
-    if ($e.estricto) { $estrictoRoto++ }
+    $docAbs = Join-Path $raiz $e.doc
+    if (-not (Test-Path -LiteralPath $docAbs)) { continue }   # no presente en este arquetipo/hijo: se salta
+    $r = Check-Doc $docAbs $e.doc $e.requeridas $e.estricto
+    if ($r -eq 0) { $conf++ } elseif ($r -eq 2) { $desv++; $estrictoRoto++ } else { $desv++ }
   }
 }
 
