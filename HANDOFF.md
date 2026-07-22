@@ -6,15 +6,83 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x` (salió de beta en `v1.0.0`). Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-21 — El descubrimiento del sistema configurable CERRADO · rama `descubre/sistema-configurable-20260720` SIN MERGEAR, 8 commits)
+## Dónde estamos (2026-07-21 noche — Sprint "La app de la tubería" COMPLETO · 2 PRs esperando orden nombrada)
+
+**El sprint "La app de la tubería" TERMINÓ (7/7 rebanadas), verde en local, en la rama `sprint/app-tuberia-20260721` (14 commits propios `692e8a4`→`b0626fa`, apilados sobre los 6 del legado = 20 sobre `main`).** La superficie del gobierno dejó de ser comandos de VS Code y es ahora una **app de escritorio Tauri fiel a la maqueta** (ADR 0048): 49 piezas con estado real, bandeja, formulario que escribe de verdad y modo avanzado que firma derivando de `git config`. La extensión se retiró completa. Récord completo: [`docs/sprints/sprint-app-tuberia-entrega.md`](docs/sprints/sprint-app-tuberia-entrega.md) (con el cuadro de cierre). Evidencia: [`qa_runs/app-tuberia-20260721/LOG.md`](qa_runs/app-tuberia-20260721/LOG.md).
+
+**Los 2 PRs (esperando orden nombrada, apilados):**
+- **PR #120** — el sprint legado `sprint/sistema-configurable-20260721` → `main` (`v1.26.0`, el motor). **CI VERDE.** Abierto.
+- **PR #121** — la app `sprint/app-tuberia-20260721` → (apilado sobre #120) (`v1.27.0`, la app). **CI rojo al cerrar el código; curado en el cierre, verde esperado tras push.** `probar-ligas` fallaba porque `tools/ligas.json` conservaba la liga `linterna-extension` apuntando a `extension/*`, que R6 borró — puntero colgante. Hallazgo cazado por el gate en el cierre: la entrada `linterna-extension` se retiró de `ligas.json` (array vacío); `probar-ligas` 25/25, `verificar` 0.
+
+**La app y su instalador:**
+- Código: `app/` (Tauri v2; `ui/index.html` = la maqueta viva, `src-tauri/` el puente Rust). Es **Jidoka-only** (no se siembra).
+- El `.exe` y el instalador NSIS (`app/src-tauri/target/release/bundle/nsis/jidoka-tuberia_1.27.0_x64-setup.exe`, 1.86 MB) son **locales, NO versionados** (`app/src-tauri/target/` en `.gitignore`). El instalador sube como asset del release cuando se corte.
+
+**Cola de decisiones del cliente:**
+1. **[PENDIENTE]** orden nombrada — **merge #120** (legado `v1.26.0`, CI verde).
+2. **[PENDIENTE]** orden nombrada — **merge #121** + tag/release `v1.27.0` + subir `jidoka-tuberia_1.27.0_x64-setup.exe` como asset. (La liga colgante ya está curada en el cierre; el CI quedará verde tras el push.)
+3. **[PENDIENTE]** **Gemba completo end-to-end** (flujo del glosario: crear glosario por fuera → bandeja → parametrizar desde el formulario → candado → ver a la IA rebotar; sin código ni terminal — los pasos están en la entrega). La fidelidad de R2 ya la aprobó; el flujo completo NO lo ha corrido todavía.
+4. **[PENDIENTE]** ¿el retiro de la extensión amerita **MAJOR (`v2.0.0`)** en vez de `v1.27.0`? (breaking confesado; en régimen 1.x lo decide el cliente).
+5. **[PENDIENTE]** destino de la copia scratch `.jidoka/maqueta-tuberia.html` (dice "SAP", quedó vieja; la spec real vive en `docs/analisis/`).
+
+**Pendientes técnicos (nada bloquea):**
+1. ~~Curar la liga colgante `linterna-extension` en `tools/ligas.json`~~ — **CURADO en el cierre** (entrada retirada; `probar-ligas` 25/25 verde, CI de #121 verde esperado tras push).
+2. Certificado Authenticode del `.exe` (SmartScreen; historial Bitdefender).
+3. Autoría de ligas en la app (capacidad futura; el gate `estado-ligas.ps1` sigue vivo, la autoría asistida se perdió al retirar `ligas.js`).
+4. Reconciliar y alta-de-agente aún cartón.
+5. Multiplataforma del motor (`pwsh`, macOS/Linux) — fase 2.
+6. Bajar `v1.26`/`v1.27` a los labs tras el release.
+7. Atlas de los tools nuevos (`tuberia-datos`, `parametrizar`, `override`).
+
+**Regla de modelos (orden del cliente):** Fable orquesta y pone criterio en el hilo; opus/sonnet/haiku hacen TODA la mecánica en subagentes. Ningún subagente en Fable.
+
+---
+
+## Dónde estuvimos (2026-07-21 tarde — Sistema configurable CONSTRUIDO + giro de superficie a la app Tauri)
+
+**El sprint "sistema configurable, fase 1" está construido completo y verde en la rama `sprint/sistema-configurable-20260721` (6 commits sobre `main`):**
+
+1. `587e133` — **R1**: los 3 ADRs (0045 identidad · 0046 contratos/regímenes · 0047 meta-gobierno) + CFG-1, y el rename que retira la marca "SAP" por `estatuto`.
+2. `afde41b` — **R2**: la bandeja "pendiente de parametrizar" (`tools/bandeja.ps1`, 15/15).
+3. `3e6ad5f` — **R3**: el estatuto del ritual (`tools/estado-ritual.ps1`, 13/13).
+4. `4b5fd84` — **R5**: el candado IA (hook `PreToolUse`, `.claude/hooks/candado-pretooluse.ps1`, hooks 42/42, `deny-vs-ask` cableado).
+5. `ba522fe` — **R4**: el formulario para parametrizar (webview fiel a la maqueta en la extensión).
+6. `c9bf5c9` — **R6**: el modo avanzado (firma + reclasificar, extensión 26/26).
+
+Todo verde; evidencia en [`qa_runs/sistema-configurable-20260721/LOG.md`](qa_runs/sistema-configurable-20260721/LOG.md).
+
+**Pero el Gemba del cliente REPROBÓ la superficie.** El motor quedó bien; la cara quedó fragmentada en comandos de VS Code (paleta + clic derecho + webviews sueltos) — lo contrario de lo que el cliente validó en 6 Gembas: **la maqueta como UNA app navegable**. La retro del transcript encontró la causa en el plan: decía a la vez "la maqueta ES la spec visual" y "no se porta", y esa exclusión de la cara visible **nunca se le resaltó** al cliente al aprobar.
+
+**Decisión del cliente (2026-07-21):** la superficie del gobierno es una **app de escritorio Tauri fiel a la maqueta** — una sola ventana navegable, no comandos dispersos. Registrada en el **[ADR 0048](docs/decisions/0048-superficie-app-tuberia.md)** (supersede el 0044 **en la superficie**; el principio "la UI autora, el gate ejecuta" sigue vivo). El motor PowerShell del sprint pasado (R1/R2/R3/R5) es la **base de la app**; la extensión se retira.
+
+**Sprint nuevo "La app de la tubería"** con plan aprobado en [`docs/sprints/sprint-app-tuberia-plan.md`](docs/sprints/sprint-app-tuberia-plan.md):
+- **R1** — cerrar el legado + la ley nueva (ADR 0048, CHANGELOG `v1.26.0`, HANDOFF reconciliado, PR del sprint legado).
+- **R2** — el cascarón fiel con **GEMBA TEMPRANO** (doble clic al `.exe` a ver la maqueta tal cual, antes de cablear datos).
+- **R3** — las lecturas (datos reales a la app).
+- **R4** — las escrituras (parametrizar de verdad).
+- **R5** — el modo avanzado real (firma + candado desde la app).
+- **R6** — retiro de la extensión (VS Code limpio).
+- **R7** — empaquetado + release `v1.27.0`.
+
+**Regla de modelos (orden del cliente):** Fable orquesta y pone criterio en el hilo; opus/sonnet/haiku hacen TODA la mecánica en subagentes. Ningún subagente en Fable.
+
+**Pendientes del cliente (nada bloquea al agente):**
+1. **Orden nombrada para el merge del PR del sprint legado** (`sprint/sistema-configurable-20260721` a `main`, corta `v1.26.0`).
+2. **Gemba de fidelidad en R2** (aprobar la cara de la app con sus ojos antes de cablear datos) — es el criterio de "hecho" de esa rebanada.
+
+---
+
+## Dónde estuvimos (2026-07-21 — El descubrimiento del sistema configurable CERRADO · rama `descubre/sistema-configurable-20260720`)
+
+> **Nota git (git gana):** esta sección dijo "SIN MERGEAR" — falso. La rama del descubrimiento **se mergeó vía PR #119** (merge `0b14de1`); el plan viajó en ella y la construcción ya corrió (ver la sección de arriba).
 
 **El descubrimiento quedó completo y durable en la rama; la sesión cerró con cuadro** ([`docs/sprints/cierre-20260721.md`](docs/sprints/cierre-20260721.md)). La visión: **Jidoka evoluciona de metodología a sistema de gobierno configurable con UI guiada** (la UI autora, el gate ejecuta — ADRs 0002/0044 intactos). Los artefactos, en orden de lectura para la sesión de construcción:
 
-1. **El plan-contrato del sprint** [`docs/sprints/sprint-sistema-configurable-plan.md`](docs/sprints/sprint-sistema-configurable-plan.md) — R0 con Gherkin + 6 rebanadas en orden de dependencia (R1 ADRs+CFG-1 · R2 bandeja · R3 contrato SAP del ritual · R5 candado IA · R4 formulario · R6 modo avanzado), pruebas y demo del cliente por rebanada, diseño mecánico validado contra el código real y **3 trampas confesadas** (la mecánica converge en `-Actualizar` → `contratos.json` es INSTANCIA; el sello seguirá acusando `DIVERGE` hasta la clase `contrato` — R3b diferida; el `deny` de Bash es por prefijo → el hook es el muro). Trae su propia sección "Arranque en el chat nuevo".
+1. **El plan-contrato del sprint** [`docs/sprints/sprint-sistema-configurable-plan.md`](docs/sprints/sprint-sistema-configurable-plan.md) — R0 con Gherkin + 6 rebanadas en orden de dependencia (R1 ADRs+CFG-1 · R2 bandeja · R3 estatuto del ritual · R5 candado IA · R4 formulario · R6 modo avanzado), pruebas y demo del cliente por rebanada, diseño mecánico validado contra el código real y **3 trampas confesadas** (la mecánica converge en `-Actualizar` → `contratos.json` es INSTANCIA; el sello seguirá acusando `DIVERGE` hasta la clase `contrato` — R3b diferida; el `deny` de Bash es por prefijo → el hook es el muro). Trae su propia sección "Arranque en el chat nuevo".
 2. **El informe de la visión** [`docs/analisis/descubrimiento-sistema-configurable-202607.md`](docs/analisis/descubrimiento-sistema-configurable-202607.md) — la spec conceptual: 5 relaciones de "ligar" (incluidas lectura `@` y prohibición), 3 regímenes por pieza (y el hallazgo "los comandos están en el cajón equivocado"), bandeja, formulario, meta-gobierno, hallazgos del censo (`permissions` VACÍO con `deny-vs-ask` catálogo-solo, PreToolUse subutilizado, hueco de `docs/`, `gemba.md` sin `@`).
 3. **La maqueta clickeable** [`docs/analisis/maqueta-tuberia-202607.html`](docs/analisis/maqueta-tuberia-202607.html) — la spec visual, validada en **6 Gembas vivos** del cliente (2 hallazgos suyos, curados en caliente): tubería de 54 piezas con regímenes, bandeja (1 caso REAL), formulario, reconciliar, modo avanzado (contraseña-ritual `GARANTIA-NULA` + firma + candado IA) y tour de 14/19 paradas que abre los pop-ups por dentro. **Correr ambos tours ES el onboarding de la sesión de construcción.**
 4. **El spike del modo "Capas" RECHAZADO en Gemba** (*"la verdad es que no"*) — rama `spike/linterna-capas-enforcement-20260720` (`fa3a8c3`), aparcada sin mergear. Lección: el cliente no quiere mapas del todo — quiere guía en el momento concreto.
-5. **Nota de trato:** leer ÍNTEGRO el transcript anterior (jsonl) funcionó cuando el cliente se sintió mal entendido — repetir la técnica si recurre. **Los menús de opciones abstractas lo pierden; los artefactos concretos clickeables lo destraban.**
+5. **Nota de trato:** leer ÍNTEGRO el transcript anterior (jsonl) funcionó cuando el cliente se sintió mal entendido — repetir la técnica si recurre. **Los menús de opciones abstractas lo pierden; los artefactos concretos clickeables lo destraban.** Y (2026-07-21): **el Gemba temprano funciona — la fidelidad visual se aprueba ANTES de cablear.**
 
 **Pendiente (cliente — nada bloquea al agente):**
 1. **PR + merge de la rama `descubre/…`** (orden nombrada) — el plan viaja en ella; la construcción arranca DESPUÉS del merge.
@@ -80,7 +148,7 @@
 
 ## Dónde estuvimos (2026-07-17 — Documentos gobernados · KIT-2 · `v1.23.0` — ✅ MERGEADO Y LIBERADO)
 
-**Sprint "Documentos gobernados" cerrado, mergeado y liberado (`v1.23.0`, ADR 0042).** El **hermano estructural del sello**: el motor se gobierna por hash; los documentos **instancia-de-template** que el ritual inyecta con `@` (`brief`/`infra`/`CONTRIBUTING`) por **secciones** (modelo SAP del cliente — alterar la estructura gobernada = *garantía nula*). Nació de que el cliente sintió "los docs de los hijos están super diferentes"; la medición desmintió la premisa (el ritual NO diverge, es motor por-hash) y encontró el hueco real: los docs de instancia sin gobierno de estructura, con `CONTRIBUTING` como el peor caso (un stub de 4 líneas sin template). Piezas: `tools/docs-gobernados.json` (ledger capa-1/2/3 + secciones requeridas congeladas), `tools/estado-docs.ps1` (detector — **aviso** en `/jidoka:arranca`, **muro opt-in** `-Estricto` en CI apagado por defecto), template real de `CONTRIBUTING`. Contrato+récord: `docs/sprints/sprint-documentos-gobernados-{plan,entrega}.md`. Evidencia: `qa_runs/documentos-gobernados-20260717/LOG.md` (suite verde + demos + caso enti confirmado con máquina).
+**Sprint "Documentos gobernados" cerrado, mergeado y liberado (`v1.23.0`, ADR 0042).** El **hermano estructural del sello**: el motor se gobierna por hash; los documentos **instancia-de-template** que el ritual inyecta con `@` (`brief`/`infra`/`CONTRIBUTING`) por **secciones** (gobierno por estatuto del cliente — alterar la estructura gobernada = *garantía nula*). Nació de que el cliente sintió "los docs de los hijos están super diferentes"; la medición desmintió la premisa (el ritual NO diverge, es motor por-hash) y encontró el hueco real: los docs de instancia sin gobierno de estructura, con `CONTRIBUTING` como el peor caso (un stub de 4 líneas sin template). Piezas: `tools/docs-gobernados.json` (ledger capa-1/2/3 + secciones requeridas congeladas), `tools/estado-docs.ps1` (detector — **aviso** en `/jidoka:arranca`, **muro opt-in** `-Estricto` en CI apagado por defecto), template real de `CONTRIBUTING`. Contrato+récord: `docs/sprints/sprint-documentos-gobernados-{plan,entrega}.md`. Evidencia: `qa_runs/documentos-gobernados-20260717/LOG.md` (suite verde + demos + caso enti confirmado con máquina).
 
 **La rama del sprint subsumió el preflight `!` de la 1.21.1** (que nunca se tagueó): su fix viaja en `v1.23.0`. La 1.21.1 ya no queda suelta.
 

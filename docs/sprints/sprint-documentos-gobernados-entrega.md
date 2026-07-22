@@ -4,7 +4,7 @@
 
 ## Qué se entregó
 
-El **hermano estructural del sello**: el motor se gobierna por hash; los documentos instancia-de-template que el ritual inyecta con `@` (`brief`/`infra`/`CONTRIBUTING`) por **secciones** (modelo SAP: alterar la estructura gobernada = *garantía nula*). Las 3 rebanadas del plan, entregadas completas:
+El **hermano estructural del sello**: el motor se gobierna por hash; los documentos instancia-de-template que el ritual inyecta con `@` (`brief`/`infra`/`CONTRIBUTING`) por **secciones** (gobierno por estatuto: alterar la estructura gobernada = *garantía nula*). Las 3 rebanadas del plan, entregadas completas:
 
 - **R1 — Ledger** `tools/docs-gobernados.json`: taxonomía capa-1/2/3 + secciones requeridas congeladas por doc.
 - **R2 — Detector** `tools/estado-docs.ps1` (hermano de `estado-motor`): aviso en `/jidoka:arranca`; muro opt-in (`-Estricto` en CI, apagado por defecto). `tools/probar-docs.ps1` (24/24).
@@ -41,10 +41,10 @@ El **hermano estructural del sello**: el motor se gobierna por hash; los documen
 | CHANGELOG · versión | al día · **1.23.0** (MINOR — capacidad nueva; rebumpó de 1.22.0 al rebasar sobre main que ya liberó 1.22.0 con #108) |
 | Motor Jidoka | al día (es la nave nodriza) |
 | Issues/hallazgos | code-review: 1 fix aplicado (fence), 2 límites aceptados (prefijo — ADR), 1 follow-up (muro lee ledger del PR no de base). Sin issues de GitHub abiertos (al HANDOFF) |
-| Fricción / Kaizen crudo | Correcciones del cliente (colaborativas, no errores): "y el plan mode?" (aclaré los 2 STOP) · "no autorizo el QUÉ sin el CÓMO" (fusioné R0+plan en plan mode) · "capacidades es mal ejemplo" (refiné la taxonomía) · reframe SAP · "une la rama del preflight". Errores del agente reparados en sesión: 2 — el ledger requería "El casting" (falso-DESVIADO en la nave nodriza) y el falso-CONFORME por code-fence (cazado por el review) |
+| Fricción / Kaizen crudo | Correcciones del cliente (colaborativas, no errores): "y el plan mode?" (aclaré los 2 STOP) · "no autorizo el QUÉ sin el CÓMO" (fusioné R0+plan en plan mode) · "capacidades es mal ejemplo" (refiné la taxonomía) · reframe del estatuto · "une la rama del preflight". Errores del agente reparados en sesión: 2 — el ledger requería "El casting" (falso-DESVIADO en la nave nodriza) y el falso-CONFORME por code-fence (cazado por el review) |
 | Pendientes al HANDOFF | colisión de versión #108 · Gemba del cliente · atlas 10-arranca sin el sub-paso nuevo · muro lee ledger del PR no de base · bajar KIT-2 a los labs |
 | Resumen de cambios | Gobierno documental por estructura: ledger + detector (aviso + muro opt-in) + template de CONTRIBUTING. El motor gana la capacidad de detectar cuando un doc de instancia altera su estructura gobernada, sin sobrescribirlo (KIT-1 manda). |
-| Resumen de la conversación | El cliente pidió "documentos gobernados que no se puedan/recomienden desviar de la original" (modelo SAP). Se midió el drift real (el ritual NO diverge; el hueco es el `CONTRIBUTING` sin template), se planeó con R0+arquitecto, se construyó, revisó y cerró con merge+release autorizados. |
+| Resumen de la conversación | El cliente pidió "documentos gobernados que no se puedan/recomienden desviar de la original" (gobierno por estatuto). Se midió el drift real (el ritual NO diverge; el hueco es el `CONTRIBUTING` sin template), se planeó con R0+arquitecto, se construyó, revisó y cerró con merge+release autorizados. |
 
 ## Verificación (el demo que corre el cliente) — owner: cliente · **PENDIENTE**
 

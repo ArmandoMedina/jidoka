@@ -21,7 +21,7 @@ camino muy cercano, me encanta"* (2026-07-21). Récord completo:
 
 - Línea doctrinal intacta: **la UI autora, el gate ejecuta** (ADR 0002, ADR 0044). Nada de este
   sprint convierte a la UI en muro.
-- Vecino de [[AND-1-muro-andon]] y [[KIT-2-gobierno-documental]] (extiende el modelo SAP del
+- Vecino de [[AND-1-muro-andon]] y [[KIT-2-gobierno-documental]] (extiende el gobierno por estatuto del
   KIT-2 al ritual). Nace la capacidad **CFG-1** (gobierno configurable) con los criterios de R0.
 - Subsume el follow-up del ROADMAP "ligar como verbo genérico, opción (b)".
 
@@ -30,7 +30,7 @@ camino muy cercano, me encanta"* (2026-07-21). Récord completo:
 | Fecha | Decisión |
 |---|---|
 | 2026-07-20 | **Cambio de identidad**: Jidoka = sistema de gobierno configurable ("conectar tubería que no sea caja negra; guiar al usuario y a la IA por los caminos que nosotros determinamos; toda la maquinaria es configurable"). |
-| 2026-07-21 | **Los 3 regímenes + contrato por pieza** (motor sellado / contrato SAP / libre) con el hallazgo: los comandos del ritual salen del gobierno por hash (que no distingue extensión legal de mutilación) y ganan contrato SAP. |
+| 2026-07-21 | **Los 3 regímenes + contrato por pieza** (motor sellado / estatuto / libre) con el hallazgo: los comandos del ritual salen del gobierno por hash (que no distingue extensión legal de mutilación) y ganan estatuto. |
 | 2026-07-21 | **Meta-gobierno en 3 piezas**: contraseña-ritual pública en el README (deliberación: "no le muevas si no le sabes"), firma a registro (atribución), candado IA = permissions.deny + hook PreToolUse (el único muro). "Bajo su propio riesgo" = garantía nula, nunca desviación muda. |
 | 2026-07-20 | La bandeja: "si se da de alta por fuera, sale en pendiente de parametrizar". |
 | 2026-07-21 | Wizard corto y formulario completo **conviven** (aviso vs alta consciente) — confirmar en el Gemba de R4. |
@@ -66,7 +66,7 @@ camino muy cercano, me encanta"* (2026-07-21). Récord completo:
 ### R1 — Los ADRs + la capacidad (S) — primero: es la ley de todo lo demás
 - **ADR "identidad"**: metodología → sistema configurable (decisión 2026-07-20; UI autora, gate ejecuta).
 - **ADR "contratos y regímenes"**: régimen efectivo = fábrica + overrides. NO se duplica la fuente
-  de verdad: motor = sello (hash), SAP = ledgers por secciones/invariantes, libre = capa 3.
+  de verdad: motor = sello (hash), estatuto = ledgers por secciones/invariantes, libre = capa 3.
   `tools/contratos.json` es **INSTANCIA** (no-clobber, jamás en la lista mecánica del manifiesto —
   la mecánica converge en `-Actualizar` y pisaría datos del cliente). Registra solo overrides con
   firma: candado, reclasificación, desviación aceptada. Incluye la decisión diferida **R3b**
@@ -98,7 +98,7 @@ camino muy cercano, me encanta"* (2026-07-21). Récord completo:
   exit 2 · Parte B: cola del repo real corre. **Demo cliente**: doble clic al HTML — ver el caso
   REAL (`docs/analisis/costo-neto-sgi-202607.md`) confesado en la cola.
 
-### R3 — Contrato SAP del ritual (M) — `tools/ritual-gobernado.json` + `tools/estado-ritual.ps1`
+### R3 — Estatuto del ritual (M) — `tools/ritual-gobernado.json` + `tools/estado-ritual.ps1`
 - Ledger APARTE (no extender `docs-gobernados.json`: extracción distinta —`@`/`!` por regex fuera
   de fences vs `## `— y ese ledger es mecánica-que-converge). Por comando: `arrobas_requeridas` +
   `estricto:false`. `gemba.md` se declara con `[]` explícito — el "no inyecta nada" deja de ser
@@ -139,7 +139,7 @@ camino muy cercano, me encanta"* (2026-07-21). Récord completo:
   `extension/ritual.js` (insertar `@` en el marcador de R3; jamás regex-replace del cuerpo), con
   `*.test.js` (node --test, como `ligas.test.js`).
 - Comando `jidoka.parametrizar` (clic derecho + paleta): tipo (del catálogo de templates) →
-  régimen (**solo sap|libre — "motor" jamás se ofrece**) → cajón (áreas reales de la ley; opción
+  régimen (**solo estatuto|libre — "motor" jamás se ofrece**) → cajón (áreas reales de la ley; opción
   "cajón nuevo") → fuerza (avisa/bloquea) → comandos que lo leen (canPickMany del ledger R3) →
   **confirmación antes de escribir** (el OK del cliente). + `jidoka.verBandeja` (webview del HTML
   de R2, calca verGobierno). Reusa `rutaRelativa` y `refrescarGobierno` existentes.
@@ -152,7 +152,7 @@ camino muy cercano, me encanta"* (2026-07-21). Récord completo:
 
 ### R6 — El modo avanzado (M) — reusa contratos.js y la bandeja
 - Comando `jidoka.reclasificar` (o `modoAvanzado`): pieza (leyendo ledgers directo en JS, no
-  parseando texto) → acción (aceptar desviación / candado on-off / reclasificar sap↔libre; "motor"
+  parseando texto) → acción (aceptar desviación / candado on-off / reclasificar estatuto↔libre; "motor"
   no se ofrece) → **motivo obligatorio** (`showInputBox` no vacío) → **firma = `git config
   user.name/email` + fecha ISO** (determinista, no inventada) → confirmación modal → escribe
   `contratos.json`. La contraseña-ritual del README aplica al flujo según el ADR de R1 (en VS Code

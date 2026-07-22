@@ -29,10 +29,17 @@ La lupa de todo lo demás; léela primero:
 
 > **El `@` existe, ¿pero tiene las secciones?** El preflight de arriba verifica que el archivo **esté**;
 > este verifica que su **estructura** siga el molde gobernado. Un `CONTRIBUTING`/`brief`/`infra` presente
-> pero **destripado o reestructurado** pasa el `[FALTA]` y aun así **inyecta basura** al `@`. Modelo SAP:
+> pero **destripado o reestructurado** pasa el `[FALTA]` y aun así **inyecta basura** al `@`. Gobierno por estatuto:
 > el contenido varía libre, las **secciones** no — `DESVIADO` = *garantía nula* sobre ese doc. Aviso, no
 > muro (jidoka KIT-2; el muro es opt-in en CI).
 !`test -f tools/estado-docs.ps1 && powershell -File tools/estado-docs.ps1 || echo "[docs] sin detector de conformidad estructural -- corre instalar.ps1 -Actualizar (o sembrar-manual) para gobernar la estructura de brief/infra/CONTRIBUTING."`
+
+> **¿Y los `@` de fábrica del ritual siguen puestos?** El estatuto de arriba gobierna la *estructura* de
+> los docs; este gobierna los **`@`-includes de fábrica** de los comandos `/jidoka:*`. Un `@` extra que
+> agregaste es **CONFORME** (aditiva legal); si a un comando le falta un `@` de fábrica, sale `DESVIADO`
+> nombrándolo — *garantía nula*: la lógica que ese `@` inyectaba no corre. Reconcilia: restaura el `@` o
+> acéptalo con firma. Aviso, no muro (jidoka CFG-1, el estatuto; muro opt-in en CI).
+!`test -f tools/estado-ritual.ps1 && powershell -File tools/estado-ritual.ps1 || echo "[ritual] sin detector del estatuto del ritual -- corre instalar.ps1 -Actualizar (o sembrar-manual) para gobernar los @ de fabrica de los comandos /jidoka:*."`
 
 - **El QUÉ** (el brief: caso concreto, métrica, autoridad del dominio, criterio de "hecho"):
 @product/PRODUCT_BRIEF.md
@@ -45,6 +52,9 @@ La lupa de todo lo demás; léela primero:
 
 - **El DÓNDE — dónde se quedó la última sesión**: el relevo se lee y **se limpia** al abrir; interprétalo contra git (§1a), no al revés:
 @HANDOFF.md
+
+<!-- Punto de insercion de @ del cliente (parametrizar desde la extension). Aditiva legal: el estatuto del ritual acepta un @ extra. No borres el marcador. -->
+<!-- jidoka:arrobas -->
 
 - **El plan de trabajo del día**, si una sesión anterior lo dejó a medias (efímero, fuera de git — ADR 0006):
 !`test -f .jidoka/plan-actual.md && cat .jidoka/plan-actual.md || echo "(no hay plan de trabajo activo — empezamos limpio)"`

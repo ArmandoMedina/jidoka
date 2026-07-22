@@ -71,6 +71,36 @@ Check 'no-memorias: DEJA LEER memoria con 2>&1 (no es escritura)' (-not $outBash
 $outBashErr2 = Invoke-Hook $noMem '{"tool_name":"Bash","tool_input":{"command":"ls -1 ~/.claude/projects/slug/memory/ 2>/dev/null"}}' $null
 Check 'no-memorias: DEJA LISTAR memoria con 2>/dev/null (no es escritura)' (-not $outBashErr2.Contains('deny')) "falso positivo 2>/dev/null: $outBashErr2"
 
+# --- candado IA (PreToolUse, contra tools/contratos.json; ADR 0047) ---
+$candado = Join-Path $hooksDir 'candado-pretooluse.ps1'
+$repoCand = New-TempRepo
+Set-Content -Path (Join-Path $repoCand 'tools/contratos.json') -Value '{"contratos":[{"path":"tools/blast-radius.json","candado":true}]}' -Encoding Ascii
+$candFP = ($repoCand -replace '\\', '/')
+$outCandW = Invoke-Hook $candado ('{"tool_input":{"file_path":"' + $candFP + '/tools/blast-radius.json"}}') $repoCand
+Check 'candado: DENIEGA Write/Edit a una pieza con candado' ($outCandW.Contains('"permissionDecision":"deny"')) "no denego: $outCandW"
+$outCandOk = Invoke-Hook $candado ('{"tool_input":{"file_path":"' + $candFP + '/tools/otra-cosa.ps1"}}') $repoCand
+Check 'candado: DEJA pasar una pieza SIN candado (silencio)' (-not $outCandOk.Contains('deny')) "denego de mas: $outCandOk"
+$outCandBash = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"Set-Content -Path tools/blast-radius.json -Value x"}}' $repoCand
+Check 'candado: DENIEGA escritura Bash (Set-Content) a la pieza con candado' ($outCandBash.Contains('"permissionDecision":"deny"')) "no denego el Bash: $outCandBash"
+$outCandRead = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"cat tools/blast-radius.json"}}' $repoCand
+Check 'candado: DEJA LEER la pieza con candado (leer no es editar)' (-not $outCandRead.Contains('deny')) "bloqueo una lectura: $outCandRead"
+$outCandErr = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"cat tools/blast-radius.json 2>&1"}}' $repoCand
+Check 'candado: 2>&1 NO dispara falso positivo (no es escritura)' (-not $outCandErr.Contains('deny')) "falso positivo 2>&1: $outCandErr"
+$repoNoLedger = New-TempRepo
+$outNoLedger = Invoke-Hook $candado ('{"tool_input":{"file_path":"' + ($repoNoLedger -replace '\\', '/') + '/tools/blast-radius.json"}}') $repoNoLedger
+Check 'candado: SIN contratos.json (hijo sin ledger) -> falla-abierta (no bloquea)' (-not $outNoLedger.Contains('deny')) "bloqueo sin ledger: $outNoLedger"
+Set-Content -Path (Join-Path $repoNoLedger 'tools/contratos.json') -Value '{ esto no es json valido' -Encoding Ascii
+$outRot = Invoke-Hook $candado ('{"tool_input":{"file_path":"' + ($repoNoLedger -replace '\\', '/') + '/tools/blast-radius.json"}}') $repoNoLedger
+Check 'candado: ledger PODRIDO -> falla-abierta (no bloquea)' (-not $outRot.Contains('deny')) "bloqueo con ledger podrido: $outRot"
+$repoOff = New-TempRepo
+Set-Content -Path (Join-Path $repoOff 'tools/contratos.json') -Value '{"contratos":[{"path":"tools/blast-radius.json","candado":false}]}' -Encoding Ascii
+$outOff = Invoke-Hook $candado ('{"tool_input":{"file_path":"' + ($repoOff -replace '\\', '/') + '/tools/blast-radius.json"}}') $repoOff
+Check 'candado: candado:false NO bloquea (solo candado:true muerde)' (-not $outOff.Contains('deny')) "bloqueo con candado:false: $outOff"
+$outCandEdit = Invoke-Hook $candado ('{"tool_name":"Edit","tool_input":{"file_path":"' + $candFP + '/tools/blast-radius.json"}}') $repoCand
+Check 'candado: DENIEGA Edit (no solo Write) a la pieza con candado' ($outCandEdit.Contains('"permissionDecision":"deny"')) "no denego el Edit: $outCandEdit"
+$outCandBs = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"Set-Content -Path tools\\blast-radius.json -Value x"}}' $repoCand
+Check 'candado: DENIEGA escritura Bash con backslash (prueba la normalizacion \\ -> /)' ($outCandBs.Contains('"permissionDecision":"deny"')) "no normalizo el backslash: $outCandBs"
+
 # --- stop_hook_active: los Stop-hooks no re-bloquean ---
 foreach ($h in @('review-stop.ps1','gemba-stop.ps1','andon-stop.ps1','validador-stop.ps1')) {
   $o = Invoke-Hook (Join-Path $hooksDir $h) '{"stop_hook_active":true}' $null

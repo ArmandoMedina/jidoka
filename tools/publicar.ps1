@@ -76,7 +76,7 @@ if (-not $SoloVerificar) {
 # (2>&1, p.ej. "LF -> CRLF") dentro de un test no debe volverse error fatal (como andon.yml).
 $ErrorActionPreference = 'Continue'
 Write-Host "== Suite de self-tests (evidencia-no-palabra antes de publicar) =="
-foreach ($t in @('probar-version','probar-gate','probar-hooks','probar-auditor','probar-disparos','probar-preflight','probar-docs','probar-ligas','probar-linterna','probar-anti-pii','probar-instalador','probar-sembrar','probar-agentes','probar-extension')) {
+foreach ($t in @('probar-version','probar-gate','probar-hooks','probar-auditor','probar-disparos','probar-preflight','probar-docs','probar-ligas','probar-linterna','probar-bandeja','probar-ritual','probar-parametrizar','probar-override','probar-anti-pii','probar-instalador','probar-sembrar','probar-agentes','probar-app')) {
   # Falla CERRADO si el archivo del test no existe (issue #78): sin esta guarda, el
   # CommandNotFoundException (no-terminante) se traga con *> $null y $LASTEXITCODE
   # conserva el 0 del test ANTERIOR -> [OK] de un test que jamas corrio. Cazado en vivo
