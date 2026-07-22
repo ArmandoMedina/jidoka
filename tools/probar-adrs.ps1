@@ -71,7 +71,9 @@ function Get-Secciones($path) {
 # Devuelve $null si no reconoce ninguno.
 function Get-EstadoClase($texto) {
   $f = Fold $texto
-  foreach ($c in $script:CLASES) { if ($f -match [regex]::Escape($c)) { return $c } }
+  # Palabra completa: '(^|[^a-z]) clase ([^a-z]|$)'. Sin ancla, 'inaceptado' matchearia
+  # 'aceptado' (substring). El orden de CLASES resuelve 'reemplazado ... por' (primer token).
+  foreach ($c in $script:CLASES) { if ($f -match ('(^|[^a-z])' + [regex]::Escape($c) + '([^a-z]|$)')) { return $c } }
   return $null
 }
 
@@ -90,14 +92,18 @@ function Get-Indice($path) {
   $filas = @{}
   foreach ($line in [System.IO.File]::ReadAllLines($path)) {
     if ($line -notmatch '^\s*\|') { continue }
-    $celdas = $line -split '\|'
-    if ($celdas.Count -lt 4) { continue }
+    # Celdas sin los vacios de borde (pipe inicial/final): asi el estado es la ULTIMA
+    # celda real, con o sin pipe de cierre (GitHub acepta filas sin pipe final).
+    $celdas = [System.Collections.ArrayList]@($line -split '\|')
+    while ($celdas.Count -gt 0 -and "$($celdas[0])".Trim() -eq '') { $celdas.RemoveAt(0) }
+    while ($celdas.Count -gt 0 -and "$($celdas[$celdas.Count - 1])".Trim() -eq '') { $celdas.RemoveAt($celdas.Count - 1) }
+    if ($celdas.Count -lt 2) { continue }
     $numFound = $null; $archFound = $null
     foreach ($cel in $celdas) {
       if ($cel -match '\[(\d{4})\]\(([^)]+\.md)\)') { $numFound = $Matches[1]; $archFound = $Matches[2]; break }
     }
     if (-not $numFound) { continue }
-    $estadoCell = $celdas[$celdas.Count - 2]
+    $estadoCell = "$($celdas[$celdas.Count - 1])"
     $filas[$numFound] = @{ archivo = $archFound; estadoClase = (Get-EstadoClase $estadoCell); estadoTexto = $estadoCell.Trim() }
   }
   return $filas
@@ -108,6 +114,11 @@ function Get-Indice($path) {
 function Test-Adrs($dir, $index) {
   $problemas = @()
   $adrs = @()
+  # Falla-suave: un repo sin docs/decisions o sin su indice NO se bloquea (un hijo recien
+  # sembrado, o brownfield sin ADRs). 'no aplica', no excepcion -- como el resto del motor.
+  if (-not (Test-Path -LiteralPath $dir) -or -not (Test-Path -LiteralPath $index)) {
+    return @{ problemas = @(); adrs = @(); noAplica = $true }
+  }
   $indice = Get-Indice $index
 
   $archivos = Get-ChildItem -LiteralPath $dir -Filter '*.md' -File |
@@ -122,7 +133,7 @@ function Test-Adrs($dir, $index) {
     $faltan = @()
     foreach ($req in $script:REQUERIDAS) {
       $hit = $false
-      foreach ($sec in $secciones) { if ($sec.StartsWith($req)) { $hit = $true; break } }
+      foreach ($sec in $secciones) { if ($sec -eq $req -or $sec -match ('^' + [regex]::Escape($req) + '[^a-z]')) { $hit = $true; break } }
       if (-not $hit) { $faltan += $req }
     }
     $estadoArch = Get-EstadoArchivo $f.FullName
@@ -147,9 +158,11 @@ function Test-Adrs($dir, $index) {
 # --- Emite el tablero de conformidad (R4): HTML autocontenido, sin BOM. ---
 function Write-Reporte($resultado, $salidaPath) {
   $rows = ''
+  $conf = 0
   foreach ($a in $resultado.adrs) {
     $estadoOk = (-not $a.estadoArch) -or (-not $a.estadoIdx) -or ($a.estadoArch -eq $a.estadoIdx)
     $ok = $a.conforme -and $estadoOk
+    if ($ok) { $conf++ }
     $clase = if ($ok) { 'ok' } else { 'mal' }
     $etq = if ($ok) { 'conforme' } else { 'DESVIADO' }
     $nota = ''
@@ -159,7 +172,6 @@ function Write-Reporte($resultado, $salidaPath) {
   }
   $total = $resultado.adrs.Count
   $desv  = $resultado.problemas.Count
-  $conf  = $total - (@($resultado.adrs | Where-Object { -not $_.conforme }).Count)
   $html = @"
 <!doctype html><html lang='es'><head><meta charset='utf-8'>
 <title>Conformidad de ADRs - Jidoka</title>
@@ -187,9 +199,14 @@ Write-Host "== Conformidad del corpus de ADRs (docs/decisions) =="
 
 # --- El corpus REAL: 0 problemas o el muro cae. ---
 $real = Test-Adrs $decisionsDir $indexPath
-Check ("corpus real: los {0} ADRs conforman (secciones + estado coherente + sin huerfanos)" -f $real.adrs.Count) ($real.problemas.Count -eq 0) ($real.problemas -join ' | ')
-if ($real.problemas.Count -gt 0) {
-  foreach ($p in $real.problemas) { Write-Host "     - $p" -ForegroundColor Yellow }
+if ($real.noAplica) {
+  Write-Host "  [N/A]   sin docs/decisions o su indice: no aplica (un repo sin ADRs no se bloquea)." -ForegroundColor DarkGray
+}
+else {
+  Check ("corpus real: los {0} ADRs conforman (secciones + estado coherente + sin huerfanos)" -f $real.adrs.Count) ($real.problemas.Count -eq 0) ($real.problemas -join ' | ')
+  if ($real.problemas.Count -gt 0) {
+    foreach ($p in $real.problemas) { Write-Host "     - $p" -ForegroundColor Yellow }
+  }
 }
 
 # --- Self-test sintetico: DEBE cazar cada tipo de desvio y NO marcar el sano. ---
@@ -292,6 +309,32 @@ x
   Check 'sintetico: caza el HUERFANO de indice (0005 sin archivo)'    ($p -match '0005.*no existe en disco') $p
   $sano = @($s.adrs | Where-Object { $_.num -eq '0001' })[0]
   Check 'sintetico: NO marca el ADR sano (0001 conforme)'             ($sano.conforme -and -not ($p -match '0001')) $p
+
+  # --- Curas del review 2026-07-22: plural que no cuela + estado no-anclado + falla-suave. ---
+  $plural = @"
+# ADR 0006 - plural + estado espurio
+
+- **Estado:** inaceptado
+- **Fecha:** 2026-01-01
+
+## Contexto
+x
+## Decisiones
+x
+## Por que
+x
+## El camino que NO se toma
+x
+## Consecuencias
+x
+"@
+  [System.IO.File]::WriteAllText((Join-Path $tmp '0006-plural.md'), $plural, $encA)
+  $s2 = Test-Adrs $tmp (Join-Path $tmp 'README.md')
+  $p2 = $s2.problemas -join ' | '
+  Check "sintetico: '## Decisiones' (plural) NO satisface 'decision'"          ($p2 -match '0006.*decision') $p2
+  Check "sintetico: estado 'inaceptado' NO se lee como 'aceptado'"             ($p2 -match '0006.*no se reconoce') $p2
+  $sNA = Test-Adrs (Join-Path $tmp 'no-existe') (Join-Path $tmp 'no-existe/README.md')
+  Check 'sintetico: dir/indice ausente -> noAplica (no truena, no bloquea)'    ($sNA.noAplica -eq $true) "noAplica=$($sNA.noAplica)"
 }
 finally { Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue }
 
