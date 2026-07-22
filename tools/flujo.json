@@ -1,5 +1,5 @@
 {
-  "_comentario": "El contrato del pilar de flujo (FLU-1, ADR 0045). Dato de INSTANCIA: cada repo declara sus limites y el motor los hace cumplir (verificar.ps1: check contrato-handoff; estado-flujo.ps1: la vista). Sin este archivo, los checks de flujo no aplican (un repo sin el pilar no se bloquea). ASCII a proposito.",
+  "_comentario": "El contrato del pilar de flujo (FLU-1, ADR 0049). Dato de INSTANCIA: cada repo declara sus limites y el motor los hace cumplir (verificar.ps1: check contrato-handoff; estado-flujo.ps1: la vista). Sin este archivo, los checks de flujo no aplican (un repo sin el pilar no se bloquea). ASCII a proposito.",
   "handoff": {
     "max_historicas": 2,
     "techo_lineas": 120,

@@ -1,5 +1,5 @@
 #Requires -Version 5
-# expirar.ps1 - el circuit breaker del ROADMAP (FLU-1, ADR 0045). La MECANICA de la
+# expirar.ps1 - el circuit breaker del ROADMAP (FLU-1, ADR 0049). La MECANICA de la
 # muerte por defecto: mueve los items VENCIDOS del ROADMAP.md al archivo de muertos
 # (docs/MUERTOS.md) con fecha y motivo. Lo que caduca no muere por juicio de nadie --
 # muere por script. Convierte "podar" de decision-que-nadie-toma en evento-que-ocurre-solo.

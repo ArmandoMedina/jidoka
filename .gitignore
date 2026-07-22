@@ -47,3 +47,9 @@ docs/atlas/render/*.png
 tools/anti-pii.denylist.txt
 
 extension/*.vsix
+
+# La app de la tuberia (Tauri): el target de Rust y los node_modules del CLI son
+# artefactos de build (cientos de MB de crates compilados), no fuente. El .exe se
+# reconstruye con `npx tauri build`; el instalador firmado viaja como asset del release.
+app/src-tauri/target/
+app/node_modules/

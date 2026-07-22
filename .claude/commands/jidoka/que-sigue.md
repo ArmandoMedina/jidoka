@@ -11,6 +11,9 @@ El cliente pregunta **¿y ahora qué?**. Tu trabajo es proponer el siguiente pas
 - **`@ROADMAP.md`** — hacia dónde va la beta: los sprints, las grietas registradas de auditoría, el backlog sin sprint asignado.
 - **Dónde está git**: !`git branch --show-current && git status --short && git log --oneline -3`
 
+<!-- Punto de insercion de @ del cliente (parametrizar desde la extension). Aditiva legal: el estatuto del ritual acepta un @ extra. No borres el marcador. -->
+<!-- jidoka:arrobas -->
+
 ## Propón (en orden de valor, no de aparición)
 
 1. **Separa lo que decide la IA de lo que decide el humano.** Los pendientes de código/construcción los puedes proponer y ejecutar; las decisiones de juicio del cliente (las de la cola del HANDOFF, las abiertas del ROADMAP) **se le presentan para que elija — no las tomes por él** (disparo `decision-queda-en-humano`).

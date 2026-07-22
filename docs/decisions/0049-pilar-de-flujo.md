@@ -1,4 +1,4 @@
-# 0045 — El pilar de flujo: contratos de documentos con gate, límite WIP y visibilidad determinista
+# 0049 — El pilar de flujo: contratos de documentos con gate, límite WIP y visibilidad determinista
 
 - **Estado:** aceptado
 - **Fecha:** 2026-07-21

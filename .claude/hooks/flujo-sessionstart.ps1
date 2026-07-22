@@ -1,4 +1,4 @@
-# flujo-sessionstart.ps1 - SessionStart hook (FLU-1, ADR 0045). El PRIMER hook
+# flujo-sessionstart.ps1 - SessionStart hook (FLU-1, ADR 0049). El PRIMER hook
 # SessionStart del repo: al abrir sesion EMPUJA a la vista el estado del flujo -- que
 # sigue y que espera a terceros -- sin que nadie lo pida (gestion visual). Ya no depende
 # de que un comando se acuerde de mostrarlo.

@@ -1,5 +1,5 @@
 #Requires -Version 5
-# estado-flujo.ps1 - la vista del ESTADO VIVO del pilar de flujo (FLU-1, ADR 0045).
+# estado-flujo.ps1 - la vista del ESTADO VIVO del pilar de flujo (FLU-1, ADR 0049).
 # Tres modos, un molde:
 #   -Gate    (R5): el muro de entrada del WIP. Imprime el veredicto y sale con codigo.
 #   -Json    (R6): emite a stdout SOLO el JSON del contrato (la cara la pinta el Tauri

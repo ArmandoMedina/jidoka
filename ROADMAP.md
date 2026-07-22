@@ -1,6 +1,6 @@
 # Roadmap — Jidoka
 
-> **Contrato del ROADMAP (FLU-1, ADR 0045): esto es una cola de trabajo clasificada, no un diario.** Cada ítem vivo declara `[alta:AAAA-MM-DD · apetito:Nh]` (los «Con fecha» además `vence:`; el icebox «Algún día» solo `alta:`). Se **clasifica, no se rankea** (Anderson: ordenar el backlog es desperdicio). Lo cumplido vive en `CHANGELOG.md`; lo vencido **muere solo** a `docs/MUERTOS.md` (`tools/expirar.ps1`) y solo vuelve si alguien lo re-propone. El check `[contrato-roadmap]` de `tools/verificar.ps1` hace cumplir el formato y el techo (límites en `tools/flujo.json`). El roadmap-diario anterior, íntegro: [`docs/roadmap-historico.md`](docs/roadmap-historico.md). Norte sin cambio: **la disciplina en el robot, el juicio en el humano**.
+> **Contrato del ROADMAP (FLU-1, ADR 0049): esto es una cola de trabajo clasificada, no un diario.** Cada ítem vivo declara `[alta:AAAA-MM-DD · apetito:Nh]` (los «Con fecha» además `vence:`; el icebox «Algún día» solo `alta:`). Se **clasifica, no se rankea** (Anderson: ordenar el backlog es desperdicio). Lo cumplido vive en `CHANGELOG.md`; lo vencido **muere solo** a `docs/MUERTOS.md` (`tools/expirar.ps1`) y solo vuelve si alguien lo re-propone. El check `[contrato-roadmap]` de `tools/verificar.ps1` hace cumplir el formato y el techo (límites en `tools/flujo.json`). El roadmap-diario anterior, íntegro: [`docs/roadmap-historico.md`](docs/roadmap-historico.md). Norte sin cambio: **la disciplina en el robot, el juicio en el humano**.
 
 ## Urgente
 

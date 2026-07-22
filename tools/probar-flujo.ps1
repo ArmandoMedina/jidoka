@@ -1,5 +1,5 @@
 #Requires -Version 5
-# probar-flujo.ps1 - self-test del pilar de flujo (FLU-1, ADR 0045): los contratos del
+# probar-flujo.ps1 - self-test del pilar de flujo (FLU-1, ADR 0049): los contratos del
 # HANDOFF y del ROADMAP, ambos en verificar.ps1. El check [contrato-handoff] cuenta las
 # secciones "Donde estamos" (max 1), las historicas "Donde estuvimos"/"Antes"
 # (max_historicas) y el techo de lineas. El check [contrato-roadmap] exige que el ROADMAP

@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Maqueta de cartón — la tubería de Jidoka</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#171e26; --panel2:#1d2630; --line:#2a3642;
+    --txt:#d8e1e8; --dim:#8a9aa8; --acc:#4db8ff; --ok:#43d675; --warn:#ffb454;
+    --bad:#ff6b6b; --violet:#b48eff; --chip:#222d38; --chipglow:#2c4a63;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.5 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--txt)}
+  header{padding:14px 22px;border-bottom:1px solid var(--line);background:var(--panel)}
+  header h1{margin:0;font-size:17px;font-weight:600}
+  header .sub{color:var(--dim);font-size:12.5px;margin-top:3px}
+  header .sub b{color:var(--warn)}
+  nav{display:flex;gap:8px;padding:10px 22px;background:var(--panel);border-bottom:1px solid var(--line)}
+  nav button{background:var(--chip);border:1px solid var(--line);color:var(--txt);padding:7px 16px;border-radius:8px;cursor:pointer;font-size:13.5px}
+  nav button.on{background:var(--chipglow);border-color:var(--acc);color:#fff}
+  .tab{display:none}
+  .tab.on{display:block}
+
+  /* ---- Tubería ---- */
+  #layout{display:flex;gap:0;align-items:flex-start}
+  #cats{flex:1;padding:16px 12px 60px 22px;display:flex;flex-wrap:wrap;gap:12px;align-content:flex-start}
+  .cat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:210px;flex:1 1 230px}
+  .cat h3{margin:0 0 8px;font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--dim);font-weight:600}
+  .cat h3 .n{color:var(--acc);font-weight:700}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{background:var(--chip);border:1px solid var(--line);border-radius:7px;padding:4px 9px;cursor:pointer;font-size:12.5px;white-space:nowrap;transition:all .12s}
+  .chip:hover{border-color:var(--acc)}
+  .chip.sel{background:var(--acc);color:#06131f;border-color:var(--acc);font-weight:600}
+  .chip.glow{background:var(--chipglow);border-color:var(--acc)}
+  .chip .tag{font-size:10px;color:var(--dim);margin-left:5px}
+  .chip.sel .tag{color:#06304d}
+  .chip.dorm{opacity:.55;border-style:dashed}
+  #detail{width:400px;max-width:42vw;position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--panel2);border-left:1px solid var(--line);padding:18px 20px 60px}
+  #detail h2{margin:0 0 2px;font-size:16px}
+  #detail .tipo{color:var(--dim);font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+  #detail .desc{margin-bottom:14px}
+  #detail h4{margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--dim)}
+  .conn{display:block;background:var(--chip);border:1px solid var(--line);border-radius:7px;padding:5px 10px;margin:4px 0;cursor:pointer;font-size:12.5px}
+  .conn:hover{border-color:var(--acc)}
+  .conn .rel{color:var(--acc);font-size:11px;margin-right:6px}
+  .confbox{background:#141b22;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:12.5px;margin:5px 0}
+  .confbox b{color:var(--warn)}
+  .confbox.vision b{color:var(--ok)}
+  .wizbtn{margin-top:14px;width:100%;background:var(--ok);color:#03170a;border:none;border-radius:8px;padding:9px;font-size:13.5px;font-weight:600;cursor:pointer}
+  .hint{color:var(--dim);font-size:12px;font-style:italic}
+  table.mini{border-collapse:collapse;width:100%;font-size:11.5px;margin:6px 0}
+  table.mini td,table.mini th{border:1px solid var(--line);padding:3px 6px;text-align:left;vertical-align:top}
+  table.mini th{color:var(--dim);font-weight:600}
+  .b{color:var(--bad);font-weight:700}.a{color:var(--warn)}.g{color:var(--ok)}
+
+  /* ---- Flujos ---- */
+  #flujos{padding:22px;max-width:1000px}
+  .flowcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+  .flowcard h3{margin:0 0 4px;font-size:15px}
+  .flowcard p{margin:0;color:var(--dim);font-size:13px}
+  .flowcard button{background:var(--acc);color:#06131f;border:none;border-radius:8px;padding:9px 18px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .flowcard .new{color:var(--violet);font-size:11px;font-weight:700;letter-spacing:.5px}
+
+  /* ---- Huecos ---- */
+  #huecos{padding:22px;max-width:1000px}
+  .hueco{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:12px}
+  .hueco h3{margin:0 0 6px;font-size:14.5px}
+  .hueco p{margin:0;color:var(--txt);font-size:13px}
+  .hueco .et{font-size:10.5px;font-weight:700;letter-spacing:.6px;padding:2px 8px;border-radius:5px;margin-right:8px;vertical-align:1px}
+  .et.sin{background:#4a2b2b;color:var(--bad)} .et.dor{background:#453a1e;color:var(--warn)}
+  .et.hue{background:#2b2b4a;color:var(--violet)} .et.dat{background:#1e3a45;color:var(--acc)}
+
+  /* ---- regímenes ---- */
+  .chip.rmotor{border-left:3px solid var(--bad)}
+  .chip.restatuto{border-left:3px solid var(--warn)}
+  .chip.rlibre{border-left:3px solid var(--ok)}
+  .chip.rmal{border-left:3px dashed var(--violet)}
+  .leg{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--dim);padding:12px 22px 0}
+  .leg i{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:-1px}
+
+  /* ---- bandeja ---- */
+  #bandeja{padding:22px;max-width:1000px}
+  .bitem{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 16px;margin-bottom:10px;display:flex;justify-content:space-between;gap:14px;align-items:center}
+  .bitem h3{margin:0 0 3px;font-size:13.5px;font-family:Consolas,monospace}
+  .bitem p{margin:0;color:var(--dim);font-size:12.5px}
+  .bitem button{background:var(--acc);color:#06131f;border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .bitem button.rec{background:var(--warn)}
+
+  /* ---- formulario ---- */
+  #wiz label.f{display:block;font-size:11.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-top:12px}
+  #wiz select,#wiz input[type=text]{width:100%;background:var(--chip);border:1px solid var(--line);color:var(--txt);border-radius:7px;padding:7px 9px;font-size:13px;margin:4px 0 2px}
+  .ck{display:block;font-size:13px;margin:6px 0;cursor:pointer}
+  .ck input{margin-right:7px}
+  .rr{display:block;font-size:13px;margin:6px 0;cursor:pointer}
+  .rr input{margin-right:7px}
+  .rr small{color:var(--dim);margin-left:22px;display:block}
+
+  /* ---- tour ---- */
+  .tourhl{outline:3px solid var(--acc);outline-offset:3px;border-radius:6px;position:relative;z-index:35}
+  #tourbox{display:none;position:fixed;bottom:18px;left:50%;transform:translateX(-50%);width:540px;max-width:92vw;background:#0d2135;border:1px solid var(--acc);border-radius:12px;padding:16px 20px;z-index:60;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+  #tourbox h4{margin:0 0 6px;font-size:14.5px;color:#fff;text-transform:none;letter-spacing:0}
+  #tourbox p{margin:0 0 12px;font-size:13px;color:var(--txt)}
+  #tourbox .tbar{display:flex;justify-content:space-between;align-items:center}
+  #tourbox .tn{color:var(--dim);font-size:12px}
+  #tourbox button{border:none;border-radius:7px;padding:6px 14px;font-weight:600;cursor:pointer;font-size:12.5px;margin-left:6px}
+  #tourbox .tprev{background:var(--chip);color:var(--txt);border:1px solid var(--line)}
+  #tourbox .tnext{background:var(--acc);color:#06131f}
+  #tourbox .tout{background:none;color:var(--dim);border:none}
+
+  /* ---- Wizard modal ---- */
+  #ovl{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:50}
+  #ovl.on{display:flex;align-items:center;justify-content:center}
+  #wiz{background:var(--panel2);border:1px solid var(--acc);border-radius:12px;width:560px;max-width:92vw;max-height:88vh;overflow-y:auto;padding:22px 26px}
+  #wiz h3{margin:0 0 2px;font-size:16px}
+  #wiz .paso{color:var(--dim);font-size:12px;margin-bottom:14px}
+  .opt{display:block;background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin:7px 0;cursor:pointer;font-size:13.5px}
+  .opt:hover{border-color:var(--acc)}
+  .opt.pick{border-color:var(--ok);background:#1b2e22}
+  .opt small{display:block;color:var(--dim);font-size:12px;margin-top:2px}
+  .opt input{margin-right:8px}
+  #wiz .acciones{display:flex;justify-content:space-between;margin-top:18px}
+  #wiz .acciones button{border:none;border-radius:8px;padding:8px 18px;font-weight:600;cursor:pointer;font-size:13px}
+  #wiz .atras{background:var(--chip);color:var(--txt);border:1px solid var(--line)}
+  #wiz .sigue{background:var(--acc);color:#06131f}
+  .escribe{background:#0d1a12;border:1px solid var(--ok);border-radius:8px;padding:12px 14px;font-size:12.5px;margin:10px 0}
+  .escribe code{color:var(--ok);font-family:Consolas,monospace;font-size:12px;display:block;margin:3px 0}
+  .carton{color:var(--warn);font-size:12px;font-style:italic}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🗜️ La tubería de Jidoka — maqueta de cartón</h1>
+  <div class="sub">Todas las piezas son <b>reales</b> (censadas de tu repo hoy). El <b>formulario de alta</b> y el <b>modo avanzado</b> ya escriben de verdad (contratos, ley, @, firma); el resto de flujos guiados siguen de <b>teatro</b> y lo confiesan al final. Solo con tu OK, nunca solos.</div>
+</header>
+
+<nav>
+  <button class="on" data-t="tuberia">1 · La tubería</button>
+  <button data-t="bandeja">2 · La bandeja — pendiente de parametrizar <span id="bandejaCont" style="background:var(--bad);color:#fff;border-radius:9px;padding:0 7px;font-size:11px;margin-left:4px">5</span></button>
+  <button data-t="flujos">3 · Flujos guiados</button>
+  <button data-t="huecos">4 · Lo que no estás viendo</button>
+  <button id="refrescarBtn" style="margin-left:auto;font-size:12.5px" title="Vuelve a leer la foto real del repo" onclick="jidokaRefrescar()">↻ Refrescar</button>
+  <button id="cambiarRepoBtn" style="font-size:12.5px" title="Elige otra carpeta de repo Jidoka" onclick="jidokaCambiarRepo()">📁 Cambiar repo</button>
+  <button id="tourBtn" style="background:var(--ok);color:#03170a;border:none;font-weight:700" onclick="tourStart()">▶ Tour guiado</button>
+  <button id="rootBtn" onclick="rootToggle()">🔒 Modo avanzado</button>
+</nav>
+
+<div id="jidokaAviso" style="display:none;padding:10px 22px;background:#4a2b2b;color:var(--bad);border-bottom:1px solid var(--line);font-size:12.5px"></div>
+
+<div class="tab on" id="tuberia">
+  <div class="leg">
+    <span style="color:var(--txt);font-weight:600">Régimen de cada pieza:</span>
+    <span><i style="background:var(--bad)"></i>motor sellado — solo Jidoka lo actualiza (el lazo)</span>
+    <span><i style="background:var(--warn)"></i>estatuto — invariantes de fábrica + tus extensiones</span>
+    <span><i style="background:var(--ok)"></i>libre — tuyo, solo se registra</span>
+    <span><i style="background:var(--violet)"></i>⚠ hoy en el cajón equivocado (hash; debería ser estatuto)</span>
+  </div>
+  <div id="layout">
+    <div id="cats"></div>
+    <div id="detail">
+      <h2>👈 Elige una pieza</h2>
+      <div class="desc" style="color:var(--dim)">Clic en cualquier chip. Verás qué es, <b>con qué está cableada hoy</b> (las piezas conectadas se iluminan), y qué tendría de configurable. Nada de marañas: una pieza a la vez.</div>
+      <div class="confbox"><b>Cómo leer esto:</b> cada chip es una pieza real de tu repo. Las categorías son los "tipos de tubo": ritual, asientos, hooks, ley, motor… La visión que describiste es que TODO esto se cablee desde una UI guiada — hoy casi todo se cablea editando archivos a mano.</div>
+    </div>
+  </div>
+</div>
+
+<div class="tab" id="bandeja">
+  <h2 style="margin-top:0">La bandeja — todo lo que nació o se tocó POR FUERA de la UI</h2>
+  <p style="color:var(--dim);max-width:780px">Tu regla: <i>"si se da de alta por fuera, que salga en alguna parte como pendiente de parametrizar."</i> Nada se pierde en silencio, nada finge estar verde. Los detectores YA existen en tu motor (huérfanos de la linterna, el hueco de docs/, el sello por hash, estado-docs) — esta bandeja es su unión, presentada como cola de trabajo. Parametrizar un elemento lo saca de la cola.</p>
+
+  <div id="bandejaLista"></div>
+</div>
+
+<div class="tab" id="flujos">
+  <h2 style="margin-top:0">Los flujos guiados — dale clic y siéntelos</h2>
+  <p style="color:var(--dim);max-width:760px">Esto es tu <i>"llega un aviso → abro la UI → me guía con preguntas"</i>. Tres flujos de muestra sobre casos reales de tu repo. Ninguno escribe nada — al final te enseño <b>qué escribiría</b> la versión de verdad.</p>
+
+  <div class="flowcard">
+    <div>
+      <h3>⚠️ Un documento nuevo quedó huérfano</h3>
+      <p>El caso del glosario: creas <code>docs/glosario-del-dominio.md</code>, nadie lo gobierna, nadie lo lee. La UI te hace 3 preguntas y lo deja cableado.</p>
+    </div>
+    <button onclick="wizStart('doc')">Probar el flujo →</button>
+  </div>
+
+  <div class="flowcard">
+    <div>
+      <h3>🤖 Dar de alta un agente-asiento</h3>
+      <p>Hoy un asiento nuevo = escribir un .md a mano con frontmatter. La UI te pregunta el oficio, el modelo y las herramientas — y recorta caminos por ti.</p>
+    </div>
+    <button onclick="wizStart('agente')">Probar el flujo →</button>
+  </div>
+
+  <div class="flowcard">
+    <div>
+      <h3>🚫 Una regla de prohibición <span class="new">MECÁNICA NUEVA</span></h3>
+      <p>Tu "esto NO se puede conectar con esto, no tiene sentido". Hoy no existe en ninguna ley de Jidoka. Así se sentiría declararla.</p>
+    </div>
+    <button onclick="wizStart('prohib')">Probar el flujo →</button>
+  </div>
+</div>
+
+<div class="tab" id="huecos">
+  <h2 style="margin-top:0">Lo que no estás viendo — el censo honesto</h2>
+  <p style="color:var(--dim);max-width:760px">Me pediste ayudarte a ver lo que no ves. Esto salió de censar tu repo HOY contra lo que el harness de Claude Code permite. Etiquetas: <span class="et sin">SIN CABLEAR</span> existe la capacidad y nadie la usa · <span class="et dor">DORMIDO</span> configurado pero apagado · <span class="et hue">HUECO</span> el verde miente · <span class="et dat">DATO</span> quizá no lo sabías.</p>
+
+  <div class="hueco"><h3><span class="et sin">SIN CABLEAR</span>Los permisos deterministas del harness — la sección está VACÍA</h3>
+  <p>Claude Code trae un sistema de permisos <b>allow / ask / deny</b> por herramienta y por patrón (ej: "deny: editar tools/blast-radius.json", "ask: git push", "allow: leer todo"). Es un muro que NO depende de que el modelo coopere — exactamente tu doctrina. Tu <code>settings.json</code> no tiene NI UNA regla. Y lo mejor: el disparo <code>deny-vs-ask</code> ("deny para irreversible; ask para juicio humano") <b>ya existe en tu catálogo desde hace meses — como "catálogo-solo", nunca cableado</b>. La doctrina ya lo pedía; la máquina nunca lo recibió.</p></div>
+
+  <div class="hueco"><h3><span class="et sin">SIN CABLEAR</span>PreToolUse puede frenar EN EL MOMENTO, no al final</h3>
+  <p>Tus 4 gates gordos (andon, review, gemba, validador) son <b>Stop hooks</b>: muerden cuando el agente dice "terminé". Pero el evento <b>PreToolUse</b> puede interceptar CADA edición <i>antes</i> de que ocurra — hoy solo lo usa <code>no-memorias</code>. Ejemplos que hoy no existen: "no puedes editar la ley sin un ADR en el mismo cambio — bloqueado AHORA, no al cerrar", "este asiento (mecánico) no toca archivos fuera de su encargo". Es la diferencia entre un inspector al final de la línea y un poka-yoke en la estación.</p></div>
+
+  <div class="hueco"><h3><span class="et dat">DATO</span>Hay más eventos de hook que nadie usa</h3>
+  <p>El harness también dispara hooks en: <b>PostToolUse</b> (después de cada herramienta — ej: correr el lint tras cada Edit), <b>SubagentStop</b> (cuando un subagente termina — ej: verificar que el mecánico no borró motor, ANTES de que el orquestador acepte su palabra), <b>SessionStart</b> y <b>PreCompact</b> (¡tu disparo "desconfía-de-la-compactación" podría ser maquinaria, no prosa!). Hoy: cero de estos cableados.</p></div>
+
+  <div class="hueco"><h3><span class="et dat">DATO</span>Tus agentes YA son tubería configurada — pero invisible y sin UI</h3>
+  <p>Cada asiento tiene <b>modelo fijo</b> (mecánico=haiku, arquitecto=opus) y <b>herramientas recortadas</b>: el arquitecto NO PUEDE editar archivos (solo Read/Glob/Grep), el mecánico no tiene Bash, el auditor sí. Eso es "bajar la cantidad de caminos" ya funcionando — solo que vive en frontmatter de .md que nunca ves. En la visión: esto se ve y se configura con checkboxes (pruébalo en el flujo 2).</p></div>
+
+  <div class="hueco"><h3><span class="et hue">HUECO</span>El hueco de docs/ que TÚ encontraste — "el verde miente"</h3>
+  <p>Confirmado en la sesión pasada contra <code>estado-gobierno.ps1:132</code>: cualquier archivo bajo <code>docs/</code> cuenta como "cubierto" solo por vivir ahí — ninguna regla lo gobierna, pero NO sale como huérfano. "Cero huérfanos" puede ser teatro. Hoy este hallazgo <b>solo existe en el chat de ayer</b> — tu propio método dice que eso es exactamente donde las cosas se mueren.</p></div>
+
+  <div class="hueco"><h3><span class="et dor">DORMIDO</span>2 de tus 4 gates gordos están dormidos</h3>
+  <p><code>gemba-stop</code> (evidencia visual) y <code>validador-stop</code> (validación por medición) están instalados y con prueba de vida — pero ninguna área de la ley los despierta. No es un error; es que la ley no declara áreas visuales ni de datos. Pero significa que la mitad de tu artillería de evidencia está en la bodega.</p></div>
+
+  <div class="hueco"><h3><span class="et hue">HUECO</span>Los comandos del ritual: la tubería de lectura sin gobierno propio</h3>
+  <p>Los <code>@</code> de cada comando (qué lee arranca, qué lee planea) son EL cableado del ritual — y son texto plano editable sin que nada vigile su estructura. El gobierno por secciones (KIT-2) cubre brief/infra/CONTRIBUTING… pero no los comandos mismos. Dato curioso del censo: <b>gemba.md no inyecta absolutamente nada</b> — ¿decisión o accidente? Nadie lo sabe, porque nada lo declara.</p></div>
+
+  <div class="hueco"><h3><span class="et dat">DATO</span>Branch protection: el único muro real es un estado que tu ley NO ve</h3>
+  <p>Todo el modelo de amenaza descansa en que el check <code>andon</code> es required en GitHub — y ese estado vive server-side, invisible para la linterna y la ley. Si alguien lo apaga mañana, ningún gate local te avisa. (Se puede leer vía <code>gh api</code> — sería un check de "el muro sigue en pie".)</p></div>
+
+  <div class="hueco"><h3><span class="et dat">DATO</span>No hay CLAUDE.md en el repo — y eso es a propósito (pero nadie lo declara)</h3>
+  <p>El repo NO tiene CLAUDE.md (la "memoria" que Claude lee al arrancar). Coherente con tu doctrina anti-memoria: el contexto entra por el ritual (@ del arranca), no por memoria del harness. Pero no está escrito en ningún lado que sea a propósito — un colaborador nuevo podría "ayudar" creándolo.</p></div>
+
+  <div class="hueco"><h3><span class="et dat">DATO</span>La costura ci.local.ps1 — extensión del CI por hijo, casi desconocida</h3>
+  <p>El CI trae un paso que corre <code>tools/ci.local.ps1</code> si existe: el punto oficial para que cada repo hijo AGREGUE sus propios checks sin divergir del motor. Tubería de personalización ya construida (cosecha #7) — ¿la has usado en algún lab?</p></div>
+</div>
+
+<!-- Wizard modal -->
+<div id="ovl"><div id="wiz"></div></div>
+
+<script>
+/* JIDOKA:DATOS-INICIO
+   R3 (mitad UI): el bloque de datos DEJO de ser teatro. Antes aqui vivian, hardcodeados,
+   las ~49 llamadas pz(), el array E de aristas y los REGBY/REGTXT/REGCOLOR de la maqueta
+   (censo del 2026-07-20). Ahora esas MISMAS estructuras se reconstruyen en jidokaCargar()
+   desde la foto real del repo, que el motor PS (tools/tuberia-datos.ps1) emite y el puente
+   Rust (cargar_datos) entrega. La FORMA de P/E/ADJ/REGBY/REGTXT/REGCOLOR/AREAS es identica
+   a la que producia la maqueta; solo cambia el ORIGEN (JSON del repo, no literales). Todo
+   lo demas (render, wizards, tour, modo avanzado, CSS) queda INTACTO. Las ESCRITURAS
+   siguen siendo teatro (R4/R5-UI, otro paso). Contrato JSON: ADR 0048. */
+
+let P = {};            // piezas: { id -> {id,tipo,nombre,tag,desc,confHoy,confVision,extra,path,regimen,candado,firma} }
+function pz(id, tipo, nombre, tag, desc, confHoy, confVision, extra){ P[id]={id,tipo,nombre,tag,desc,confHoy,confVision,extra:extra||{}}; }
+
+let E = [];            // aristas: [de, a, rel] (forma identica a la maqueta)
+let ADJ = {};          // adyacencia bidireccional derivada de E
+let REGBY = {};        // regimen por tipo (regimenes.porTipo del JSON)
+let REGOVR = {};       // override de regimen por id de pieza (regimenes.override)
+let REGTXT = {};       // { regimen -> [titulo, explicacion] } (regimenes.texto)
+let REGCOLOR = {};     // { regimen -> var(--...) } (regimenes.color)
+let AREAS = [];        // tabla de areas para el detalle de la ley: [nombre, disparaCon, exige]
+let BANDEJA = { cola:[], aceptados:[] };  // la foto real de la bandeja
+let FOTOREPO = '';     // ruta (forward-slash) del repo abierto -- el motor de escritura la usa
+                       // como -Repo, y su basename es la contrasena del modo avanzado (R5).
+
+/* regOf: el regimen efectivo de una pieza. La foto ya trae el regimen VIVO por pieza
+   (override de contratos.json incluido), asi que lo preferimos; caemos al derivado por
+   override-por-id o por-tipo (como hacia la maqueta) si faltara. Conserva la clase CSS r+regimen. */
+function regOf(id){ const p=P[id]; return (p&&p.regimen)||REGOVR[id]||(p&&REGBY[p.tipo])||'libre'; }
+
+/* jidokaCargar: reconstruye P/E/ADJ/REGs/AREAS/BANDEJA desde la foto consolidada del repo
+   (mismo shape que la maqueta) y repinta. Se llama al abrir y en cada Refrescar. */
+function jidokaCargar(foto){
+  // --- piezas: pz() con la misma forma; ademas conservo path/regimen/candado/firma vivos ---
+  P = {};
+  (foto.piezas||[]).forEach(p=>{
+    pz(p.id, p.tipo, p.nombre, p.tag||'', p.desc||'', p.confHoy||'', p.confVision||'', p.extra||{});
+    // la ley (l-ley) trae su tabla de areas en el detalle, como en la maqueta
+    if(p.id==='l-ley'){ P[p.id].extra = Object.assign({}, P[p.id].extra, {tabla:'areas'}); }
+    P[p.id].path = (p.path!==undefined)?p.path:null;
+    P[p.id].regimen = p.regimen||'';
+    P[p.id].candado = !!p.candado;
+    P[p.id].firma = p.firma||null;
+  });
+  // --- aristas: [de,a,rel] identico + adyacencia bidireccional (calca la maqueta) ---
+  E = (foto.aristas||[]).map(a=>[a.de,a.a,a.rel]);
+  ADJ = {};
+  E.forEach(([a,b,rel])=>{ (ADJ[a]=ADJ[a]||[]).push({id:b,rel,dir:'→'}); (ADJ[b]=ADJ[b]||[]).push({id:a,rel,dir:'←'}); });
+  // --- regimenes: porTipo/override/texto/color -> REGBY/REGOVR/REGTXT/REGCOLOR ---
+  const rg = foto.regimenes||{};
+  REGBY = rg.porTipo||{}; REGOVR = rg.override||{}; REGTXT = rg.texto||{}; REGCOLOR = rg.color||{};
+  // --- areas de la ley: triple [nombre,disparaCon,exige] calca el formato de la maqueta ---
+  AREAS = (foto.areas||[]).map(a=>{
+    const nombre = typeof a==='string' ? a : (a.nombre||'');
+    if(typeof a==='string') return [nombre,'',''];
+    const fuente = (a.fuente||[]).join(', ');
+    const exige = [
+      ...(a.doc_bloquea||[]).map(d=>`<span class="b">BLOQUEA</span> ${esc(d)}`),
+      ...(a.doc_avisa||[]).map(d=>`<span class="a">avisa</span> ${esc(d)}`)
+    ].join(', ');
+    return [nombre, fuente, exige];
+  });
+  // --- bandeja real ---
+  BANDEJA = foto.bandeja||{ cola:[], aceptados:[] };
+  // --- la ruta del repo (para -Repo de los motores de escritura y el nombre-contrasena) ---
+  FOTOREPO = foto.repo||'';
+  // --- repintar todo ---
+  pintarTuberia();
+  pintarBandeja();
+  curSel=null;
+}
+
+/* ---- El censo hardcodeado de la maqueta se retiro (vive ahora en tools/tuberia-piezas.json,
+        la semilla que el motor sirve). Se conserva UNA llamada pz() de ejemplo comentada como
+        referencia de la forma exacta que jidokaCargar() reproduce:
+   pz('c-arranca','Ritual — comandos','/jidoka:arranca','', 'Abre la sesión: ...','Editando ...','Checkboxes: ...');
+   ---- */
+/* JIDOKA:DATOS-FIN */
+
+/* ================== RENDER tubería ================== */
+/* ORDER: los "tipos de tubo" en su orden de la maqueta. Si la foto trae un tipo fuera de
+   esta lista (no deberia con la semilla curada), se anexa al final para no perder piezas. */
+const ORDER = ['Ritual — comandos','Asientos — agentes','Skills — oficios','Hooks de Claude','git — el cinturón local','GitHub — el muro','La ley y los ledgers','El motor (tools/)','Doctrina ejecutable','Templates del kit','Producto — capacidades','Extensión VS Code','Docs de instancia'];
+const cats = document.getElementById('cats');
+/* pintarTuberia: mismo render que la maqueta corria al cargar, ahora reinvocable (Refrescar).
+   Limpia #cats y repinta las categorias/chips desde P (poblado por jidokaCargar). */
+function pintarTuberia(){
+  cats.innerHTML='';
+  const tipos = ORDER.slice();
+  Object.values(P).forEach(p=>{ if(tipos.indexOf(p.tipo)<0) tipos.push(p.tipo); });
+  tipos.forEach(cat=>{
+    const items=Object.values(P).filter(p=>p.tipo===cat);
+    if(!items.length) return;
+    const div=document.createElement('div'); div.className='cat';
+    div.innerHTML=`<h3>${cat} <span class="n">${items.length}</span></h3>`;
+    const box=document.createElement('div'); box.className='chips';
+    items.forEach(p=>{
+      const c=document.createElement('span');
+      c.className='chip r'+regOf(p.id)+(p.tag&&p.tag.includes('DORMIDO')?' dorm':'');
+      c.dataset.id=p.id;
+      c.innerHTML=p.nombre+(p.tag?`<span class="tag">${p.tag}</span>`:'');
+      c.onclick=()=>select(p.id);
+      box.appendChild(c);
+    });
+    div.appendChild(box); cats.appendChild(div);
+  });
+}
+
+/* pintarBandeja: render dinamico del tab #bandeja desde la foto real (BANDEJA.cola +
+   BANDEJA.aceptados), con los MISMOS estilos/clases que los 5 items de ejemplo de la
+   maqueta (.bitem, .et con su color por motivo, boton Parametrizar). El contador del tab
+   (#bandejaCont) refleja el numero real de pendientes en la cola. */
+const bandejaLista = document.getElementById('bandejaLista');
+const bandejaCont = document.getElementById('bandejaCont');
+function esc(s){ return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+/* motivo -> clase .et de la paleta (mismos colores que la maqueta): existe/huerfano=sin(rojo),
+   desviado=sin(rojo), simulado/dato=dat(azul), aceptado=dor(ambar). Default: dat. */
+function etClase(motivo){
+  const m=String(motivo||'').toLowerCase();
+  if(m.indexOf('desvi')>=0||m.indexOf('existe')>=0||m.indexOf('huerf')>=0||m.indexOf('huérf')>=0) return 'sin';
+  if(m.indexOf('acept')>=0) return 'dor';
+  return 'dat';
+}
+function pintarBandeja(){
+  const cola = (BANDEJA&&BANDEJA.cola)||[];
+  const aceptados = (BANDEJA&&BANDEJA.aceptados)||[];
+  let h='';
+  if(!cola.length && !aceptados.length){
+    h=`<p class="hint">La bandeja está vacía: nada nació o se tocó por fuera de la UI. El verde no miente.</p>`;
+  }
+  cola.forEach(it=>{
+    const ruta = it.path||it.ruta||'(sin ruta)';
+    const motivo = it.motivo||'pendiente';
+    const detalle = it.detalle||'';
+    const et = etClase(motivo);
+    h+=`<div class="bitem"><div>
+      <h3>${esc(ruta)} <span class="et ${et}">${esc(motivo).toUpperCase()}</span></h3>
+      <p>${esc(detalle)}</p>
+    </div><button class="parametrizar-btn" data-ruta="${esc(ruta)}">Parametrizar →</button></div>`;
+  });
+  aceptados.forEach(it=>{
+    const ruta = it.path||it.ruta||'(sin ruta)';
+    const detalle = it.detalle||it.motivo||'aceptado / parametrizado';
+    h+=`<div class="bitem"><div>
+      <h3>${esc(ruta)} <span class="et dor">ACEPTADO</span></h3>
+      <p>${esc(detalle)}</p>
+    </div><button disabled style="opacity:.5;cursor:default">Resuelto ✓</button></div>`;
+  });
+  bandejaLista.innerHTML=h;
+  bandejaLista.querySelectorAll('.parametrizar-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>wizStart('alta',{ruta:btn.dataset.ruta}));
+  });
+  if(bandejaCont) bandejaCont.textContent=String(cola.length);
+}
+
+function select(id){
+  curSel=id;
+  document.querySelectorAll('.chip').forEach(c=>{c.classList.remove('sel','glow')});
+  const me=document.querySelector(`.chip[data-id="${id}"]`); if(me) me.classList.add('sel');
+  (ADJ[id]||[]).forEach(e=>{ const t=document.querySelector(`.chip[data-id="${e.id}"]`); if(t) t.classList.add('glow'); });
+  const p=P[id]; const d=document.getElementById('detail');
+  const rg=regOf(id), rt=REGTXT[rg]||[rg,''];
+  let h=`<h2>${p.nombre}${p.candado?' 🔒':''}</h2><div class="tipo">${p.tipo}${p.tag?' · '+p.tag:''}</div>
+    <div class="confbox" style="border-left:3px solid ${REGCOLOR[rg]||'var(--line)'}"><b>Régimen: ${rt[0]}.</b> ${rt[1]}</div>
+    ${p.candado?`<div class="confbox" style="border-left:3px solid var(--violet)"><b>🔒 Candado a la IA activo.</b> deny determinista del harness + hook PreToolUse: el agente NO PUEDE tocar esta pieza. Todo intento se bloquea al momento y cae acusado a la bandeja.</div>`:''}
+    <div class="desc">${p.desc}</div>`;
+  if(p.extra.tabla==='areas'){
+    h+=`<h4>Las 11 áreas (la ley completa)</h4><table class="mini"><tr><th>área</th><th>dispara con</th><th>exige</th></tr>`;
+    AREAS.forEach(a=>h+=`<tr><td><b>${a[0]}</b></td><td>${a[1]}</td><td>${a[2]}</td></tr>`); h+=`</table>`;
+  }
+  const cx=ADJ[id]||[];
+  h+=`<h4>Cableado real hoy (${cx.length}) — se iluminan a la izquierda</h4>`;
+  if(cx.length===0) h+=`<div class="hint">Nada. Esta pieza no está cableada con ninguna otra — dato en sí mismo.</div>`;
+  cx.forEach(e=>{ h+=`<span class="conn" onclick="select('${e.id}')"><span class="rel">${e.dir} ${e.rel}</span>${P[e.id].nombre}</span>`; });
+  h+=`<h4>¿Cómo se configura?</h4>
+      <div class="confbox"><b>Hoy:</b> ${p.confHoy}</div>
+      <div class="confbox vision"><b>En tu visión:</b> ${p.confVision}</div>`;
+  if(id==='l-ley'||id==='doc-brief'||id==='t-templates') h+=`<button class="wizbtn" onclick="wizStart('doc')">▶ Probar el flujo guiado de alta de doc (maqueta)</button>`;
+  if(p.tipo==='Asientos — agentes') h+=`<button class="wizbtn" onclick="wizStart('agente')">▶ Probar el flujo de alta de agente (maqueta)</button>`;
+  if(rootMode) h+=`<button id="reclasBtn" class="wizbtn" style="background:var(--violet);color:#120b22" onclick="wizStart('reclas',{id:'${id}'})">⚙️ Reclasificar régimen (modo avanzado)</button>`;
+  d.innerHTML=h;
+}
+
+/* ================== Tabs ================== */
+document.querySelectorAll('nav button[data-t]').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); document.getElementById(b.dataset.t).classList.add('on');
+  };
+});
+
+/* ================== Wizards (cartón puro) ================== */
+const ovl=document.getElementById('ovl'), wiz=document.getElementById('wiz');
+let W={};
+function wizStart(tipo,pre){ W={tipo,paso:1,r:{},pre:pre||{}}; ovl.classList.add('on'); wizRender(); }
+function altaResumen(){
+  const q=id=>document.getElementById(id);
+  W.r={ruta:q('f-ruta').value, tipo:q('f-tipo').value, reg:document.querySelector('input[name="f-reg"]:checked').value,
+       cajon:q('f-cajon').value.split(' ')[0], fz:document.querySelector('input[name="f-fz"]:checked').value,
+       cmds:[['f-c1','arranca'],['f-c2','planea'],['f-c3','descubre']].filter(x=>q(x[0]).checked).map(x=>x[1]),
+       ci:q('f-ci').checked};
+  W.paso=2; wizRender();
+}
+/* altaEscribir (R4): el botón real. Invoca el comando Rust 'parametrizar' con los datos de W.r
+   (ya no teatro: escribe contratos.json + ley + los @). El motor emite {ok,contrato,avisos,arrobas}.
+   Éxito -> mensaje + lista de avisos si los hay + refresco de la foto (la bandeja resta la pieza).
+   ok:false o error del puente -> el error tal cual (JAMÁS éxito falso). */
+async function altaEscribir(){
+  const r=W.r, res=document.getElementById('alta-res'), btn=document.getElementById('alta-btn');
+  const ruta=r.ruta||W.pre.ruta;
+  // El cajón "— crear otro cajón…" o vacío -> sin -Area (el motor no crea áreas a ciegas).
+  const area=(r.cajon&&r.cajon!=='—')?r.cajon:'';
+  if(!FOTOREPO){ if(res) res.innerHTML=`<div class="carton" style="color:var(--bad)">No hay repo abierto — no puedo escribir.</div>`; return; }
+  if(btn){ btn.disabled=true; btn.textContent='Escribiendo…'; }
+  try{
+    const raw=await jidokaInvoke('parametrizar',{repo:FOTOREPO, ruta, tipo:r.tipo, regimen:r.reg, area, fuerza:r.fz, comandos:(r.cmds||[]).join(',')});
+    const out=JSON.parse(raw);
+    if(!out.ok){ throw new Error(out.error||'el motor no reportó ok'); }
+    let msg=`<div class="escribe"><b style="color:var(--ok)">✅ Contrato escrito: ${esc(ruta)}</b> (régimen ${esc((out.contrato&&out.contrato.regimen)||r.reg)}, @ insertados: ${out.arrobas||0}).`;
+    const avisos=out.avisos||[];
+    if(avisos.length){ msg+=`<div style="color:var(--warn);margin-top:6px">Avisos (el contrato quedó; esto NO se completó):<ul style="margin:4px 0">${avisos.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></div>`; }
+    msg+=`</div>`;
+    if(res) res.innerHTML=msg;
+    const c=document.getElementById('alta-carton'); if(c) c.style.display='none';
+    if(btn){ btn.textContent='Listo ✓'; btn.onclick=wizClose; btn.disabled=false; }
+    await jidokaRefrescar();  // la bandeja resta la pieza a la vista
+  }catch(e){
+    if(res) res.innerHTML=`<div class="carton" style="color:var(--bad)">✗ No se escribió: ${esc((e&&e.message)?e.message:String(e))}</div>`;
+    if(btn){ btn.disabled=false; btn.textContent='✍️ Reintentar'; }
+  }
+}
+
+/* ================== Modo avanzado (root) ================== */
+let rootMode=false, curSel=null;
+function rootToggle(){ if(rootMode){ rootMode=false; rootPaint(); } else {
+  // El modo avanzado exige la foto cargada: la contraseña ES el nombre del repo (basename de
+  // foto.repo). Sin foto no hay nombre contra el que comparar -> no abre, avisa.
+  if(!FOTOREPO){ jidokaMostrarAviso('El modo avanzado no abre: aún no cargó la foto del repo (no sé contra qué nombre comparar).'); return; }
+  wizStart('root'); } }
+/* nombreRepo: el basename del repo (última carpeta de foto.repo, forward-slash). Es la
+   contraseña del modo avanzado (patrón GitHub, ADR 0047: "teclea el nombre del repo"). */
+function nombreRepo(){ const s=(FOTOREPO||'').replace(/\/+$/,''); const i=s.lastIndexOf('/'); return (i>=0?s.slice(i+1):s); }
+/* norm: normaliza para comparar case-insensitive + tolerante a acentos (como hacía la maqueta
+   con la Í). Sirve para que "Jidoka"=="jidoka" y un repo acentuado tolere el acento. */
+function norm(s){ return (s||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim(); }
+function rootPaint(){
+  const b=document.getElementById('rootBtn');
+  b.textContent=rootMode?'🔓 Modo avanzado: ON':'🔒 Modo avanzado';
+  b.style.background=rootMode?'var(--violet)':'';
+  b.style.color=rootMode?'#120b22':'';
+  b.style.fontWeight=rootMode?'700':'';
+  if(curSel) select(curSel);
+}
+function rootCheck(){
+  // La contraseña ES el NOMBRE DEL REPO (basename de foto.repo), patrón GitHub (ADR 0047).
+  // Comparación case-insensitive + tolerante a acentos (norm): "Jidoka"=="jidoka".
+  const v=norm(document.getElementById('r-pass').value);
+  const nombre=norm(nombreRepo());
+  if(nombre && v===nombre){ rootMode=true; wizClose(); rootPaint(); }
+  else { document.getElementById('r-err').textContent='No es. Teclea el NOMBRE DEL REPO (la última carpeta de su ruta) — está a la vista, a propósito.'; }
+}
+function reclasResumen(){
+  // La firma YA NO se teclea: la deriva el motor de tu git config (ADR 0047). Aquí solo el
+  // régimen nuevo, el candado opt-in y el motivo (obligatorio: sin motivo no hay override).
+  W.r={reg:document.querySelector('input[name="rc-reg"]:checked').value,
+       lock:document.getElementById('rc-lock').checked,
+       why:(document.getElementById('rc-why').value||'').trim()};
+  W.paso=2; wizRender();
+}
+/* reclasEscribir (R5 + fix review): el botón real del modo avanzado. Invoca 'override_accion'
+   por cada acción que DIFIERA del estado actual de la pieza (régimen y/o candado). Solo emite
+   las acciones necesarias; si nada cambió, avisa sin invocar al motor. Rastreo de éxito parcial:
+   si una acción triunfa y la siguiente falla, el mensaje dice explícitamente qué quedó aplicado
+   y qué falló. Tras éxito (total o parcial) refresca la foto (el régimen ya cambió). */
+async function reclasEscribir(){
+  const r=W.r, res=document.getElementById('reclas-res'), btn=document.getElementById('reclas-btn');
+  const pieza=P[W.pre.id], ruta=pieza&&pieza.path;
+  const fail=(m)=>{ if(res) res.innerHTML=`<div class="carton" style="color:var(--bad)">✗ ${esc(m)}</div>`; if(btn){ btn.disabled=false; btn.textContent='✍️ Reintentar'; } };
+  if(r.reg==='motor'){ return fail('No se aplicó: el régimen "motor sellado" no se fija desde la UI (solo Jidoka de fábrica).'); }
+  if(!ruta){ return fail('No se aplicó: esta pieza no tiene ruta de archivo (path) — el motor firma por ruta; no puedo reclasificarla.'); }
+  if(!r.why){ return fail('No se aplicó: el motivo es obligatorio (sin motivo no hay reclasificación, ADR 0047).'); }
+  if(!FOTOREPO){ return fail('No se aplicó: no hay repo abierto.'); }
+
+  // Comparar contra el estado REAL de la pieza para saber qué acciones emitir.
+  const regActual = pieza.regimen||'';
+  const candadoActual = !!pieza.candado;
+  const regNuevo = r.reg;          // 'estatuto' | 'libre' (nunca 'motor' — ya chequeado)
+  const candadoNuevo = !!r.lock;   // el checkbox del form, ya inicializado con el estado real
+
+  const acciones = [];
+  if(regNuevo!==regActual) acciones.push(regNuevo==='estatuto'?'reclasificar-estatuto':'reclasificar-libre');
+  if(candadoNuevo && !candadoActual) acciones.push('candado-on');
+  if(!candadoNuevo && candadoActual) acciones.push('candado-off');
+
+  if(!acciones.length){
+    fail('No hay cambios que aplicar: el régimen y el candado ya coinciden con el estado actual de la pieza.');
+    return;
+  }
+
+  if(btn){ btn.disabled=true; btn.textContent='Firmando…'; }
+
+  // Ejecutar acciones en orden: régimen primero, candado después. Rastrear éxito parcial.
+  const aplicadas=[], falladas=[];
+  let firma=null, contrato=null;
+  for(const accion of acciones){
+    try{
+      const raw=await jidokaInvoke('override_accion',{repo:FOTOREPO, ruta, accion, motivo:r.why});
+      const out=JSON.parse(raw);
+      if(!out.ok){ throw new Error(out.error||'el motor no reportó ok'); }
+      contrato=out.contrato; if(contrato&&contrato.firma) firma=contrato.firma;
+      aplicadas.push(accion);
+    }catch(e2){
+      falladas.push({accion, error:(e2&&e2.message)?e2.message:String(e2)});
+      break; // detenemos en el primer fallo; lo aplicado ya está escrito
+    }
+  }
+
+  if(!aplicadas.length){
+    // Nada se aplicó — fallo limpio
+    fail('No se aplicó nada: '+falladas[0].error);
+    return;
+  }
+
+  // Al menos una acción triunfó: refresca (el régimen / candado ya cambió en disco)
+  await jidokaRefrescar();
+
+  if(falladas.length){
+    // Éxito parcial honesto: lista qué quedó y qué falló
+    const resumen=aplicadas.map(a=>a+': APLICADO').concat(falladas.map(f=>f.accion+': FALLÓ: '+f.error)).join(' — ');
+    if(res) res.innerHTML=`<div class="carton" style="color:var(--warn)">⚠ Éxito parcial: ${esc(resumen)}</div>`;
+    if(btn){ btn.disabled=false; btn.textContent='✍️ Reintentar lo que falló'; }
+    return;
+  }
+
+  // Éxito total
+  let msg=`<div class="escribe"><b style="color:var(--ok)">✅ Aplicado: ${esc(ruta)}</b>`;
+  if(aplicadas.some(a=>a.startsWith('reclasificar'))) msg+=` → régimen "${esc((contrato&&contrato.regimen)||regNuevo)}"`;
+  if(aplicadas.includes('candado-on')) msg+=` · 🔒 candado ON`;
+  if(aplicadas.includes('candado-off')) msg+=` · 🔓 candado OFF`;
+  msg+=`.`;
+  if(firma){ msg+=`<div style="margin-top:6px">Firmado por <b>${esc(firma.quien)}</b>${firma.email?` &lt;${esc(firma.email)}&gt;`:''} · ${esc(firma.cuando)}<br><span class="hint">motivo: ${esc(firma.motivo)}</span></div>`; }
+  msg+=`</div>`;
+  if(res) res.innerHTML=msg;
+  const c=document.getElementById('reclas-carton'); if(c) c.style.display='none';
+  if(btn){ btn.textContent='Listo ✓'; btn.onclick=wizClose; btn.disabled=false; }
+}
+function wizClose(){ ovl.classList.remove('on'); }
+function pick(el,k,v,multi){
+  if(multi){ el.classList.toggle('pick'); W.r[k]=W.r[k]||[]; const i=W.r[k].indexOf(v); i>=0?W.r[k].splice(i,1):W.r[k].push(v); }
+  else{ el.parentNode.querySelectorAll('.opt').forEach(o=>o.classList.remove('pick')); el.classList.add('pick'); W.r[k]=v; }
+}
+function nav(dir){ W.paso+=dir; wizRender(); }
+
+function wizRender(){
+  let h='';
+  const btns=(fin)=>`<div class="acciones">
+    <button class="atras" onclick="${W.paso===1?'wizClose()':'nav(-1)'}">${W.paso===1?'Cancelar':'← Atrás'}</button>
+    <button class="sigue" onclick="${fin?'nav(1)':'nav(1)'}">${fin?'Ver qué escribiría →':'Siguiente →'}</button></div>`;
+
+  if(W.tipo==='doc'){
+    if(W.paso===1) h=`<h3>⚠️ docs/glosario-del-dominio.md no está gobernado</h3><div class="paso">Paso 1 de 3 — ¿Qué tipo de documento es?</div>
+      <div class="hint" style="margin-bottom:8px">Solo te ofrezco tipos con sentido para un .md en docs/ (del catálogo real de templates). verificar.ps1 no aparece — no tiene sentido, no se ofrece.</div>
+      <span class="opt" onclick="pick(this,'tipo','glosario')">📖 Glosario del dominio <small>vocabulario del negocio, términos exactos</small></span>
+      <span class="opt" onclick="pick(this,'tipo','proceso')">🔁 Proceso <small>flujo con pasos y criterios</small></span>
+      <span class="opt" onclick="pick(this,'tipo','guia')">🧭 Guía operativa <small>cómo se hace algo aquí</small></span>
+      <span class="opt" onclick="pick(this,'tipo','libre')">🕊️ Libre a propósito <small>declararlo sin gobierno — y que el verde deje de mentir</small></span>${btns()}`;
+    if(W.paso===2) h=`<h3>📖 glosario-del-dominio.md</h3><div class="paso">Paso 2 de 3 — ¿Cuándo debe mantenerse fresco, y con qué fuerza?</div>
+      <div class="hint" style="margin-bottom:8px">Esto escribe la regla de vigilancia (blast-radius). El código que dispara ya lo decide el cajón — tú solo eliges la fuerza.</div>
+      <span class="opt" onclick="pick(this,'fuerza','avisa')">🟠 Solo avisa <small>"tocaste el dominio — ¿cambió un término?" · recomendado para empezar</small></span>
+      <span class="opt" onclick="pick(this,'fuerza','bloquea')">🔴 Bloquea el push <small>muro duro: como el índice de ADRs. Úsalo poco.</small></span>${btns()}`;
+    if(W.paso===3) h=`<h3>📖 glosario-del-dominio.md</h3><div class="paso">Paso 3 de 3 — ¿Qué comandos del ritual deben LEERLO? (marca varios)</div>
+      <div class="hint" style="margin-bottom:8px">Tu ejemplo exacto: el brief lo leen arranca Y planea. Esto escribe los @ en los comandos.</div>
+      <span class="opt" onclick="pick(this,'cmds','arranca',1)">☐ /jidoka:arranca <small>se inyecta al abrir cada sesión</small></span>
+      <span class="opt" onclick="pick(this,'cmds','planea',1)">☐ /jidoka:planea <small>se inyecta al planear un sprint</small></span>
+      <span class="opt" onclick="pick(this,'cmds','descubre',1)">☐ /jidoka:descubre <small>se inyecta en la entrevista</small></span>
+      <span class="opt" onclick="pick(this,'cmds','ninguno',1)">☐ Ninguno <small>solo vigilancia, nadie lo inyecta</small></span>${btns(true)}`;
+    if(W.paso===4){ const f=W.r.fuerza||'avisa', cmds=(W.r.cmds||[]).filter(c=>c!=='ninguno');
+      h=`<h3>✅ Listo (en cartón)</h3><div class="paso">Esto es lo que la versión REAL escribiría — con tu aprobación, nunca sola:</div>
+      <div class="escribe">
+        <code>tools/blast-radius.json → área "dominio": fuente + doc_${f==='bloquea'?'bloquea':'avisa'}: glosario-del-dominio.md</code>
+        ${cmds.map(c=>`<code>.claude/commands/jidoka/${c}.md → + @docs/glosario-del-dominio.md</code>`).join('')}
+        <code>La linterna: el nodo deja de estar huérfano; el gate empieza a vigilar.</code>
+      </div>
+      <div class="carton">Cartón (flujo express, no cableado): este atajo de 3 preguntas usa un caso fijo (glosario) sin ruta ni régimen reales, así que no invoca el motor. El acto REAL de parametrizar vive en el formulario completo de la bandeja (botón "Parametrizar →"), que sí escribe contratos.json + la ley + los @. Fíjate qué sentiste: 3 preguntas, cero JSON, cero opciones absurdas.</div>
+      <div class="acciones"><button class="atras" onclick="wizClose()">Cerrar</button><button class="sigue" onclick="wizStart('alta',{ruta:'docs/glosario-del-dominio.md',tipo:'glosario'})">Hacerlo de verdad (formulario) →</button></div>`;
+    }
+  }
+
+  if(W.tipo==='agente'){
+    if(W.paso===1) h=`<h3>🤖 Nuevo agente-asiento</h3><div class="paso">Paso 1 de 3 — ¿Cuál es su oficio? (esto decide todo lo demás)</div>
+      <span class="opt" onclick="pick(this,'oficio','buscar')">🔎 Buscar y leer <small>barridos, localizar — nunca cambia nada</small></span>
+      <span class="opt" onclick="pick(this,'oficio','editar')">🔧 Editar mecánico <small>aplicar cambios ya decididos</small></span>
+      <span class="opt" onclick="pick(this,'oficio','juzgar')">⚖️ Juzgar <small>revisar contra spec, correr un test — sin editar lo que juzga</small></span>
+      <span class="opt" onclick="pick(this,'oficio','decidir')">🧠 Decidir con trade-offs <small>diseño, alternativas — solo lectura</small></span>${btns()}`;
+    if(W.paso===2){ const o=W.r.oficio||'buscar';
+      const rec={buscar:'haiku (barato: es volumen, no juicio)',editar:'haiku (el CÓMO ya está decidido)',juzgar:'sonnet (juicio acotado)',decidir:'opus (la decisión cara merece el tier caro)'}[o];
+      h=`<h3>🤖 Nuevo agente-asiento</h3><div class="paso">Paso 2 de 3 — El modelo (te recomiendo según el oficio)</div>
+      <div class="hint" style="margin-bottom:8px">Recomendado para "${o}": <b>${rec}</b></div>
+      <span class="opt" onclick="pick(this,'modelo','haiku')">⚡ haiku <small>rápido y barato</small></span>
+      <span class="opt" onclick="pick(this,'modelo','sonnet')">⚖️ sonnet <small>equilibrio</small></span>
+      <span class="opt" onclick="pick(this,'modelo','opus')">🧠 opus <small>el más capaz, el más caro</small></span>${btns()}`;}
+    if(W.paso===3){ const o=W.r.oficio||'buscar';
+      const auto={buscar:'Read, Glob, Grep — sin edición, sin ejecución',editar:'Read, Edit, Glob, Grep — SIN Bash (no ejecuta)',juzgar:'Read, Glob, Grep, Bash — SIN Edit (no toca lo que juzga)',decidir:'Read, Glob, Grep — solo lectura'}[o];
+      h=`<h3>🤖 Nuevo agente-asiento</h3><div class="paso">Paso 3 de 3 — Las herramientas (los caminos que le abres)</div>
+      <div class="hint" style="margin-bottom:8px">Por el oficio "${o}", las herramientas se recortan solas — así es como se "baja la cantidad de caminos". Puedes forzar más, pero la UI te lo marcaría en rojo.</div>
+      <div class="confbox vision"><b>Auto:</b> ${auto}</div>${btns(true)}`;}
+    if(W.paso===4) h=`<h3>✅ Listo (en cartón)</h3><div class="paso">La versión real escribiría:</div>
+      <div class="escribe">
+        <code>.claude/agents/&lt;nombre&gt;.md → frontmatter: model: ${W.r.modelo||'haiku'} + tools recortadas por oficio</code>
+        <code>tools/asientos.ps1 lo imprime en el próximo /jidoka:arranca (el casting)</code>
+        <code>probar-agentes.ps1 lo lintea (¿tier válido? ¿tools válidas?)</code>
+      </div>
+      <div class="carton">Cartón (fuera de alcance): no hay motor para dar de alta un agente todavía — este flujo queda de teatro. Nota el truco: el OFICIO decide modelo y herramientas — no te pregunté 20 cosas.</div>
+      <div class="acciones"><button class="atras" onclick="wizClose()">Cerrar</button><button class="sigue" onclick="wizClose()">Eso quiero 🙂</button></div>`;
+  }
+
+  if(W.tipo==='prohib'){
+    if(W.paso===1) h=`<h3>🚫 Regla de prohibición <span style="color:var(--violet);font-size:11px">MECÁNICA NUEVA — hoy no existe</span></h3>
+      <div class="paso">Paso 1 de 2 — ¿Qué quieres prohibir?</div>
+      <span class="opt" onclick="pick(this,'que','conexion')">🔗 Una conexión sin sentido <small>"el glosario NO se liga a barreras" — la UI deja de ofrecerla para siempre</small></span>
+      <span class="opt" onclick="pick(this,'que','edicion')">✋ Una edición directa <small>"NADIE edita blast-radius.json a mano — solo vía la extensión" (esto se cablea con los permisos deny del harness: muro real, hoy vacíos)</small></span>
+      <span class="opt" onclick="pick(this,'que','camino')">🛤️ Un camino del agente <small>"el mecánico no toca nada fuera de su encargo" (PreToolUse: frena EN el momento)</small></span>${btns()}`;
+    if(W.paso===2){ const q=W.r.que||'conexion';
+      const esc={conexion:['tools/prohibiciones.json (ledger NUEVO) → {origen: glosario, destino: barreras, porque: "..."}','La UI de ligar deja de ofrecer esa pareja','La linterna la pinta como frontera declarada'],
+                 edicion:['settings.json → permissions.deny: Edit(tools/blast-radius.json)','El agente NO PUEDE ni intentarlo — no es un aviso, es un muro del harness','El disparo deny-vs-ask por fin se cablea (era catálogo-solo)'],
+                 camino:['settings.json → hook PreToolUse nuevo: valida asiento vs ruta ANTES de cada Edit','ROJO en el momento, no al cerrar la sesión','probar-hooks.ps1 gana su prueba de vida']}[q];
+      h=`<h3>🚫 Regla de prohibición</h3><div class="paso">Paso 2 de 2 — Qué escribiría la versión real:</div>
+      <div class="escribe">${esc.map(e=>`<code>${e}</code>`).join('')}</div>
+      <div class="carton">Cartón: nada se escribió. Esta es la pieza genuinamente NUEVA de tu visión — merece ADR y diseño con calma. Pero mira: dos de las tres variantes ya tienen dónde cablearse HOY (permisos del harness, PreToolUse); solo la primera necesita ledger nuevo.</div>
+      <div class="acciones"><button class="atras" onclick="nav(-1)">← Atrás</button><button class="sigue" onclick="wizClose()">Eso quiero 🙂</button></div>`;}
+  }
+  if(W.tipo==='alta'){
+    const ruta=W.pre.ruta||'docs/nuevo.md';
+    if(W.paso===1) h=`<h3>📋 Alta y parametrización — ${ruta.split('/').pop()}</h3><div class="paso">El formulario completo. Burocrático a propósito: es el CONTRATO de la pieza — se llena UNA vez, gobierna para siempre.</div>
+      <label class="f">Ruta</label><input type="text" id="f-ruta" value="${ruta}" readonly>
+      <label class="f">¿Qué tipo de pieza es? (del catálogo real de templates)</label>
+      <select id="f-tipo"><option value="glosario"${W.pre.tipo==='glosario'?' selected':''}>Glosario del dominio</option><option value="analisis"${W.pre.tipo==='analisis'?' selected':''}>Análisis / informe</option><option value="proceso">Proceso</option><option value="guia">Guía operativa</option><option value="libre"${W.pre.tipo==='libre'?' selected':''}>Otro / libre</option></select>
+      <label class="f">Régimen de gobierno</label>
+      <label class="rr"><input type="radio" name="f-reg" value="estatuto" checked>🟡 Estructura gobernada <small>molde con secciones; contenido libre; desviarse = DESVIADO, garantía nula</small></label>
+      <label class="rr"><input type="radio" name="f-reg" value="libre">🟢 Libre, pero REGISTRADO <small>declarado a propósito — deja de contar como "cubierto por accidente"</small></label>
+      <div class="hint">🔴 "Motor sellado" no aparece: ese régimen solo lo trae Jidoka de fábrica. La UI recorta el camino absurdo.</div>
+      <label class="f">Vigilancia — ¿en qué cajón vive?</label>
+      <select id="f-cajon"><option>dominio (cajón nuevo — el vocabulario del negocio)</option><option>guias</option><option>decisiones</option><option>— crear otro cajón…</option></select>
+      <label class="rr"><input type="radio" name="f-fz" value="avisa" checked>🟠 Avisa <small>"tocaste su código — ¿sigue fresco?" · recomendado para empezar</small></label>
+      <label class="rr"><input type="radio" name="f-fz" value="bloquea">🔴 Bloquea el push <small>muro duro, como el índice de ADRs — úsalo poco</small></label>
+      <label class="f">Lectura — ¿qué comandos lo inyectan (@)?</label>
+      <label class="ck"><input type="checkbox" id="f-c1">/jidoka:arranca — se lee en cada sesión</label>
+      <label class="ck"><input type="checkbox" id="f-c2">/jidoka:planea — se lee al planear</label>
+      <label class="ck"><input type="checkbox" id="f-c3">/jidoka:descubre — se lee en la entrevista</label>
+      <label class="f">¿Quién responde por él?</label>
+      <select id="f-resp"><option>escribano</option><option>validador</option><option>revisor-visual</option></select>
+      <label class="ck" style="margin-top:12px"><input type="checkbox" id="f-ci">Endurecer en CI (-Estricto): la desviación se vuelve MURO en el PR</label>
+      <div class="acciones"><button class="atras" onclick="wizClose()">Cancelar</button><button class="sigue" onclick="altaResumen()">Ver qué escribiría →</button></div>`;
+    if(W.paso===2){const r=W.r;
+      h=`<h3>📋 Vas a parametrizar — ${ruta.split('/').pop()}</h3><div class="paso">Esto es lo que el botón va a ESCRIBIR en tu repo de verdad (previsualización). Revísalo y confirma:</div>
+      <div class="escribe">
+        ${r.reg==='libre'?`<code>tools/contratos.json → ${ruta} declarado LIBRE a propósito (sale de la bandeja; el verde deja de mentir)</code>`:
+        `<code>tools/contratos.json → ${ruta}: contrato ESTATUTO (estado parametrizado)</code>`}
+        ${(r.cajon&&r.cajon!=='—')?`<code>tools/blast-radius.json → área "${r.cajon}": fuente + ${ruta}</code>`:'<code>sin área de vigilancia (no toca la ley)</code>'}
+        ${r.cmds.length?r.cmds.map(c=>`<code>.claude/commands/jidoka/${c}.md → + @${ruta} (extensión REGISTRADA — el sello no la acusa)</code>`).join(''):'<code>ningún comando lo inyecta (solo vigilancia)</code>'}
+        <code>bandeja → este elemento SALE de pendientes · linterna → nodo gobernado de verdad</code>
+      </div>
+      <div class="carton" id="alta-carton">Esto escribe en tu repo de verdad: contratos.json, la ley y los @ de los comandos. Solo con tu OK, nunca solo. Burocracia de UNA vez, determinismo para siempre.</div>
+      <div id="alta-res"></div>
+      <div class="acciones"><button class="atras" onclick="nav(-1)">← Ajustar</button><button class="sigue" id="alta-btn" onclick="altaEscribir()">✍️ Escribir el contrato</button></div>`;}
+  }
+
+  if(W.tipo==='root'){
+    if(W.paso===1) h=`<h3>🔒 Entrar al modo avanzado</h3><div class="paso">Aquí se cambia la ESTRUCTURA: regímenes, invariantes, candados. No es para el día a día.</div>
+      <div class="confbox"><b>Esto no es seguridad</b> — es un "no le muevas si no le sabes". La contraseña es el <b>nombre del repo</b> (a la vista, patrón GitHub). Teclearla no te autentica: te hace <b>firmar que sabes lo que haces</b>. Desde aquí adentro, garantía nula sobre lo que toques.</div>
+      <label class="f">Teclea el NOMBRE DEL REPO (la última carpeta de su ruta) para confirmar</label>
+      <input type="text" id="r-pass" placeholder="nombre-del-repo" autocomplete="off">
+      <p class="hint" id="r-err"></p>
+      <div class="acciones"><button class="atras" onclick="wizClose()">Cancelar</button><button class="sigue" onclick="rootCheck()">Entrar →</button></div>`;
+  }
+
+  if(W.tipo==='reclas'){
+    const pp=P[W.pre.id], rg0=regOf(W.pre.id), rt0=REGTXT[rg0];
+    // Fix review: el form se inicializa con el estado REAL de la pieza (régimen + candado).
+    // Los radios reflejan el régimen actual; el checkbox refleja pp.candado.
+    // reclasEscribir() compara contra ese estado real y solo emite las acciones que difieran.
+    const candadoReal=!!pp.candado;
+    if(W.paso===1) h=`<h3>⚙️ Reclasificar régimen — ${pp.nombre}</h3><div class="paso">Acto estructural (modo avanzado). Queda firmado y registrado — nunca mudo.</div>
+      <div class="confbox">Régimen actual: <b>${rt0[0]}</b>${candadoReal?' · 🔒 candado activo':''}</div>
+      <label class="f">Nuevo régimen</label>
+      <label class="rr"><input type="radio" name="rc-reg" value="motor"${rg0==='motor'?' checked':''}>🔴 Motor sellado <small>solo el lazo lo actualiza; borrarlo exige ADR</small></label>
+      <label class="rr"><input type="radio" name="rc-reg" value="estatuto"${rg0==='estatuto'?' checked':''}>🟡 Estatuto <small>invariantes fijos + extensiones registradas</small></label>
+      <label class="rr"><input type="radio" name="rc-reg" value="libre"${rg0==='libre'?' checked':''}>🟢 Libre <small>registrado, sin opinión del gobierno</small></label>
+      <label class="ck" style="margin-top:12px"><input type="checkbox" id="rc-lock"${candadoReal?' checked':''}>🔒 <b>Candado a la IA</b> <small style="display:block;margin-left:22px;color:var(--dim)">deny determinista del harness + hook PreToolUse: el agente NO PUEDE tocar esta pieza — ni queriendo, ni "sin que nadie se dé cuenta". Todo intento se bloquea en el momento y se acusa en la bandeja. Este sí es muro real, y vive fuera del LLM. (Inicializado con el estado real de la pieza — desmarcar para quitar el candado.)</small></label>
+      <label class="f">¿Por qué? (obligatorio — va al registro firmado)</label>
+      <input type="text" id="rc-why" placeholder="p. ej. este comando ya quedó probado — lo sello">
+      <div class="confbox"><b>La firma NO se teclea.</b> Se deriva de tu <code>git config user.name</code> / <code>user.email</code> (ADR 0047: la firma nunca se inventa). El motor la pone al escribir — y te la muestra abajo.</div>
+      <div class="acciones"><button class="atras" onclick="wizClose()">Cancelar</button><button class="sigue" onclick="reclasResumen()">Ver qué escribiría →</button></div>`;
+    if(W.paso===2){const r=W.r; const canReclas=(r.reg!=='motor');
+      // Fix review: calcular qué acciones se emitirán (espejo de reclasEscribir) para el resumen.
+      const regActual=pp.regimen||'', candadoActual2=!!pp.candado, candadoNuevo2=!!r.lock;
+      const accionesPreview=[];
+      if(canReclas && r.reg!==regActual) accionesPreview.push(r.reg==='estatuto'?'reclasificar-estatuto':'reclasificar-libre');
+      if(candadoNuevo2 && !candadoActual2) accionesPreview.push('candado-on');
+      if(!candadoNuevo2 && candadoActual2) accionesPreview.push('candado-off');
+      const sinCambios=!canReclas&&accionesPreview.length===0 || (canReclas&&!accionesPreview.length&&!(!r.lock!==!candadoActual2));
+      h=`<h3>⚙️ Vas a aplicar — ${pp.nombre}</h3><div class="paso">Esto es lo que el botón va a ESCRIBIR (firmado con tu git config). Revísalo y confirma:</div>
+      <div class="escribe">
+        ${!canReclas?`<code style="color:var(--warn)">⚠ "motor sellado" no se puede fijar desde aquí — ese régimen solo lo trae Jidoka de fábrica. Elige estatuto o libre.</code>`
+          : r.reg!==regActual?`<code>tools/contratos.json → ${esc(pp.nombre)}: régimen "${r.reg}" (antes: "${regActual}") + firma derivada de git</code>`
+          : `<code style="color:var(--dim)">(sin cambio de régimen — ya es "${regActual}")</code>`}
+        ${candadoNuevo2 && !candadoActual2?`<code>tools/contratos.json → candado=true + firma (deny del harness + PreToolUse: la IA no puede tocarla)</code>`:''}
+        ${!candadoNuevo2 && candadoActual2?`<code>tools/contratos.json → candado=false + firma (se levanta el deny y el hook PreToolUse)</code>`:''}
+        ${accionesPreview.length===0&&canReclas?`<code style="color:var(--warn)">⚠ No hay cambios que aplicar — el régimen y el candado ya coinciden con el estado actual.</code>`:''}
+        <code>registro estructural → motivo: "${esc(r.why||'(sin motivo — el motor lo rechazará)')}"</code>
+      </div>
+      <div class="carton" id="reclas-carton">Esto escribe en tu repo de verdad: aplica solo las acciones que difieren del estado real (reclasificar y/o candado). Todo va firmado con tu identidad de git.</div>
+      <div id="reclas-res"></div>
+      <div class="acciones"><button class="atras" onclick="nav(-1)">← Ajustar</button><button class="sigue" id="reclas-btn" onclick="reclasEscribir()"${canReclas?'':' disabled style="opacity:.5"'}>✍️ Firmar y aplicar</button></div>`;}
+  }
+
+  if(W.tipo==='rec'){
+    if(W.paso===1) h=`<h3>⚖️ Reconciliar: arranca.md perdió un invariante</h3><div class="paso">Alguien quitó el @PRODUCT_BRIEF por fuera de la UI. El estira y afloja, resuelto en dos botones:</div>
+      <span class="opt" onclick="W.r.op='rest';nav(1)">↩️ Restaurar el invariante <small>re-inyecta el @ de fábrica · el comando vuelve a CONFORME · garantía intacta</small></span>
+      <span class="opt" onclick="W.r.op='acep';nav(1)">✍️ Aceptar la desviación, con firma <small>queda registrado quién y cuándo · "garantía nula sobre la orientación de sesión" · sale de la bandeja pero la pieza carga el badge DESVIADO</small></span>
+      <div class="hint" style="margin-top:10px">Lo que NO existe: quitarlo en silencio. Ese camino la UI no lo ofrece — y el detector lo trae de vuelta a la bandeja.</div>
+      <div class="acciones"><button class="atras" onclick="wizClose()">Cancelar</button><span></span></div>`;
+    if(W.paso===2){const rest=W.r.op==='rest';
+      h=`<h3>${rest?'↩️ Restaurado':'✍️ Desviación aceptada'} (en cartón)</h3><div class="paso">La versión real escribiría:</div>
+      <div class="escribe">${rest?`<code>arranca.md → re-inyecta @product/PRODUCT_BRIEF.md</code><code>estado → CONFORME · bandeja → resuelto</code>`:
+      `<code>registro de desviaciones → arranca.md sin el QUÉ · decidió: Armando · 2026-07-20 · garantía nula sobre la orientación de sesión</code><code>bandeja → sale de pendientes · la pieza conserva el badge DESVIADO en la tubería</code>`}</div>
+      <div class="carton">Cartón (ejemplo del tour, no cableado): este flujo ilustra un caso fijo de arranca.md — no está atado a una pieza real ni pide motivo, así que no invoca el motor. "Aceptar la desviación" firmada SÍ existe de verdad en el motor (override.ps1 -Accion aceptar-desviacion); se cablea cuando el detector traiga desviaciones reales con su ruta. "Restaurar" (re-inyectar el @) no tiene motor aún. Fíjate: las DOS salidas son legales — lo único ilegal es la desviación MUDA.</div>
+      <div class="acciones"><button class="atras" onclick="nav(-1)">← Atrás</button><button class="sigue" onclick="wizClose()">Eso quiero 🙂</button></div>`;}
+  }
+  wiz.innerHTML=h;
+}
+ovl.onclick=e=>{ if(e.target===ovl) wizClose(); };
+
+/* ================== Tour guiado ================== */
+const TOUR_BASE=[
+ {tab:'tuberia', sel:'header', title:'Bienvenido — esto es la tubería de tu Jidoka',
+  text:'Todas las piezas son reales (censadas de tu repo); ningún botón escribe nada. El tour son 14 paradas por las 4 pestañas — incluye abrir los pop-ups por ti y explicártelos por dentro. Sal cuando quieras; se retoma con el mismo botón.'},
+ {tab:'tuberia', sel:'.leg', title:'Los 3 regímenes de gobierno (los colores)',
+  text:'Cada pieza trae su contrato pintado: ROJO = motor sellado (solo Jidoka lo actualiza, por el lazo). ÁMBAR = estatuto (invariantes de fábrica + tus extensiones registradas). VERDE = libre (tuyo). El VIOLETA punteado marca las piezas que hoy están en el cajón equivocado.'},
+ {tab:'tuberia', sel:'.chip[data-id="c-arranca"]', do:()=>select('c-arranca'), title:'Una pieza y su cableado real',
+  text:'Acabo de darle clic al arranca por ti: las piezas conectadas se ILUMINAN (lo que lee y lo que corre) y a la derecha ves su régimen, su cableado y cómo se configura hoy vs en tu visión. Así se ve "el cableado" sin marañas: una pieza a la vez.'},
+ {tab:'tuberia', sel:'.chip[data-id="l-ley"]', do:()=>select('l-ley'), title:'La ley — el corazón de la vigilancia',
+  text:'blast-radius.json: 11 áreas de "si tocas X, mantén Y fresco". La tabla completa está en el panel derecho. Dato: solo 1 área bloquea (decisiones); las otras 10 avisan. Hoy se edita a mano — tu visión la autora desde la UI.'},
+ {tab:'tuberia', sel:'.chip[data-id="a-auditor"]', do:()=>select('a-auditor'), title:'"Bajar caminos" ya existe — pero invisible',
+  text:'Mira el auditor: tiene Bash (puede ejecutar) pero NO tiene Edit — no puede tocar lo que juzga. Juez que no es parte, cableado, no prometido. Esto vive en frontmatter que nunca ves; tu visión lo vuelve visible y configurable.'},
+ {tab:'bandeja', sel:'#bandeja .bitem:nth-of-type(2)', title:'La bandeja — tu regla hecha pantalla',
+  text:'"Si se da de alta por fuera, que salga como pendiente de parametrizar." Y ojo: ESTE caso es REAL — ese archivo existe hoy en tu repo, nada lo gobierna y nadie lo lee, pero la linterna lo da por cubierto. El verde miente; la bandeja lo confiesa.'},
+ {tab:'bandeja', do:()=>wizStart('alta',{ruta:'docs/glosario-del-dominio.md',tipo:'glosario'}), sel:'#wiz', title:'El formulario, por dentro',
+  text:'Lo abrí por ti. Recórrelo de arriba a abajo: tipo (del catálogo real), RÉGIMEN (fíjate: "motor sellado" no se ofrece — ese camino absurdo está recortado), cajón de vigilancia, fuerza, LECTURA (los checkboxes que escriben los @ en los comandos), responsable y el muro opt-in de CI. Burocracia de UNA vez.'},
+ {tab:'bandeja', do:()=>{ if(W.tipo!=='alta'||W.paso!==1){ wizStart('alta',{ruta:'docs/glosario-del-dominio.md',tipo:'glosario'}); } altaResumen(); }, sel:'#wiz .escribe', title:'Y esto es lo que escribiría',
+  text:'El final de todo flujo: el contrato de salida. Te dice EXACTAMENTE qué tocaría (la ley, docs-gobernados, los @) — y solo con tu OK, nunca solo. El elemento sale de la bandeja y la linterna lo pinta gobernado de verdad. En cartón: no escribió nada.'},
+ {tab:'bandeja', do:()=>wizStart('rec'), sel:'#wiz', title:'Reconciliar — el estira y afloja, por dentro',
+  text:'El caso: alguien quitó el @PRODUCT_BRIEF del arranca por fuera. DOS salidas legales: restaurar el invariante, o aceptar la desviación CON FIRMA (queda quién y cuándo, garantía nula, badge permanente). Lo único que no existe es quitarlo en silencio.'},
+ {tab:'flujos', do:()=>wizStart('doc'), sel:'#wiz', title:'El wizard corto — el ancestro del formulario',
+  text:'El flujo express de 3 preguntas que nació del caso del glosario. Es el MISMO acto que el formulario de la bandeja, en versión rápida. Decisión de diseño pendiente (tuya): ¿wizard corto en el momento del aviso y formulario completo en el alta consciente — o uno solo?'},
+ {tab:'flujos', do:()=>wizStart('agente'), sel:'#wiz', title:'Alta de agente — el oficio decide todo',
+  text:'Una sola pregunta (el oficio) y deriva el resto: el modelo recomendado y las herramientas recortadas (buscar = solo lectura; juzgar = ejecuta pero no edita). No hay 20 preguntas. Eso es "bajar la cantidad de caminos" aplicado a la propia alta.'},
+ {tab:'flujos', do:()=>wizStart('prohib'), sel:'#wiz', title:'La única mecánica genuinamente nueva',
+  text:'"Esto NO se puede conectar con esto." Hoy ninguna ley de Jidoka sabe decirlo — merece diseño y ADR propios. Dato: dos de sus tres variantes ya tienen dónde cablearse HOY (los permisos deny del harness y PreToolUse); solo una pide ledger nuevo.'},
+ {tab:'huecos', sel:'#huecos .hueco:nth-of-type(1)', title:'Lo que no estabas viendo — el hallazgo gordo',
+  text:'El harness trae permisos deterministas allow-ask-deny: un muro que NO le pide permiso al modelo — tu doctrina pura. La sección está VACÍA, y tu disparo deny-vs-ask lleva meses esperándolo como "catálogo-solo". La doctrina lo pedía; nadie lo cableó.'},
+ {tab:'huecos', sel:'nav', title:'Fin del tour — y qué sigue',
+  text:'Ya viste todo: tubería con contratos, bandeja, formulario, reconciliar y los huecos. Esto ya vive en el repo (docs/analisis/descubrimiento-sistema-configurable). Lo que sigue es tuyo: nombrar el ADR de identidad y elegir la primera rebanada. Ahora juega: el formulario del caso REAL es buen inicio.'}
+];
+/* Tramo root: solo se teje al tour si entraste con la contraseña */
+const TOUR_ROOT=[
+ {tab:'tuberia', sel:'#rootBtn', title:'BONUS root — estás en modo avanzado',
+  text:'Este tramo del tour solo existe porque tecleaste la contraseña. El botón violeta es tu recordatorio permanente: aquí adentro los actos son ESTRUCTURALES y todo va firmado. Garantía nula desde este punto.'},
+ {tab:'tuberia', do:()=>select('m-verificar'), sel:'#reclasBtn', title:'Cada pieza ganó su botón estructural',
+  text:'Con el modo activo, el detalle de CUALQUIER pieza trae "Reclasificar régimen". Elegí verificar.ps1 a propósito: es motor sellado — el caso más delicado que puedes tocar. Vamos a abrirlo.'},
+ {tab:'tuberia', do:()=>{ select('m-verificar'); wizStart('reclas',{id:'m-verificar'}); }, sel:'#wiz', title:'El acto estructural, por dentro',
+  text:'Tres decisiones: el régimen nuevo, el porqué (va al registro) y tu firma. Fíjate en lo que NO hay: un camino mudo. Reclasificar sin explicarte no existe.'},
+ {tab:'tuberia', do:()=>{ if(W.tipo!=='reclas'||W.paso!==1) wizStart('reclas',{id:'m-verificar'}); }, sel:'#wiz .ck', title:'El candado a la IA — el único muro de los tres',
+  text:'La contraseña delibera, la firma atribuye — pero SOLO esto detiene: permissions.deny del harness + PreToolUse. El agente no puede tocar la pieza ni en silencio; todo intento se bloquea al momento y cae acusado a la bandeja. Vive fuera del LLM: no le pide permiso al modelo.'},
+ {tab:'tuberia', do:()=>{ if(W.tipo!=='reclas'||W.paso!==1) wizStart('reclas',{id:'m-verificar'}); reclasResumen(); }, sel:'#wiz .escribe', title:'La salida firmada (lee el detalle)',
+  text:'Dejé la firma VACÍA a propósito — lee la segunda línea: "la versión real NO dejaría pasar esto". Root te deja entrar fácil, pero jamás salir sin nombre. Deliberación, atribución, muro: cada pieza hace su trabajo.'}
+];
+let ti=-1, tprev=null, TOURACT=TOUR_BASE;
+const tbox=document.createElement('div'); tbox.id='tourbox';
+tbox.innerHTML='<h4 id="tt"></h4><p id="tx"></p><div class="tbar"><span class="tn" id="tc"></span><span><button class="tout" onclick="tourEnd()">Salir</button><button class="tprev" onclick="tourGo(ti-1)">← Anterior</button><button class="tnext" id="tnx" onclick="tourGo(ti+1)">Siguiente →</button></span></div>';
+document.body.appendChild(tbox);
+function tourStart(){
+  TOURACT = TOUR_BASE.slice(0,-1);
+  if(rootMode) TOURACT = TOURACT.concat(TOUR_ROOT);
+  TOURACT = TOURACT.concat(TOUR_BASE.slice(-1));
+  TOURACT[0] = Object.assign({}, TOURACT[0], {text: TOURACT[0].text.replace('14 paradas', TOURACT.length+' paradas'+(rootMode?' (incluye el tramo root que desbloqueaste)':''))});
+  tourGo(0);
+}
+function tourEnd(){ if(tprev) tprev.classList.remove('tourhl'); tprev=null; ti=-1; tbox.style.display='none'; wizClose(); }
+function tourGo(i){
+  if(i<0) i=0;
+  if(i>=TOURACT.length){ tourEnd(); return; }
+  ti=i; const s=TOURACT[i];
+  wizClose();
+  if(tprev) tprev.classList.remove('tourhl');
+  const nb=document.querySelector('nav button[data-t="'+s.tab+'"]'); if(nb) nb.click();
+  if(s.do) s.do();
+  const el=document.querySelector(s.sel);
+  if(el){ el.classList.add('tourhl'); tprev=el; el.scrollIntoView({behavior:'smooth',block:'center'}); }
+  document.getElementById('tt').textContent=(i+1)+' · '+s.title;
+  document.getElementById('tx').textContent=s.text;
+  document.getElementById('tc').textContent='Parada '+(i+1)+' de '+TOURACT.length;
+  document.getElementById('tnx').textContent=(i===TOURACT.length-1)?'Terminar ✓':'Siguiente →';
+  tbox.style.display='block';
+}
+
+/* ================== Arranque: cargar la foto real del repo ==================
+   La app ES la maqueta; R3 la cablea a los datos VIVOS. El puente Rust (cargar_datos,
+   repo_actual, elegir_repo) corre el motor PS (tools/tuberia-datos.ps1). El JS solo invoca
+   y hace JSON.parse. Las ESCRITURAS siguen teatro (los wizards) -- R4/R5-UI. */
+const jidokaAviso = document.getElementById('jidokaAviso');
+function jidokaMostrarAviso(msg){ jidokaAviso.textContent='⚠ '+msg; jidokaAviso.style.display='block'; }
+function jidokaLimpiarAviso(){ jidokaAviso.style.display='none'; jidokaAviso.textContent=''; }
+let repoActual=null;
+
+function jidokaInvoke(cmd, args){
+  const T = window.__TAURI__;
+  if(!T || !T.core || typeof T.core.invoke!=='function'){
+    return Promise.reject(new Error('el puente Tauri no está disponible (¿abriste la app, no el .html suelto?)'));
+  }
+  return T.core.invoke(cmd, args||{});
+}
+
+async function jidokaCargarRepo(repo){
+  const json = await jidokaInvoke('cargar_datos', {repo});
+  let foto;
+  try{ foto = JSON.parse(json); }
+  catch(e){ throw new Error('la foto del repo no es JSON válido: '+e.message); }
+  repoActual = repo;
+  jidokaCargar(foto);
+  jidokaLimpiarAviso();
+}
+
+async function jidokaArranque(){
+  try{
+    let repo;
+    try{ repo = await jidokaInvoke('repo_actual'); }
+    catch(e){ repo = await jidokaInvoke('elegir_repo'); }
+    await jidokaCargarRepo(repo);
+  }catch(e){
+    jidokaMostrarAviso((e&&e.message)?e.message:String(e));
+  }
+}
+
+async function jidokaRefrescar(){
+  try{
+    let repo = repoActual;
+    if(!repo){ repo = await jidokaInvoke('repo_actual'); }
+    await jidokaCargarRepo(repo);
+  }catch(e){
+    jidokaMostrarAviso((e&&e.message)?e.message:String(e));
+  }
+}
+
+async function jidokaCambiarRepo(){
+  try{
+    const repo = await jidokaInvoke('elegir_repo');
+    await jidokaCargarRepo(repo);
+  }catch(e){
+    jidokaMostrarAviso((e&&e.message)?e.message:String(e));
+  }
+}
+
+/* Al abrir: carga los datos ANTES del primer render (la tuberia/bandeja nacen vacias en el
+   HTML y se pueblan aqui). Si el puente falla, la UI queda navegable con un aviso visible. */
+window.addEventListener('DOMContentLoaded', jidokaArranque);
+</script>
+</body>
+</html>
