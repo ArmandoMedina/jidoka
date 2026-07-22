@@ -21,6 +21,7 @@ La Casa del TPS tiene dos pilares; el método construyó Jidoka (parar ante el d
 - **`fix` cazado en vivo:** el check leía HANDOFF.md sin `-Encoding UTF8` y PS 5.1 deformaba los acentos — el contrato se medía en falso (0 históricas donde había 2). Curado con caso de regresión en el self-test.
 - **`test` — `tools/probar-flujo.ps1` (nuevo, mecánica):** fixtures ROJO→VERDE del contrato (conforme, doble «estamos», históricas de más, techo excedido, sin flujo.json = no aplica, corrupto = falla cerrado, acentos UTF-8 sin BOM contados bien). En el preflight de `publicar.ps1` y en el CI.
 - **ADR 0049** — el pilar de flujo: contratos de documentos con gate, límite WIP y visibilidad determinista · aceptado.
+
 ## [1.27.0] — 2026-07-21
 
 ### La app de la tubería — la maqueta se vuelve el producto (ADR 0048)

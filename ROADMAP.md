@@ -12,7 +12,6 @@
 
 ## Normal
 
-- **Construir «El sistema configurable, fase 1»** `[alta:2026-07-21 · apetito:8h · espera:cliente]` — plan archivado (`docs/sprints/sprint-sistema-configurable-plan.md`, mergeado en PR #119); R0 por ratificar con aprobación nombrada en sesión de construcción; nace del descubrimiento (informe + maqueta validada en 6 Gembas).
 - **Issues del lazo con los hallazgos del censo** `[alta:2026-07-21 · apetito:1h]` — PreToolUse subutilizado · hueco de `docs/` · `gemba.md` sin `@` (batch, no goteo; el de permisos ya está listado aparte).
 - **Reporte/vista para terceros del lab** — ver sprint FLU-1 en curso (R6/R7): la vista «qué sigue» y el reporte sin jerga `[alta:2026-07-21 · apetito:6h]`.
 - **Coordinación de escritores multi-máquina** `[alta:2026-07-21 · apetito:8h]` — 3 frentes de escritura sobre el método + la rama del socio sin subir; «una sola sesión escritora por working tree» no alcanza con varias PCs (decisión abierta #3 del diagnóstico del flujo).
