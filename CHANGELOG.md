@@ -2,6 +2,21 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.30.0] — 2026-07-22
+
+### El molde único de sprints y `qa_runs`, extendiendo el motor genérico (ADR 0056)
+
+Los ADRs ya tenían molde con guardián (v1.29.0); sprints, `qa_runs`, módulos y dominios no. En vez de clonar un `probar-<familia>.ps1` (mecánica frágil de PS 5.1 ×6) o un `.ps1` monolítico (punto único de falla en `andon.yml`), se **extiende el motor genérico** `estado-docs.ps1` por **datos** (glob de familia en el ledger) — la tercera vía que ya existía en el repo (ADR 0042).
+
+- **`feat` — el motor valida familias por glob (R1):** el campo `doc` del ledger `tools/docs-gobernados.json` acepta ahora un **glob** (`docs/sprints/*-plan.md`, `qa_runs/*/LOG.md`), no solo una ruta singleton; `estado-docs.ps1` lo expande con `Get-ChildItem` y valida cada miembro. Guarda del **verde mentiroso**: 0 miembros emite `[FAMILIA VACIA]`, nunca un CONFORME en falso. Self-test en `tools/probar-docs.ps1` con fixture de familia (conforme + desviado + vacía).
+- **`feat` — sprints numerados + molde + generación (R2):** los 25 sprints se **numeran** en `docs/sprints/README.md` (columna `#` canónica) y sus archivos se renombran `sprint-NN-<slug>`; 3 filas nuevas al ledger (sprint-plan, sprint-entrega, LOG de qa) con sus secciones requeridas mínimas; los 11 docs desviados homologados (solo encabezados, nunca la prosa). Un sprint nace conforme por `/jidoka:planea` + plantilla + `tools/nuevo-sprint.ps1`.
+- **`feat` — molde de `qa_runs` (R3):** cada `LOG.md` valida `Método reproducible · Resultados · Veredicto`; 20/20 CONFORME.
+- **`feat` — módulos y dominios se refuerzan en su dueño `auditar.ps1` (R4):** un módulo `vigente` exige `## Capacidades`, un dominio `vigente` exige `## Módulos` (modulado por estado); **NO** van al ledger — evita el doble-gobierno del grafo que ADR 0042 rechazó. Las capacidades ya las audita `auditar` (Gherkin) → sin trabajo.
+- **`feat` — cada template atado a su guardián:** un self-test verifica que las secciones requeridas existan en su plantilla (`probar-adrs` para ADRs, `probar-docs` Parte B para el ledger, `probar-auditor` casos 12-13 para módulo/dominio) — tocar un template y quitar una sección obligatoria **truena**. `kit/.jidoka/templates/README.md` documenta dónde vive la regla de verdad de cada familia (el *lever*, no el template).
+- **`chore` — se retira el comando `/jidoka:nuevo-sprint`** (redundante con `planea`); el scaffolder `tools/nuevo-sprint.ps1` se pliega en `planea`. Registrado por el gate `no-borres-el-motor` en ADR 0056.
+- **`docs` — consolidación de doctrina:** las decisiones de `doctrina/decisiones/0001-0004` se consolidan en `docs/decisions/` (**una sola carpeta de ADRs**) como 0052-0055, homologadas al molde canónico.
+- **ADR 0056** — el molde de sprints y `qa_runs` se gobierna extendiendo el motor genérico, no clonando guardianes · aceptado.
+
 ## [1.29.0] — 2026-07-22
 
 ### El molde único de los ADRs + la tubería, mapa completo del repo (ADR 0050, ADR 0051)

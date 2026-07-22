@@ -6,22 +6,24 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x`. Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-22 — PR único de consolidación `consolida-tuberia-adrs-20260722` · dos sprints + el fix, todo hacia `v1.29.0` · listo para push)
+## Dónde estamos (2026-07-22 — Sprint 25 «El molde único de sprints y `qa_runs`» · construido y verde · `v1.30.0` · rama `sprint/molde-sprints-qa-20260722`, apilada sobre la consolidación)
 
-**Un solo PR consolida sobre `main` (v1.28.0) dos sprints paralelos ya construidos y verdes + un fix — por orden del cliente ("todos los cambios a un solo PR").**
+**El molde de sprints/`qa_runs`/módulos/dominios se homologó extendiendo el motor genérico `estado-docs.ps1` por datos (ADR 0056), no clonando guardianes ni con un monolito.** Construcción R1–R4 + reworks verde de punta a punta: **50 CONFORME, 0 DESVIADO**; self-tests `probar-docs` 39/39, `probar-adrs` 14/14, `probar-auditor` 13/13; `verificar` exit 0.
 
-1. **El molde único de los ADRs (ADR 0050, MINOR):** guardián residente `tools/probar-adrs.ps1` que **BLOQUEA** (5 secciones canónicas + estado header↔índice + huérfanos; self-test 9/9; falla-suave sin ADRs), los 49 ADRs alineados al molde sin reescribir decisiones (0044 corregido), molde `0000` ↔ kit reconciliado, cableado a `andon.yml`+`publicar.ps1`+sembrado. Récord: [`sprint-23-molde-adrs-entrega.md`](docs/sprints/sprint-23-molde-adrs-entrega.md).
-2. **La tubería = mapa completo del repo (ADR 0051, MINOR):** `tuberia-datos.ps1` deriva el censo de las carpetas — 49 piezas a mano → 360 = `git ls-files` exacto; `probar-app.ps1` 41/41; **2 Gembas del cliente aprobados**. Récord: [`sprint-24-tuberia-por-carpetas-entrega.md`](docs/sprints/sprint-24-tuberia-por-carpetas-entrega.md).
-3. **Fix de encoding de la foto (PATCH):** los 5 emits a stdout escriben bytes UTF-8 crudos (`Emit-Utf8Json`); ya no cae a CP437. `probar-app.ps1` endurecido. Evidencia: `qa_runs/curas-tuberia-20260722/LOG.md`.
+1. **R1 — motor por glob-familia:** el ledger acepta globs (`docs/sprints/*-plan.md`, `qa_runs/*/LOG.md`); guarda del verde mentiroso (`[FAMILIA VACIA]`).
+2. **R2 — sprints numerados + molde + generación:** los 25 sprints numerados (`sprint-NN`), archivos renombrados, 11 docs homologados (solo encabezados); un sprint nace por `/jidoka:planea` + scaffolder.
+3. **R3 — `qa_runs`:** cada `LOG.md` valida Método · Resultados · Veredicto.
+4. **R4 — módulos/dominios en su dueño `auditar.ps1`** (no al ledger, ADR 0042); capacidades ya por Gherkin (sin trabajo — el propio template ordena el set mínimo para proyecto chico).
+5. **Reworks:** una sola carpeta de ADRs (0052-0055 consolidados), comando `/jidoka:nuevo-sprint` retirado (ADR 0056), cada template atado a su guardián. Récord: [`sprint-25-molde-sprints-qa-entrega.md`](docs/sprints/sprint-25-molde-sprints-qa-entrega.md). Evidencia: `qa_runs/gemba-molde-sprints-qa-20260722-120402/`.
 
-**Reconciliación hecha en la rama:** el ADR de tubería se renumeró **0050 → 0051** (el sprint de ADRs se quedó con 0050); versión unificada **`v1.29.0`**; CHANGELOG y HANDOFF fusionados bajo un solo corte y el HANDOFF migrado al contrato FLU-1. FLU-1 (`v1.28.0`, ADR 0049) ya está en `main` (PR #122) — deja de estar suelto.
+**Apilamiento:** esta rama contiene los commits de la consolidación (`v1.29.0`, PR #125) más el molde (`v1.30.0`). Un solo PR desde ella lleva ambos cortes a `main` (v1.28.0) — encaja con "todos los cambios a un solo PR".
 
 **Cola de decisiones del cliente:**
-1. **[PENDIENTE] Gemba** de ambos sprints sin terminal (ADRs: `conformidad-adrs.html` + ojear 0044/0001/0028; tubería: abrir la app y ver el censo completo). La fidelidad de la tubería ya la aprobó en 2 Gembas.
-2. **[PENDIENTE] Merge del PR + release `v1.29.0`** con **orden nombrada** (los merges la siguen necesitando).
-3. **[PENDIENTE] Cerrar la PR #124** (la de ADRs, del otro agente) apuntando a este PR consolidado — su trabajo viaja aquí.
+1. **[PENDIENTE] Gemba del molde** sin terminal (README numerado · dos `-entrega.md` con mismas secciones · dos `LOG.md` · reporte CONFORME/DESVIADO). Registrado en `flujo.json` (`aceptado: false`) — planta a `planea` hasta que lo aceptes con nombre.
+2. **[PENDIENTE] Gemba de la consolidación v1.29.0** sin terminal (ADRs: `conformidad-adrs.html`; tubería: abrir la app y ver el censo completo). La fidelidad de la tubería ya la aprobaste en 2 Gembas.
+3. **[PENDIENTE] Estrategia de PR + merge + release** con **orden nombrada**: ¿un solo PR (v1.29.0 + v1.30.0 juntos) desde esta rama, o merge escalonado? Cerrar/retargetear PR #124 (ADRs) y #125 (consolidación) según eso.
 
-**Follow-ups técnicos (nada bloquea):** aristas reales de la tubería (otro sprint) · latencia ~2s del refresco · `textContent` para nombres derivados en la UI · adelgazar `tuberia-piezas.json` a overrides · reconciliar `~/.claude/skills/adr-helper` (higiene local) · restaurar `instalar.ps1`/`probar-instalador.ps1` si el AV los dejó en cuarentena (intactos en git).
+**Follow-ups técnicos (nada bloquea):** aristas reales de la tubería (otro sprint) · reconciliar `~/.claude/skills/adr-helper` (higiene local) · restaurar `instalar.ps1`/`probar-instalador.ps1` si el AV los dejó en cuarentena (intactos en git).
 
 ## Dónde estuvimos (2026-07-22 — «El pilar de flujo» FLU-1 · MERGEADO A `main`, `v1.28.0`, PR #122)
 
