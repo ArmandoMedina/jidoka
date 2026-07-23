@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>BOCETO B — Bandeja única priorizada (modo Operar)</title>
+<style>
+  body { font-family: "Segoe UI", sans-serif; margin:0; background:#f4f5f7; color:#1a1a2e; }
+  .banner { background:#fff3cd; border-bottom:2px dashed #b8860b; padding:8px 16px; font-size:13px; }
+  header { display:flex; align-items:center; gap:16px; padding:14px 24px; background:#fff; border-bottom:1px solid #ddd; }
+  header h1 { font-size:17px; margin:0; }
+  .toggle { margin-left:auto; }
+  .toggle button { padding:6px 14px; border:1px solid #888; background:#fff; cursor:pointer; border-radius:4px; }
+  .toggle button.on { background:#1a1a2e; color:#fff; }
+  .lista { max-width:760px; margin:22px auto; padding:0 16px; }
+  .fila { display:flex; align-items:center; gap:14px; background:#fff; border:1px solid #ddd; border-left:6px solid #ccc; border-radius:5px; padding:12px 16px; margin-bottom:10px; font-size:14px; }
+  .fila.p1 { border-left-color:#d64545; } .fila.p2 { border-left-color:#e2a03f; } .fila.p3 { border-left-color:#4a7fd4; }
+  .fila .num { font-size:20px; font-weight:700; color:#889; width:28px; text-align:center; }
+  .fila .cuerpo { flex:1; }
+  .fila .accion { font-size:12px; color:#666; }
+  .fila .reloj { font-weight:600; font-size:12px; color:#a33; white-space:nowrap; }
+  .fila .fuente { font-size:11px; color:#999; white-space:nowrap; }
+  .silencio { text-align:center; padding:70px 20px; color:#8a9; }
+  .silencio .grande { font-size:44px; }
+  .oculto { display:none; }
+  footer { max-width:760px; margin:0 auto; padding:10px 16px 24px; font-size:12px; color:#777; }
+</style>
+</head>
+<body>
+<div class="banner">⚠ <b>BOCETO B de 3 — no es la spec.</b> Variante «Bandeja única»: una sola cola ordenada por gravedad (paros → esperándote → relojes). Lo primero de la lista es siempre lo que más importa. Datos simulados; cada fila cita su señal del inventario.</div>
+<header>
+  <h1>Operar — tu bandeja de la línea</h1>
+  <div class="toggle">
+    <button id="btn-sano" class="on" onclick="setEstado(true)">Estado sano</button>
+    <button id="btn-mal" onclick="setEstado(false)">Con anomalías</button>
+  </div>
+</header>
+<div class="lista">
+  <div id="sano" class="silencio">
+    <div class="grande">✓</div>
+    <p><b>La línea está en silencio.</b><br>Sin paros, nada esperándote, ningún reloj urgente.</p>
+  </div>
+  <div id="mal" class="oculto">
+    <div class="fila p1"><div class="num">1</div><div class="cuerpo"><b>La IA rebotó al cerrar</b> — código sin revisar<div class="accion">acción: pedir la revisión o rechazar el cambio</div></div><div><div class="reloj">hoy 14:32</div><div class="fuente">O1 · paros</div></div></div>
+    <div class="fila p1"><div class="num">2</div><div class="cuerpo"><b>Documento DESVIADO</b> — un plan perdió una sección obligada<div class="accion">acción: abrir la pieza en Configurar</div></div><div><div class="reloj">desde ayer</div><div class="fuente">O6 · estado-docs</div></div></div>
+    <div class="fila p2"><div class="num">3</div><div class="cuerpo"><b>Gemba del sprint de ejemplo espera tus ojos</b><div class="accion">acción: correr el demo y dar veredicto</div></div><div><div class="reloj">3 días</div><div class="fuente">O2 · flujo.json</div></div></div>
+    <div class="fila p2"><div class="num">4</div><div class="cuerpo"><b>WIP 9 de 8</b> — la cola pasó tu techo<div class="accion">acción: aceptar o rechazar algo antes de abrir más</div></div><div><div class="fuente">O3 · estado-flujo</div></div></div>
+    <div class="fila p2"><div class="num">5</div><div class="cuerpo"><b>Pieza huérfana en la bandeja</b> — <code>notas-sueltas.md</code><div class="accion">acción: parametrizar o descartar</div></div><div><div class="fuente">O7 · bandeja</div></div></div>
+    <div class="fila p3"><div class="num">6</div><div class="cuerpo"><b>Bajar el batch a los labs</b><div class="accion">acción: abrir la ventana o mover la fecha</div></div><div><div class="reloj">vence en 6 días</div><div class="fuente">O4 · expirar</div></div></div>
+    <div class="fila p3"><div class="num">7</div><div class="cuerpo"><b>12 documentos sin validar hace +30 días</b><div class="accion">acción: sesión de revisión en Configurar</div></div><div><div class="fuente">O8 · validado_fecha</div></div></div>
+  </div>
+</div>
+<footer>Principio: una sola lista, gravedad arriba, cada fila con su acción siguiente — el dueño nunca decide «por dónde empiezo». Sano = página vacía con ✓.</footer>
+<script>
+function setEstado(sano){
+  document.getElementById('sano').className = sano ? 'silencio' : 'silencio oculto';
+  document.getElementById('mal').className = sano ? 'oculto' : '';
+  document.getElementById('btn-sano').className = sano ? 'on' : '';
+  document.getElementById('btn-mal').className = sano ? '' : 'on';
+}
+</script>
+</body>
+</html>

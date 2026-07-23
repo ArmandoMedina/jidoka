@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>BOCETO A — Semáforo por columnas (modo Operar)</title>
+<style>
+  body { font-family: "Segoe UI", sans-serif; margin: 0; background:#f4f5f7; color:#1a1a2e; }
+  .banner { background:#fff3cd; border-bottom:2px dashed #b8860b; padding:8px 16px; font-size:13px; }
+  header { display:flex; align-items:center; gap:16px; padding:14px 24px; background:#fff; border-bottom:1px solid #ddd; }
+  header h1 { font-size:17px; margin:0; }
+  .semaforo { width:18px; height:18px; border-radius:50%; }
+  .verde { background:#2e9e5b; } .rojo { background:#d64545; }
+  .toggle { margin-left:auto; }
+  .toggle button { padding:6px 14px; border:1px solid #888; background:#fff; cursor:pointer; border-radius:4px; }
+  .toggle button.on { background:#1a1a2e; color:#fff; }
+  .cols { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; padding:20px 24px; }
+  .col { background:#fff; border:1px solid #ddd; border-radius:6px; min-height:220px; }
+  .col h2 { font-size:13px; text-transform:uppercase; letter-spacing:.5px; margin:0; padding:10px 14px; border-bottom:1px solid #eee; color:#555; }
+  .card { margin:10px; padding:10px 12px; border-left:4px solid #ccc; background:#fafafa; border-radius:3px; font-size:13px; }
+  .card.paro { border-color:#d64545; } .card.espera { border-color:#e2a03f; } .card.reloj { border-color:#4a7fd4; }
+  .card .reloj-txt { color:#a33; font-weight:600; font-size:12px; }
+  .card .fuente { color:#999; font-size:11px; }
+  .vacio { color:#aab; text-align:center; padding:44px 10px; font-size:13px; font-style:italic; }
+  footer { padding:10px 24px; font-size:12px; color:#777; }
+  .oculto { display:none; }
+</style>
+</head>
+<body>
+<div class="banner">⚠ <b>BOCETO A de 3 — no es la spec.</b> Variante «Semáforo por columnas»: tres carriles fijos (Paros / Esperándote / Relojes). Datos simulados. Cada tarjeta cita su señal del inventario (`senales-tableros-202607.md`).</div>
+<header>
+  <div class="semaforo verde" id="sem"></div>
+  <h1>Operar — <span id="titulo">la línea está en silencio</span></h1>
+  <div class="toggle">
+    <button id="btn-sano" class="on" onclick="setEstado(true)">Estado sano</button>
+    <button id="btn-mal" onclick="setEstado(false)">Con anomalías</button>
+  </div>
+</header>
+<div class="cols">
+  <div class="col">
+    <h2>🛑 Paros de la línea</h2>
+    <div class="vacio" id="paros-vacio">sin paros — nada que ver aquí</div>
+    <div class="oculto" id="paros-mal">
+      <div class="card paro"><b>La IA rebotó al cerrar</b> — código sin revisar (review-stop)<br><span class="reloj-txt">hoy 14:32</span> · <span class="fuente">O1 · ledger de paros (nuevo)</span></div>
+      <div class="card paro"><b>Documento DESVIADO</b> — un plan perdió su sección Verificación<br><span class="reloj-txt">desde ayer</span> · <span class="fuente">O6 · estado-docs</span></div>
+    </div>
+  </div>
+  <div class="col">
+    <h2>👀 Esperándote a ti</h2>
+    <div class="vacio" id="esp-vacio">nada espera tus ojos</div>
+    <div class="oculto" id="esp-mal">
+      <div class="card espera"><b>Gemba del sprint de ejemplo</b> — ver el demo y aceptar/rechazar<br><span class="reloj-txt">3 días esperando</span> · <span class="fuente">O2 · flujo.json</span></div>
+      <div class="card espera"><b>Pieza huérfana</b> — <code>notas-sueltas.md</code> sin gobernar<br><span class="reloj-txt">en bandeja</span> · <span class="fuente">O7 · bandeja</span></div>
+      <div class="card espera"><b>WIP 9 de 8</b> — la cola pasó tu techo<br><span class="fuente">O3 · estado-flujo</span></div>
+    </div>
+  </div>
+  <div class="col">
+    <h2>⏱ Relojes corriendo</h2>
+    <div class="vacio" id="rel-vacio">ningún vencimiento próximo</div>
+    <div class="oculto" id="rel-mal">
+      <div class="card reloj"><b>Bajar el batch a los labs</b><br><span class="reloj-txt">vence en 6 días</span> · <span class="fuente">O4 · expirar -Simular</span></div>
+      <div class="card reloj"><b>12 documentos sin validar hace +30 días</b><br><span class="fuente">O8 · validado_fecha (nuevo)</span></div>
+      <div class="card reloj"><b>Espera de tercero envejeciendo</b> — cuenta npm, 11 días<br><span class="fuente">O5 · estado-flujo</span></div>
+    </div>
+  </div>
+</div>
+<footer>Principio: el silencio es el diseño — sano = tres columnas vacías. Señales O1–O8 del inventario; ninguna decorativa.</footer>
+<script>
+function setEstado(sano){
+  document.getElementById('sem').className = 'semaforo ' + (sano ? 'verde' : 'rojo');
+  document.getElementById('titulo').textContent = sano ? 'la línea está en silencio' : '2 paros · 3 esperándote · 3 relojes';
+  document.getElementById('btn-sano').className = sano ? 'on' : '';
+  document.getElementById('btn-mal').className = sano ? '' : 'on';
+  ['paros','esp','rel'].forEach(function(k){
+    document.getElementById(k+'-vacio').className = sano ? 'vacio' : 'vacio oculto';
+    document.getElementById(k+'-mal').className = sano ? 'oculto' : '';
+  });
+}
+</script>
+</body>
+</html>

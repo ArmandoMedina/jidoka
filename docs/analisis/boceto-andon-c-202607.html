@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>BOCETO C — Tablero de planta (modo Operar)</title>
+<style>
+  body { font-family: "Segoe UI", sans-serif; margin:0; background:#14161c; color:#e8eaf0; }
+  .banner { background:#fff3cd; color:#333; border-bottom:2px dashed #b8860b; padding:8px 16px; font-size:13px; }
+  header { display:flex; align-items:center; gap:16px; padding:14px 24px; background:#1c1f28; border-bottom:1px solid #2a2e3a; }
+  header h1 { font-size:17px; margin:0; font-weight:600; }
+  .toggle { margin-left:auto; }
+  .toggle button { padding:6px 14px; border:1px solid #555; background:#1c1f28; color:#e8eaf0; cursor:pointer; border-radius:4px; }
+  .toggle button.on { background:#e8eaf0; color:#14161c; }
+  .contadores { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; padding:22px 24px 8px; }
+  .contador { background:#1c1f28; border:1px solid #2a2e3a; border-radius:8px; padding:18px; text-align:center; }
+  .contador .cifra { font-size:52px; font-weight:800; line-height:1; }
+  .contador .titulo { font-size:12px; text-transform:uppercase; letter-spacing:1px; color:#8a90a5; margin-top:8px; }
+  .contador .fuente { font-size:10px; color:#565d72; margin-top:4px; }
+  .ok .cifra { color:#3fca7f; } .alerta .cifra { color:#e2a03f; } .fuego .cifra { color:#ff5c5c; }
+  .detalle { margin:14px 24px 24px; background:#1c1f28; border:1px solid #2a2e3a; border-radius:8px; min-height:120px; padding:6px 18px 14px; }
+  .detalle h2 { font-size:13px; text-transform:uppercase; letter-spacing:.5px; color:#8a90a5; }
+  .detalle .fila { padding:8px 0; border-bottom:1px solid #262a36; font-size:14px; display:flex; justify-content:space-between; gap:12px; }
+  .detalle .reloj { color:#ff9c9c; font-size:12px; white-space:nowrap; }
+  .detalle .fuente { color:#565d72; font-size:11px; white-space:nowrap; }
+  .silencio { color:#5f8a72; text-align:center; padding:36px; font-style:italic; }
+  .oculto { display:none; }
+  footer { padding:0 24px 20px; font-size:12px; color:#565d72; }
+</style>
+</head>
+<body>
+<div class="banner">⚠ <b>BOCETO C de 3 — no es la spec.</b> Variante «Tablero de planta»: 4 contadores grandes estilo andon fabril (legible a 3 metros) + zona de detalle de lo encendido. Datos simulados; cada elemento cita su señal del inventario.</div>
+<header>
+  <h1>Operar — el tablero de la planta</h1>
+  <div class="toggle">
+    <button id="btn-sano" class="on" onclick="setEstado(true)">Estado sano</button>
+    <button id="btn-mal" onclick="setEstado(false)">Con anomalías</button>
+  </div>
+</header>
+<div class="contadores">
+  <div class="contador ok" id="c-paros"><div class="cifra">0</div><div class="titulo">Paros de la línea</div><div class="fuente">O1 + O6 · ledger de paros / estado-docs</div></div>
+  <div class="contador ok" id="c-esperas"><div class="cifra">0</div><div class="titulo">Esperándote</div><div class="fuente">O2 + O7 · flujo.json / bandeja</div></div>
+  <div class="contador ok" id="c-wip"><div class="cifra">2/8</div><div class="titulo">WIP vs techo</div><div class="fuente">O3 · estado-flujo</div></div>
+  <div class="contador ok" id="c-relojes"><div class="cifra">0</div><div class="titulo">Relojes en rojo</div><div class="fuente">O4 + O5 + O8 · expirar / esperas / validado</div></div>
+</div>
+<div class="detalle">
+  <h2>Lo encendido, en orden de gravedad</h2>
+  <div id="sano" class="silencio">— nada encendido: la línea corre sola —</div>
+  <div id="mal" class="oculto">
+    <div class="fila"><span>🛑 La IA rebotó al cerrar — código sin revisar</span><span class="reloj">hoy 14:32</span><span class="fuente">O1</span></div>
+    <div class="fila"><span>🛑 Documento DESVIADO — plan sin sección obligada</span><span class="reloj">desde ayer</span><span class="fuente">O6</span></div>
+    <div class="fila"><span>👀 Gemba del sprint de ejemplo espera veredicto</span><span class="reloj">3 días</span><span class="fuente">O2</span></div>
+    <div class="fila"><span>👀 Huérfana en bandeja: <code>notas-sueltas.md</code></span><span></span><span class="fuente">O7</span></div>
+    <div class="fila"><span>⏱ Batch a los labs</span><span class="reloj">vence en 6 días</span><span class="fuente">O4</span></div>
+    <div class="fila"><span>⏱ 12 documentos sin validar hace +30 días</span><span></span><span class="fuente">O8</span></div>
+  </div>
+</div>
+<footer>Principio: los 4 números cuentan TODO el estado (sano = 0 · 0 · n/techo · 0, tablero oscuro y quieto); el detalle solo existe cuando algo se enciende.</footer>
+<script>
+function setEstado(sano){
+  var d = [['c-paros', sano?'0':'2', sano?'ok':'fuego'],
+           ['c-esperas', sano?'0':'2', sano?'ok':'alerta'],
+           ['c-wip', sano?'2/8':'9/8', sano?'ok':'fuego'],
+           ['c-relojes', sano?'0':'2', sano?'ok':'alerta']];
+  d.forEach(function(x){
+    var el = document.getElementById(x[0]);
+    el.className = 'contador ' + x[2];
+    el.querySelector('.cifra').textContent = x[1];
+  });
+  document.getElementById('sano').className = sano ? 'silencio' : 'silencio oculto';
+  document.getElementById('mal').className = sano ? 'oculto' : '';
+  document.getElementById('btn-sano').className = sano ? 'on' : '';
+  document.getElementById('btn-mal').className = sano ? '' : 'on';
+}
+</script>
+</body>
+</html>
