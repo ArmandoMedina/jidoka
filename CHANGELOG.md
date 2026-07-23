@@ -2,6 +2,21 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.34.0] — 2026-07-23
+
+### Volver muro las dos exploraciones — las reglas dejan de ser prosa y los gates dejan de fallar abiertos
+
+Las dos exploraciones del 2026-07-23 dejaron reglas nuevas atrapadas en prosa (la procedencia y el guion de revisión del ROADMAP se aplicaban a mano y «el hueco volvía al día siguiente») y defectos de falla-abierta medidos en vivo en los propios gates. Este sprint las vuelve mecanismo y cierra los huecos, sin abrir superficie nueva. Ocho rebanadas construidas y verificadas; una revisión de código independiente atrapó 2 CRÍTICOS —path traversal en el check del guion (R2) y los 4 Stop hooks fallando ABIERTO con la ley corrupta (R5)—, ambos curados y re-verificados. Suites verdes: probar-flujo 123/0, probar-hooks 68/0, probar-instalador 72/0, probar-gate 18/0, probar-adrs 14/0, conformidad-docs 58/0.
+
+- **`feat` — el candado de procedencia del ROADMAP (R1):** `verificar.ps1` (`[contrato-roadmap]`) exige a cada ítem vivo un puntero a informe/ADR/issue, igual que ya exige `apetito:`; un ítem sin origen → exit 1. Opt-in por `roadmap.procedencia:true` en `tools/flujo.json` (sin la clave, no aplica). La regla que era prosa desde el 2026-07-23 ya es gate.
+- **`feat` — el guion de revisión obligatorio (R2):** extiende R1 con un segundo requisito —el puntero debe alcanzar una sección «Qué debe revisar el dueño» en su informe— bajo `roadmap.guion_revision:true` (el icebox «Algún día» queda exento). Remedió 13 ítems: 4 informes ganaron su sección de guion y 3 ítems se re-apuntaron a un informe con guion.
+- **`fix` — los hooks del muro fallan CERRADO (R3/R4/R5):** `review-stop` deja de dictar en su mensaje de bloqueo el comando de auto-firma y su SHA cubre ahora los archivos sin rastrear (R3); el candado `PreToolUse` falla cerrado ante su propio crash —envoltorio + `.core` en proceso hijo— (R4); y los 4 Stop hooks salen exit 2 sin la ley **y con la ley corrupta**, en vez del pase silencioso (R5).
+- **`fix` — el apetito expresa menos de una hora (R6):** el check acepta `Nh` o `Nm` (minutos) y `estado-flujo` los suma correcto (`apetito:30m` → 0.5h); el backlog deja de sobreestimar el presupuesto de atención del dueño.
+- **`fix` — el instalador rechaza la maquinaria anidada (R8):** el sello (`-Sellar`) falla cerrado ante la forma anidada mal resuelta en vez de aprobar sin mirar (falso-verde curado). La migración real de carpetas a `jidoka/` queda fuera de alcance, sigue pendiente.
+- **`test` — R7 no era defecto, se midió y se blindó:** los 3 scripts (`estado-flujo`/`expirar`/`auditar`) ya resolvían sus JSON contra `-Repo`; se agregaron guardianes de regresión (cwd1–cwd3) para que no vuelva a romperse. Cierra como no-defecto.
+- **ADR 0057** — el candado de procedencia del ROADMAP: todo ítem vivo cita de dónde vino, con gate (extiende el 0049) · aceptado.
+- **ADR 0058** — los hooks del muro fallan cerrado: crash y ley ausente ya no son un pase silencioso · aceptado.
+
 ## [1.33.0] — 2026-07-23
 
 ### El backlog no sabía de dónde venía, y el modelo de asientos está enredado
