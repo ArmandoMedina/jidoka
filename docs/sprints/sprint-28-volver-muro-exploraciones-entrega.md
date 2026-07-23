@@ -48,11 +48,11 @@ Una revisión de código independiente encontró **2 CRÍTICOS** —path travers
 
 > **Regla del demo tangible:** R1/R2/R6/R7 se ven sin terminal en la página del PR. R3/R4/R5/R8 son muro interno: su demo es *ver el gate bloquear un intento real*, y la evidencia durable es el `LOG.md` A/B rastreado por git — el formato que el brief acepta para trabajo de muro (los Gherkin de AND-1 son exactamente eso). Ninguna rebanada se cierra con «corre este script»: se cierra con la ✔/✘ del PR o el `LOG.md`.
 
-> **Estado del Gemba:** pendiente de la corrida del cliente. Los agentes NO marcan esta sección como cumplida; queda como checkbox en «Pendiente que dejó».
+> **Estado del Gemba:** ✔ **ACEPTADO por el dueño (2026-07-23).** El dueño revisó la evidencia (5/5 muros muerden, `qa_runs/gemba-volver-muro-20260723/LOG.md`) y autorizó «gemba» por nombre en `/jidoka:cierra`.
 
 ## Pendiente que dejó
 
-- [ ] Gemba del cliente del sprint 28: correr el demo sin terminal (✔/✘ del PR sobre el commit-trampa + los `LOG.md` A/B de R3/R4/R5/R8) y registrar la aceptación en `flujo.json`.
+- [x] Gemba del cliente del sprint 28: **ACEPTADO (2026-07-23)** — el dueño revisó la evidencia (5/5 muros muerden, `qa_runs/gemba-volver-muro-20260723/LOG.md`) y autorizó «gemba» por nombre. Registrado en `flujo.json`.
 - [ ] Merge del PR de `v1.34.0` con orden nombrada del cliente + tag+release.
 - [ ] La **migración real de carpetas a `jidoka/`** (el reorg grande del contenedor): R8 solo curó el falso-verde.
 
@@ -62,3 +62,48 @@ Una revisión de código independiente encontró **2 CRÍTICOS** —path travers
 2. Falla-cerrada tiene más de un camino: «sin la ley» y «con la ley corrupta» son dos modos distintos; curar uno no cura el otro (R5).
 3. No todo síntoma es defecto: R7 se midió antes de curar y resultó ya correcto; el entregable fue el guardián de regresión, no una cura.
 4. Volver mecanismo lo que era prosa es lo que hace que «el hueco no vuelva al día siguiente»: la procedencia y el guion duraron un día como regla escrita y ya son gate (R1/R2).
+
+## Cuadro de cierre — sesión de deuda y /code-review (2026-07-23)
+
+> Esta sesión NO es una rebanada nueva: el sprint 28 se construyó y cerró antes. Aquí se cerró su **deuda** (Gemba + merge + release) y los **4 fixes del `/code-review` del dueño**.
+
+### Hechos (números, nombres, sí/no)
+
+| Campo | Valor |
+| --- | --- |
+| Sprint | 28 «Volver muro las dos exploraciones» — cierre de deuda **TERMINADO** (sprint ya cerrado antes; esta sesión cerró su deuda) |
+| Rebanadas | 8 planeadas / 8 entregadas / 0 desviadas (R1–R8). Esta sesión: cierre de deuda (no rebanada nueva) + 4 fixes del `/code-review` |
+| Rama | `sprint/volver-muro-exploraciones-20260723` · 9 commits |
+| Commit de esta sesión | `2c83f67` — `fix(muro): cierra la deuda del sprint 28 y los hallazgos del /code-review` |
+| Working tree al cerrar | limpio |
+| Duración | sesión del 2026-07-23 |
+| PR | se abre y mergea a `main` en este cierre · rama a borrar tras merge |
+| Release | **v1.34.0** (MINOR) |
+| Ritual corrido | arranca · planea · gemba · cierra |
+| Delegaciones | explorador (barridos/atlas/guiones), mecánico (edits de docs), auditor (verificaciones + paneles adversariales), arquitecto (diseño de la cura de bypasses), general-purpose (aplicar+verificar con TDD). Hilo principal: orquestación + una edición menor del LOG del Gemba (metadata), marcada como excepción |
+| Aprobaciones del dueño | «Adelante» (composición, R0, plan del sprint — sesiones previas). Esta sesión: aprobó la secuencia de correcciones, pidió imprimir el SHA, **firmó el marcador él mismo**, y autorizó por nombre en `/jidoka:cierra`: «gemba, pr, release, merge, poda» |
+| Pruebas automáticas | probar-flujo 123→140 (**+17** casos), probar-hooks 68→87 (**+19** casos), 0 bajas / 0 debilitadas |
+| Suites al cierre | probar-flujo **140/140**, probar-hooks **87/87**, `verificar -Base main` **verde**. E2E (Playwright): no aplica (trabajo de motor PS) |
+| Evidencia qa_runs (commiteada `-f`) | `gemba-volver-muro-20260723/LOG.md` (Gemba 5/5 muros muerden), `volver-muro-barreras-20260723/LOG.md` (A/B hooks), `volver-muro-instalador-20260723/LOG.md` (R8) |
+| Gates | `verificar` verde (1 aviso atlas no bloqueante, juzgado no-flujo por un explorador), probar-flujo/hooks verdes, estado-docs verde |
+| Compactación | sí, la sesión se compactó; se re-verificó contra los artefactos al retomar (evidencia-no-palabra en todo) |
+| ADRs | **0057** (creado + enmendado: R1 valida existencia; junction confesado) y **0058** (creado + enmendado: ley `{}`/corrupta fail-closed; candado deniega marcador; residuo Bash confesado) |
+| CHANGELOG | al día, `[1.34.0]`, MINOR |
+| Hallazgos | panel adversarial (H1–H5: traversal y alias del candado, junction, excepción `GetFullPath`; curados o confesados) + `/code-review` del dueño (5: **4 curados** — #1 guion-existencia, #2 hash-incidental, #3 quotepath, #4 vista-regex; **1 confesado** — #5 sobre-bloqueo). No se abrieron issues de GitHub |
+| Pendientes al HANDOFF | idea de exploración «cuándo es suficiente la revisión» |
+
+### Fricción / Kaizen crudo
+
+- **Correcciones del dueño al agente:** «no te veo usando subagentes» (delegar más), «asumes que domino todo» (hizo falta un resumen a altura de dueño), «solo me explicaste 1» (explicar TODOS los mecanismos, no uno).
+- **Errores del agente reparados:** el guard `{}` fail-open no atrapaba el objeto vacío (cazado por auditoría); los 4 huecos del `/code-review`; el candado bloqueó mi propio commit por mencionar el marcador en el mensaje (H3 en vivo) — se rodeó con `git commit -F`.
+
+### Kaizen
+
+1. Un muro nuevo hay que auditarlo en **todas** sus ramas hermanas: curar una y olvidar la hermana (quotepath, guard `{}`, contratos) fue patrón recurrente en esta sesión.
+2. El `/code-review` del dueño cazó lo que el panel adversarial del agente NO vio: revisores independientes que se contradicen **son** la seguridad, no un fallo del proceso.
+3. Confesar el límite > fingir la garantía: se caminó para atrás de «no puede en absoluto» a «defensa en profundidad» — evidencia-no-palabra también aplica a las promesas que escriben los docs.
+4. La cota de apetito (R6) es justo lo que arreglaba el sobreestimado que el dueño notó (14 h estimadas vs. ~1 h real): el contrato forzaba horas enteras e inflaba el número.
+
+### Gemba — ACEPTADO por el dueño
+
+✔ El dueño revisó la evidencia (**5/5 muros muerden**, `qa_runs/gemba-volver-muro-20260723/LOG.md`) y autorizó «gemba» por nombre el **2026-07-23**. La sección «Verificación (el demo que corre el cliente)» y su checkbox en «Pendiente que dejó» quedan marcados como cumplidos citando esa evidencia.

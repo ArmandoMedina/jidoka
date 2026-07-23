@@ -4,6 +4,14 @@
 
 ---
 
+## Archivado 2026-07-23 (cierre del sprint 28: la histórica de la huella en un lab sale del relevo)
+
+### Dónde estuvimos (2026-07-23 — exploración: la huella de Jidoka en un lab · SIN sprint · `v1.32.0` liberada)
+
+**Primera vuelta de la kata (cap. 08) corrida de verdad.** Pregunta: ¿el estorbo de Jidoka en un repo ajeno es colisión estructural o ruido visual? **Respuesta medida: estructural, y aislable sin apagar el muro.** Expediente: [`exploracion-huella-en-labs-202607.md`](docs/analisis/exploracion-huella-en-labs-202607.md). Molde nuevo `kit/.jidoka/templates/exploracion.md` (n=1, fuera del ledger). Hallazgos colaterales: los 4 Stop hooks dejan cerrar sin la ley, y `review-stop` suma tres defectos medidos al usarlo — ambos curados por el sprint 28.
+
+---
+
 ## Archivado 2026-07-23 (cierre de la exploración de la huella: la histórica del sprint 25 sale del relevo)
 
 ### Dónde estuvimos (2026-07-22 — Sprint 25 + consolidación · MERGEADOS, `v1.30.0`, PR #126)
