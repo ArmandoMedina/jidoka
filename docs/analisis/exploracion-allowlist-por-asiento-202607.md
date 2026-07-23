@@ -62,9 +62,11 @@ hilo principal sin candado:
   en subagentes **anidados**. Solo se probó un asiento custom, un nivel.
 - El campo en `Bash` y `Edit` (aquí solo `Write`), y si el matcher heurístico de rutas dentro de
   comandos de `Bash` hereda las evasiones ya confesadas en `andon/README.md`.
-- **Si el campo es contrato estable de la herramienta o detalle de implementación.** No hay
-  promesa escrita; si desaparece en una versión, el muro cae en silencio. Medido en
-  `2.1.218`.
+- ~~**Si el campo es contrato estable de la herramienta o detalle de implementación.**~~
+  **CERRADO el 2026-07-23** por el barrido de la CLI (`exploracion-modelo-de-asientos-202607.md`):
+  `agent_type`/`agent_id` son **contrato formal documentado** de los hooks, no detalle de
+  implementación — el muro no se cae sin aviso entre versiones. Además apareció una alternativa a
+  medir: la CLI podría soportar un campo `paths` nativo en skills, que evitaría el hook.
 
 ## Qué debe revisar el dueño (guion) — 6 min
 
