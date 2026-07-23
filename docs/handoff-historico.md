@@ -531,3 +531,9 @@ Todo verde; evidencia en [`qa_runs/sistema-configurable-20260721/LOG.md`](qa_run
 2. **Gemba de fidelidad en R2** (aprobar la cara de la app con sus ojos antes de cablear datos) — es el criterio de "hecho" de esa rebanada.
 
 ---
+
+## Dónde estuvimos (2026-07-22 — Sprint 26 «La 2.0 estable», la construcción · archivado del HANDOFF el 2026-07-23)
+
+Plan-contrato [`sprint-26-la-2-0-estable-plan.md`](sprints/sprint-26-la-2-0-estable-plan.md), nacido de 4 escaneos `arquitecto` ([`escaneo-camino-2.0-202607.md`](analisis/escaneo-camino-2.0-202607.md); 8 ítems al ROADMAP). R1 corte honesto (os `win32`, badge gateado, aviso del muro) · R2 fiabilidad (`probar-gemelas` estrenó en rojo con 3 drifts reales curados; `auditar` fail-closed; salvavidas ampliado) · R3 superficies (`conformidad-docs.html` interino; [`matriz-carriles-202607.md`](analisis/matriz-carriles-202607.md)) · review adversarial 2M+2B curados. Evidencia rojo→verde: `qa_runs/la-2-0-estable-20260722/LOG.md`.
+
+---

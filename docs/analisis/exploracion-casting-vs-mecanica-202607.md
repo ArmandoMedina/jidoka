@@ -78,7 +78,10 @@ todavía** en el método.
 - **Si renombrar el eje de tiers rompe algo**: no se buscaron referencias a `explorador`/
   `arquitecto` en skills, docs, atlas o suites. Un renombre sin ese censo rompe punteros.
 
-## Qué debe revisar el dueño (guion) — 8 min
+## Qué debe revisar el dueño (guion) — 18 min
+
+> **Este guion mezcla inspección y decisión** (regla 6 del molde): los pasos 1-2 y 5 se miran; los
+> pasos 3, 4 y 6 son decisiones tuyas con salidas legítimas ofrecidas, no un checklist de «ok».
 
 1. **Haz esto:** lee la tabla de tres ejes de arriba y responde en voz alta qué es `explorador`.
    **Debe pasar:** contestas «la mecánica barata» sin dudar, y sabes que el asiento de exploración es otra cosa.
@@ -88,10 +91,35 @@ todavía** en el método.
    **Debe pasar:** dice `arquitecto-doc`, y reconoces que **no** es el trabajo que tú le pides.
    **Recházalo si** te parece que `arquitecto-doc` sí describe lo que hace — entonces no falta un
    asiento y la tarjeta del casting sobra.
-3. **Haz esto:** busca nombres de pila en lo que esta rama agrega
-   (`git diff main.. -- ROADMAP.md docs/analisis/`). **Debe pasar:** no aparece ninguno — el
-   canon nominal se decidió fuera de git (ver abajo). **Recházalo si** encuentras uno: la
-   decisión del 2026-07-23 no se aplicó completa.
+3. **Haz esto:** busca nombres de pila **y frases textuales tuyas entre comillas** en lo que la
+   rama agrega (`git diff main..HEAD | grep "^+"`, y ojea las líneas con `«…»` atribuidas a ti).
+   **Debe pasar:** no aparece ningún nombre ni cita literal — el canon nominal se decidió fuera de
+   git y tus dichos se parafrasean con fecha (regla del 2026-07-22, ADR 0055). **Recházalo si**
+   encuentras uno de los dos: durante este mismo cierre se coló una frase textual del dueño entre
+   comillas en `ROADMAP.md`/`HANDOFF.md` y un auditor la atrapó — el guion viejo revisaba nombres
+   pero **no** citas, y por eso pasó. Por eso este paso ahora cubre las dos cosas.
+
+### Para la tarjeta «Renombrar la mecánica por tier» — 4 min
+
+4. **Haz esto:** lee los tres candidatos de nombres en la tarjeta del ROADMAP (instrumentos /
+   pesos / arbitrarios) y elige cuál prefieres, o pide otro. **Debe pasar:** el que elijas dice
+   **esfuerzo o instrumento**, no oficio, y no choca con `explorador`/`arquitecto` ni con un rol.
+   **Recházalo si** el candidato vuelve a sonar a puesto (reintroduce la colisión que curamos).
+
+### Para la tarjeta «La doctrina del casting no cubre el eje de agentes» — 3 min
+
+5. **Haz esto:** abre `kanban/roles.md:31-48` («Personalizar el casting») y busca una línea que
+   diga cómo renombrar un **agente** de `.claude/agents/`. **Debe pasar:** no la encuentras —
+   solo habla de skills, y ese es el hueco. **Recházalo si** sí aparece: entonces la doctrina ya
+   lo cubre y la tarjeta sobra.
+
+### Para la tarjeta «Nombres de personas ya publicados en `main`» — 3 min
+
+6. **Haz esto:** corre `git log -1 --format=%ci -- kanban/roles.md` y mira la tabla de
+   `kanban/roles.md:40-48`. **Debe pasar:** ves los seis nombres de pila viviendo en `main` desde
+   antes de hoy — decisión pendiente: reescribir historia para sacarlos, o aceptarlos con un ADR
+   que enmiende el 0055. **Recházalo si** decides que como «ejemplo» no violan `CONTRIBUTING.md:40`
+   y prefieres dejarlos — es una salida legítima, pero **escríbela**, no la dejes implícita.
 
 ## La decisión de confidencialidad (tomada, 2026-07-23)
 
