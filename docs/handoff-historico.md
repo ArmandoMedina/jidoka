@@ -4,6 +4,14 @@
 
 ---
 
+## Archivado 2026-07-23 (cierre de la exploración de la huella: la histórica del sprint 25 sale del relevo)
+
+### Dónde estuvimos (2026-07-22 — Sprint 25 + consolidación · MERGEADOS, `v1.30.0`, PR #126)
+
+**El molde único de sprints/`qa_runs` (ADR 0056) y la consolidación `v1.29.0` llegaron a `main` en el PR #126**; los 2 Gembas (`flu-1`, `molde-sprints-qa`) aceptados con nombre el 2026-07-22 en `flujo.json`. Récord: [`sprint-25-molde-sprints-qa-entrega.md`](sprints/sprint-25-molde-sprints-qa-entrega.md). Nota: `qa_runs/` ya no versiona el bulto — lo citado se agrega con `git add -f` (regla en `.gitignore`/`qa_runs/README.md`).
+
+---
+
 ## Archivado 2026-07-22 (cierre del sprint 26: la histórica de FLU-1 sale del relevo)
 
 ### Dónde estuvimos (2026-07-22 — «El pilar de flujo» FLU-1 · MERGEADO, `v1.28.0`, PR #122)

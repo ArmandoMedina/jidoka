@@ -20,6 +20,7 @@ Sobre esa ley, la tesis dual (los dos pájaros): la disciplina cae sobre el robo
 | [`05-instrumentacion.md`](05-instrumentacion.md) | Leading vs lagging, TIP (capture-test), el tablero mínimo de 5 series |
 | [`06-fronteras.md`](06-fronteras.md) | Qué es reclamable, qué se cita, qué se corrigió |
 | [`07-receta-de-traslado.md`](07-receta-de-traslado.md) | Portar el método a cualquier actividad: las 6 preguntas y los 5 mínimos |
+| [`08-kata-de-mejora.md`](08-kata-de-mejora.md) | Cómo se explora: las 5 preguntas de la kata, la receta desechable, la frontera línea/exploración |
 | [`citas-verificadas.md`](citas-verificadas.md) | El ledger de verificación adversarial contra fuente primaria |
 | [`decisiones/`](decisiones/) | Los ADRs de la doctrina misma: por qué repo propio, por qué NO una API de gobierno, por qué disparos y no lectura, cómo se anonimiza |
 

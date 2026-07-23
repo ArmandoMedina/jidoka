@@ -2,6 +2,17 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.32.0] — 2026-07-23
+
+### La primera vuelta de la kata, corrida de verdad
+
+Exploración (sin sprint) sobre la huella de Jidoka en un repo ajeno. Todo lo afirmado se midió sobre copias desechables de los labs —originales intactos, copias borradas— y lo no medido se declara como tal. Evidencia y guion de revisión del dueño: [`exploracion-huella-en-labs-202607.md`](docs/analisis/exploracion-huella-en-labs-202607.md).
+
+- **`docs` — la huella en un lab es colisión estructural, no ruido visual:** el contenedor **anidado** produce falso-verde silencioso (los scripts resuelven la raíz con `Split-Path -Parent $PSScriptRoot`, así que desde `jidoka/tools/` verifican un árbol que no existe y reportan «Todo limpio»); el **aplanado** pasa el gate sin tocar una línea; el instalador **falla cerrado** ante un lab migrado a mano. 9 tarjetas al ROADMAP, todas con puntero al informe y 6 con guion de revisión.
+- **`feat` — molde de exploración sembrable** (`kit/.jidoka/templates/exploracion.md`): la pregunta, lo medido, **lo NO medido**, el guion del dueño (*haz esto / debe pasar / recházalo si*, con al menos un paso que provoca un fallo) y qué mata. Nace **n=1 y fuera de `docs-gobernados.json`** a propósito: hacerlo muro con un solo uso sería método-ficción.
+- **`docs` — rojo honesto, medido y sin cura:** los 4 Stop hooks salen `exit 0` si falta `tools/blast-radius.json` (intención sin determinar; la clasifica el dueño), y `review-stop` suma tres defectos hallados al usarlo — dicta el comando de su propio bypass, su hash no cubre el contenido de los archivos sin rastrear, y ese comando puede venir caducado.
+- **`chore` — se retira del ROADMAP la tarjeta del fail-open de `auditar.ps1`:** ya se curó en `1.31.0` y el CHANGELOG lo registra; la tarjeta mandaba a arreglar algo vivo hace días.
+
 ## [1.31.0] — 2026-07-22
 
 ### El corte de honestidad y fiabilidad
