@@ -116,6 +116,11 @@ Se listan porque se midieron y si no quedan escritas se pierden:
   `estado-flujo.ps1:102-105` y `expirar.ps1:79-82` prueban `'tools/flujo.json'`, y `auditar.ps1:82`
   fija `'tools/blast-radius.json'` literal — los tres aceptan `-Repo` y no lo usan en esas líneas.
   Ya fallan hoy si se corren desde otra carpeta; el contenedor solo los delataría.
+  > **Corrección (2026-07-23, sprint 28 / R7):** este bullet era una **inferencia equivocada** — se
+  > miraron las líneas literales sin ver que los tres scripts hacen `Push-Location $Repo` /
+  > `Set-Location $Repo` al inicio (presente desde su creación). Medido corriéndolos desde `C:\Windows`
+  > y una carpeta neutral: **los tres hallan su JSON**. NO era defecto. R7 cerró como no-defecto y agregó
+  > guardianes de regresión (`cwd1-cwd3` en `probar-flujo.ps1`) que blindan la independencia del CWD.
 - **El contrato del apetito no expresa nada menor a una hora** (`apetito:\d+h`,
   `tools/verificar.ps1:300`). Todo ítem chico se declara `1h`, así que el backlog **sobreestima el
   presupuesto de atención del dueño**, que es justo la restricción del sistema. Arreglo de una
