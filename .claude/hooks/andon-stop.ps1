@@ -48,9 +48,25 @@ if (-not $changed) { exit 0 }
 
 # 3. Leer el manifiesto unico de blast-radius (la ley).
 $manifestPath = Join-Path $repo 'tools/blast-radius.json'
-if (-not (Test-Path $manifestPath)) { exit 0 }
+# FALLA CERRADA (R5): sin la ley el muro no puede saber que docs dueno exige el cambio -> NO apruebo a
+# ciegas. Antes salia exit 0 (silencio, dejaba cerrar). Alineado con el criterio de fallar-cerrado del gate.
+if (-not (Test-Path $manifestPath)) {
+  [Console]::Error.WriteLine("BLOQUEO (andon-stop): no encuentro la ley tools/blast-radius.json. No apruebo a ciegas: sin la ley el muro no sabe que docs dueno hay que sincronizar. Restaura tools/blast-radius.json (o corre el instalador) antes de cerrar.")
+  exit 2
+}
+# FALLA CERRADA (R5, camino gemelo): la ley EXISTE pero NO parsea (JSON corrupto/truncado) es la
+# MISMA clase de "aprobar a ciegas" que la ley ausente -- NO un hipo de git (eso sigue en Avisa-
+# SinVeredicto por ALTO-04). Un JSON corrupto (edicion interrumpida) se dispara mas facil que borrar
+# el archivo, y antes salia exit 0 (solo aviso, dejaba cerrar). Ahora falla cerrado igual que ausente.
 try { $manifest = Get-Content $manifestPath -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop }
-catch { Avisa-SinVeredicto "la ley tools/blast-radius.json no se pudo leer o parsear" }
+catch {
+  [Console]::Error.WriteLine("BLOQUEO (andon-stop): la ley tools/blast-radius.json existe pero no puedo medirla (JSON corrupto/truncado): $($_.Exception.Message). No apruebo a ciegas: sin poder leer la ley el muro no sabe que docs dueno exige el cambio. Repara tools/blast-radius.json (o corre el instalador) antes de cerrar.")
+  exit 2
+}
+if (-not $manifest) {
+  [Console]::Error.WriteLine("BLOQUEO (andon-stop): la ley tools/blast-radius.json parseo a algo vacio/no-usable. No apruebo a ciegas: sin la ley el muro no sabe que docs dueno hay que sincronizar. Repara tools/blast-radius.json antes de cerrar.")
+  exit 2
+}
 
 function Test-Pattern($path, $pattern) {
   # Patron sin '/' = solo raiz del repo (un '*.md' no debe casar docs/x.md).
