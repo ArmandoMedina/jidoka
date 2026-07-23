@@ -1,3 +1,7 @@
+---
+tipo: analisis
+estado: vigente
+---
 # Exploración — la huella de Jidoka en un repo ajeno (2026-07-23)
 
 > **Qué es.** La primera vuelta de la kata de mejora (`doctrina/08-kata-de-mejora.md`) corrida

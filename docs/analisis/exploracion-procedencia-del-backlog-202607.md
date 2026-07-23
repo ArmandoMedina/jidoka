@@ -105,9 +105,12 @@ mecanismo.
 - **32 ítems sin procedencia declarada** y sin forma de reconstruirla desde git. Se podaron a
   `docs/MUERTOS.md` por orden del dueño (2026-07-23), con su texto íntegro: revivir es
   re-proponer con alta nueva. **La poda dejó 30 supervivientes (62 − 32); el ROADMAP nunca
-  estuvo en 30**: el mismo commit agregó las tarjetas que esta vuelta graduó, así que el estado
-  real en disco fue 36. Se dice así porque «quedó en 30» describe un momento que ningún artefacto
-  respalda — corregido tras la auditoría de cifras del 2026-07-23.
+  estuvo en 30**: el mismo commit agregó las tarjetas que estas vueltas graduaron, así que el
+  documento quedó siempre por encima de 30 (hoy son 41, cifra verificable con
+  `tools/verificar.ps1`). Se dice así porque «quedó en 30» describe un momento que ningún
+  artefacto respalda — dos auditorías de cifras (2026-07-23) corrigieron primero un «36» y luego
+  un «39» intermedios, ninguno de los cuales fue nunca el HEAD real; por eso este texto ya no cita
+  un número de tránsito, solo el de la poda (30) y el actual (41).
 - **9 de los 41 huérfanos tenían procedencia real pero no la citaban.** Se verificó por búsqueda directa en el
   doc respaldante (`escaneo-camino-2.0-202607.md`, `senales-tableros-202607.md`,
   `gemba-gestion-del-flujo-202607.md`) y se les escribió el puntero en vez de matarlos. Esto
@@ -174,7 +177,7 @@ mecanismo.
 
 ## Qué mata este informe si se adopta
 
-- **Mata 41 tarjetas del ROADMAP** (listadas íntegras en `docs/MUERTOS.md`, entrada 2026-07-23).
+- **Mata 32 tarjetas del ROADMAP** (las huérfanas, listadas íntegras en `docs/MUERTOS.md`, entrada 2026-07-23; las otras 9 de los 41 sin puntero se rescataron, no se mataron).
   Cualquier documento que las citara por título deja de decir la verdad.
 - **Mata la suposición de que git conserva la procedencia** de un documento de estado: el
   reformateo de FLU-1 la borró. Un ADR futuro que reformatee un doc de cola debe migrar la
