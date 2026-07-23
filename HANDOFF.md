@@ -6,32 +6,26 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x`. Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-23 — exploración: la huella de Jidoka en un lab · SIN sprint · commit `0511f46` en `doctrina/kata-de-mejora-20260723`, sin PR)
+## Dónde estamos (2026-07-23 — exploración: procedencia del backlog + el enredo de asientos · SIN sprint · `v1.33.0` · PR #130)
 
-**Primera vuelta de la kata (cap. 08) corrida de verdad, no como ejemplo.** Pregunta: ¿el estorbo de Jidoka en un repo ajeno es colisión estructural o ruido visual? **Respuesta medida: estructural, y aislable sin apagar el muro.** El expediente completo —condición actual, rojo→verde, lo NO medido, el guion de revisión del dueño y qué mata— vive en [`exploracion-huella-en-labs-202607.md`](docs/analisis/exploracion-huella-en-labs-202607.md); en el ROADMAP quedan **9 tarjetas, todas con puntero** al informe. Molde nuevo `kit/.jidoka/templates/exploracion.md` (n=1, fuera del ledger a propósito).
+**El backlog se reinició de 62 a 41 ítems por una regla nueva: todo pendiente cita de dónde viene** (informe/ADR/issue). El síntoma que lo disparó: el dueño no reconocía la mayoría de sus pendientes. Medido: 41 de 62 no citaban nada y git no lo suplía (el reformateo de FLU-1 aplanó la historia). 32 huérfanos a [`docs/MUERTOS.md`](docs/MUERTOS.md); 9 rescatados con puntero verificado. **6 informes de exploración** en `docs/analisis/` (procedencia, allowlist-por-asiento, casting-vs-mecánica, modelo-de-asientos, + los dos de la vuelta anterior), todos con guion de revisión. Cada una de las **16 tarjetas nacidas hoy tiene puntero y punto de Gemba** (medido 16/16). Cuatro auditores ciegos revisaron la sesión y sus curas ya están aplicadas.
 
-**Hallazgos que no eran la pregunta:** los 4 Stop hooks dejan cerrar si falta la ley (intención sin determinar — la clasifica el cliente) y `review-stop` suma **tres defectos propios** medidos al usarlo. Se retiró del ROADMAP la tarjeta del fail-open de `auditar.ps1`: ya estaba curada en `v1.31.0`.
+**Dos hallazgos con dientes:** (1) el hook `PreToolUse` **sí distingue al asiento** que lo invoca (`agent_type`/`agent_id`, contrato formal) — el asiento de exploración con allowlist de rutas es viable, probado rojo→verde en un lab desechable; (2) **el modelo de asientos está enredado** (el dueño lo marcó importantísimo el 2026-07-23) — tres ejes bajo la palabra «asiento», la doctrina personaliza skills pero no agentes, y un renombre toca 120+ sitios. Mapa levantado para la sesión a fondo: [`exploracion-modelo-de-asientos-202607.md`](docs/analisis/exploracion-modelo-de-asientos-202607.md).
 
 **Cola de decisiones del cliente (ninguna es del agente):**
-1. `[PENDIENTE]` **Las otras dos exploraciones** que anunció al abrir y nunca describió — se pierden si no las dicta.
-2. `[PENDIENTE]` ¿El contenedor entra **antes o después** del batch que vence **2026-08-04**? Después = los labs migran dos veces.
-3. `[PENDIENTE]` Los 4 Stop hooks: ¿falla-abierta por **diseño** (se documenta) o **defecto** (se cura)?
-4. `[PENDIENTE]` Las **tres contradicciones del capítulo 08**: el Gemba (innegociable vs prohibido), la dirección de la página de hallazgos, y media cuartilla vs los informes durables de `docs/analisis/`.
-5. `[PENDIENTE]` `/code-review` del diff con **tus** ojos: el marcador lo firmó el agente por orden tuya, no es tu revisión.
-6. `[PENDIENTE]` **Elegir boceto del tablero Operar (A/B/C)** — desbloquea el Sprint 27, pausado desde el 2026-07-22 sin reloj. Los tres viven ya en `docs/analisis/boceto-andon-{a,b,c}-202607.html` (rescatados a `main` el 2026-07-23; antes solo existían en la rama pausada y eran invisibles desde `main`). La rama `sprint/tableros-spec-20260722` **sigue viva** para reanudar la construcción.
+1. `[PENDIENTE]` **Merge + release de `v1.33.0`** — autorizado **condicionado** a que los auditores de cierre salgan limpios. Si hay hallazgo que bloquee, se detiene.
+2. `[PENDIENTE]` **La sesión a fondo del modelo de asientos** (marcada importantísimo): ¿la punta de lanza es agente o skill? ¿tres ejes de nombres o menos? ¿el campo `paths` de skills existe (evitaría el hook)?
+3. `[PENDIENTE]` **Nombres de personas ya en `main`** desde el 2026-07-10 (`kanban/roles.md:40-48`): reescribir historia para sacarlos, o aceptarlos con un ADR que enmiende el 0055.
+4. `[PENDIENTE]` El casting nominal vive **fuera de git** (decidido hoy): falta crear el archivo local cuando el dueño quiera.
+5. `[PENDIENTE]` Heredadas de la vuelta anterior y aún abiertas: ¿contenedor antes o después del batch que **vence 2026-08-04**? · los 4 Stop hooks ¿diseño o defecto? · elegir boceto del tablero Operar (A/B/C) para reanudar el Sprint 27 pausado.
+
+## Dónde estuvimos (2026-07-23 — exploración: la huella de Jidoka en un lab · SIN sprint · `v1.32.0` liberada)
+
+**Primera vuelta de la kata (cap. 08) corrida de verdad.** Pregunta: ¿el estorbo de Jidoka en un repo ajeno es colisión estructural o ruido visual? **Respuesta medida: estructural, y aislable sin apagar el muro.** Expediente: [`exploracion-huella-en-labs-202607.md`](docs/analisis/exploracion-huella-en-labs-202607.md). Molde nuevo `kit/.jidoka/templates/exploracion.md` (n=1, fuera del ledger). Hallazgos colaterales: los 4 Stop hooks dejan cerrar sin la ley, y `review-stop` suma tres defectos medidos al usarlo.
 
 ## Dónde estuvimos (2026-07-22 — Sprint 26 «La 2.0 estable» · CERRADO: mergeado PR #127, `v1.31.0` liberada · la etiqueta «2.0» NO se declaró)
 
-**El sprint TERMINÓ (3/3 + review + Gemba aceptado) y se cerró con orden nombrada del cliente** (merge + release + poda). Salió como **`v1.31.0`** — decisión del cliente al cierre: los mecanismos no bastan para la etiqueta «estable»; la declara él, no un sprint. Récord completo: [`sprint-26-la-2-0-estable-entrega.md`](docs/sprints/sprint-26-la-2-0-estable-entrega.md) (con cuadro de cierre). Dos reglas nuevas de la sesión, ya operativas: **toda superficie del gobierno debe ser la app** (linterna descartada, ADR 0043 reemplazado) y **ninguna frase textual del cliente va al repo público** (barrido hecho; la historia de la rama se reescribió antes del merge).
-
-**Qué sigue (en orden de valor):**
-1. **Sprint 27 — la ola de UI** (ya decidido): la app dice la verdad por documento (4 ledgers) · pantalla del mapa de enforcement · parametrizar secciones (`-Requeridas` + ADR no-clobber). Ahí se retira `estado-gobierno.ps1` y el tablero interino.
-2. **Bajar el batch a los labs** — vence **2026-08-04** (el único reloj).
-3. Cola del cliente: decidir el barrido de citas textuales de sesiones ANTERIORES (`docs/handoff-historico.md`, contexto del ADR 0043) — hoy solo se limpió lo de esta sesión.
-
-## Dónde estuvimos (2026-07-22 — Sprint 26, la construcción · el detalle ÍNTEGRO vive en la entrega y el LOG)
-
-Plan-contrato [`sprint-26-la-2-0-estable-plan.md`](docs/sprints/sprint-26-la-2-0-estable-plan.md), nacido de 4 escaneos `arquitecto` ([`escaneo-camino-2.0-202607.md`](docs/analisis/escaneo-camino-2.0-202607.md); 8 ítems al ROADMAP). R1 corte honesto (os `win32`, badge gateado, aviso del muro) · R2 fiabilidad (`probar-gemelas` estrenó en rojo con 3 drifts reales curados; `auditar` fail-closed; salvavidas ampliado) · R3 superficies (`conformidad-docs.html` interino; [`matriz-carriles-202607.md`](docs/analisis/matriz-carriles-202607.md)) · review adversarial 2M+2B curados. Evidencia rojo→verde: [`qa_runs/la-2-0-estable-20260722/LOG.md`](qa_runs/la-2-0-estable-20260722/LOG.md).
+**El sprint TERMINÓ (3/3 + review + Gemba aceptado) y se cerró con orden nombrada del cliente** (merge + release + poda). Salió como **`v1.31.0`** — los mecanismos no bastan para la etiqueta «estable»; la declara el cliente, no un sprint. Récord: [`sprint-26-la-2-0-estable-entrega.md`](docs/sprints/sprint-26-la-2-0-estable-entrega.md). Dos reglas nuevas ya operativas: **toda superficie del gobierno debe ser la app** (linterna descartada, ADR 0043 reemplazado) y **ninguna frase textual del cliente va al repo público**. El detalle de la construcción se archivó en [`docs/handoff-historico.md`](docs/handoff-historico.md).
 
 ## Autorizaciones vigentes del cliente (dichas con nombre)
 

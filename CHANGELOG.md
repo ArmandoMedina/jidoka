@@ -2,6 +2,17 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.33.0] — 2026-07-23
+
+### El backlog no sabía de dónde venía, y el modelo de asientos está enredado
+
+Exploración (sin sprint, tres vueltas de la kata). El ROADMAP acumulaba pendientes sin origen y el dueño no los reconocía; se reinicia con una **regla de procedencia** y se levanta el mapa del enredo agentes/skills/casting para una sesión a fondo. Nada de mecanismo construido: todo gradúa a tarjeta con puntero. Cuatro auditores ciegos revisaron la sesión; sus curas están aplicadas.
+
+- **`docs` — el backlog se reinicia de 62 a 41 ítems (regla de procedencia):** todo ítem vivo cita informe/ADR/issue, igual que ya exige `apetito:`. Medido: 41 de 62 no citaban nada y git no lo suplía (el reformateo de FLU-1 aplanó la historia). 32 huérfanos a `docs/MUERTOS.md` con texto íntegro; 9 rescatados con puntero verificado contra el doc respaldante. La regla es prosa hoy; volverla gate es tarjeta. Evidencia: [`exploracion-procedencia-del-backlog-202607.md`](docs/analisis/exploracion-procedencia-del-backlog-202607.md).
+- **`docs` — el asiento de exploración con allowlist de rutas es viable (medido rojo→verde):** el hook `PreToolUse` distingue al invocador por `agent_type`/`agent_id` (contrato formal de la CLI), probado en un lab desechable fuera del árbol. Hallazgo colateral: un hook que truena falla ABIERTO. Informe: [`exploracion-allowlist-por-asiento-202607.md`](docs/analisis/exploracion-allowlist-por-asiento-202607.md).
+- **`docs` — mapa del enredo de asientos para la sesión a fondo:** tres ejes bajo la palabra «asiento» (función/tier/persona), la doctrina personaliza skills pero no agentes, un renombre toca 120+ sitios con listas hardcodeadas. [`exploracion-modelo-de-asientos-202607.md`](docs/analisis/exploracion-modelo-de-asientos-202607.md) y [`exploracion-casting-vs-mecanica-202607.md`](docs/analisis/exploracion-casting-vs-mecanica-202607.md).
+- **`docs` — el casting nominal vive fuera de git:** los nombres del casting son personas reales que no contribuyen al repo (aplica `CONTRIBUTING.md:40`, ADR 0055); el repo público conserva los roles neutrales. Queda tarjeta por los seis nombres que ya viven en `kanban/roles.md` desde el 2026-07-10.
+
 ## [1.32.0] — 2026-07-23
 
 ### La primera vuelta de la kata, corrida de verdad
