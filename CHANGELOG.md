@@ -2,6 +2,20 @@
 
 Formato: [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) · Versionado: [SemVer](https://semver.org/lang/es/).
 
+## [1.31.0] — 2026-07-22
+
+### El corte de honestidad y fiabilidad
+
+Los mecanismos del corte: lo instalado == lo prometido, el motor no se miente, el gobierno se ve sin terminal. **La etiqueta «2.0» NO se declara** — decisión del cliente al cierre: el corte aún no la merece, y esa etiqueta la declara el cliente, no un sprint. Cada defecto se reprodujo en **rojo** corriendo y se cerró en **verde** corriendo: `qa_runs/la-2-0-estable-20260722/LOG.md`.
+
+- **`feat` — corte honesto (R1):** `package.json` declara solo `os: ["win32"]` (Mac/Linux prometían sin evidencia, contra la propia ley «no se declara cross-platform sin evidencia»); el badge de estado del README queda **gateado al SSOT** por `probar-version.ps1` — el «1.0 estable» sobrevivió 30 releases mintiendo, ya no puede; `instalar.ps1` cierra con el aviso ruidoso «el muro server-side AÚN NO muerde» (`post.aviso` del manifiesto, caso de regresión en `probar-instalador` 68/68).
+- **`test` — las copias gemelas son contrato verificado (R2):** `tools/probar-gemelas.ps1` (nuevo, en el smoke del CI) extrae las funciones duplicadas-a-propósito (11 grupos, 21 comparaciones: `Test-Pattern` ×8, parser-claves del ROADMAP, normalizadores…) y **falla si divergen**. Su estreno en rojo atrapó los 3 drifts reales que el escaneo predijo (`Match-Any` del andon-stop, `Test-NoVacio` de bandeja, `Clase-Display` de expirar) — curados. La huella respeta literales de string (hallazgo del review adversarial).
+- **`fix` — `auditar.ps1` falla CERRADO en `-Range`:** si git no calcula el rango ya no aprueba en silencio (era el único gate fail-open del sistema).
+- **`fix` — el salvavidas `no-borres-el-motor` cubre también `.claude/hooks/*.ps1`, `.claude/settings.json` y `.githooks/*`** (borrar un Stop hook pasaba con exit 0; `probar-gate` 18/18).
+- **`feat` — `estado-docs.ps1 -Reporte`:** el tablero `conformidad-docs.html` doble-clic (interino hasta la pantalla de la app) + artefacto `tableros-sin-terminal` en cada corrida del CI.
+- **`docs` — la matriz de carriles de la IA** (`docs/analisis/matriz-carriles-202607.md`): los 11 escenarios con su carril honesto (1 muro, 2 parciales, 6 prosa, 2 nada) + la síntesis de los 4 escaneos (`escaneo-camino-2.0-202607.md`).
+- **`chore` — la linterna descartada como superficie** por decisión del cliente (toda superficie del gobierno debe ser la app): descableada del CI y del Gemba; el mapa de enforcement pasa a la app (ROADMAP); ADR 0043 marcado **reemplazado**.
+
 ## [1.30.0] — 2026-07-22
 
 ### El molde único de sprints y `qa_runs`, extendiendo el motor genérico (ADR 0056)
