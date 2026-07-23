@@ -444,8 +444,11 @@ $rProcOk = @(
   "- **Item con origen** [alta:2026-07-21${sep}apetito:2h] -- medido en [informe](docs/analisis/algo-202607.md)"
 )
 $dirRP1 = New-RoadmapFixture 'roadmap-proc-ok' (New-FlujoRoadmapProc 90) $rProcOk
+# El puntero docs/analisis/ ahora debe RESOLVER (existencia, no contenido): se crea el archivo citado.
+New-Item -ItemType Directory -Path (Join-Path $dirRP1 'docs/analisis') -Force | Out-Null
+[System.IO.File]::WriteAllText((Join-Path $dirRP1 'docs/analisis/algo-202607.md'), "# informe fixture", $utf8NoBom)
 $rRP1 = Invoke-Verificar $dirRP1
-if ($rRP1.Code -eq 0) { Ok "roadmap-proc-ok: exit 0 (item con puntero docs/analisis/ pasa)" } else { No "roadmap-proc-ok: esperaba exit 0, fue $($rRP1.Code)`n$($rRP1.Out)" }
+if ($rRP1.Code -eq 0) { Ok "roadmap-proc-ok: exit 0 (item con puntero docs/analisis/ que resuelve pasa)" } else { No "roadmap-proc-ok: esperaba exit 0, fue $($rRP1.Code)`n$($rRP1.Out)" }
 
 # ------------------------------------------------------------------ (r2p) ON + sin puntero -> ROJO
 $rProcNo = @(
@@ -468,8 +471,11 @@ $rProcAdr = @(
   "- **Uno por issue** [alta:2026-07-20${sep}apetito:2h] -- alimenta el issue #67"
 )
 $dirRP3 = New-RoadmapFixture 'roadmap-proc-adr' (New-FlujoRoadmapProc 90) $rProcAdr
+# El ADR textual 'ADR 0015' ahora debe RESOLVER a docs/decisions/0015-*.md: se crea el ADR citado.
+New-Item -ItemType Directory -Path (Join-Path $dirRP3 'docs/decisions') -Force | Out-Null
+[System.IO.File]::WriteAllText((Join-Path $dirRP3 'docs/decisions/0015-converger-el-motor.md'), "# ADR 0015 fixture", $utf8NoBom)
 $rRP3 = Invoke-Verificar $dirRP3
-if ($rRP3.Code -eq 0) { Ok "roadmap-proc-adr: exit 0 (ADR textual y #issue cuentan como procedencia)" } else { No "roadmap-proc-adr: esperaba exit 0, fue $($rRP3.Code)`n$($rRP3.Out)" }
+if ($rRP3.Code -eq 0) { Ok "roadmap-proc-adr: exit 0 (ADR textual que resuelve y #issue cuentan como procedencia)" } else { No "roadmap-proc-adr: esperaba exit 0, fue $($rRP3.Code)`n$($rRP3.Out)" }
 
 # ------------------------------------------------------------------ (r4p) OFF (default) -> no se exige
 # El item huerfano de (r2p) pasa cuando el opt-in NO esta: la regla es opt-in, el hijo no se rompe.
@@ -487,6 +493,115 @@ $rProcIce = @(
 $dirRP5 = New-RoadmapFixture 'roadmap-proc-icebox' (New-FlujoRoadmapProc 90) $rProcIce
 $rRP5 = Invoke-Verificar $dirRP5
 if ($rRP5.Code -eq 1 -and $rRP5.Out -match 'procedencia') { Ok "roadmap-proc-icebox: exit 1 (procedencia aplica a TODA clase viva, incluido el icebox)" } else { No "roadmap-proc-icebox: esperaba exit 1 por procedencia, fue $($rRP5.Code)`n$($rRP5.Out)" }
+
+# ==== Procedencia que RESUELVE (R1, FIX B): un puntero respaldado por archivo cuenta como
+# procedencia SOLO si el archivo EXISTE. Antes el regex miraba el PATRON, no la existencia, asi
+# 'docs/analisis/no-existe.md' o 'ADR 9999' colaban aunque no exista tal informe/ADR (evasion
+# trivial). El gate verifica EXISTENCIA, no CONTENIDO. El #issue NO se puede verificar localmente
+# (no hay forma de consultar GitHub desde el gate) -> sigue aceptandose. Fixtures ROJO->VERDE.
+
+# ------------------------------------------------------------------ (r6p) docs/ que NO resuelve -> ROJO
+$rProcNoFile = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Cita un informe fantasma** [alta:2026-07-21${sep}apetito:2h] -- ver docs/analisis/no-existe.md"
+)
+$dirRP6 = New-RoadmapFixture 'roadmap-proc-no-file' (New-FlujoRoadmapProc 90) $rProcNoFile
+$rRP6 = Invoke-Verificar $dirRP6
+if ($rRP6.Code -eq 1 -and $rRP6.Out -match 'procedencia') { Ok "roadmap-proc-no-file: exit 1 (docs/analisis/ que no resuelve YA NO cuenta como procedencia)" } else { No "roadmap-proc-no-file: esperaba exit 1 por procedencia, fue $($rRP6.Code)`n$($rRP6.Out)" }
+
+# ------------------------------------------------------------------ (r7p) ADR inexistente -> ROJO
+$rProcAdrGhost = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Cita un ADR fantasma** [alta:2026-07-21${sep}apetito:2h] -- segun ADR 9999"
+)
+$dirRP7 = New-RoadmapFixture 'roadmap-proc-adr-ghost' (New-FlujoRoadmapProc 90) $rProcAdrGhost
+$rRP7 = Invoke-Verificar $dirRP7
+if ($rRP7.Code -eq 1 -and $rRP7.Out -match 'procedencia') { Ok "roadmap-proc-adr-ghost: exit 1 (ADR 9999 sin docs/decisions/9999-*.md NO cuenta)" } else { No "roadmap-proc-adr-ghost: esperaba exit 1 por procedencia, fue $($rRP7.Code)`n$($rRP7.Out)" }
+
+# ------------------------------------------------------------------ (r8p) docs/ que SI resuelve -> verde
+$rProcFileOk = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Cita un informe real** [alta:2026-07-21${sep}apetito:2h] -- ver docs/analisis/existe.md"
+)
+$dirRP8 = New-RoadmapFixture 'roadmap-proc-file-ok' (New-FlujoRoadmapProc 90) $rProcFileOk
+New-Item -ItemType Directory -Path (Join-Path $dirRP8 'docs/analisis') -Force | Out-Null
+[System.IO.File]::WriteAllText((Join-Path $dirRP8 'docs/analisis/existe.md'), "# informe real fixture", $utf8NoBom)
+$rRP8 = Invoke-Verificar $dirRP8
+if ($rRP8.Code -eq 0) { Ok "roadmap-proc-file-ok: exit 0 (docs/analisis/existe.md resuelve -> cuenta como procedencia)" } else { No "roadmap-proc-file-ok: esperaba exit 0, fue $($rRP8.Code)`n$($rRP8.Out)" }
+
+# ------------------------------------------------------------------ (r9p) #issue sigue pasando (no verificable local)
+$rProcIssue = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Cita un issue** [alta:2026-07-21${sep}apetito:2h] -- alimenta el issue #67"
+)
+$dirRP9 = New-RoadmapFixture 'roadmap-proc-issue' (New-FlujoRoadmapProc 90) $rProcIssue
+$rRP9 = Invoke-Verificar $dirRP9
+if ($rRP9.Code -eq 0) { Ok "roadmap-proc-issue: exit 0 (#issue no es verificable localmente -> sigue aceptandose como hoy)" } else { No "roadmap-proc-issue: esperaba exit 0, fue $($rRP9.Code)`n$($rRP9.Out)" }
+
+# ------------------------------------------------------------------ (r10p) traversal en docs/ -> NO cuenta
+# Guardia anti-'..' (como el guion R2): 'docs/analisis/../../fuera.md' resolveria FUERA de docs/;
+# aunque fuera.md exista, el '..' lo invalida como puntero -> el item queda sin procedencia -> ROJO.
+$rProcTrav = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Cita con traversal** [alta:2026-07-21${sep}apetito:2h] -- ver docs/analisis/../../fuera.md"
+)
+$dirRP10 = New-RoadmapFixture 'roadmap-proc-traversal' (New-FlujoRoadmapProc 90) $rProcTrav
+[System.IO.File]::WriteAllText((Join-Path $dirRP10 'fuera.md'), "# fuera del repo fixture", $utf8NoBom)
+$rRP10 = Invoke-Verificar $dirRP10
+if ($rRP10.Code -eq 1 -and $rRP10.Out -match 'procedencia') { Ok "roadmap-proc-traversal: exit 1 (el '..' NO resuelve dentro de docs/ -> no cuenta como procedencia)" } else { No "roadmap-proc-traversal: esperaba exit 1 por procedencia, fue $($rRP10.Code)`n$($rRP10.Out)" }
+
+# ------------------------------------------------------------------ (r11p) drive-letter en procedencia -> BLOQUEA limpio
+# Un puntero con letra de unidad intercalada ('docs/analisis/C:\foo.md') hace que GetFullPath lance
+# NotSupportedException; sin el try/catch el gate reventaba con stack trace. Con el guardia, la
+# excepcion = "no resuelve" -> el item queda sin procedencia -> BLOQUEA (exit 1) y la salida NO trae
+# stack trace / NotSupportedException.
+$rProcDrive = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Cita con drive-letter** [alta:2026-07-21${sep}apetito:2h] -- ver docs/analisis/C:\foo.md"
+)
+$dirRP11 = New-RoadmapFixture 'roadmap-proc-drive' (New-FlujoRoadmapProc 90) $rProcDrive
+$rRP11 = Invoke-Verificar $dirRP11
+if ($rRP11.Code -eq 1 -and $rRP11.Out -match 'procedencia') { Ok "roadmap-proc-drive: exit 1 (la letra de unidad NO resuelve -> no cuenta como procedencia)" } else { No "roadmap-proc-drive: esperaba exit 1 por procedencia, fue $($rRP11.Code)`n$($rRP11.Out)" }
+if (-not ($rRP11.Out -match 'NotSupportedException' -or $rRP11.Out -match 'at System\.')) { Ok "roadmap-proc-drive: BLOQUEA limpio (sin stack trace / NotSupportedException)" } else { No "roadmap-proc-drive: fugo un stack trace / NotSupportedException`n$($rRP11.Out)" }
+
+# ------------------------------------------------------------------ (r12p) '#' incidental (page#2) -> NO cuenta
+# El token de issue se aprieta a '#\d+' NO precedido por caracter de palabra (?<!\w): antes '#\d' a
+# secas contaba cualquier '#' pegado a un digito, asi un 'page#2' incidental (el '#' va tras 'e',
+# palabra) colaba como procedencia. Ahora page#2 NO cuenta -> el item queda SIN procedencia -> BLOQUEA.
+$rProcHashInc = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Cita un hash incidental** [alta:2026-07-21${sep}apetito:2h] -- ver page#2 del manual"
+)
+$dirRP12 = New-RoadmapFixture 'roadmap-proc-hash-incidental' (New-FlujoRoadmapProc 90) $rProcHashInc
+$rRP12 = Invoke-Verificar $dirRP12
+if ($rRP12.Code -eq 1 -and $rRP12.Out -match 'procedencia') { Ok "roadmap-proc-hash-incidental: exit 1 (un '#' pegado a palabra como 'page#2' NO cuenta como issue)" } else { No "roadmap-proc-hash-incidental: esperaba exit 1 por procedencia, fue $($rRP12.Code)`n$($rRP12.Out)" }
+
+# ------------------------------------------------------------------ (r13p) '#67' legitimo (con espacio antes) SIGUE pasando
+# El aprete no debe romper el #issue legitimo: un '#67' precedido de espacio (inicio de token) SIGUE
+# contando como procedencia -> exit 0. (r9p ya cubre 'issue #67'; este reconfirma tras el aprete.)
+$rProcHashOk = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Cita un issue legitimo** [alta:2026-07-21${sep}apetito:2h] -- cierra #67"
+)
+$dirRP13 = New-RoadmapFixture 'roadmap-proc-hash-legitimo' (New-FlujoRoadmapProc 90) $rProcHashOk
+$rRP13 = Invoke-Verificar $dirRP13
+if ($rRP13.Code -eq 0) { Ok "roadmap-proc-hash-legitimo: exit 0 (' #67' con espacio antes sigue contando como issue)" } else { No "roadmap-proc-hash-legitimo: esperaba exit 0, fue $($rRP13.Code)`n$($rRP13.Out)" }
 
 # ==== Guion de revision (R2, ADR 0057 enmienda): opt-in roadmap.guion_revision=true. Cada item
 # EJECUTABLE (Urgente/Con fecha/Normal) declara COMO se revisa: cita un informe docs/analisis/
@@ -544,8 +659,12 @@ $rGui3 = @(
   "- **Item por sprint** [alta:2026-07-20${sep}vence:2026-08-04${sep}apetito:4h] -- pasos en [entrega](docs/sprints/sprint-21-foo-entrega.md)"
 )
 $dirG3 = New-RoadmapFixture 'roadmap-guion-sprint' (New-FlujoRoadmapGuion 90) $rGui3
+# El record docs/sprints/ citado debe RESOLVER (existencia, no contenido; mismo guardia que R1 y la
+# rama analisis R2): se crea el archivo citado, como se hizo con r1p/r3p para procedencia. Antes este
+# caso citaba un sprint INEXISTENTE y esperaba exit 0 -- eso horneaba el hueco que este fix cierra.
+Add-Informe $dirG3 'docs/sprints/sprint-21-foo-entrega.md' @("# Sprint 21 -- entrega", "", "## Verificacion", "- paso")
 $rG3 = Invoke-Verificar $dirG3
-if ($rG3.Code -eq 0) { Ok "roadmap-guion-sprint: exit 0 (un record docs/sprints/ cuenta como guion por molde)" } else { No "roadmap-guion-sprint: esperaba exit 0, fue $($rG3.Code)`n$($rG3.Out)" }
+if ($rG3.Code -eq 0) { Ok "roadmap-guion-sprint: exit 0 (un record docs/sprints/ que RESUELVE cuenta como guion por molde)" } else { No "roadmap-guion-sprint: esperaba exit 0, fue $($rG3.Code)`n$($rG3.Out)" }
 
 # ------------------------------------------------------------------ (g4) ON + icebox sin guion -> EXENTO
 $rGui4 = @(
@@ -596,6 +715,36 @@ $dirG7 = New-RoadmapFixture 'roadmap-guion-legitimo' (New-FlujoRoadmapGuion 90) 
 Add-Informe $dirG7 'docs/analisis/con-guion.md' $informeConGuion
 $rG7 = Invoke-Verificar $dirG7
 if ($rG7.Code -eq 0) { Ok "roadmap-guion-legitimo: exit 0 (informe legitimo sin '..' sigue contando como guion)" } else { No "roadmap-guion-legitimo: esperaba exit 0, fue $($rG7.Code)`n$($rG7.Out)" }
+
+# ------------------------------------------------------------------ (g8) drive-letter en guion -> BLOQUEA limpio
+# Mismo defecto que R1 pero en el guion R2: 'docs/analisis/C:\foo.md' hace que GetFullPath lance
+# NotSupportedException. Con el try/catch nuevo la excepcion = $full=$null -> no cuenta como guion ->
+# el item queda SIN guion -> BLOQUEA (exit 1) sin volcar stack trace.
+$rGui8 = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Item con drive-letter** [alta:2026-07-21${sep}apetito:2h] -- ver [informe](docs/analisis/C:\foo.md)"
+)
+$dirG8 = New-RoadmapFixture 'roadmap-guion-drive' (New-FlujoRoadmapGuion 90) $rGui8
+$rG8 = Invoke-Verificar $dirG8
+if ($rG8.Code -eq 1 -and $rG8.Out -match 'guion de revision') { Ok "roadmap-guion-drive: exit 1 (la letra de unidad NO resuelve -> no cuenta como guion)" } else { No "roadmap-guion-drive: esperaba exit 1 por guion, fue $($rG8.Code)`n$($rG8.Out)" }
+if (-not ($rG8.Out -match 'NotSupportedException' -or $rG8.Out -match 'at System\.')) { Ok "roadmap-guion-drive: BLOQUEA limpio (sin stack trace / NotSupportedException)" } else { No "roadmap-guion-drive: fugo un stack trace / NotSupportedException`n$($rG8.Out)" }
+
+# ------------------------------------------------------------------ (g9) sprint INEXISTENTE -> BLOQUEA
+# La rama de guion R2 que acepta un record docs/sprints/ debe RESOLVER (existencia), igual que su
+# hermana docs/analisis/ y que la procedencia R1. Antes miraba el PATRON, no la existencia: un puntero
+# a 'docs/sprints/sprint-fantasma.md' inexistente colaba como guion (evasion trivial). Ahora un record
+# de sprint citado que no existe en disco NO cuenta -> el item queda SIN guion -> BLOQUEA (exit 1).
+$rGui9 = @(
+  "# Roadmap fixture",
+  "",
+  "## Con fecha",
+  "- **Item por sprint fantasma** [alta:2026-07-20${sep}vence:2026-08-04${sep}apetito:4h] -- pasos en [entrega](docs/sprints/sprint-fantasma.md)"
+)
+$dirG9 = New-RoadmapFixture 'roadmap-guion-sprint-fantasma' (New-FlujoRoadmapGuion 90) $rGui9
+$rG9 = Invoke-Verificar $dirG9
+if ($rG9.Code -eq 1 -and $rG9.Out -match 'guion de revision') { Ok "roadmap-guion-sprint-fantasma: exit 1 (record docs/sprints/ inexistente NO cuenta como guion)" } else { No "roadmap-guion-sprint-fantasma: esperaba exit 1 por guion, fue $($rG9.Code)`n$($rG9.Out)" }
 
 Write-Host ""
 Write-Host "== Contrato del CHANGELOG (check [contrato-changelog]): fixtures ROJO->VERDE =="
@@ -1220,6 +1369,56 @@ $dirM9 = New-RoadmapFixture 'roadmap-apetito-4h-ok' (New-FlujoRoadmap 90) $rHrs4
 $rM9 = Invoke-Verificar $dirM9
 if ($rM9.Code -eq 0) { Ok "roadmap-apetito-4h-ok: exit 0 (apetito:4h sigue valido tras el ancla)" } else { No "roadmap-apetito-4h-ok: esperaba exit 0, fue $($rM9.Code)`n$($rM9.Out)" }
 
+# ==== Apetito bien formado y con cota (R6, FIX A): valor entero >= 1, UNA sola unidad (h|m), NADA
+# pegado despues (ni letra ni digito -> ancla (?![A-Za-z0-9]), mata '30m5h'), y cota sensata
+# (1..999h / 1..60000m). Antes 'apetito:0h', 'apetito:30m5h' y 'apetito:999999m' colaban. ROJO->VERDE.
+
+# ------------------------------------------------------------------ (a1) apetito:0h BLOQUEA (cero sin sentido)
+$rApet0h = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Apetito cero** [alta:2026-07-21${sep}apetito:0h] -- cero horas no tiene sentido"
+)
+$dirA1 = New-RoadmapFixture 'roadmap-apetito-0h' (New-FlujoRoadmap 90) $rApet0h
+$rA1 = Invoke-Verificar $dirA1
+if ($rA1.Code -eq 1 -and $rA1.Out -match 'apetito:Nh o Nm') { Ok "roadmap-apetito-0h: exit 1 (apetito:0h bloquea -- el valor debe ser >= 1)" } else { No "roadmap-apetito-0h: esperaba exit 1 acusando 'apetito:Nh o Nm', fue $($rA1.Code)`n$($rA1.Out)" }
+
+# ------------------------------------------------------------------ (a2) apetito:30m5h BLOQUEA (concatenacion basura)
+$rApetCat = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Apetito concatenado** [alta:2026-07-21${sep}apetito:30m5h] -- basura pegada, no una sola unidad"
+)
+$dirA2 = New-RoadmapFixture 'roadmap-apetito-30m5h' (New-FlujoRoadmap 90) $rApetCat
+$rA2 = Invoke-Verificar $dirA2
+if ($rA2.Code -eq 1 -and $rA2.Out -match 'apetito:Nh o Nm') { Ok "roadmap-apetito-30m5h: exit 1 (el ancla (?![A-Za-z0-9]) mata la concatenacion '30m5h')" } else { No "roadmap-apetito-30m5h: esperaba exit 1 acusando 'apetito:Nh o Nm', fue $($rA2.Code)`n$($rA2.Out)" }
+
+# ------------------------------------------------------------------ (a3) apetito:999999m BLOQUEA (excede el techo 60000m)
+$rApetHuge = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Apetito absurdo** [alta:2026-07-21${sep}apetito:999999m] -- ~700 dias, excede la cota"
+)
+$dirA3 = New-RoadmapFixture 'roadmap-apetito-999999m' (New-FlujoRoadmap 90) $rApetHuge
+$rA3 = Invoke-Verificar $dirA3
+if ($rA3.Code -eq 1 -and $rA3.Out -match 'apetito:Nh o Nm') { Ok "roadmap-apetito-999999m: exit 1 (excede el techo de 60000m -- no es tarjeta de cola)" } else { No "roadmap-apetito-999999m: esperaba exit 1 acusando 'apetito:Nh o Nm', fue $($rA3.Code)`n$($rA3.Out)" }
+
+# ------------------------------------------------------------------ (a4) 45m y 2h SIGUEN pasando (camino feliz intacto)
+$rApetOk = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Tres cuartos de hora** [alta:2026-07-21${sep}apetito:45m] -- unidad valida, dentro de cota",
+  "## Urgente",
+  "- **Dos horas** [alta:2026-07-21${sep}apetito:2h] -- unidad valida, dentro de cota"
+)
+$dirA4 = New-RoadmapFixture 'roadmap-apetito-ok' (New-FlujoRoadmap 90) $rApetOk
+$rA4 = Invoke-Verificar $dirA4
+if ($rA4.Code -eq 0) { Ok "roadmap-apetito-ok: exit 0 (apetito:45m y apetito:2h siguen pasando tras la cura)" } else { No "roadmap-apetito-ok: esperaba exit 0, fue $($rA4.Code)`n$($rA4.Out)" }
+
 # ------------------------------------------------------------------ (m10) la VISTA tampoco cuela la basura
 # El mismo ancla en estado-flujo.ps1: 'apetito:30min' NO debe emitirse como apetito:'30m' en la
 # vista (antes lo capturaba). Con el ancla, el campo queda vacio (null), no una unidad falsa.
@@ -1234,6 +1433,22 @@ $rM10 = Invoke-EstadoJson $dirM10
 $objM10 = $null
 try { $objM10 = $rM10.Out | ConvertFrom-Json } catch { $objM10 = $null }
 if ($rM10.Code -eq 0 -and $objM10 -and @($objM10.siguientes).Count -ge 1 -and -not $objM10.siguientes[0].apetito) { Ok "vista-apetito-basura: la vista NO captura '30m' de 'apetito:30min' (campo vacio, no unidad falsa)" } else { No "vista-apetito-basura: esperaba siguientes[0].apetito vacio, fue $($rM10.Out)" }
+
+# ------------------------------------------------------------------ (m11) la VISTA no cuenta '30m5h' como 30m
+# El ancla de la vista se alineo al gate: (?![A-Za-z0-9]) (antes (?![A-Za-z]) divergia). Para
+# 'apetito:30m5h' el gate BLOQUEA; la vista NO debe extraer '30m' truncado (con el ancla vieja,
+# el '5' -- que no es letra -- dejaba pasar el '30m'). Con [0-9] en el ancla, el campo queda vacio.
+$vistaCatRoad = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Concatenacion basura en la vista** [alta:2026-07-21${sep}apetito:30m5h] -- el gate lo bloquea; la vista no cuenta '30m'"
+)
+$dirM11 = New-VistaFixture 'vista-apetito-30m5h' $vistaMinFlujo $vistaCatRoad $null
+$rM11 = Invoke-EstadoJson $dirM11
+$objM11 = $null
+try { $objM11 = $rM11.Out | ConvertFrom-Json } catch { $objM11 = $null }
+if ($rM11.Code -eq 0 -and $objM11 -and @($objM11.siguientes).Count -ge 1 -and -not $objM11.siguientes[0].apetito) { Ok "vista-apetito-30m5h: la vista NO extrae '30m' de 'apetito:30m5h' (ancla (?![A-Za-z0-9]) alineada al gate)" } else { No "vista-apetito-30m5h: esperaba siguientes[0].apetito vacio, fue $($rM11.Out)" }
 
 Write-Host ""
 Write-Host "== R7: rutas resueltas contra -Repo, no contra el CWD (corriendo desde OTRA carpeta) =="

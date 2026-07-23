@@ -56,6 +56,16 @@ if (-not $manifest) {
   [Console]::Error.WriteLine("BLOQUEO (gemba-stop): la ley tools/blast-radius.json parseo a algo vacio/no-usable. No apruebo a ciegas: sin la ley el muro no sabe que areas exigen evidencia visual. Repara tools/blast-radius.json antes de cerrar.")
   exit 2
 }
+# FALLA CERRADA (R5, camino gemelo): la ley parsea a un objeto/array SIN NINGUNA entrada de area usable
+# (un '{}' objeto vacio parsea a un PSCustomObject truthy que ESQUIVA el guard '-not $manifest' de arriba,
+# y $areasVis saldria 0 -> se declararia 'dormido' y aprobaria a ciegas en silencio). "Usable" = al menos
+# un area con nombre+fuente. OJO: esto NO rompe la dormancia legitima -- una ley VALIDA con areas pero
+# ninguna con rol revisor-visual SI tiene entradas usables (pasa este guard) y sigue dormida en exit 0.
+$areasUsables = @($manifest | Where-Object { $_ -and $_.nombre -and $_.fuente })
+if ($areasUsables.Count -eq 0) {
+  [Console]::Error.WriteLine("BLOQUEO (gemba-stop): la ley tools/blast-radius.json no tiene contenido usable (ninguna entrada de area con nombre+fuente; p.ej. un objeto vacio '{}'). No apruebo a ciegas: sin la ley el muro no sabe que areas exigen evidencia visual. Repara tools/blast-radius.json antes de cerrar.")
+  exit 2
+}
 $areasVis = @($manifest | Where-Object { $_.rol -eq 'revisor-visual' })
 if ($areasVis.Count -eq 0) { exit 0 }   # dormido: no hay areas visuales
 
@@ -68,7 +78,9 @@ function Test-Pattern($path, $pattern) {
 # un directorio recien-nacido y sin trackear en una sola entrada 'dir/', y el glob de
 # 'fuente' (p.ej. 'qa_runs/*') no casa -> el gate falla-ABIERTO justo en el deliverable
 # nuevo que existe para atrapar (issue #50). Con -uall lista archivo por archivo.
-$statusRaw = git status --porcelain --untracked-files=all 2>&1
+# core.quotepath=false: que git NO cite/octalice rutas no-ASCII (asi el glob de 'fuente'
+# casa y el match de area no falla-abierto con nombres acentuados; espejo de review-stop).
+$statusRaw = git -c core.quotepath=false status --porcelain --untracked-files=all 2>&1
 if ($LASTEXITCODE -ne 0) { Write-GitFailWarning 'git status --porcelain' ($statusRaw -join ' '); exit 0 }
 $changed = @($statusRaw) | ForEach-Object { $s = "$_"; if ($s.Length -gt 3) { $s.Substring(3).Trim() } }
 $visChanged = @()

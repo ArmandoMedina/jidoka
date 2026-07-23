@@ -310,13 +310,68 @@ if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
       if ($rNombre.Length -gt 60) { $rNombre = $rNombre.Substring(0, 60) }
       $faltan = @()
       if ($ln -notmatch 'alta:\s*\d{4}-\d{2}-\d{2}') { $faltan += 'alta:AAAA-MM-DD' }
-      # Procedencia: aplica a TODA clase viva (incluida Algun dia), como el alta. Solo si el
-      # opt-in esta encendido. El item cita informe/ADR/#issue en su cuerpo.
-      if ($rProcedencia -and $ln -notmatch 'docs/analisis/|docs/sprints/|docs/decisions/|ADR\s*\d|#\d') { $faltan += 'procedencia (informe docs/analisis/, record de sprint, ADR o #issue)' }
+      # Procedencia (R1): aplica a TODA clase viva (incluida Algun dia), como el alta. Solo si el
+      # opt-in esta encendido. Un puntero cuenta como procedencia SOLO si RESUELVE -- antes el
+      # regex miraba el PATRON, no la existencia, asi 'docs/analisis/no-existe.md' o 'ADR 5000'
+      # colaban aunque no exista tal informe/ADR (evasion trivial). El gate verifica EXISTENCIA,
+      # no CONTENIDO (juzgar el contenido seria meta del producto). Reglas:
+      #   - un #issue NO se puede verificar localmente (no hay forma de consultar GitHub desde el
+      #     gate) -> se ACEPTA como hoy; es el unico limite que queda, y es real.
+      #   - un docs/{analisis,sprints,decisions}/*.md debe resolver a un archivo EXISTENTE, con el
+      #     mismo guardia anti-'..' del guion R2 ('..' es puntero invalido, no cuenta, y ademas la
+      #     ruta resuelta debe caer dentro de docs/ del repo).
+      #   - un 'ADR NNNN' textual debe resolver a docs/decisions/<NNNN>-*.md (padding a 4 digitos).
+      if ($rProcedencia) {
+        $tieneProc = $false
+        # Token de issue "de verdad": '#\d+' NO precedido por caracter de palabra. Antes '#\d'
+        # a secas contaba cualquier '#' pegado a un digito -- 'page#2' (el '#' va tras 'e',
+        # palabra) colaba como procedencia incidental. Con (?<!\w) solo cuenta un issue real
+        # (' #67', '(#2', inicio de token); '#issue' legitimo (con espacio antes) sigue pasando.
+        if ($ln -match '(?<!\w)#\d+') { $tieneProc = $true }
+        if (-not $tieneProc) {
+          $baseDocs = [System.IO.Path]::GetFullPath((Join-Path $Repo 'docs'))
+          $sepP = [System.IO.Path]::DirectorySeparatorChar
+          foreach ($m in [regex]::Matches($ln, 'docs/(?:analisis|sprints|decisions)/[^\s)]+\.md')) {
+            $rel = $m.Value
+            if ($rel -match '\.\.') { continue }
+            # Un puntero con letra de unidad intercalada ('docs/analisis/C:\foo.md') hace que
+            # GetFullPath lance NotSupportedException; se atrapa -> "no resuelve" -> no cuenta (el
+            # item queda sin procedencia y BLOQUEA limpio, sin volcar un stack trace).
+            try { $fullDoc = [System.IO.Path]::GetFullPath((Join-Path $Repo $rel)) }
+            catch { continue }
+            if ($fullDoc.StartsWith($baseDocs + $sepP, [System.StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $fullDoc)) { $tieneProc = $true; break }
+          }
+        }
+        if (-not $tieneProc) {
+          foreach ($m in [regex]::Matches($ln, 'ADR\s*(\d+)')) {
+            $adrNum = [long]0
+            if (-not [long]::TryParse($m.Groups[1].Value, [ref]$adrNum)) { continue }
+            $adrPad = '{0:D4}' -f $adrNum
+            if (@(Get-ChildItem -Path (Join-Path $Repo ('docs/decisions/' + $adrPad + '-*.md')) -ErrorAction SilentlyContinue).Count -gt 0) { $tieneProc = $true; break }
+          }
+        }
+        if (-not $tieneProc) { $faltan += 'procedencia (informe docs/analisis/, record de sprint, ADR o #issue)' }
+      }
       # Guion de revision: solo clases ejecutables (el icebox va exento). Un record de sprint
       # cuenta por molde; un informe docs/analisis/ solo si trae la seccion de guion.
       if ($rGuion -and ($claseActual -eq 'urgente' -or $claseActual -eq 'confecha' -or $claseActual -eq 'normal')) {
-        $tieneGuion = ($ln -match 'docs/sprints/[^\s)]+\.md')
+        $tieneGuion = $false
+        # Un record docs/sprints/ cuenta como guion por molde (su seccion Verificacion). Pero
+        # SOLO si RESUELVE -- antes el regex miraba el PATRON, no la existencia, asi un puntero a
+        # 'docs/sprints/no-existe.md' colaba aunque no exista tal record (mismo hueco que la
+        # procedencia R1 y la rama analisis R2 ya cerraron). Mismo guardia que su hermana: rechaza
+        # cualquier '..' (puntero invalido), confirma que la ruta RESUELTA cae dentro de
+        # docs/sprints/ del repo, y exige que EXISTA en disco. Una letra de unidad intercalada
+        # revienta GetFullPath (NotSupported) -> se atrapa -> no cuenta (BLOQUEA limpio).
+        $baseSprints = [System.IO.Path]::GetFullPath((Join-Path $Repo 'docs/sprints'))
+        $sepS = [System.IO.Path]::DirectorySeparatorChar
+        foreach ($m in [regex]::Matches($ln, 'docs/sprints/[^\s)]+\.md')) {
+          $rel = $m.Value
+          if ($rel -match '\.\.') { continue }
+          $fullS = $null
+          try { $fullS = [System.IO.Path]::GetFullPath((Join-Path $Repo $rel)) } catch { $fullS = $null }
+          if (($fullS -ne $null) -and $fullS.StartsWith($baseSprints + $sepS, [System.StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $fullS)) { $tieneGuion = $true; break }
+        }
         if (-not $tieneGuion) {
           foreach ($m in [regex]::Matches($ln, 'docs/analisis/[^\s)]+\.md')) {
             $rel = $m.Value
@@ -330,9 +385,12 @@ if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
               # (no leer archivos gigantes -- DoS leve).
               if ($rel -notmatch '\.\.') {
                 $baseDir = [System.IO.Path]::GetFullPath((Join-Path $Repo 'docs/analisis'))
-                $full = [System.IO.Path]::GetFullPath((Join-Path $Repo $rel))
+                # Igual que R1: una letra de unidad intercalada revienta GetFullPath (NotSupported);
+                # se atrapa -> $full = $null -> no cuenta como guion (BLOQUEA limpio, sin stack trace).
+                $full = $null
+                try { $full = [System.IO.Path]::GetFullPath((Join-Path $Repo $rel)) } catch { $full = $null }
                 $sep = [System.IO.Path]::DirectorySeparatorChar
-                $dentro = $full.StartsWith($baseDir + $sep, [System.StringComparison]::OrdinalIgnoreCase)
+                $dentro = ($full -ne $null) -and $full.StartsWith($baseDir + $sep, [System.StringComparison]::OrdinalIgnoreCase)
                 if ($dentro -and (Test-Path -LiteralPath $full)) {
                   $fi = Get-Item -LiteralPath $full
                   if ($fi.Length -lt 1048576) {
@@ -353,9 +411,25 @@ if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
         # El apetito es HORAS (Nh) O MINUTOS (Nm, entero): el presupuesto de atencion del
         # dueno es la restriccion del sistema y hay trabajo que vale menos de una hora --
         # forzar horas enteras SOBREESTIMA el backlog (informe huella-en-labs 2026-07-23).
-        # Ancla de fin de unidad (?![A-Za-z]): sin ella 'apetito:30min'/'2hrs'/'5horas'
-        # casarian el '30m'/'2h' DE ADENTRO y colarian una unidad basura como valida (R6).
-        if ($ln -notmatch 'apetito:\d+[hm](?![A-Za-z])') { $faltan += 'apetito:Nh o Nm' }
+        # Bien formado (R6): valor entero >= 1, UNA sola unidad (h|m) y NADA pegado despues.
+        # Ancla de fin (?![A-Za-z0-9]): la parte [A-Za-z] mata 'apetito:30min'/'2hrs' (casarian
+        # el '30m'/'2h' DE ADENTRO); la parte [0-9] mata 'apetito:30m5h' (casaria el '30m' e
+        # ignoraria la concatenacion basura). Cota sensata: el apetito es presupuesto de ATENCION
+        # del dueno, no un cronograma -- un item que pide >999h (~125 dias-persona de 8h) o
+        # >60000m (~1000h) no es una tarjeta de cola, es un proyecto que se rebana. Y '0h'/'0m'
+        # no significan nada (>=1). Techo defendible: 999h / 60000m. Se captura el numero y la
+        # unidad para validar la cota en codigo (un regex puro no expresa "1..999"); TryParse a
+        # long para que un numero descomunal (overflow) caiga como invalido, no reviente.
+        $mApet = [regex]::Match($ln, 'apetito:(\d+)(h|m)(?![A-Za-z0-9])')
+        $apetitoOk = $false
+        if ($mApet.Success) {
+          $apetitoVal = [long]0
+          if ([long]::TryParse($mApet.Groups[1].Value, [ref]$apetitoVal)) {
+            if ($mApet.Groups[2].Value -eq 'h') { $apetitoOk = ($apetitoVal -ge 1 -and $apetitoVal -le 999) }
+            else                                { $apetitoOk = ($apetitoVal -ge 1 -and $apetitoVal -le 60000) }
+          }
+        }
+        if (-not $apetitoOk) { $faltan += 'apetito:Nh o Nm (N entero 1..999h o 1..60000m, sin nada pegado)' }
       }
       if ($claseActual -eq 'confecha' -and $ln -notmatch 'vence:\d{4}-\d{2}-\d{2}') { $faltan += 'vence:AAAA-MM-DD' }
       if ($faltan.Count -gt 0) {

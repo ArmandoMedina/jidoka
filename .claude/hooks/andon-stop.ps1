@@ -67,6 +67,16 @@ if (-not $manifest) {
   [Console]::Error.WriteLine("BLOQUEO (andon-stop): la ley tools/blast-radius.json parseo a algo vacio/no-usable. No apruebo a ciegas: sin la ley el muro no sabe que docs dueno hay que sincronizar. Repara tools/blast-radius.json antes de cerrar.")
   exit 2
 }
+# FALLA CERRADA (R5, camino gemelo): la ley parsea a un objeto/array SIN NINGUNA entrada de area usable
+# (un '{}' objeto vacio parsea a un PSCustomObject truthy que ESQUIVA el guard '-not $manifest' de arriba,
+# y caeria al camino normal aprobando a ciegas en silencio). "Usable" = al menos un area con nombre+fuente.
+# OJO: esto NO rompe la dormancia legitima -- una ley VALIDA con areas donde ninguna aplica al diff SI
+# tiene entradas usables (pasa este guard) y sigue su camino normal a exit 0.
+$areasUsables = @($manifest | Where-Object { $_ -and $_.nombre -and $_.fuente })
+if ($areasUsables.Count -eq 0) {
+  [Console]::Error.WriteLine("BLOQUEO (andon-stop): la ley tools/blast-radius.json no tiene contenido usable (ninguna entrada de area con nombre+fuente; p.ej. un objeto vacio '{}'). No apruebo a ciegas: sin la ley el muro no sabe que docs dueno hay que sincronizar. Repara tools/blast-radius.json antes de cerrar.")
+  exit 2
+}
 
 function Test-Pattern($path, $pattern) {
   # Patron sin '/' = solo raiz del repo (un '*.md' no debe casar docs/x.md).

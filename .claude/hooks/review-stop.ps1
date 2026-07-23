@@ -49,6 +49,16 @@ if (-not $manifest) {
   [Console]::Error.WriteLine("BLOQUEO (review-stop): la ley tools/blast-radius.json parseo a algo vacio/no-usable. No apruebo a ciegas: sin la ley el muro no sabe que codigo exige revision. Repara tools/blast-radius.json antes de cerrar.")
   exit 2
 }
+# FALLA CERRADA (R5, camino gemelo): la ley parsea a un objeto/array SIN NINGUNA entrada de area usable
+# (un '{}' objeto vacio parsea a un PSCustomObject truthy que ESQUIVA el guard '-not $manifest' de arriba,
+# y $areasCod saldria 0 -> se declararia 'dormido' y aprobaria a ciegas en silencio). "Usable" = al menos
+# un area con nombre+fuente. OJO: esto NO rompe la dormancia legitima -- una ley VALIDA con areas pero
+# ninguna con "revisa": true SI tiene entradas usables (pasa este guard) y sigue dormida en exit 0.
+$areasUsables = @($manifest | Where-Object { $_ -and $_.nombre -and $_.fuente })
+if ($areasUsables.Count -eq 0) {
+  [Console]::Error.WriteLine("BLOQUEO (review-stop): la ley tools/blast-radius.json no tiene contenido usable (ninguna entrada de area con nombre+fuente; p.ej. un objeto vacio '{}'). No apruebo a ciegas: sin la ley el muro no sabe que codigo exige revision. Repara tools/blast-radius.json antes de cerrar.")
+  exit 2
+}
 $areasCod = @($manifest | Where-Object { $_.revisa -eq $true })
 if ($areasCod.Count -eq 0) { exit 0 }   # dormido: ninguna area pide revision
 

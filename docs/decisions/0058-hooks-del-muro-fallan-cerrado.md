@@ -3,6 +3,10 @@
 - **Estado:** aceptado
 - **Fecha:** 2026-07-23
 
+> **Enmienda (cierre de deuda, sprint 28, 2026-07-23):** dos endurecimientos hermanos de la misma tesis, medidos por auditoría.
+> **(1) La ley inutilizable también falla cerrado.** La decisión original cubría la ley *ausente*; se midió que una ley presente pero **vacía (`{}`), corrupta o sin ninguna área usable** (sin `nombre`+`fuente`) se colaba: `{}` parsea a un objeto verdadero-pero-vacío, así que `-not $manifest` daba `$false` y caía al camino normal (`exit 0`). Los 4 Stop hooks ganan una guarda de *contenido usable* — si ninguna área trae `nombre`+`fuente`, salen `exit 2`. La dormancia legítima de un rol (ley válida cuyas áreas no aplican) queda intacta: tiene entradas usables, pasa la guarda y llega a `exit 0`.
+> **(2) El agente ya no puede escribir el marcador humano.** R3 pedía que el agente no se entregara la llave de su propia cerradura; el candado `PreToolUse` **deniega los vectores comunes** (independiente de `tools/contratos.json`) de escritura del agente a `.claude/.review-marker` / `.claude/.gemba-marker`: Write/Edit a la ruta **resuelta** (`..` normalizado vía `GetFullPath`), o un Bash con cmdlet/alias de escritura (incluidos `sc`/`ac`/`ni` y `[IO.File]::Write*`/`Append*`) o redirección `>`/`>>` sobre el **nombre** del marcador. Es **defensa en profundidad, no un muro absoluto**: el matcher de Bash es heurístico (mismo residuo confesado abajo y en `no-memorias`); el muro es la firma humana + el required check server-side. El **borrado** NO se deniega (borrar un marcador solo re-dispara el gate: es fail-safe). Así el checkpoint vive de verdad fuera del LLM: la firma la pone un humano y el agente no puede fabricarla.
+
 ## Contexto
 
 La kata de la huella en labs (2026-07-23, [`exploracion-huella-en-labs-202607.md`](../analisis/exploracion-huella-en-labs-202607.md)) y el spike de allowlist ([`exploracion-allowlist-por-asiento-202607.md`](../analisis/exploracion-allowlist-por-asiento-202607.md)) midieron en vivo dos fallas-abiertas en los propios hooks del muro:
@@ -41,4 +45,4 @@ También se consideró **exit 1** para los Stop hooks sin ley; se usó **exit 2*
 ## Qué NO resuelve
 
 - No cubre un hook que **cuelga** (proceso hijo que no retorna): el envoltorio depende del timeout del harness, no propio. Queda como deuda si se mide en vivo.
-- No toca la falla-abierta del **matcher heurístico de Bash** de `candado-pretooluse` (límite conocido, ya documentado): esto endurece el *crash*, no la cobertura del matcher.
+- No toca la falla-abierta del **matcher heurístico de Bash** de `candado-pretooluse` — **incluida la denegación del marcador humano (enmienda 2)**: endurece los vectores comunes (`..` normalizado, alias `sc`/`ac`/`ni`, `[IO.File]::Write*`), **no** la ofuscación arbitraria (base64/python/ruta-por-variable). Esto endurece el *crash* y los vectores comunes, no la cobertura total del matcher.

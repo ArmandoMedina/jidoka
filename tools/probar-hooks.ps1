@@ -114,6 +114,57 @@ Check 'candado: DENIEGA Edit (no solo Write) a la pieza con candado' ($outCandEd
 $outCandBs = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"Set-Content -Path tools\\blast-radius.json -Value x"}}' $repoCand
 Check 'candado: DENIEGA escritura Bash con backslash (prueba la normalizacion \\ -> /)' ($outCandBs.Contains('"permissionDecision":"deny"')) "no normalizo el backslash: $outCandBs"
 
+# --- candado: DENEGACION INCONDICIONAL de los marcadores humanos (R3 / ADR 0058, clase auto-firma) ---
+# Medido en vivo 2026-07-23: un .claude/.review-marker AUTO-FIRMADO por el agente (sin OK humano) vivio
+# en disco -- "la llave junto a la cerradura". El agente NO se auto-firma: escribir .review-marker o
+# .gemba-marker (los checkpoints HUMANOS) se DENIEGA siempre. La denegacion es HARDCODED (no depende de
+# tools/contratos.json) -> se prueba en un repo SIN ledger. El humano firma FUERA del agente; y BORRAR
+# un marcador stale sigue permitido (fail-safe: re-dispara el gate, mas estricto, nunca aprueba a ciegas).
+$repoMk = New-TempRepo   # sin tools/contratos.json: prueba que la denegacion no depende del ledger
+$mkFP = ($repoMk -replace '\\', '/')
+$outMkReview = Invoke-Hook $candado ('{"tool_name":"Write","tool_input":{"file_path":"' + $mkFP + '/.claude/.review-marker"}}') $repoMk
+Check 'candado: DENIEGA Write al marcador humano .review-marker (el agente no se auto-firma)' ($outMkReview.Contains('"permissionDecision":"deny"')) "no denego el Write al .review-marker: $outMkReview"
+$outMkGemba = Invoke-Hook $candado ('{"tool_name":"Write","tool_input":{"file_path":"' + $mkFP + '/.claude/.gemba-marker"}}') $repoMk
+Check 'candado: DENIEGA Write al marcador humano .gemba-marker (el agente no se auto-firma)' ($outMkGemba.Contains('"permissionDecision":"deny"')) "no denego el Write al .gemba-marker: $outMkGemba"
+$outMkBash = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"Set-Content -Encoding ASCII .claude/.review-marker ABC123"}}' $repoMk
+Check 'candado: DENIEGA escritura Bash (Set-Content) al marcador humano .review-marker' ($outMkBash.Contains('"permissionDecision":"deny"')) "no denego el Set-Content al marcador: $outMkBash"
+$outMkRedir = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"echo ABC123 > .claude/.gemba-marker"}}' $repoMk
+Check 'candado: DENIEGA redireccion Bash (>) al marcador humano .gemba-marker' ($outMkRedir.Contains('"permissionDecision":"deny"')) "no denego la redireccion al marcador: $outMkRedir"
+# Control: un Write a un archivo NORMAL no se toca (la denegacion del marcador no bloquea de mas).
+$outMkNorm = Invoke-Hook $candado ('{"tool_name":"Write","tool_input":{"file_path":"' + $mkFP + '/HANDOFF.md"}}') $repoMk
+Check 'candado: DEJA pasar un Write a un archivo normal (la denegacion del marcador no bloquea de mas)' (-not $outMkNorm.Contains('deny')) "denego de mas un archivo normal: $outMkNorm"
+# Control fail-safe: BORRAR el marcador stale (Remove-Item) sigue permitido. OJO: 'Remove-Item' contiene
+# el substring 'move-Item' -- el \b del matcher evita que 'Move-Item' de un falso positivo aqui.
+$outMkDel = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"Remove-Item -LiteralPath .claude/.review-marker -Force"}}' $repoMk
+Check 'candado: DEJA borrar el marcador stale (Remove-Item; fail-safe, no confundir con Move-Item)' (-not $outMkDel.Contains('deny')) "bloqueo el borrado del marcador stale: $outMkDel"
+
+# --- candado: cierre de bypasses del marcador humano (traversal '..', alias PS5.1, API .NET) ---
+# Medido en vivo 2026-07-23 por auditoria: el EndsWith se esquivaba con un '..' intercalado en la ruta
+# ('.claude/x/../.review-marker' -> EndsWith no casa, pero resuelve al marcador) y el matcher de Bash
+# ignoraba los alias (sc/ac/ni) y las APIs .NET ([IO.File]::WriteAllText). Ahora Write resuelve la ruta
+# ABSOLUTA (colapsa '..') y el matcher de Bash incluye alias + .NET. Todos deben DENEGAR.
+$outMkTravW = Invoke-Hook $candado ('{"tool_name":"Write","tool_input":{"file_path":"' + $mkFP + '/.claude/x/../.review-marker"}}') $repoMk
+Check 'candado: DENIEGA Write con traversal ..  al .review-marker (ruta absoluta resuelta)' ($outMkTravW.Contains('"permissionDecision":"deny"')) "no denego el Write con '..': $outMkTravW"
+$outMkTravG = Invoke-Hook $candado ('{"tool_name":"Write","tool_input":{"file_path":"' + $mkFP + '/.claude/x/../.gemba-marker"}}') $repoMk
+Check 'candado: DENIEGA Write con traversal ..  al .gemba-marker (ruta absoluta resuelta)' ($outMkTravG.Contains('"permissionDecision":"deny"')) "no denego el Write con '..' al gemba: $outMkTravG"
+$outMkTravB = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"Set-Content .claude/x/../.review-marker ABC"}}' $repoMk
+Check 'candado: DENIEGA Bash con traversal ..  al marcador (match por nombre, no por ruta)' ($outMkTravB.Contains('"permissionDecision":"deny"')) "no denego el Set-Content con '..': $outMkTravB"
+$outMkSc = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"sc .claude/.review-marker ABC"}}' $repoMk
+Check 'candado: DENIEGA alias sc (Set-Content) al marcador humano' ($outMkSc.Contains('"permissionDecision":"deny"')) "no denego el alias sc: $outMkSc"
+$outMkAc = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"ac .claude/.review-marker ABC"}}' $repoMk
+Check 'candado: DENIEGA alias ac (Add-Content) al marcador humano' ($outMkAc.Contains('"permissionDecision":"deny"')) "no denego el alias ac: $outMkAc"
+$outMkNi = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"ni .claude/.gemba-marker"}}' $repoMk
+Check 'candado: DENIEGA alias ni (New-Item) al marcador humano' ($outMkNi.Contains('"permissionDecision":"deny"')) "no denego el alias ni: $outMkNi"
+$outMkNet = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"[IO.File]::WriteAllText(''.claude/.review-marker'',''x'')"}}' $repoMk
+Check 'candado: DENIEGA la API .NET [IO.File]::WriteAllText al marcador humano' ($outMkNet.Contains('"permissionDecision":"deny"')) "no denego la API .NET: $outMkNet"
+# Control fail-safe reconfirmado: BORRAR el marcador (Remove-Item) NO esta en la regex de escritura -> PASA.
+$outMkDel2 = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"Remove-Item .claude/.review-marker"}}' $repoMk
+Check 'candado: RE-confirma que Remove-Item del marcador sigue PASANDO (borrado no es auto-firma)' (-not $outMkDel2.Contains('deny')) "bloqueo de mas el borrado del marcador: $outMkDel2"
+# Simetria (ADR arquitecto): el candado de CONTRATOS comparte la grieta alias/.NET -> tambien debe morder.
+$outCandSc = Invoke-Hook $candado '{"tool_name":"Bash","tool_input":{"command":"sc tools/blast-radius.json x"}}' $repoCand
+Check 'candado: DENIEGA alias sc (Set-Content) a la pieza con candado de contratos (simetria)' ($outCandSc.Contains('"permissionDecision":"deny"')) "no denego el alias sc en contratos: $outCandSc"
+Remove-Item $repoMk -Recurse -Force -ErrorAction SilentlyContinue
+
 # --- candado FAIL-CLOSED (R4): un hook del muro que TRUENA debe BLOQUEAR, no dejar pasar ---
 # Medido en vivo 2026-07-23: un SyntaxError en un PreToolUse dejo pasar la escritura que debia
 # bloquear, sin ruido (falla-ABIERTA). Ahora el envoltorio candado-pretooluse.ps1 corre la logica
@@ -204,6 +255,24 @@ foreach ($h in $stopHooks) {
   Check "${h}: FALLA CERRADO (exit 2) si la ley existe pero parsea a vacio/no-usable" ($res.code -eq 2) "no fallo cerrado con ley vacia (code=$($res.code)): $($res.out)"
 }
 Remove-Item $rLeyVacia -Recurse -Force -ErrorAction SilentlyContinue
+
+# --- R5 (camino gemelo): ley = '{}' (objeto vacio, JSON VALIDO) tambien falla cerrado ---
+# Medido A/B 2026-07-23: un '{}' parsea a un PSCustomObject VACIO que es TRUTHY -> ESQUIVA el guard
+# '-not $manifest' (que si captura null y []) y caia al camino normal: review/gemba/validador se
+# declaraban 'dormidos' (0 areas de su rol) y andon no hallaba faltas -> los 4 salian exit 0 en SILENCIO,
+# aprobando a ciegas. Ahora un manifiesto sin NINGUNA entrada de area usable (sin nombre+fuente) falla
+# cerrado (exit 2) igual que ausente/corrupta/vacia. La dormancia LEGITIMA (ley VALIDA con areas que no
+# aplican al diff) sigue en exit 0 -- eso lo blinda el bloque de control 'con la ley presente' de arriba.
+$rLeyLlaves = New-TempRepo
+Set-Manifest $rLeyLlaves '{}'
+Set-Content (Join-Path $rLeyLlaves 'tools/motor.ps1') "# v1" -Encoding Ascii
+Push-Location $rLeyLlaves; git add -A 2>&1 | Out-Null; git commit -q -m init 2>&1 | Out-Null; Pop-Location
+Set-Content (Join-Path $rLeyLlaves 'tools/motor.ps1') "# v2 cambiado sin commitear" -Encoding Ascii   # cambio pendiente (andon-stop es change-gated)
+foreach ($h in $stopHooks) {
+  $res = Invoke-HookFull (Join-Path $hooksDir $h) '{}' $rLeyLlaves
+  Check "${h}: FALLA CERRADO (exit 2) si la ley es '{}' (objeto vacio, JSON valido, sin areas usables)" ($res.code -eq 2) "no fallo cerrado con ley '{}' (code=$($res.code)): $($res.out)"
+}
+Remove-Item $rLeyLlaves -Recurse -Force -ErrorAction SilentlyContinue
 
 # --- review-stop en repo temporal ---
 $r1 = New-TempRepo
