@@ -8,6 +8,7 @@
 | [`sprint-entrega.md`](sprint-entrega.md) | El récord de cierre: qué se entregó, la evidencia, el Kaizen | **Sí** — es el récord |
 | [`plan-de-trabajo.md`](plan-de-trabajo.md) | Plan persistido para una tarea larga que puede morir a media ejecución | **No** — es efímero (lección del linaje: versionarlo creó contradicción entre plan y realidad). Vive fuera de git y se borra al terminar |
 | [`adr.md`](adr.md) | Una decisión y su porqué — incluido el camino que NO se tomó | **Sí** — permanente, y se lista en su índice en el mismo commit |
+| [`exploracion.md`](exploracion.md) | La vuelta de la kata (`doctrina/08`): la pregunta, lo medido, **lo NO medido**, el guion de revisión del dueño y qué mata. **n=1 — no es formato probado todavía** | **Sí** — el informe va a `docs/analisis/`; en el ROADMAP solo la tarjeta y el puntero |
 
 ## Ownership por sección
 
