@@ -43,8 +43,11 @@ $tmp = Join-Path $env:TEMP ("jidoka-smoke-" + [guid]::NewGuid().ToString('N').Su
 
 try {
   # 1. Instalar en el temporal.
-  Run-PS $instalar -Destino $tmp -Arquetipo 'docs-as-code' -Yes | Out-Null
+  $salidaInstala = Run-PS-Out $instalar -Destino $tmp -Arquetipo 'docs-as-code' -Yes
   Check 'instala: el motor queda sembrado' (Test-Path (Join-Path $tmp 'tools/verificar.ps1')) "no aparecio tools/verificar.ps1"
+  # Sprint 26: el cierre de la instalacion GRITA que el muro server-side aun no
+  # muerde (post.aviso del manifiesto). Sin este caso, quitar el aviso pasaria verde.
+  Check 'instala: imprime el aviso "el muro server-side AUN NO muerde" (post.aviso)' (($salidaInstala -join "`n") -match 'muro server-side AUN NO muerde') "el aviso post-instalar no aparecio en la salida"
   Check 'instala: la ley del arquetipo queda sembrada' (Test-Path (Join-Path $tmp 'tools/blast-radius.json')) "no aparecio la ley"
   Check 'instala: los comandos /jidoka:* quedan sembrados' (Test-Path (Join-Path $tmp '.claude/commands/jidoka/arranca.md')) "no aparecio arranca.md"
   # Cosecha #7 (issue #87): los agentes-asiento del ADR 0033 viajan en el kit -- el arranca

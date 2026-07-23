@@ -41,6 +41,12 @@ $script:block = 0
 $script:warn  = 0
 function Note($msg)  { Write-Host "  [AVISO] $msg"   -ForegroundColor Yellow; $script:warn++ }
 function Block($msg) { Write-Host "  [BLOQUEA] $msg" -ForegroundColor Red;    $script:block++ }
+function Fail($msg) {
+  Write-Host "  [ERROR] $msg" -ForegroundColor Red
+  Write-Host ""
+  Write-Host "== Gate sin veredicto: FALLA CERRADO (exit 2). Un muro que ante fallo interno se abre no es muro. ==" -ForegroundColor Red
+  exit 2
+}
 
 # Parsea el frontmatter YAML simple (key: value) del bloque --- ... --- inicial.
 function Get-Frontmatter($text) {
@@ -106,8 +112,13 @@ if (Test-Path 'product') {
 }
 
 # Filtro por rango: solo las notas tocadas en $Range (para el CI sobre un PR).
+# Fail-closed (sprint 26): si git no puede calcular el rango, $changed quedaria
+# vacio y el auditor aprobaria EN SILENCIO ("nada que auditar", exit 0) -- el
+# unico gate que contradecia la disciplina del resto. Un auditor que no puede
+# medir no aprueba.
 if ($Range) {
   $changed = git diff --name-only $Range -- product
+  if ($LASTEXITCODE -ne 0) { Fail "git diff no pudo calcular el rango '$Range': no se que notas auditar" }
   $changedSet = @{}
   foreach ($c in $changed) { $changedSet[$c.Replace('\', '/')] = $true }
   $targets = $targets | Where-Object {

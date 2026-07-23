@@ -42,6 +42,15 @@ if (Test-Path $pkgPath) {
   Check "package.json ($pkgVer) coincide con version.txt ($version)" ($pkgVer -eq $version) 'el CLI npm quedaria desincronizado del SSOT'
 }
 
+# SSOT extendido 2 (sprint 26): el badge de estado del README declara la version.
+# El badge "1.0 estable" sobrevivio 30 releases sin que nadie lo tocara -- un claim
+# de estabilidad hand-maintained envejece en silencio. Gateado, ya no puede.
+$readmePath = Join-Path $raiz 'README.md'
+if (Test-Path $readmePath) {
+  $readme = Get-Content $readmePath -Raw
+  Check "el badge de estado del README dice v$version" ($readme -match [regex]::Escape("estado-v$version")) "el README declara otra version que el SSOT: actualiza el badge estado-v<x.y.z>"
+}
+
 Write-Host ""
 if ($script:fallos -gt 0) {
   Write-Host "== $($script:fallos) inconsistencia(s) de version. El sello mentiria: no siembres ni publiques asi. ==" -ForegroundColor Red

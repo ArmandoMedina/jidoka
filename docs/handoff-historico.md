@@ -4,6 +4,22 @@
 
 ---
 
+## Archivado 2026-07-22 (cierre del sprint 26: la histórica de FLU-1 sale del relevo)
+
+### Dónde estuvimos (2026-07-22 — «El pilar de flujo» FLU-1 · MERGEADO, `v1.28.0`, PR #122)
+
+**FLU-1 (el pilar JIT) en `main`** (ADR 0049): contratos con gate de HANDOFF/ROADMAP/CHANGELOG, expiración a `MUERTOS.md`, límite WIP, vista `estado-flujo`. Plan: [`sprint-22-pilar-de-flujo-plan.md`](sprints/sprint-22-pilar-de-flujo-plan.md). **Kaizen vigente:** ante «voy más lento que tú», el agente se detiene — el ritmo lo marca quien absorbe.
+
+---
+
+## Archivado 2026-07-22 (apertura del sprint 26: la histórica de la app de la tubería sale del relevo)
+
+### Dónde estuvimos (2026-07-21 — «La app de la tubería» · MERGEADO Y LIBERADO `v1.27.0`, PR #121)
+
+**El sprint "La app de la tubería" TERMINÓ (7/7)**, mergeado y liberado el 2026-07-22 con orden nombrada. La superficie del gobierno es ahora una **app de escritorio Tauri fiel a la maqueta** (ADR 0048); la extensión VS Code se retiró (`v1.26.0` subsumida, PR #120). Récord: [`sprint-21-app-tuberia-entrega.md`](sprints/sprint-21-app-tuberia-entrega.md). **[PENDIENTE del cliente] Gemba end-to-end** (la fidelidad de R2 ya la aprobó; el flujo completo no). Pendientes técnicos (nada bloquea): cert Authenticode del `.exe`, autoría de ligas en la app, atlas de los tools nuevos, multiplataforma del motor (fase 2). [Nota del archivado: el Gemba end-to-end y los pendientes siguen clasificados en el ROADMAP.]
+
+---
+
 ## Archivado 2026-07-21 (merge con main PR #119: la sección original del descubrimiento + la histórica de la linterna)
 
 ### Dónde estamos (2026-07-21 — El descubrimiento del sistema configurable CERRADO · rama `descubre/sistema-configurable-20260720` SIN MERGEAR, 8 commits) [nota del merge: la rama SÍ se mergeó — PR #119]

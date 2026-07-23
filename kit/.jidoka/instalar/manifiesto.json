@@ -94,6 +94,11 @@
       "Corre /jidoka:arranca en una sesion de Claude Code para activar el ritual.",
       "Enciende el muro server-side (paso humano): branch protection en main con el check 'andon' requerido y sin bypass.",
       "Copia una plantilla de kit/.jidoka/templates/ (ritual) o kit/.jidoka/templates/producto/ para tu primer plan, ADR o capacidad."
+    ],
+    "aviso": [
+      "OJO: el muro server-side AUN NO muerde. Lo que acabas de instalar son hooks",
+      "locales (saltables con --no-verify). El candado real es branch protection en",
+      "main con el check 'andon' requerido -- paso humano en GitHub, 1 sola vez (paso 3)."
     ]
   }
 }

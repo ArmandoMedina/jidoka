@@ -118,9 +118,9 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
     $secClave = ($secTexto -replace $uAcc,'u' -replace $iAcc,'i').ToLowerInvariant()
     switch ($secClave) {
       'urgente'    { $claseActual = 'urgente' }
-      'con fecha'  { $claseActual = 'confecha' }
+      'con fecha'  { $claseActual = 'con_fecha' }
       'normal'     { $claseActual = 'normal' }
-      'algun dia'  { $claseActual = 'algundia' }
+      'algun dia'  { $claseActual = 'algun_dia' }
       'referencia' { $claseActual = 'referencia' }
       default      { $claseActual = $null }
     }
@@ -135,7 +135,7 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
 
   # Fecha de vencimiento segun la clase.
   $venceDate = $null
-  if ($claseActual -eq 'confecha') {
+  if ($claseActual -eq 'con_fecha') {
     if ($ln -match 'vence:\s*(\d{4}-\d{2}-\d{2})') {
       $venceDate = [datetime]::ParseExact($matches[1], 'yyyy-MM-dd', [System.Globalization.CultureInfo]::InvariantCulture).Date
     }
@@ -143,7 +143,7 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
   else {
     if ($ln -match 'alta:\s*(\d{4}-\d{2}-\d{2})') {
       $altaDate = [datetime]::ParseExact($matches[1], 'yyyy-MM-dd', [System.Globalization.CultureInfo]::InvariantCulture).Date
-      $dias = switch ($claseActual) { 'urgente' { $diasUrgente } 'normal' { $diasNormal } 'algundia' { $diasAlgun } }
+      $dias = switch ($claseActual) { 'urgente' { $diasUrgente } 'normal' { $diasNormal } 'algun_dia' { $diasAlgun } }
       $venceDate = $altaDate.AddDays($dias)
     }
   }
@@ -168,13 +168,13 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
 }
 
 # --- Nombres legibles de clase (con acentos por [char] para el .md de salida) -------
-function Clase-Display($c) {
-  switch ($c) {
-    'urgente'    { return 'Urgente' }
-    'confecha'   { return 'Con fecha' }
-    'normal'     { return 'Normal' }
-    'algundia'   { return "Alg${uAcc}n d${iAcc}a" }
-    default      { return $c }
+function Clase-Display($k) {
+  switch ($k) {
+    'urgente'   { 'Urgente' }
+    'con_fecha' { 'Con fecha' }
+    'normal'    { 'Normal' }
+    'algun_dia' { "Alg${uAcc}n d${iAcc}a" }
+    default     { [string]$k }
   }
 }
 

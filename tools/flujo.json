@@ -17,8 +17,15 @@
   },
   "estado": {
     "wip_limite": 8,
-    "sprint_activo": "molde-sprints-qa (rama sprint/molde-sprints-qa-20260722)",
+    "sprint_activo": "la-2-0-estable · CERRADO (v1.31.0, PR #127); siguiente decidido: la ola de UI",
     "gembas_pendientes": [
+      {
+        "id": "la-2-0-estable",
+        "desde": "2026-07-22",
+        "aceptado": true,
+        "aceptado_fecha": "2026-07-22",
+        "que_ver": "El demo sin terminal del sprint 26: el README ya no promete lo que no hay (badge v-real, npx calificado); doble clic a qa_runs/la-2-0-estable-20260722/conformidad-docs.html (CONFORME por documento; interino hasta que la app lo absorba); leer docs/analisis/matriz-carriles-202607.md (que caminos de la IA tienen muro y cuales prosa); y el LOG.md con los pares rojo->verde de cada escenario de los escaneos"
+      },
       {
         "id": "flu-1-pilar-de-flujo",
         "desde": "2026-07-21",

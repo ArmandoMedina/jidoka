@@ -1,6 +1,6 @@
 # 0043 — La linterna del gobierno: una vista de solo lectura, no un gate
 
-- **Estado:** aceptado
+- **Estado:** reemplazado por decisión del cliente (2026-07-22, sprint 26): toda superficie del gobierno debe ser la app ([ADR 0048](0048-superficie-app-tuberia.md)); el mapa de enforcement será pantalla de la app (ROADMAP) y `estado-gobierno.ps1` se retirará del motor con el ADR de esa pantalla
 - **Fecha:** 2026-07-19
 - **Sprint:** La linterna del gobierno (`docs/sprints/sprint-17-linterna-gobierno-plan.md`)
 
