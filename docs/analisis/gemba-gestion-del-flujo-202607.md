@@ -147,3 +147,11 @@ Ninguna se poda del alcance. El orden es la propuesta; decide el cliente.
 - El benchmark se lanzó pero **su resultado no está incorporado** (ver arriba). La hipótesis de los dos pilares está **sin verificar contra fuentes**.
 - El corpus destilado vivía en un directorio temporal de sesión: **si se necesita re-analizar, hay que re-destilarlo** desde las transcripciones.
 - Este análisis mide el dolor y propone; **no construyó nada**. Ninguna de las 5 piezas existe.
+
+## Qué debe revisar el dueño (guion)
+
+1. **Verifica el problema.** Abre «Decisiones abiertas — sólo del cliente», punto 3 «Coordinación de escritores». Confirma que hay 3+ frentes escribiendo el mismo método en paralelo (esta sesión, el agente del lab, un agente en otra máquina/rama) más la rama del socio sin subir, y que «una sola sesión escritora por working tree» ya no cubre varias máquinas.
+2. **Decide si es tuyo ahora.** El informe lo llama «el mismo desmadre una capa arriba»: sin resolverlo, la capa PM «producirá tres versiones de la verdad sobre qué está cerrado». Decide si este ítem bloquea a las otras piezas —el estado CERRADO depende de una sola verdad— o corre en paralelo.
+3. **Ojo con la dependencia oculta.** Este ítem nace de un informe cuya **hipótesis central sigue sin verificar**: el benchmark de los dos pilares se lanzó y su resultado **no se incorporó**. Decide si la coordinación se diseña ya o espera a relanzar el benchmark del que cuelgan las 5 piezas.
+4. **El criterio de decisión.** Si pesa más «no perder trabajo entre máquinas» → priorízalo antes de abrir frentes nuevos. Si pesa más «no construir sobre hipótesis sin verificar» → primero relanza el benchmark.
+5. **Recházalo si** la propuesta que llegue trata esto como un problema de git/branching puro: el informe lo enmarca como **flujo** (qué está cerrado y quién lo declara), no como merge de ramas.

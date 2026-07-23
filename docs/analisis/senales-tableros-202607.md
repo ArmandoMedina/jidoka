@@ -44,3 +44,11 @@
 
 Todo lo demás que las maquetas dibujen sale de fuentes que ya existen — la ola de UI es
 mayormente **superficie sobre motor existente**, no motor nuevo.
+
+## Qué debe revisar el dueño (guion)
+
+1. **Verifica el hueco.** Abre la tabla del Tablero Operar y localiza O8 «Pieza sin validar / validación vieja» y su gemelo C8: ambos marcados `REQUIERE MECANISMO` porque **la propiedad no existe hoy**. Confirma que ninguna pieza guarda cuándo la validaste por última vez.
+2. **Decide dónde vive el dato.** El informe propone campo `validado_fecha` por pieza en `contratos.json` — pero `contratos.json` **aún no existe en la nave** (camino de escritura probado, no ejercido). Decide: ¿este ítem espera a que `contratos.json` se ejerza de punta a punta, o se adelanta con otro almacén?
+3. **Decide la firma.** El informe ata la escritura al motor con firma (ADR 0047, vía `override.ps1`/`parametrizar.ps1`). Decide: ¿validar una pieza exige firma como un candado, o es un sello ligero sin ceremonia? Es el trade-off fricción vs. autoridad del sello.
+4. **Decide el umbral de «vieja».** El reloj de O8 son «días desde la última validación». Decide a partir de cuántos días una validación se marca vencida y la pieza vuelve a pedir tus ojos — sin umbral, la señal nunca se enciende.
+5. **Recházalo si** la maqueta dibuja «última validación» tomando el dato de una fuente ya existente: el informe es explícito en que esta es una de las **4 piezas de motor nuevo**, no superficie sobre motor existente.

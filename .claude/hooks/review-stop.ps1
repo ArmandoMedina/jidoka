@@ -31,8 +31,34 @@ function Write-GitFailWarning($comando, $detalle) {
 
 # Areas de codigo del manifiesto (las que piden "revisa": true). Se auto-configura.
 $manifestPath = Join-Path $repo 'tools/blast-radius.json'
-if (-not (Test-Path $manifestPath)) { exit 0 }
-try { $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json } catch { exit 0 }
+# FALLA CERRADA (R5): sin la ley el muro no puede saber que codigo se toco -> NO apruebo a ciegas.
+# Antes salia exit 0 (silencio, dejaba cerrar). Alineado con el criterio de fallar-cerrado del gate.
+if (-not (Test-Path $manifestPath)) {
+  [Console]::Error.WriteLine("BLOQUEO (review-stop): no encuentro la ley tools/blast-radius.json. No apruebo a ciegas: sin la ley el muro no sabe que codigo exige revision. Restaura tools/blast-radius.json (o corre el instalador) antes de cerrar.")
+  exit 2
+}
+# FALLA CERRADA (R5, camino gemelo): la ley EXISTE pero NO parsea (JSON corrupto/truncado) es la MISMA
+# clase de "aprobar a ciegas" que la ley ausente -- antes salia exit 0 (silencio, dejaba cerrar). Un
+# JSON corrupto (edicion interrumpida) se dispara mas facil que borrar el archivo. Ahora falla cerrado.
+try { $manifest = Get-Content $manifestPath -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop }
+catch {
+  [Console]::Error.WriteLine("BLOQUEO (review-stop): la ley tools/blast-radius.json existe pero no puedo medirla (JSON corrupto/truncado): $($_.Exception.Message). No apruebo a ciegas: sin poder leer la ley el muro no sabe que codigo exige revision. Repara tools/blast-radius.json (o corre el instalador) antes de cerrar.")
+  exit 2
+}
+if (-not $manifest) {
+  [Console]::Error.WriteLine("BLOQUEO (review-stop): la ley tools/blast-radius.json parseo a algo vacio/no-usable. No apruebo a ciegas: sin la ley el muro no sabe que codigo exige revision. Repara tools/blast-radius.json antes de cerrar.")
+  exit 2
+}
+# FALLA CERRADA (R5, camino gemelo): la ley parsea a un objeto/array SIN NINGUNA entrada de area usable
+# (un '{}' objeto vacio parsea a un PSCustomObject truthy que ESQUIVA el guard '-not $manifest' de arriba,
+# y $areasCod saldria 0 -> se declararia 'dormido' y aprobaria a ciegas en silencio). "Usable" = al menos
+# un area con nombre+fuente. OJO: esto NO rompe la dormancia legitima -- una ley VALIDA con areas pero
+# ninguna con "revisa": true SI tiene entradas usables (pasa este guard) y sigue dormida en exit 0.
+$areasUsables = @($manifest | Where-Object { $_ -and $_.nombre -and $_.fuente })
+if ($areasUsables.Count -eq 0) {
+  [Console]::Error.WriteLine("BLOQUEO (review-stop): la ley tools/blast-radius.json no tiene contenido usable (ninguna entrada de area con nombre+fuente; p.ej. un objeto vacio '{}'). No apruebo a ciegas: sin la ley el muro no sabe que codigo exige revision. Repara tools/blast-radius.json antes de cerrar.")
+  exit 2
+}
 $areasCod = @($manifest | Where-Object { $_.revisa -eq $true })
 if ($areasCod.Count -eq 0) { exit 0 }   # dormido: ninguna area pide revision
 
@@ -45,9 +71,19 @@ function Test-Pattern($path, $pattern) {
 # sin esto git COLAPSA un directorio recien-nacido y sin trackear en una sola entrada
 # 'dir/', y el glob de 'fuente' no casa -> el gate falla-ABIERTO justo en el deliverable
 # nuevo que existe para atrapar (issue #50). Con -uall lista archivo por archivo.
-$statusRaw = git status --porcelain --untracked-files=all 2>&1
+$statusRaw = git -c core.quotepath=false status --porcelain --untracked-files=all 2>&1
 if ($LASTEXITCODE -ne 0) { Write-GitFailWarning 'git status --porcelain' ($statusRaw -join ' '); exit 0 }
-$changed = @($statusRaw) | ForEach-Object { $s = "$_"; if ($s.Length -gt 3) { $s.Substring(3).Trim() } }
+# Se conserva CUALES estan sin rastrear (codigo '??'): git diff HEAD no ve su contenido, asi que
+# el hash de mas abajo tiene que anexarlo aparte (si no, un archivo nuevo escapa del marcador).
+$changed = @()
+$untracked = @{}
+foreach ($ln in @($statusRaw)) {
+  $s = "$ln"
+  if ($s.Length -le 3) { continue }
+  $f = $s.Substring(3).Trim()
+  $changed += $f
+  if ($s.Substring(0,2) -eq '??') { $untracked[$f] = $true }
+}
 $codChanged = @()
 foreach ($f in $changed) {
   foreach ($area in $areasCod) {
@@ -61,12 +97,26 @@ foreach ($f in $changed) {
 }
 if ($codChanged.Count -eq 0) { exit 0 }
 
-# SHA del estado revisable actual (diff + lista de archivos).
+# SHA del estado revisable actual. git diff HEAD ve el contenido de los archivos RASTREADOS pero
+# NO el de los archivos SIN RASTREAR (nuevos): sin esto, un archivo nuevo del area revisada podia
+# cambiar de contenido sin mover el SHA -> el marcador de "revisado" no lo cubre (medido en vivo
+# 2026-07-23). Por eso el payload anexa el CONTENIDO de cada archivo sin rastrear del area.
 $diffRaw = git diff HEAD -- $codChanged 2>&1
 if ($LASTEXITCODE -ne 0) { Write-GitFailWarning 'git diff HEAD -- <codigo>' ($diffRaw -join ' '); exit 0 }
 $payload = (($diffRaw) -join "`n") + "|" + (($codChanged) -join "`n")
+foreach ($f in $codChanged) {
+  if ($untracked[$f]) {
+    $abs = Join-Path $repo $f
+    $body = ''
+    if (Test-Path -LiteralPath $abs) { $body = (Get-Content -LiteralPath $abs -Raw -ErrorAction SilentlyContinue) }
+    $payload += "`n>>SIN-RASTREAR:$f`n" + [string]$body
+  }
+}
 $sha1 = New-Object System.Security.Cryptography.SHA1Managed
 $sha = [System.BitConverter]::ToString($sha1.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($payload))).Replace('-','')
+# Semilla de diagnostico SOLO para el self-test (el harness nunca la enciende): expone el SHA por
+# stderr para poder comprobar que CAMBIA cuando cambia un archivo sin rastrear (defecto 2, R3).
+if ($env:JIDOKA_REVIEW_EMIT_SHA) { [Console]::Error.WriteLine("REVIEW_SHA=$sha") }
 
 $marker = Join-Path $repo '.claude\.review-marker'
 $last = if (Test-Path $marker) { (Get-Content $marker -Raw).Trim() } else { '' }
@@ -75,9 +125,9 @@ if ($sha -eq $last) { exit 0 }   # este diff exacto ya se reviso
 $ctx = "Hay codigo sin revisar (" + (($codChanged | Select-Object -First 5) -join ', ') + "). " +
        "Corre /code-review sobre el diff actual ANTES de cerrar (y antes del escribano). " +
        "No uses --no-verify ni maquilles el estado staged para pasar (disparo no-verify-es-teatro): " +
-       "el muro real es el required check server-side. Al terminar la revision y atender o anotar los " +
-       "hallazgos, marca este diff como revisado ejecutando exactamente: " +
-       "Set-Content -Encoding ASCII '.claude/.review-marker' '$sha'"
+       "el muro real es el required check server-side. La firma del marcador de revision " +
+       "(.claude/.review-marker) la pone un HUMANO tras revisar, no el agente: este hook NO dicta el " +
+       "comando de firma -- dictarlo seria entregar la llave junto a la cerradura."
 $out = @{
   decision = 'block'
   reason   = 'Codigo sin revisar. Corre /code-review sobre el diff antes de cerrar.'

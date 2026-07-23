@@ -115,3 +115,16 @@ Authenticode (mitigada por `sembrar-manual`), cartones de la app, comunidad.
 > Los cuatro informes completos con toda la evidencia archivo:línea viven en la conversación de
 > la sesión 2026-07-22; este doc es la síntesis citable. Los ítems accionables quedaron en
 > `ROADMAP.md` con contrato de ítem.
+
+## Qué debe revisar el dueño (guion)
+
+El informe agrupa el trabajo en BLOQUEA-2.0 (~5h) + FIABILIDAD (~6h) + SUPERFICIES (~6h) y difiere una ola (V1-V4). Lo que decides:
+
+1. **Alcance del corte.** Abre «La lista cerrada del corte estable 2.0». Decide si la 2.0 son los tres bloques o solo BLOQUEA. Recházalo si un V1-V4 se cuela al corte: el informe los declara explícitamente fuera.
+2. **Promesas honestas (B1-B3).** Verifica el claim: `package.json:32-36` declara `darwin/linux` sin evidencia (contradice la propia ley del repo) y `npx jidoka-method` se promete 3× sin publicar. Decide por cada uno: recortar o cumplir; y si el aviso post-instalar «branch protection es manual» bloquea el corte o solo avisa.
+3. **Self-test anti-drift (F1).** Verifica que `Test-Pattern` vive ×8 byte-idénticas y que `Clase-Display` **ya divergió** (`con_fecha` vs `confecha`). Decide: self-test que muerda cuando las copias divergen vs. DRY — el informe descarta DRY por doctrina, confirma que aceptas «la copia como contrato verificado».
+4. **Salvavidas a hooks (F3/H7).** Verifica que `no-borres-el-motor` (`verificar.ps1:160`) no cubre `.claude/hooks/*`, `settings.json` ni `.githooks/*`. Decide: cerrar el hueco en el corte o aceptarlo como deuda.
+5. **UI dice la verdad por documento (V1).** Verifica el teatro confesado: el radio «Estructura gobernada» (`app/ui/index.html:693`) escribe `contratos.json`, pero el guardián lee `docs-gobernados.json` que `parametrizar.ps1` **no toca**. Decide si consolidar los 4 ledgers entra a 2.0 o a la ola.
+6. **Parametrizar secciones desde la UI (V2) — exige ADR primero.** Decide antes de diseñar: re-clasificar `docs-gobernados.json` de `mecanica` (clobber) a instancia (no-clobber). Recházalo si se codea la UI sin ese ADR: pisaría las secciones del cliente.
+7. **Mapa de enforcement (S2) + matriz de carriles (S3).** Verifica que `estado-gobierno.ps1` ya emite el HTML del grafo y nadie lo llama en el flujo. Decide cablearlo con self-test vista==rutear; y si para S3 basta publicar la matriz muro/prosa/nada como doc vivo, o exiges además la suite `probar-caminos.ps1`.
+8. **conformidad-docs.html (S1).** Decide si el tablero sin terminal entra al corte estable o espera a la siguiente ola.

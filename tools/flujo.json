@@ -9,6 +9,8 @@
     "techo_lineas": 90,
     "historico": "docs/roadmap-historico.md",
     "muertos": "docs/MUERTOS.md",
+    "procedencia": true,
+    "guion_revision": true,
     "vencimiento_dias": { "urgente": 14, "normal": 90, "algun-dia": 180 }
   },
   "changelog": {
@@ -39,6 +41,13 @@
         "aceptado": true,
         "aceptado_fecha": "2026-07-22",
         "que_ver": "El molde sin terminal: docs/sprints/README.md numerado en orden (sprint-NN); dos -entrega.md con las mismas secciones; dos LOG.md de qa_runs con misma estructura (Metodo, Resultados, Veredicto); kit/.jidoka/templates/README.md dice donde vive la regla de cada familia; y el reporte de conformidad marca CONFORME/DESVIADO por familia (50 CONFORME hoy)"
+      },
+      {
+        "id": "sprint-28-volver-muro",
+        "desde": "2026-07-23",
+        "aceptado": true,
+        "aceptado_fecha": "2026-07-23",
+        "que_ver": "los 5 muros del sprint muerden (evidencia qa_runs/gemba-volver-muro-20260723/LOG.md)"
       }
     ]
   }

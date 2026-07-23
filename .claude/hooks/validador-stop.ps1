@@ -46,8 +46,34 @@ function Write-GitFailWarning($comando, $detalle) {
 
 # Areas de datos/spec del manifiesto (rol validador). Se auto-configura.
 $manifestPath = Join-Path $repo 'tools/blast-radius.json'
-if (-not (Test-Path $manifestPath)) { exit 0 }
-try { $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json } catch { exit 0 }
+# FALLA CERRADA (R5): sin la ley el muro no puede saber que areas son de spec/datos -> NO apruebo a ciegas.
+# Antes salia exit 0 (silencio, dejaba cerrar). Alineado con el criterio de fallar-cerrado del gate.
+if (-not (Test-Path $manifestPath)) {
+  [Console]::Error.WriteLine("BLOQUEO (validador-stop): no encuentro la ley tools/blast-radius.json. No apruebo a ciegas: sin la ley el muro no sabe que specs/datos exigen evidencia de corrida. Restaura tools/blast-radius.json (o corre el instalador) antes de cerrar.")
+  exit 2
+}
+# FALLA CERRADA (R5, camino gemelo): la ley EXISTE pero NO parsea (JSON corrupto/truncado) es la MISMA
+# clase de "aprobar a ciegas" que la ley ausente -- antes salia exit 0 (silencio, dejaba cerrar). Un
+# JSON corrupto (edicion interrumpida) se dispara mas facil que borrar el archivo. Ahora falla cerrado.
+try { $manifest = Get-Content $manifestPath -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop }
+catch {
+  [Console]::Error.WriteLine("BLOQUEO (validador-stop): la ley tools/blast-radius.json existe pero no puedo medirla (JSON corrupto/truncado): $($_.Exception.Message). No apruebo a ciegas: sin poder leer la ley el muro no sabe que specs/datos exigen evidencia de corrida. Repara tools/blast-radius.json (o corre el instalador) antes de cerrar.")
+  exit 2
+}
+if (-not $manifest) {
+  [Console]::Error.WriteLine("BLOQUEO (validador-stop): la ley tools/blast-radius.json parseo a algo vacio/no-usable. No apruebo a ciegas: sin la ley el muro no sabe que specs/datos exigen evidencia de corrida. Repara tools/blast-radius.json antes de cerrar.")
+  exit 2
+}
+# FALLA CERRADA (R5, camino gemelo): la ley parsea a un objeto/array SIN NINGUNA entrada de area usable
+# (un '{}' objeto vacio parsea a un PSCustomObject truthy que ESQUIVA el guard '-not $manifest' de arriba,
+# y $areasVal saldria 0 -> se declararia 'dormido' y aprobaria a ciegas en silencio). "Usable" = al menos
+# un area con nombre+fuente. OJO: esto NO rompe la dormancia legitima -- una ley VALIDA con areas pero
+# ninguna con rol validador SI tiene entradas usables (pasa este guard) y sigue dormida en exit 0.
+$areasUsables = @($manifest | Where-Object { $_ -and $_.nombre -and $_.fuente })
+if ($areasUsables.Count -eq 0) {
+  [Console]::Error.WriteLine("BLOQUEO (validador-stop): la ley tools/blast-radius.json no tiene contenido usable (ninguna entrada de area con nombre+fuente; p.ej. un objeto vacio '{}'). No apruebo a ciegas: sin la ley el muro no sabe que specs/datos exigen evidencia de corrida. Repara tools/blast-radius.json antes de cerrar.")
+  exit 2
+}
 $areasVal = @($manifest | Where-Object { $_.rol -eq 'validador' })
 if ($areasVal.Count -eq 0) { exit 0 }   # dormido: no hay areas de validacion por medicion
 
@@ -58,7 +84,9 @@ function Test-Pattern($path, $pattern) {
 
 # Cambios de spec/datos sin commitear. -uall (--untracked-files=all): sin esto git COLAPSA un
 # dir recien-nacido sin trackear en 'dir/' y el glob de 'fuente' no casa -> fallo-abierto (#50).
-$statusRaw = git status --porcelain --untracked-files=all 2>&1
+# core.quotepath=false: que git NO cite/octalice rutas no-ASCII (asi el glob de 'fuente'
+# casa y el match de area no falla-abierto con nombres acentuados; espejo de review-stop).
+$statusRaw = git -c core.quotepath=false status --porcelain --untracked-files=all 2>&1
 if ($LASTEXITCODE -ne 0) { Write-GitFailWarning 'git status --porcelain' ($statusRaw -join ' '); exit 0 }
 $changed = @($statusRaw) | ForEach-Object { $s = "$_"; if ($s.Length -gt 3) { $s.Substring(3).Trim() } }
 $valChanged = @()

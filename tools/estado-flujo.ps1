@@ -200,7 +200,13 @@ function Parse-Roadmap($roadmapPath) {
     if ($ln -match '\*\*(.+?)\*\*') { $titulo = $matches[1].Trim() }
     else { $titulo = ($ln -replace '^\s*-\s*','').Trim(); if ($titulo.Length -gt 80) { $titulo = $titulo.Substring(0,80) } }
     $alta = $null;    if ($ln -match 'alta:\s*(\d{4}-\d{2}-\d{2})')   { $alta = $matches[1] }
-    $apetito = $null; if ($ln -match 'apetito:\s*(\d+h)')             { $apetito = $matches[1] }
+    # Apetito en HORAS (Nh) O MINUTOS (Nm): el contrato acepta menos de una hora, asi que la
+    # vista no debe tragarse el sub-hora (con solo \d+h un 'apetito:30m' quedaria invisible).
+    # Ancla de fin de unidad IDENTICA al gate (?![A-Za-z0-9]): la parte [A-Za-z] mata
+    # 'apetito:30min'/'2hrs' (casarian el '30m'/'2h' de adentro); la parte [0-9] mata
+    # 'apetito:30m5h' (el gate lo BLOQUEA, asi que la vista NO debe extraer '30m' truncado --
+    # antes con (?![A-Za-z]) divergia del gate y mostraba una unidad que el gate rechaza, R6).
+    $apetito = $null; if ($ln -match 'apetito:(\d+[hm])(?![A-Za-z0-9])')  { $apetito = $matches[1] }
     $vence = $null;   if ($ln -match 'vence:\s*(\d{4}-\d{2}-\d{2})')  { $vence = $matches[1] }
     $espera = $null;  if ($ln -match 'espera:\s*([A-Za-z0-9_-]+)')    { $espera = $matches[1] }
 
