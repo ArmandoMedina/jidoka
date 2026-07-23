@@ -322,10 +322,25 @@ if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
             $rel = $m.Value
             if (-not $rGuionCache.ContainsKey($rel)) {
               $tiene = $false
-              if (Test-Path $rel) {
-                $cont = Get-Content $rel -Encoding UTF8 -Raw
-                # Encabezado ## o ### cuyo texto trae 'revisar el due(no)' o 'guion de revis(ion)'.
-                if ($cont -match '(?im)^#{2,3}\s.*(revisar el due|guion de revis)') { $tiene = $true }
+              # Path traversal (R2): '[^\s)]+' acepta '..', asi un puntero como
+              # 'docs/analisis/../../fuera.md' leeria un .md FUERA de docs/analisis/ (incluso
+              # fuera del repo) y satisfaria el gate. Se RECHAZA de plano cualquier '..'
+              # (puntero invalido -> no cuenta como guion) y ademas se confirma que la ruta
+              # RESUELTA cae dentro de docs/analisis/ del repo. La lectura se acota a < 1MB
+              # (no leer archivos gigantes -- DoS leve).
+              if ($rel -notmatch '\.\.') {
+                $baseDir = [System.IO.Path]::GetFullPath((Join-Path $Repo 'docs/analisis'))
+                $full = [System.IO.Path]::GetFullPath((Join-Path $Repo $rel))
+                $sep = [System.IO.Path]::DirectorySeparatorChar
+                $dentro = $full.StartsWith($baseDir + $sep, [System.StringComparison]::OrdinalIgnoreCase)
+                if ($dentro -and (Test-Path -LiteralPath $full)) {
+                  $fi = Get-Item -LiteralPath $full
+                  if ($fi.Length -lt 1048576) {
+                    $cont = Get-Content -LiteralPath $full -Encoding UTF8 -Raw
+                    # Encabezado ## o ### cuyo texto trae 'revisar el due(no)' o 'guion de revis(ion)'.
+                    if ($cont -match '(?im)^#{2,3}\s.*(revisar el due|guion de revis)') { $tiene = $true }
+                  }
+                }
               }
               $rGuionCache[$rel] = $tiene
             }
@@ -335,11 +350,16 @@ if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
         if (-not $tieneGuion) { $faltan += 'guion de revision (informe docs/analisis/ con seccion "Que debe revisar el dueno", o record docs/sprints/)' }
       }
       if ($claseActual -eq 'urgente' -or $claseActual -eq 'confecha' -or $claseActual -eq 'normal') {
-        if ($ln -notmatch 'apetito:\d+h') { $faltan += 'apetito:Nh' }
+        # El apetito es HORAS (Nh) O MINUTOS (Nm, entero): el presupuesto de atencion del
+        # dueno es la restriccion del sistema y hay trabajo que vale menos de una hora --
+        # forzar horas enteras SOBREESTIMA el backlog (informe huella-en-labs 2026-07-23).
+        # Ancla de fin de unidad (?![A-Za-z]): sin ella 'apetito:30min'/'2hrs'/'5horas'
+        # casarian el '30m'/'2h' DE ADENTRO y colarian una unidad basura como valida (R6).
+        if ($ln -notmatch 'apetito:\d+[hm](?![A-Za-z])') { $faltan += 'apetito:Nh o Nm' }
       }
       if ($claseActual -eq 'confecha' -and $ln -notmatch 'vence:\d{4}-\d{2}-\d{2}') { $faltan += 'vence:AAAA-MM-DD' }
       if ($faltan.Count -gt 0) {
-        Block "[contrato-roadmap] el item '$rNombre' no declara su contrato: falta(n) $($faltan -join ', '). Todo item vivo trae [alta:AAAA-MM-DD] (Urgente/Con fecha/Normal ademas apetito:Nh; Con fecha ademas vence:AAAA-MM-DD)."
+        Block "[contrato-roadmap] el item '$rNombre' no declara su contrato: falta(n) $($faltan -join ', '). Todo item vivo trae [alta:AAAA-MM-DD] (Urgente/Con fecha/Normal ademas apetito:Nh o Nm; Con fecha ademas vence:AAAA-MM-DD)."
         $rotoRoadmap = $true
       }
     }

@@ -564,6 +564,39 @@ Add-Informe $dirG5 'docs/analisis/sin-guion-202607.md' $informeSinGuion
 $rG5 = Invoke-Verificar $dirG5
 if ($rG5.Code -eq 0) { Ok "roadmap-guion-off: exit 0 (sin el opt-in el guion NO se exige -- hijo intacto)" } else { No "roadmap-guion-off: esperaba exit 0, fue $($rG5.Code)`n$($rG5.Out)" }
 
+# ------------------------------------------------------------------ (g6) path traversal -> NO cuenta como guion
+# Seguridad (R2): un item cita 'docs/analisis/../../fuera.md'. El regex 'docs/analisis/[^\s)]+\.md'
+# casa ESA ruta con '..' adentro; sin el guardia, Test-Path la resuelve a fuera.md FUERA de
+# docs/analisis/ (aqui, la raiz del fixture) y -- si trae el encabezado de guion -- satisface el
+# gate leyendo un .md ajeno (PoC: exit 0 con un archivo externo). Con el guardia, '..' se rechaza
+# como puntero invalido: el item queda SIN guion -> BLOQUEA (exit 1). El fuera.md SI trae el
+# encabezado a proposito: lo que bloquea es el traversal, no la ausencia de la seccion.
+$rGui6 = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Item con traversal** [alta:2026-07-21${sep}apetito:2h] -- ver [informe](docs/analisis/../../fuera.md)"
+)
+$dirG6 = New-RoadmapFixture 'roadmap-guion-traversal' (New-FlujoRoadmapGuion 90) $rGui6
+Add-Informe $dirG6 'fuera.md' $informeConGuion   # FUERA de docs/analisis/ (raiz del fixture)
+$rG6 = Invoke-Verificar $dirG6
+if ($rG6.Code -eq 1) { Ok "roadmap-guion-traversal: exit 1 (el traversal '..' NO cuenta como guion -- PoC bloqueado)" } else { No "roadmap-guion-traversal: esperaba exit 1 (traversal bloqueado), fue $($rG6.Code)`n$($rG6.Out)" }
+if ($rG6.Out -match 'contrato-roadmap' -and $rG6.Out -match 'guion de revision') { Ok "roadmap-guion-traversal: acusa el guion faltante (el .md externo no lo satisface)" } else { No "roadmap-guion-traversal: esperaba acusar guion de revision`n$($rG6.Out)" }
+
+# ------------------------------------------------------------------ (g7) legitimo sin '..' SIGUE pasando
+# El guardia del traversal no debe romper el camino feliz: un 'docs/analisis/con-guion.md' sin
+# '..', dentro de docs/analisis/, con la seccion de guion, SIGUE contando como guion -> exit 0.
+$rGui7 = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Item con guion legitimo** [alta:2026-07-21${sep}apetito:2h] -- ver [informe](docs/analisis/con-guion.md)"
+)
+$dirG7 = New-RoadmapFixture 'roadmap-guion-legitimo' (New-FlujoRoadmapGuion 90) $rGui7
+Add-Informe $dirG7 'docs/analisis/con-guion.md' $informeConGuion
+$rG7 = Invoke-Verificar $dirG7
+if ($rG7.Code -eq 0) { Ok "roadmap-guion-legitimo: exit 0 (informe legitimo sin '..' sigue contando como guion)" } else { No "roadmap-guion-legitimo: esperaba exit 0, fue $($rG7.Code)`n$($rG7.Out)" }
+
 Write-Host ""
 Write-Host "== Contrato del CHANGELOG (check [contrato-changelog]): fixtures ROJO->VERDE =="
 
@@ -1065,6 +1098,196 @@ New-Item -ItemType Directory -Path $dirR2 -Force | Out-Null
 $rR2 = Invoke-Reporte $dirR2
 if ($rR2.Code -eq 0 -and $rR2.Html) { Ok "reporte-minimo: genera sin tronar (exit 0) pese a que faltan flujo.json y MUERTOS" } else { No "reporte-minimo: esperaba exit 0 + .html, fue $($rR2.Code)`n$($rR2.Out)" }
 if ($rR2.Html -match 'Nada se ha descartado') { Ok "reporte-minimo: la seccion 4 dice 'Nada se ha descartado' (degrada con gracia)" } else { No "reporte-minimo: esperaba 'Nada se ha descartado' sin MUERTOS`n$($rR2.Out)" }
+
+Write-Host ""
+Write-Host "== El apetito en MINUTOS (R6): el contrato acepta apetito:Nm ademas de apetito:Nh =="
+
+# El presupuesto de atencion del dueno es LA restriccion del sistema, y hay trabajo que vale
+# menos de una hora. Antes el check exigia apetito:\d+h, asi que todo item chico se declaraba
+# '1h' y el backlog SOBREESTIMABA ese presupuesto (informe huella-en-labs 2026-07-23). Ahora
+# acepta horas (Nh) O minutos (Nm, entero). Fixtures ROJO->VERDE con el verificar REAL.
+
+# ------------------------------------------------------------------ (m1) apetito:30m aceptado
+$rMin30 = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Tarea de media hora** [alta:2026-07-21${sep}apetito:30m] -- menos de una hora, ahora expresable"
+)
+$dirM1 = New-RoadmapFixture 'roadmap-apetito-30m' (New-FlujoRoadmap 90) $rMin30
+$rM1 = Invoke-Verificar $dirM1
+if ($rM1.Code -eq 0) { Ok "roadmap-apetito-30m: exit 0 (apetito:30m aceptado)" } else { No "roadmap-apetito-30m: esperaba exit 0, fue $($rM1.Code)`n$($rM1.Out)" }
+if ($rM1.Out -match '\[contrato-roadmap\]' -and $rM1.Out -match 'dentro de contrato') { Ok "roadmap-apetito-30m: ROADMAP dentro de contrato con apetito en minutos" } else { No "roadmap-apetito-30m: esperaba '[contrato-roadmap] ... dentro de contrato'`n$($rM1.Out)" }
+
+# ------------------------------------------------------------------ (m2) apetito:2m bajo Normal pasa
+$rMin2 = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Tarea de dos minutos** [alta:2026-07-21${sep}apetito:2m] -- trivial pero contabilizada al minuto"
+)
+$dirM2 = New-RoadmapFixture 'roadmap-apetito-2m' (New-FlujoRoadmap 90) $rMin2
+$rM2 = Invoke-Verificar $dirM2
+if ($rM2.Code -eq 0) { Ok "roadmap-apetito-2m: exit 0 (apetito:2m pasa el contrato bajo Normal)" } else { No "roadmap-apetito-2m: esperaba exit 0, fue $($rM2.Code)`n$($rM2.Out)" }
+
+# ------------------------------------------------------------------ (m3) apetito:4h SIGUE valido
+# La regresion: aceptar minutos NO debe romper las horas enteras que ya estaban en uso.
+$rHoras4 = @(
+  "# Roadmap fixture",
+  "",
+  "## Urgente",
+  "- **Sigue en horas** [alta:2026-07-21${sep}apetito:4h] -- las horas no se rompieron"
+)
+$dirM3 = New-RoadmapFixture 'roadmap-apetito-4h' (New-FlujoRoadmap 90) $rHoras4
+$rM3 = Invoke-Verificar $dirM3
+if ($rM3.Code -eq 0) { Ok "roadmap-apetito-4h: exit 0 (apetito:4h sigue valido -- Nh intacto)" } else { No "roadmap-apetito-4h: esperaba exit 0, fue $($rM3.Code)`n$($rM3.Out)" }
+
+# ------------------------------------------------------------------ (m4) apetito sin unidad sigue BLOQUEANDO
+# Aflojar a minutos no es abrir el campo: un 'apetito:30' pelado (ni h ni m) sigue sin declarar
+# su contrato -> BLOQUEA. Que el muro no se abra de mas es tan importante como que acepte Nm.
+$rMalApetito = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Apetito sin unidad** [alta:2026-07-21${sep}apetito:30] -- ni horas ni minutos, invalido"
+)
+$dirM4 = New-RoadmapFixture 'roadmap-apetito-malo' (New-FlujoRoadmap 90) $rMalApetito
+$rM4 = Invoke-Verificar $dirM4
+if ($rM4.Code -eq 1 -and $rM4.Out -match 'apetito:Nh o Nm') { Ok "roadmap-apetito-malo: exit 1 (apetito:30 sin unidad sigue bloqueando; el check no se abrio de mas)" } else { No "roadmap-apetito-malo: esperaba exit 1 acusando 'apetito:Nh o Nm', fue $($rM4.Code)`n$($rM4.Out)" }
+
+# ------------------------------------------------------------------ (m5) la VISTA no pierde el sub-hora
+# estado-flujo -Json parsea apetito: para la vista; con solo \d+h un 'apetito:30m' quedaba
+# INVISIBLE (campo vacio). Ahora lo captura y lo emite tal cual en siguientes[].
+$vistaMinFlujo = '{ "estado": { "sprint_activo": "r6-min" }, "roadmap": { "techo_lineas": 90 } }'
+$vistaMinRoad = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Sub-hora en la vista** [alta:2026-07-21${sep}apetito:30m] -- media hora"
+)
+$dirM5 = New-VistaFixture 'vista-apetito-min' $vistaMinFlujo $vistaMinRoad $null
+$rM5 = Invoke-EstadoJson $dirM5
+$objM5 = $null
+try { $objM5 = $rM5.Out | ConvertFrom-Json } catch { $objM5 = $null }
+if ($rM5.Code -eq 0 -and $objM5 -and @($objM5.siguientes).Count -ge 1 -and $objM5.siguientes[0].apetito -eq '30m') { Ok "vista-apetito-min: la vista captura y muestra apetito:30m (no se lo traga)" } else { No "vista-apetito-min: esperaba siguientes[0].apetito == '30m', fue $($rM5.Out)" }
+
+# ==== Ancla de fin de unidad del apetito (R6): sin '(?![A-Za-z])' el regex 'apetito:\d+[hm]'
+# casaba el '30m'/'2h' DE ADENTRO de 'apetito:30min'/'2hrs'/'5horas' y colaba una unidad basura
+# como valida. La cura ancla el fin: solo Nh/Nm seguido de NO-letra vale. Fixtures ROJO->VERDE.
+
+# ------------------------------------------------------------------ (m6) apetito:30min BLOQUEA
+$rMin30min = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Unidad basura min** [alta:2026-07-21${sep}apetito:30min] -- 'min' no es la unidad, debe bloquear"
+)
+$dirM6 = New-RoadmapFixture 'roadmap-apetito-30min' (New-FlujoRoadmap 90) $rMin30min
+$rM6 = Invoke-Verificar $dirM6
+if ($rM6.Code -eq 1 -and $rM6.Out -match 'apetito:Nh o Nm') { Ok "roadmap-apetito-30min: exit 1 (apetito:30min NO cuela el '30m' de adentro)" } else { No "roadmap-apetito-30min: esperaba exit 1 acusando 'apetito:Nh o Nm', fue $($rM6.Code)`n$($rM6.Out)" }
+
+# ------------------------------------------------------------------ (m7) apetito:2hrs BLOQUEA
+$rHrs2 = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Unidad basura hrs** [alta:2026-07-21${sep}apetito:2hrs] -- 'hrs' no es la unidad, debe bloquear"
+)
+$dirM7 = New-RoadmapFixture 'roadmap-apetito-2hrs' (New-FlujoRoadmap 90) $rHrs2
+$rM7 = Invoke-Verificar $dirM7
+if ($rM7.Code -eq 1 -and $rM7.Out -match 'apetito:Nh o Nm') { Ok "roadmap-apetito-2hrs: exit 1 (apetito:2hrs NO cuela el '2h' de adentro)" } else { No "roadmap-apetito-2hrs: esperaba exit 1 acusando 'apetito:Nh o Nm', fue $($rM7.Code)`n$($rM7.Out)" }
+
+# ------------------------------------------------------------------ (m8) apetito:30m SIGUE pasando
+# La regresion: anclar el fin NO debe romper la unidad legitima 'm' al final del token.
+$rMin30ok = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Media hora legitima** [alta:2026-07-21${sep}apetito:30m] -- unidad valida, pasa"
+)
+$dirM8 = New-RoadmapFixture 'roadmap-apetito-30m-ok' (New-FlujoRoadmap 90) $rMin30ok
+$rM8 = Invoke-Verificar $dirM8
+if ($rM8.Code -eq 0) { Ok "roadmap-apetito-30m-ok: exit 0 (apetito:30m sigue valido tras el ancla)" } else { No "roadmap-apetito-30m-ok: esperaba exit 0, fue $($rM8.Code)`n$($rM8.Out)" }
+
+# ------------------------------------------------------------------ (m9) apetito:4h SIGUE pasando
+$rHrs4ok = @(
+  "# Roadmap fixture",
+  "",
+  "## Urgente",
+  "- **Cuatro horas legitimas** [alta:2026-07-21${sep}apetito:4h] -- unidad valida, pasa"
+)
+$dirM9 = New-RoadmapFixture 'roadmap-apetito-4h-ok' (New-FlujoRoadmap 90) $rHrs4ok
+$rM9 = Invoke-Verificar $dirM9
+if ($rM9.Code -eq 0) { Ok "roadmap-apetito-4h-ok: exit 0 (apetito:4h sigue valido tras el ancla)" } else { No "roadmap-apetito-4h-ok: esperaba exit 0, fue $($rM9.Code)`n$($rM9.Out)" }
+
+# ------------------------------------------------------------------ (m10) la VISTA tampoco cuela la basura
+# El mismo ancla en estado-flujo.ps1: 'apetito:30min' NO debe emitirse como apetito:'30m' en la
+# vista (antes lo capturaba). Con el ancla, el campo queda vacio (null), no una unidad falsa.
+$vistaBasuraRoad = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Sub-hora basura en la vista** [alta:2026-07-21${sep}apetito:30min] -- 'min' no es unidad"
+)
+$dirM10 = New-VistaFixture 'vista-apetito-basura' $vistaMinFlujo $vistaBasuraRoad $null
+$rM10 = Invoke-EstadoJson $dirM10
+$objM10 = $null
+try { $objM10 = $rM10.Out | ConvertFrom-Json } catch { $objM10 = $null }
+if ($rM10.Code -eq 0 -and $objM10 -and @($objM10.siguientes).Count -ge 1 -and -not $objM10.siguientes[0].apetito) { Ok "vista-apetito-basura: la vista NO captura '30m' de 'apetito:30min' (campo vacio, no unidad falsa)" } else { No "vista-apetito-basura: esperaba siguientes[0].apetito vacio, fue $($rM10.Out)" }
+
+Write-Host ""
+Write-Host "== R7: rutas resueltas contra -Repo, no contra el CWD (corriendo desde OTRA carpeta) =="
+
+# Los tres scripts (estado-flujo/expirar/auditar) aceptan -Repo y ya resuelven contra la raiz
+# (Push-Location/Set-Location `$Repo al arrancar). Este guardian lo BLINDA: corre el script
+# desde una carpeta NEUTRAL -- ni el repo ni el fixture, SIN tools/flujo.json -- y exige que
+# aun asi halle el JSON del -Repo. Si alguien quitara el Push-Location y volviera a la ruta
+# literal, el script diria "no aplica" (falso verde) y este caso lo cazaria en rojo.
+# Se usa Start-Process -WorkingDirectory para fijar el CWD del hijo sin ambiguedad.
+$neutral = Join-Path $tmpRoot 'cwd-neutral'
+New-Item -ItemType Directory -Path $neutral -Force | Out-Null
+function Invoke-DesdeOtraCarpeta($scriptPath, $argv, $workdir) {
+  $outF = Join-Path $tmpRoot ('r7-out-' + [System.Guid]::NewGuid().ToString('N'))
+  $errF = Join-Path $tmpRoot ('r7-err-' + [System.Guid]::NewGuid().ToString('N'))
+  $a = @('-NoProfile','-ExecutionPolicy','Bypass','-File',$scriptPath) + $argv
+  $p = Start-Process -FilePath 'powershell' -ArgumentList $a -WorkingDirectory $workdir -Wait -PassThru -NoNewWindow -RedirectStandardOutput $outF -RedirectStandardError $errF
+  $out = ''
+  if (Test-Path -LiteralPath $outF) { $out += [System.IO.File]::ReadAllText($outF) }
+  if (Test-Path -LiteralPath $errF) { $out += [System.IO.File]::ReadAllText($errF) }
+  return @{ Out = $out; Code = $p.ExitCode }
+}
+
+# ------------------------------------------------------------------ (cwd1) estado-flujo -Gate desde otra carpeta
+# Fixture con wip_limite DISTINTIVO (3): si el script leyera un flujo.json equivocado (o
+# ninguno) no reportaria justo ese numero -- diria "no aplica" o WIP limite otro.
+$dirCwd1 = New-EstadoFixture 'r7-estado' '{ "estado": { "wip_limite": 3, "sprint_activo": "r7", "gembas_pendientes": [] } }'
+$rCwd1 = Invoke-DesdeOtraCarpeta $esti @('-Gate','-Repo',$dirCwd1) $neutral
+if ($rCwd1.Code -eq 0 -and $rCwd1.Out -match 'WIP limite: 3' -and $rCwd1.Out -notmatch 'no aplica') { Ok "r7-estado-flujo: desde OTRA carpeta halla el flujo.json del -Repo (WIP limite: 3, sin 'no aplica')" } else { No "r7-estado-flujo: esperaba exit 0 + 'WIP limite: 3' sin 'no aplica', fue $($rCwd1.Code)`n$($rCwd1.Out)" }
+
+# ------------------------------------------------------------------ (cwd2) expirar -Simular desde otra carpeta
+# Fixture con un Normal vencido (alta hace 100 dias, $alta100 del setup de expiracion): si
+# expirar no hallara ROADMAP/flujo del -Repo diria "no aplica" o "0 vencidos"; debe anunciarlo.
+$rCwdExp = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Vencido desde otra carpeta** [alta:$alta100${sep}apetito:2h] -- muere por ventana Normal"
+)
+$dirCwd2 = New-ExpirarFixture 'r7-expira' (New-FlujoExpirar 90) $rCwdExp
+$rCwd2 = Invoke-DesdeOtraCarpeta $expi @('-Simular','-Repo',$dirCwd2,'-Hoy',$anchor) $neutral
+if ($rCwd2.Code -eq 0 -and $rCwd2.Out -match 'Vencido desde otra carpeta' -and $rCwd2.Out -notmatch 'no aplica') { Ok "r7-expirar: desde OTRA carpeta halla ROADMAP+flujo del -Repo y anuncia el vencido" } else { No "r7-expirar: esperaba anunciar el vencido sin 'no aplica', fue $($rCwd2.Code)`n$($rCwd2.Out)" }
+
+# ------------------------------------------------------------------ (cwd3) auditar desde otra carpeta
+# auditar fija 'tools/blast-radius.json' pero hace Set-Location `$Repo al arrancar; corrido
+# desde el neutral con -Repo al fixture (que trae product/ con una nota), debe auditar ESE
+# product/ y salir 0, no tronar por no hallar la ley.
+$dirCwd3 = Join-Path $tmpRoot 'r7-auditar'
+New-Item -ItemType Directory -Path (Join-Path $dirCwd3 'tools') -Force | Out-Null
+New-Item -ItemType Directory -Path (Join-Path $dirCwd3 'product') -Force | Out-Null
+[System.IO.File]::WriteAllText((Join-Path $dirCwd3 'tools/blast-radius.json'), '[]', $utf8NoBom)
+$auditar = Join-Path $PSScriptRoot 'auditar.ps1'
+$rCwd3 = Invoke-DesdeOtraCarpeta $auditar @('-Repo',$dirCwd3) $neutral
+if ($rCwd3.Code -eq 0 -and $rCwd3.Out -match 'Auditar grafo de docs' -and $rCwd3.Out -notmatch '\[ERROR\]') { Ok "r7-auditar: desde OTRA carpeta halla su ley y product/ del -Repo (sin fallar cerrado)" } else { No "r7-auditar: esperaba exit 0 auditando el -Repo sin [ERROR], fue $($rCwd3.Code)`n$($rCwd3.Out)" }
 
 # ------------------------------------------------------------------ limpieza
 Remove-Item -LiteralPath $tmpRoot -Recurse -Force -ErrorAction SilentlyContinue
