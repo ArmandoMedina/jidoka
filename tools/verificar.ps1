@@ -268,6 +268,14 @@ if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
   # defecto: un hijo que aun no adopta la regla no se rompe al actualizar (gentileza no-clobber,
   # KIT-1). Un pendiente que no puede decir su origen no se puede ejecutar ni validar.
   $rProcedencia = ($flujoCfg.roadmap.procedencia -eq $true)
+  # Guion de revision (R2, ADR 0057 enmienda): OPT-IN por instancia. Si
+  # roadmap.guion_revision=true, cada item EJECUTABLE (Urgente/Con fecha/Normal; el icebox
+  # 'Algun dia' NO es ejecutable, va exento) debe declarar COMO se revisa -- citando un informe
+  # docs/analisis/ que traiga una seccion de guion ("Que debe revisar el dueno"), o un record
+  # docs/sprints/ (su seccion Verificacion es el guion por molde). Un pendiente sin guion no es
+  # ejecutable. Cache: un mismo informe citado por N items se lee una sola vez.
+  $rGuion = ($flujoCfg.roadmap.guion_revision -eq $true)
+  $rGuionCache = @{}
   $rPermitidas = "Urgente, Con fecha, Normal, Alg${uAcc}n d${iAcc}a, Referencia"
   $rotoRoadmap = $false
   $nItems = 0
@@ -305,6 +313,27 @@ if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
       # Procedencia: aplica a TODA clase viva (incluida Algun dia), como el alta. Solo si el
       # opt-in esta encendido. El item cita informe/ADR/#issue en su cuerpo.
       if ($rProcedencia -and $ln -notmatch 'docs/analisis/|docs/sprints/|docs/decisions/|ADR\s*\d|#\d') { $faltan += 'procedencia (informe docs/analisis/, record de sprint, ADR o #issue)' }
+      # Guion de revision: solo clases ejecutables (el icebox va exento). Un record de sprint
+      # cuenta por molde; un informe docs/analisis/ solo si trae la seccion de guion.
+      if ($rGuion -and ($claseActual -eq 'urgente' -or $claseActual -eq 'confecha' -or $claseActual -eq 'normal')) {
+        $tieneGuion = ($ln -match 'docs/sprints/[^\s)]+\.md')
+        if (-not $tieneGuion) {
+          foreach ($m in [regex]::Matches($ln, 'docs/analisis/[^\s)]+\.md')) {
+            $rel = $m.Value
+            if (-not $rGuionCache.ContainsKey($rel)) {
+              $tiene = $false
+              if (Test-Path $rel) {
+                $cont = Get-Content $rel -Encoding UTF8 -Raw
+                # Encabezado ## o ### cuyo texto trae 'revisar el due(no)' o 'guion de revis(ion)'.
+                if ($cont -match '(?im)^#{2,3}\s.*(revisar el due|guion de revis)') { $tiene = $true }
+              }
+              $rGuionCache[$rel] = $tiene
+            }
+            if ($rGuionCache[$rel]) { $tieneGuion = $true; break }
+          }
+        }
+        if (-not $tieneGuion) { $faltan += 'guion de revision (informe docs/analisis/ con seccion "Que debe revisar el dueno", o record docs/sprints/)' }
+      }
       if ($claseActual -eq 'urgente' -or $claseActual -eq 'confecha' -or $claseActual -eq 'normal') {
         if ($ln -notmatch 'apetito:\d+h') { $faltan += 'apetito:Nh' }
       }

@@ -3,6 +3,8 @@
 - **Estado:** aceptado
 - **Fecha:** 2026-07-23
 
+> **Enmienda (ADR 0057, 2026-07-23):** el candado gana un **segundo requisito hermano** — el guion de revisión (`roadmap.guion_revision`, R2). La decisión de procedencia sigue vigente sin cambio; lo que se agrega es que un ítem **ejecutable** además declare *cómo se revisa*. Detalle abajo, en «Decisión — segundo requisito».
+
 ## Contexto
 
 El 2026-07-23 el dueño no reconocía la mayoría de sus pendientes: 41 de 62 ítems del ROADMAP no citaban ninguna fuente y git no lo suplía (el reformateo de FLU-1 había aplanado la historia). La poda por procedencia (32 huérfanos a `docs/MUERTOS.md`, 9 rescatados con puntero verificado) aplicó la regla a mano, pero **al no ser mecanismo el hueco volvió al día siguiente** — un ítem sin origen se coló de nuevo. El contrato del ROADMAP (ADR 0049) ya exige `alta:`/`apetito:`/`vence:` con gate en `verificar.ps1`; falta el campo que dice **de dónde viene** el pendiente. Evidencia y método: [`exploracion-procedencia-del-backlog-202607.md`](../analisis/exploracion-procedencia-del-backlog-202607.md).
@@ -12,6 +14,13 @@ El 2026-07-23 el dueño no reconocía la mayoría de sus pendientes: 41 de 62 í
 Se extiende el contrato del ROADMAP (ADR 0049) con un requisito nuevo, gateado en `verificar.ps1` (check `[contrato-roadmap]`): **cada ítem vivo debe citar su procedencia** — un puntero a una fuente durable y trazable. Las fuentes aceptadas son: un informe de `docs/analisis/`, un récord de `docs/sprints/`, un ADR (`docs/decisions/` o `ADR NNNN` textual) o un issue (`#NNN`). Aplica a **toda clase viva**, incluido el icebox «Algún día» (como el `alta:`). Un ítem sin ninguna de esas fuentes bloquea el push (exit 1).
 
 El requisito es **opt-in por instancia**: se activa con `roadmap.procedencia: true` en `tools/flujo.json`. Esta nave lo enciende; un repo hijo lo adopta cuando su ROADMAP esté listo. La regla la dictó el dueño el 2026-07-23.
+
+### Decisión — segundo requisito (guion de revisión, R2)
+
+Además de citar su origen, cada ítem **ejecutable** (Urgente/Con fecha/Normal) debe **declarar cómo se revisa**: citar un informe de `docs/analisis/` que traiga una sección de guion de revisión (encabezado «Qué debe revisar el dueño» / «guion de revisión»), **o** un récord de `docs/sprints/` (cuya sección Verificación es el guion por molde). Sin guion, un pendiente no es *ejecutable*. Gateado en el mismo check `[contrato-roadmap]`, opt-in con `roadmap.guion_revision: true`. Dos fronteras deliberadas:
+
+- **El icebox «Algún día» va exento.** Su justificación es la propia palabra del dueño: «un pendiente sin guion no es *ejecutable*». El icebox no es ejecutable por definición — espera al N-ésimo caso real — así que exigirle guion sería método-ficción. La procedencia (R1) sí lo cubre; el guion (R2) no.
+- **Un récord de sprint cuenta como guion.** El molde de sprint garantiza una sección Verificación/demo; es un guion de revisión legítimo. Un ADR o un `#issue` **no** cuentan para R2 (son procedencia/razón, no pasos de revisión) — esto mantiene R2 más estricto que R1.
 
 ## Por qué
 
@@ -29,7 +38,7 @@ También se consideró **restringir las fuentes a solo `docs/analisis/`/ADR/issu
 
 - **Más fácil:** auditar de dónde salió cada pendiente; el ROADMAP no se vuelve a llenar de ítems sin dueño de origen.
 - **Más difícil:** agregar un ítem al vuelo — ahora exige nombrar su fuente antes del push. Es el costo buscado.
-- **Deuda abierta:** el gate verifica que el puntero *exista*, no que el archivo apuntado *tenga contenido de origen real* — un puntero a un `docs/analisis/` que no habla del ítem pasaría. El segundo requisito (que el puntero alcance una sección «Qué debe revisar el dueño») es la tarjeta hermana R2 de este mismo sprint.
+- **Deuda abierta:** el gate de procedencia verifica que el puntero *exista*, no que el archivo apuntado *tenga contenido de origen real* — un puntero a un `docs/analisis/` que no habla del ítem pasaría. El requisito de guion (R2, arriba) sí abre el informe citado y exige la sección de revisión; pero tampoco juzga que el guion sea *bueno* (solo que existe el encabezado).
 
 ## Qué NO resuelve
 

@@ -43,9 +43,9 @@
 - **«Última validación del dueño» como propiedad de cada pieza** `[alta:2026-07-22 · apetito:4h]` — decisión del cliente (2026-07-22): revisar y comprender lo existente es el trabajo; cada pieza carga la fecha de su última validación por el dueño, la app la muestra y la actualiza desde la vista por documento. Mide el avance de comprensión y delata lo nunca revisado. Origen: [`senales-tableros-202607.md`](docs/analisis/senales-tableros-202607.md).
 - **Coordinación de escritores multi-máquina** `[alta:2026-07-21 · apetito:8h]` — 3 frentes de escritura sobre el método + la rama del socio sin subir; «una sola sesión escritora por working tree» no alcanza con varias PCs. Origen (decisión abierta #3): [`gemba-gestion-del-flujo-202607.md`](docs/analisis/gemba-gestion-del-flujo-202607.md).
 - **Gemba end-to-end de la app de la tubería** `[alta:2026-07-21 · apetito:1h · espera:cliente]` — el flujo del glosario completo (crear por fuera → bandeja → parametrizar desde el formulario → candado → ver a la IA rebotar), sin código ni terminal; pasos en [`sprint-21-app-tuberia-entrega.md`](docs/sprints/sprint-21-app-tuberia-entrega.md). La fidelidad de R2 ya se aprobó; el flujo completo no se ha corrido.
-- **Cuadro de cierre como plantilla sembrable** `[alta:2026-07-17 · apetito:2h]` — mover el detalle a `kit/.jidoka/templates/cierre-cuadro.md` inyectada con `@` (ADR 0040).
-- **Épica `.local` code-first (SGI)** `[alta:2026-07-11 · apetito:8h · espera:ventana-labs]` — converger el `verificar` de SGI a motor genérico + costura `.local` sin romper sus 453 tests (ADR 0015).
-- **Demo de campo de Discovery** `[alta:2026-07-14 · apetito:2h · espera:cliente]` — correr `/jidoka:descubre` en un proyecto con niebla real; alimenta el issue #67.
+- **Cuadro de cierre como plantilla sembrable** `[alta:2026-07-17 · apetito:2h]` — mover el detalle a `kit/.jidoka/templates/cierre-cuadro.md` inyectada con `@` (ADR 0040). Guion (dónde nació el cuadro): [`cierre-20260717.md`](docs/sprints/cierre-20260717.md).
+- **Épica `.local` code-first (SGI)** `[alta:2026-07-11 · apetito:8h · espera:ventana-labs]` — converger el `verificar` de SGI a motor genérico + costura `.local` sin romper sus 453 tests (ADR 0015). Guion: [`costo-neto-sgi-202607.md`](docs/analisis/costo-neto-sgi-202607.md).
+- **Demo de campo de Discovery** `[alta:2026-07-14 · apetito:2h · espera:cliente]` — correr `/jidoka:descubre` en un proyecto con niebla real; alimenta el issue #67. Guion: [`sprint-10-descubre-entrega.md`](docs/sprints/sprint-10-descubre-entrega.md).
 
 ## Algún día
 

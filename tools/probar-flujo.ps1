@@ -488,6 +488,82 @@ $dirRP5 = New-RoadmapFixture 'roadmap-proc-icebox' (New-FlujoRoadmapProc 90) $rP
 $rRP5 = Invoke-Verificar $dirRP5
 if ($rRP5.Code -eq 1 -and $rRP5.Out -match 'procedencia') { Ok "roadmap-proc-icebox: exit 1 (procedencia aplica a TODA clase viva, incluido el icebox)" } else { No "roadmap-proc-icebox: esperaba exit 1 por procedencia, fue $($rRP5.Code)`n$($rRP5.Out)" }
 
+# ==== Guion de revision (R2, ADR 0057 enmienda): opt-in roadmap.guion_revision=true. Cada item
+# EJECUTABLE (Urgente/Con fecha/Normal) declara COMO se revisa: cita un informe docs/analisis/
+# con seccion "Que debe revisar el dueno", o un record docs/sprints/ (guion por molde). El icebox
+# 'Algun dia' va EXENTO (no es ejecutable). Off por defecto.
+function New-FlujoRoadmapGuion($techo) {
+  return @"
+{
+  "roadmap": {
+    "techo_lineas": $techo,
+    "historico": "docs/roadmap-historico.md",
+    "guion_revision": true
+  }
+}
+"@
+}
+function Add-Informe($dir, $rel, $lines) {
+  $full = Join-Path $dir $rel
+  New-Item -ItemType Directory -Path (Split-Path $full -Parent) -Force | Out-Null
+  [System.IO.File]::WriteAllLines($full, [string[]]$lines, $utf8NoBom)
+}
+$informeConGuion = @("# Informe fixture", "", "## Que debe revisar el dueno (guion)", "- paso 1", "- paso 2")
+$informeSinGuion = @("# Informe fixture", "", "## Resultados", "- algo medido, pero sin guion de revision")
+
+# ------------------------------------------------------------------ (g1) ON + informe con guion -> verde
+$rGui1 = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Item con guion** [alta:2026-07-21${sep}apetito:2h] -- ver [informe](docs/analisis/con-guion-202607.md)"
+)
+$dirG1 = New-RoadmapFixture 'roadmap-guion-ok' (New-FlujoRoadmapGuion 90) $rGui1
+Add-Informe $dirG1 'docs/analisis/con-guion-202607.md' $informeConGuion
+$rG1 = Invoke-Verificar $dirG1
+if ($rG1.Code -eq 0) { Ok "roadmap-guion-ok: exit 0 (informe citado trae la seccion de guion)" } else { No "roadmap-guion-ok: esperaba exit 0, fue $($rG1.Code)`n$($rG1.Out)" }
+
+# ------------------------------------------------------------------ (g2) ON + informe SIN guion -> ROJO
+$rGui2 = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Item sin guion** [alta:2026-07-21${sep}apetito:2h] -- ver [informe](docs/analisis/sin-guion-202607.md)"
+)
+$dirG2 = New-RoadmapFixture 'roadmap-guion-sin' (New-FlujoRoadmapGuion 90) $rGui2
+Add-Informe $dirG2 'docs/analisis/sin-guion-202607.md' $informeSinGuion
+$rG2 = Invoke-Verificar $dirG2
+if ($rG2.Code -eq 1) { Ok "roadmap-guion-sin: exit 1 (BLOQUEA -- el informe citado no trae guion)" } else { No "roadmap-guion-sin: esperaba exit 1, fue $($rG2.Code)`n$($rG2.Out)" }
+if ($rG2.Out -match 'contrato-roadmap' -and $rG2.Out -match 'guion de revision') { Ok "roadmap-guion-sin: acusa el guion de revision faltante" } else { No "roadmap-guion-sin: esperaba acusar guion de revision`n$($rG2.Out)" }
+
+# ------------------------------------------------------------------ (g3) ON + record de sprint -> verde
+$rGui3 = @(
+  "# Roadmap fixture",
+  "",
+  "## Con fecha",
+  "- **Item por sprint** [alta:2026-07-20${sep}vence:2026-08-04${sep}apetito:4h] -- pasos en [entrega](docs/sprints/sprint-21-foo-entrega.md)"
+)
+$dirG3 = New-RoadmapFixture 'roadmap-guion-sprint' (New-FlujoRoadmapGuion 90) $rGui3
+$rG3 = Invoke-Verificar $dirG3
+if ($rG3.Code -eq 0) { Ok "roadmap-guion-sprint: exit 0 (un record docs/sprints/ cuenta como guion por molde)" } else { No "roadmap-guion-sprint: esperaba exit 0, fue $($rG3.Code)`n$($rG3.Out)" }
+
+# ------------------------------------------------------------------ (g4) ON + icebox sin guion -> EXENTO
+$rGui4 = @(
+  "# Roadmap fixture",
+  "",
+  $hAlgunDia,
+  "- **Icebox sin guion** [alta:2026-07-13] -- no es ejecutable, va exento del guion"
+)
+$dirG4 = New-RoadmapFixture 'roadmap-guion-icebox' (New-FlujoRoadmapGuion 90) $rGui4
+$rG4 = Invoke-Verificar $dirG4
+if ($rG4.Code -eq 0) { Ok "roadmap-guion-icebox: exit 0 (el icebox 'Algun dia' va EXENTO del guion -- no es ejecutable)" } else { No "roadmap-guion-icebox: esperaba exit 0, fue $($rG4.Code)`n$($rG4.Out)" }
+
+# ------------------------------------------------------------------ (g5) OFF (default) -> no se exige
+$dirG5 = New-RoadmapFixture 'roadmap-guion-off' (New-FlujoRoadmap 90) $rGui2
+Add-Informe $dirG5 'docs/analisis/sin-guion-202607.md' $informeSinGuion
+$rG5 = Invoke-Verificar $dirG5
+if ($rG5.Code -eq 0) { Ok "roadmap-guion-off: exit 0 (sin el opt-in el guion NO se exige -- hijo intacto)" } else { No "roadmap-guion-off: esperaba exit 0, fue $($rG5.Code)`n$($rG5.Out)" }
+
 Write-Host ""
 Write-Host "== Contrato del CHANGELOG (check [contrato-changelog]): fixtures ROJO->VERDE =="
 

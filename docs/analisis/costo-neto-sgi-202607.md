@@ -51,3 +51,13 @@ estado: en_revision
 ## Qué seguiría (si el segundo caso lo amerita — regla 2-3)
 
 Una segunda medición real (otro lab u otro periodo) decidiría qué señales vale la pena instrumentar de forma permanente (#66) y qué piezas de las cuatro sin uso se podan, se simplifican o ganan prueba de vida (#46). Este documento NO propone construir nada todavía.
+
+## Qué debe revisar el dueño (guion)
+
+Guion para la épica «converger el `verificar` de SGI a motor genérico sin romper sus 453 tests»:
+
+1. **Verifica el costo que motiva la convergencia.** Abre la pregunta «¿Cuánto tiempo agregó?» y el Veredicto: el costo dominante **no son los gates**, es «la ceremonia del lazo — reclasificar piezas code-first a mano cada vez». Confirma que ese trabajo manual repetido es lo que la convergencia busca borrar.
+2. **Decide el criterio de éxito.** La convergencia debe pasar el `verificar` de SGI a motor genérico **sin romper sus 453 tests**. Decide: ¿se acepta solo si los 453 siguen en verde en la suite de SGI, o toleras un delta declarado y firmado? Sin ese número como gate, la convergencia se auto-firma.
+3. **Ojo con el muro que sí paga.** Verifica que el muro server-side de SGI («Protect master»: 7 checks required, `bypass: never`) sigue infranqueable tras converger. Recházalo si el motor genérico afloja un check required: es el único muro que de verdad muerde al ajeno.
+4. **Decide la poda de las piezas sin vida.** La pregunta de uso lista piezas con **0 uso** en SGI. Por cada una decide: poda, simplifica o dale prueba de vida (#46). No conviertas en genérico un control que su lab estrella no ocupa.
+5. **El criterio de decisión.** Si pesa más «bajar el costo de ceremonia» → converge y poda agresivo. Si pesa más «no perder el muro que sí paga» → converge solo lo que preserve los 453 tests y el ruleset intactos. Ten presente la limitación del informe: primer pase, sin horas medidas — todo «cuánto costó» son proxies de conteo.

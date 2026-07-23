@@ -10,6 +10,7 @@
     "historico": "docs/roadmap-historico.md",
     "muertos": "docs/MUERTOS.md",
     "procedencia": true,
+    "guion_revision": true,
     "vencimiento_dias": { "urgente": 14, "normal": 90, "algun-dia": 180 }
   },
   "changelog": {
