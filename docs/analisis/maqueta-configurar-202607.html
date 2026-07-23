@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>SPEC — Tablero Configurar (la línea) — sprint 27</title>
+<style>
+  body { font-family: "Segoe UI", sans-serif; margin:0; background:#f4f5f7; color:#1a1a2e; }
+  .banner { background:#d9edf7; border-bottom:2px solid #31708f; padding:8px 16px; font-size:13px; }
+  header { display:flex; align-items:center; gap:0; padding:0 24px; background:#fff; border-bottom:1px solid #ddd; }
+  header h1 { font-size:16px; margin:0; padding:14px 18px 14px 0; }
+  .modos { display:flex; gap:0; margin-left:auto; }
+  .modo { padding:14px 22px; font-size:14px; color:#888; border-bottom:3px solid transparent; }
+  .modo.activo { color:#1a1a2e; font-weight:600; border-bottom-color:#1a1a2e; }
+  .layout { display:grid; grid-template-columns:280px 1fr; gap:14px; padding:18px 24px; }
+  .panel { background:#fff; border:1px solid #ddd; border-radius:6px; }
+  .panel h2 { font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:#555; margin:0; padding:10px 14px; border-bottom:1px solid #eee; }
+  .lista-piezas { font-size:13px; }
+  .pieza { padding:8px 14px; border-bottom:1px solid #f0f0f0; cursor:default; display:flex; justify-content:space-between; }
+  .pieza.sel { background:#eef3fb; border-left:3px solid #4a7fd4; }
+  .pieza .estado { font-size:11px; }
+  .ok { color:#2e9e5b; } .mal { color:#d64545; } .neutro { color:#999; }
+  .ficha { padding:16px 20px; font-size:13px; }
+  .ficha h3 { margin:0 0 2px; font-size:16px; }
+  .ficha .ruta { color:#888; font-size:12px; margin-bottom:14px; }
+  .grupo { border:1px solid #eee; border-radius:5px; margin-bottom:12px; }
+  .grupo .titulo { background:#fafafa; padding:7px 12px; font-weight:600; font-size:12px; display:flex; justify-content:space-between; }
+  .grupo .titulo .fuente { color:#999; font-weight:400; font-size:11px; }
+  .grupo .cuerpo { padding:10px 12px; }
+  .fila-dato { display:flex; justify-content:space-between; padding:3px 0; }
+  .fila-dato .etq { color:#666; }
+  .chip { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; background:#eee; }
+  .chip.estatuto { background:#fff3cd; } .chip.candado { background:#f8d7da; } .chip.libre { background:#e8f0e8; }
+  button.mini { font-size:11px; padding:3px 10px; border:1px solid #999; background:#fff; border-radius:3px; cursor:default; }
+  .nota-num { background:#31708f; color:#fff; border-radius:50%; font-size:10px; padding:1px 6px; vertical-align:super; }
+  .notas { margin:0 24px 24px; background:#fff; border:1px solid #ddd; border-radius:6px; padding:8px 18px 14px; font-size:13px; }
+  .notas li { margin:6px 0; }
+</style>
+</head>
+<body>
+<div class="banner">📋 <b>SPEC del tablero Configurar</b> (R4, sprint 27) — maqueta congelada: esta página ES la especificación (precedente sprint 20/ADR 0048). Datos simulados. Los números azules ⓝ remiten a las notas de abajo; las fuentes citan el inventario (`senales-tableros-202607.md`).</div>
+<header>
+  <h1>Jidoka — la línea de <code>repo-de-ejemplo</code></h1>
+  <div class="modos"><div class="modo">Operar</div><div class="modo activo">Configurar</div></div>
+</header>
+<div class="layout">
+  <div class="panel">
+    <h2>Piezas de la línea <span class="nota-num">1</span></h2>
+    <div class="lista-piezas">
+      <div class="pieza"><span>📂 product/brief.md</span><span class="estado ok">✔ validado</span></div>
+      <div class="pieza sel"><span>📄 ROADMAP.md</span><span class="estado mal">⚠ sin validar 34d</span></div>
+      <div class="pieza"><span>📄 docs/guia-x.md</span><span class="estado neutro">huérfana</span></div>
+      <div class="pieza"><span>⚙ tools/verificar.ps1</span><span class="estado ok">🔒 candado</span></div>
+      <div class="pieza"><span>📄 CONTRIBUTING.md</span><span class="estado ok">✔ validado</span></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>La ficha de la pieza — toda la verdad en un lugar</h2>
+    <div class="ficha">
+      <h3>ROADMAP.md</h3>
+      <div class="ruta">raíz del repo · área <b>raiz</b></div>
+      <div class="grupo">
+        <div class="titulo">Quién la vigila <span class="nota-num">2</span> <span class="fuente">C4/C5 · blast-radius + flujo.json + docs-gobernados</span></div>
+        <div class="cuerpo">
+          <div class="fila-dato"><span class="etq">Régimen efectivo</span><span><span class="chip estatuto">contrato de flujo</span> — techo 90 líneas, clases de servicio, formato de ítem</span></div>
+          <div class="fila-dato"><span class="etq">Gate que la mide</span><span><code>verificar [contrato-roadmap]</code> — MURO al push y en CI</span></div>
+          <div class="fila-dato"><span class="etq">Conformidad hoy</span><span class="ok">CONFORME (78/90 líneas)</span></div>
+        </div>
+      </div>
+      <div class="grupo">
+        <div class="titulo">Parámetros que puedes cambiar aquí <span class="nota-num">3</span> <span class="fuente">C1–C3 · contratos.json / docs-gobernados</span></div>
+        <div class="cuerpo">
+          <div class="fila-dato"><span class="etq">Candado (la IA rebota)</span><span>apagado · <button class="mini">poner candado…</button> (pide tu firma)</span></div>
+          <div class="fila-dato"><span class="etq">Secciones requeridas</span><span>Urgente · Con fecha · Normal · Algún día · <button class="mini">editar…</button></span></div>
+          <div class="fila-dato"><span class="etq">Techos del contrato</span><span>90 líneas · vencimientos por clase · <button class="mini">editar…</button></span></div>
+        </div>
+      </div>
+      <div class="grupo">
+        <div class="titulo">Tu validación <span class="nota-num">4</span> <span class="fuente">C8/O8 · validado_fecha (mecanismo nuevo)</span></div>
+        <div class="cuerpo">
+          <div class="fila-dato"><span class="etq">Última validación del dueño</span><span class="mal">hace 34 días (2026-06-18)</span></div>
+          <div class="fila-dato"><span class="etq"></span><span><button class="mini">✔ lo revisé hoy — validar</button> (queda firmado con fecha)</span></div>
+        </div>
+      </div>
+      <div class="grupo">
+        <div class="titulo">Historial de la pieza <span class="nota-num">5</span> <span class="fuente">git + ledger de paros (nuevo)</span></div>
+        <div class="cuerpo" style="color:#666;">2026-07-22 · el gate la midió CONFORME &nbsp;·&nbsp; 2026-07-20 · rebotó un push por techo excedido &nbsp;·&nbsp; 2026-07-18 · editada por el agente</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="notas">
+  <b>Notas de la spec (lo que la maqueta manda):</b>
+  <ol>
+    <li><b>La lista es TODA la línea</b> (las 360 piezas de la tubería, ADR 0051), con filtro y búsqueda; el estado a la derecha resume: validada ✔ / sin validar Nd ⚠ / huérfana / candado 🔒. La bandeja de huérfanos deja de ser pantalla aparte: es el filtro «huérfanas» de esta lista.</li>
+    <li><b>«Quién la vigila» consolida los 4 ledgers</b> — la ley (área/gate), el contrato de flujo, las secciones gobernadas y el régimen de instancia — en una sola ficha. Cura el hallazgo del escaneo: hoy la app enseña «libre» para piezas con muro real.</li>
+    <li><b>Todo botón de edición invoca el motor PS</b> (`parametrizar.ps1`/`override.ps1`, ADR 0048) — nada se escribe desde JS. «Secciones requeridas: editar…» exige el mecanismo nuevo C3 (`-Requeridas` + no-clobber, con su ADR). Lo que pida firma la deriva de git (ADR 0047).</li>
+    <li><b>La validación del dueño es un acto de un clic</b> que escribe fecha+firma por el motor (mecanismo nuevo C8). Su envejecimiento alimenta la señal O8 del tablero Operar.</li>
+    <li><b>El historial mezcla git y el ledger de paros</b> (mecanismo nuevo O1): la pieza cuenta cuándo la midieron, cuándo rebotó y cuándo la editaron — el «por qué» del A3, interrogable por pieza.</li>
+  </ol>
+  <b>El puente entre modos:</b> toda señal del tablero Operar que se refiera a una pieza (DESVIADO, huérfana, sin validar) abre esta ficha directo. Operar detecta → Configurar corrige.
+</div>
+</body>
+</html>

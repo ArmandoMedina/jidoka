@@ -18,6 +18,7 @@
 3. `[PENDIENTE]` Los 4 Stop hooks: ¿falla-abierta por **diseño** (se documenta) o **defecto** (se cura)?
 4. `[PENDIENTE]` Las **tres contradicciones del capítulo 08**: el Gemba (innegociable vs prohibido), la dirección de la página de hallazgos, y media cuartilla vs los informes durables de `docs/analisis/`.
 5. `[PENDIENTE]` `/code-review` del diff con **tus** ojos: el marcador lo firmó el agente por orden tuya, no es tu revisión.
+6. `[PENDIENTE]` **Elegir boceto del tablero Operar (A/B/C)** — desbloquea el Sprint 27, pausado desde el 2026-07-22 sin reloj. Los tres viven ya en `docs/analisis/boceto-andon-{a,b,c}-202607.html` (rescatados a `main` el 2026-07-23; antes solo existían en la rama pausada y eran invisibles desde `main`). La rama `sprint/tableros-spec-20260722` **sigue viva** para reanudar la construcción.
 
 ## Dónde estuvimos (2026-07-22 — Sprint 26 «La 2.0 estable» · CERRADO: mergeado PR #127, `v1.31.0` liberada · la etiqueta «2.0» NO se declaró)
 
