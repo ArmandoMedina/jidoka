@@ -421,6 +421,73 @@ $rR = Invoke-Verificar $dirR
 if ($rR.Code -eq 2) { Ok "roadmap-incompleto: exit 2 (falla cerrado, techo_lineas requerida)" } else { No "roadmap-incompleto: esperaba exit 2, fue $($rR.Code)`n$($rR.Out)" }
 if ($rR.Out -match 'incompleta') { Ok "roadmap-incompleto: acusa la clave roadmap incompleta" } else { No "roadmap-incompleto: esperaba mensaje de clave incompleta`n$($rR.Out)" }
 
+# ==== Procedencia (R1, ADR 0057): opt-in roadmap.procedencia=true. Cada item vivo cita de
+# donde vino -- informe docs/analisis/, record docs/sprints/, ADR (link o 'ADR NNNN' textual)
+# o #issue. Off por defecto (New-FlujoRoadmap NO la trae): un hijo que no la adopta no se rompe.
+function New-FlujoRoadmapProc($techo) {
+  return @"
+{
+  "roadmap": {
+    "techo_lineas": $techo,
+    "historico": "docs/roadmap-historico.md",
+    "procedencia": true
+  }
+}
+"@
+}
+
+# ------------------------------------------------------------------ (r1p) ON + informe -> verde
+$rProcOk = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Item con origen** [alta:2026-07-21${sep}apetito:2h] -- medido en [informe](docs/analisis/algo-202607.md)"
+)
+$dirRP1 = New-RoadmapFixture 'roadmap-proc-ok' (New-FlujoRoadmapProc 90) $rProcOk
+$rRP1 = Invoke-Verificar $dirRP1
+if ($rRP1.Code -eq 0) { Ok "roadmap-proc-ok: exit 0 (item con puntero docs/analisis/ pasa)" } else { No "roadmap-proc-ok: esperaba exit 0, fue $($rRP1.Code)`n$($rRP1.Out)" }
+
+# ------------------------------------------------------------------ (r2p) ON + sin puntero -> ROJO
+$rProcNo = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Item huerfano** [alta:2026-07-21${sep}apetito:2h] -- no dice de donde vino"
+)
+$dirRP2 = New-RoadmapFixture 'roadmap-proc-sin' (New-FlujoRoadmapProc 90) $rProcNo
+$rRP2 = Invoke-Verificar $dirRP2
+if ($rRP2.Code -eq 1) { Ok "roadmap-proc-sin: exit 1 (BLOQUEA -- item sin procedencia)" } else { No "roadmap-proc-sin: esperaba exit 1, fue $($rRP2.Code)`n$($rRP2.Out)" }
+if ($rRP2.Out -match 'contrato-roadmap' -and $rRP2.Out -match 'procedencia') { Ok "roadmap-proc-sin: acusa la procedencia faltante" } else { No "roadmap-proc-sin: esperaba acusar procedencia`n$($rRP2.Out)" }
+
+# ------------------------------------------------------------------ (r3p) ON + ADR textual / #issue -> verde
+$rProcAdr = @(
+  "# Roadmap fixture",
+  "",
+  "## Normal",
+  "- **Uno por ADR** [alta:2026-07-20${sep}apetito:4h] -- converger el motor (ADR 0015)",
+  "- **Uno por issue** [alta:2026-07-20${sep}apetito:2h] -- alimenta el issue #67"
+)
+$dirRP3 = New-RoadmapFixture 'roadmap-proc-adr' (New-FlujoRoadmapProc 90) $rProcAdr
+$rRP3 = Invoke-Verificar $dirRP3
+if ($rRP3.Code -eq 0) { Ok "roadmap-proc-adr: exit 0 (ADR textual y #issue cuentan como procedencia)" } else { No "roadmap-proc-adr: esperaba exit 0, fue $($rRP3.Code)`n$($rRP3.Out)" }
+
+# ------------------------------------------------------------------ (r4p) OFF (default) -> no se exige
+# El item huerfano de (r2p) pasa cuando el opt-in NO esta: la regla es opt-in, el hijo no se rompe.
+$dirRP4 = New-RoadmapFixture 'roadmap-proc-off' (New-FlujoRoadmap 90) $rProcNo
+$rRP4 = Invoke-Verificar $dirRP4
+if ($rRP4.Code -eq 0) { Ok "roadmap-proc-off: exit 0 (sin el opt-in la procedencia NO se exige -- hijo intacto)" } else { No "roadmap-proc-off: esperaba exit 0, fue $($rRP4.Code)`n$($rRP4.Out)" }
+
+# ------------------------------------------------------------------ (r5p) aplica tambien a Algun dia
+$rProcIce = @(
+  "# Roadmap fixture",
+  "",
+  $hAlgunDia,
+  "- **Icebox huerfano** [alta:2026-07-13] -- sin origen; el icebox tambien lo exige"
+)
+$dirRP5 = New-RoadmapFixture 'roadmap-proc-icebox' (New-FlujoRoadmapProc 90) $rProcIce
+$rRP5 = Invoke-Verificar $dirRP5
+if ($rRP5.Code -eq 1 -and $rRP5.Out -match 'procedencia') { Ok "roadmap-proc-icebox: exit 1 (procedencia aplica a TODA clase viva, incluido el icebox)" } else { No "roadmap-proc-icebox: esperaba exit 1 por procedencia, fue $($rRP5.Code)`n$($rRP5.Out)" }
+
 Write-Host ""
 Write-Host "== Contrato del CHANGELOG (check [contrato-changelog]): fixtures ROJO->VERDE =="
 

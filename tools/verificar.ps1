@@ -262,6 +262,12 @@ if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
   $rTecho = $rTechoParsed
   $rHist = [string]$flujoCfg.roadmap.historico
   if (-not $rHist) { $rHist = 'docs/roadmap-historico.md' }
+  # Procedencia (ADR 0057, extiende el contrato del 0049): OPT-IN por instancia. Si
+  # roadmap.procedencia=true, cada item vivo debe citar de donde vino -- un informe de
+  # docs/analisis/, un ADR (docs/decisions/ o 'ADR NNNN' textual) o un issue (#NNN). Off por
+  # defecto: un hijo que aun no adopta la regla no se rompe al actualizar (gentileza no-clobber,
+  # KIT-1). Un pendiente que no puede decir su origen no se puede ejecutar ni validar.
+  $rProcedencia = ($flujoCfg.roadmap.procedencia -eq $true)
   $rPermitidas = "Urgente, Con fecha, Normal, Alg${uAcc}n d${iAcc}a, Referencia"
   $rotoRoadmap = $false
   $nItems = 0
@@ -296,6 +302,9 @@ if ($flujoCfg -and $flujoCfg.roadmap -and (Test-Path 'ROADMAP.md')) {
       if ($rNombre.Length -gt 60) { $rNombre = $rNombre.Substring(0, 60) }
       $faltan = @()
       if ($ln -notmatch 'alta:\s*\d{4}-\d{2}-\d{2}') { $faltan += 'alta:AAAA-MM-DD' }
+      # Procedencia: aplica a TODA clase viva (incluida Algun dia), como el alta. Solo si el
+      # opt-in esta encendido. El item cita informe/ADR/#issue en su cuerpo.
+      if ($rProcedencia -and $ln -notmatch 'docs/analisis/|docs/sprints/|docs/decisions/|ADR\s*\d|#\d') { $faltan += 'procedencia (informe docs/analisis/, record de sprint, ADR o #issue)' }
       if ($claseActual -eq 'urgente' -or $claseActual -eq 'confecha' -or $claseActual -eq 'normal') {
         if ($ln -notmatch 'apetito:\d+h') { $faltan += 'apetito:Nh' }
       }
