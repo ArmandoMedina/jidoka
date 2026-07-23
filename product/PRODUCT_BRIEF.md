@@ -83,7 +83,7 @@ Las dos alternativas externas están verificadas y registradas con fuentes en `R
 
 ## Decisiones abiertas
 
-Registradas en `ROADMAP.md`; decide el cliente:
+Decide el cliente. **Nota del 2026-07-23:** la poda por procedencia sacó cuatro de ellas del `ROADMAP.md` (multiplataforma, `npm publish`, el párrafo en inglés y qué más del linaje se hace público) por no citar informe, ADR ni issue — su texto íntegro está en [`docs/MUERTOS.md`](../docs/MUERTOS.md) y revivirlas es re-proponerlas con alta nueva. **Seguir abiertas como decisiones no las hace cola de trabajo**: aquí se registran como preguntas pendientes del dueño, no como pendientes ejecutables.
 
 - **Multiplataforma del motor** (gemelos `.sh` o unificar en pwsh Core) — pendiente de un entorno no-Windows para probarse.
 - **`npm publish` del CLI `npx jidoka-method`** — necesita la cuenta npm del cliente.
