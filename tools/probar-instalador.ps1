@@ -276,6 +276,39 @@ try {
   }
   finally { Remove-Item $tmpBf -Recurse -Force -ErrorAction SilentlyContinue }
 
+  # 5i. FALSO-VERDE ANIDADO (R8, volver-muro): -Sellar contra un lab cuya maquinaria quedo
+  # ANIDADA bajo un contenedor (jidoka/tools/... en vez de tools/ raiz) NO debe sellar a
+  # ciegas. ANTES: resolvia mal la raiz, hallaba 0 piezas de motor, escribia un sello VACIO
+  # (sembrado_hashes:{}) en un tools/ NUEVO en la raiz (segundo motor) y salia exit 0 --
+  # falso-verde silencioso (aprueba sin mirar nada). AHORA: FALLA CERRADO (exit != 0) y no
+  # escribe el sello ciego.
+  $tmpNest = Join-Path $env:TEMP ("jidoka-anidado-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+  try {
+    New-Item -ItemType Directory -Path (Join-Path $tmpNest 'jidoka/tools') -Force | Out-Null
+    # la maquinaria vive ANIDADA (mal resuelta): hay motor bajo jidoka/tools/, nada en tools/ raiz.
+    Copy-Item (Join-Path $PSScriptRoot 'verificar.ps1') (Join-Path $tmpNest 'jidoka/tools/verificar.ps1')
+    Copy-Item (Join-Path $PSScriptRoot 'auditar.ps1')   (Join-Path $tmpNest 'jidoka/tools/auditar.ps1')
+    $codeNest = Run-PS $instalar -Destino $tmpNest -Sellar
+    Check 'anidado: -Sellar sobre maquinaria ANIDADA FALLA CERRADO (no exit 0 silencioso)' ($codeNest -ne 0) "exit $codeNest (sello a ciegas = falso-verde)"
+    Check 'anidado: NO escribe un sello vacio en un tools/ raiz nuevo (segundo motor)' (-not (Test-Path (Join-Path $tmpNest 'tools/jidoka-motor.json'))) "escribio un sello a ciegas en la raiz"
+  }
+  finally { Remove-Item $tmpNest -Recurse -Force -ErrorAction SilentlyContinue }
+
+  # 5j. APLANADO/NORMAL sigue verde: -Sellar contra un hijo con la maquinaria en tools/ raiz
+  # SIGUE sellando (la cura no rompe el caso sano). Instalo limpio, borro el sello, y re-sello.
+  $tmpFlat = Join-Path $env:TEMP ("jidoka-aplanado-" + [guid]::NewGuid().ToString('N').Substring(0,8))
+  try {
+    Run-PS $instalar -Destino $tmpFlat -Arquetipo 'docs-as-code' -Yes | Out-Null
+    Remove-Item (Join-Path $tmpFlat 'tools/jidoka-motor.json') -Force
+    $codeFlat = Run-PS $instalar -Destino $tmpFlat -Sellar
+    Check 'aplanado: -Sellar sobre maquinaria en tools/ raiz sigue sellando (exit 0)' ($codeFlat -eq 0) "exit $codeFlat"
+    $selloFlat = Join-Path $tmpFlat 'tools/jidoka-motor.json'
+    $registroOk = $false
+    if (Test-Path $selloFlat) { $registroOk = ((Get-Content $selloFlat -Raw | ConvertFrom-Json).sembrado_hashes.PSObject.Properties | Measure-Object).Count -gt 0 }
+    Check 'aplanado: el sello re-creado registra piezas de motor (no vacio)' $registroOk "sello vacio o ausente"
+  }
+  finally { Remove-Item $tmpFlat -Recurse -Force -ErrorAction SilentlyContinue }
+
   # 6. Segundo arquetipo: code-first siembra DISTINTO (brief, no grafo) y su gate pasa.
   $tmp2 = Join-Path $env:TEMP ("jidoka-smoke2-" + [guid]::NewGuid().ToString('N').Substring(0,8))
   try {

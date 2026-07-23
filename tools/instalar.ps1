@@ -286,6 +286,17 @@ function Invoke-Sellar($jidoka, $manif, $Destino, $utf8) {
   $seed = $clasif.seed
   $pristinas = $clasif.pristinas; $divergen = $clasif.divergen; $ausentes = $clasif.ausentes
 
+  # FALLA CERRADO (R8, volver-muro): si NO se hallo NI UNA pieza de motor en la raiz
+  # esperada ($Destino/tools/...) -- ni pristina ni customizada, TODAS ausentes -- la raiz
+  # del hijo no se resolvio bien. El caso tipico: la maquinaria quedo ANIDADA bajo un
+  # contenedor (jidoka/tools/...) tras una migracion a mano. Sellar aqui escribiria un
+  # sello VACIO (sembrado_hashes: {}) en un tools/ NUEVO en la raiz (un segundo motor) y
+  # saldria exit 0: un falso-verde silencioso (aprueba sin mirar nada). No se sella lo que
+  # no se pudo ver: se falla cerrado con un mensaje que nombra la causa.
+  if ($pristinas -eq 0 -and $divergen.Count -eq 0) {
+    Die "no encontre ninguna pieza de motor en '$Destino' (0 halladas, $ausentes esperadas bajo tools/). No puedo resolver la raiz del hijo: la maquinaria puede estar ANIDADA bajo un contenedor (p.ej. jidoka/tools/... en vez de tools/...). NO sello a ciegas -- eso dejaria un sello vacio y un segundo motor. Apunta -Destino a la raiz donde vive tools/, o reubica la maquinaria a la raiz del repo."
+  }
+
   $selloNuevo = [ordered]@{ version = $version; sembrado_hashes = $seed }
   if ($excluir.Count) { $selloNuevo.excluir = $excluir }
   $parent = Split-Path -Parent $selloDst
