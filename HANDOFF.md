@@ -6,32 +6,22 @@
 
 **Jidoka** — el Sistema de Producción Toyota para agentes de IA: fusión de doctrina + método + ritual de sprint. Estable en `v1.x`. Instalador PowerShell + CLI `npx jidoka-method` construido (pendiente `npm publish`). Se construye por sprints, usando su propio ritual (dogfooding).
 
-## Dónde estamos (2026-07-22 — Sprint 25 «El molde único de sprints y `qa_runs`» · construido y verde · `v1.30.0` · rama `sprint/molde-sprints-qa-20260722`, apilada sobre la consolidación)
+## Dónde estamos (2026-07-22 — Sprint 26 «La 2.0 estable» · CERRADO: mergeado PR #127, `v1.31.0` liberada · la etiqueta «2.0» NO se declaró)
 
-**El molde de sprints/`qa_runs`/módulos/dominios se homologó extendiendo el motor genérico `estado-docs.ps1` por datos (ADR 0056), no clonando guardianes ni con un monolito.** Construcción R1–R4 + reworks verde de punta a punta: **50 CONFORME, 0 DESVIADO**; self-tests `probar-docs` 39/39, `probar-adrs` 14/14, `probar-auditor` 13/13; `verificar` exit 0.
+**El sprint TERMINÓ (3/3 + review + Gemba aceptado) y se cerró con orden nombrada del cliente** (merge + release + poda). Salió como **`v1.31.0`** — decisión del cliente al cierre: los mecanismos no bastan para la etiqueta «estable»; la declara él, no un sprint. Récord completo: [`sprint-26-la-2-0-estable-entrega.md`](docs/sprints/sprint-26-la-2-0-estable-entrega.md) (con cuadro de cierre). Dos reglas nuevas de la sesión, ya operativas: **toda superficie del gobierno debe ser la app** (linterna descartada, ADR 0043 reemplazado) y **ninguna frase textual del cliente va al repo público** (barrido hecho; la historia de la rama se reescribió antes del merge).
 
-1. **R1 — motor por glob-familia:** el ledger acepta globs (`docs/sprints/*-plan.md`, `qa_runs/*/LOG.md`); guarda del verde mentiroso (`[FAMILIA VACIA]`).
-2. **R2 — sprints numerados + molde + generación:** los 25 sprints numerados (`sprint-NN`), archivos renombrados, 11 docs homologados (solo encabezados); un sprint nace por `/jidoka:planea` + scaffolder.
-3. **R3 — `qa_runs`:** cada `LOG.md` valida Método · Resultados · Veredicto.
-4. **R4 — módulos/dominios en su dueño `auditar.ps1`** (no al ledger, ADR 0042); capacidades ya por Gherkin (sin trabajo — el propio template ordena el set mínimo para proyecto chico).
-5. **Reworks:** una sola carpeta de ADRs (0052-0055 consolidados), comando `/jidoka:nuevo-sprint` retirado (ADR 0056), cada template atado a su guardián. Récord: [`sprint-25-molde-sprints-qa-entrega.md`](docs/sprints/sprint-25-molde-sprints-qa-entrega.md). Evidencia: `qa_runs/gemba-molde-sprints-qa-20260722-120402/`.
+**Qué sigue (en orden de valor):**
+1. **Sprint 27 — la ola de UI** (ya decidido): la app dice la verdad por documento (4 ledgers) · pantalla del mapa de enforcement · parametrizar secciones (`-Requeridas` + ADR no-clobber). Ahí se retira `estado-gobierno.ps1` y el tablero interino.
+2. **Bajar el batch a los labs** — vence **2026-08-04** (el único reloj).
+3. Cola del cliente: decidir el barrido de citas textuales de sesiones ANTERIORES (`docs/handoff-historico.md`, contexto del ADR 0043) — hoy solo se limpió lo de esta sesión.
 
-**Apilamiento:** esta rama contiene los commits de la consolidación (`v1.29.0`, PR #125) más el molde (`v1.30.0`). Un solo PR desde ella lleva ambos cortes a `main` (v1.28.0) — encaja con "todos los cambios a un solo PR".
+## Dónde estuvimos (2026-07-22 — Sprint 26, la construcción · el detalle ÍNTEGRO vive en la entrega y el LOG)
 
-**Cola de decisiones del cliente:**
-1. **[PENDIENTE] Gemba del molde** sin terminal (README numerado · dos `-entrega.md` con mismas secciones · dos `LOG.md` · reporte CONFORME/DESVIADO). Registrado en `flujo.json` (`aceptado: false`) — planta a `planea` hasta que lo aceptes con nombre.
-2. **[PENDIENTE] Gemba de la consolidación v1.29.0** sin terminal (ADRs: `conformidad-adrs.html`; tubería: abrir la app y ver el censo completo). La fidelidad de la tubería ya la aprobaste en 2 Gembas.
-3. **[PENDIENTE] Estrategia de PR + merge + release** con **orden nombrada**: ¿un solo PR (v1.29.0 + v1.30.0 juntos) desde esta rama, o merge escalonado? Cerrar/retargetear PR #124 (ADRs) y #125 (consolidación) según eso.
+Plan-contrato [`sprint-26-la-2-0-estable-plan.md`](docs/sprints/sprint-26-la-2-0-estable-plan.md), nacido de 4 escaneos `arquitecto` ([`escaneo-camino-2.0-202607.md`](docs/analisis/escaneo-camino-2.0-202607.md); 8 ítems al ROADMAP). R1 corte honesto (os `win32`, badge gateado, aviso del muro) · R2 fiabilidad (`probar-gemelas` estrenó en rojo con 3 drifts reales curados; `auditar` fail-closed; salvavidas ampliado) · R3 superficies (`conformidad-docs.html` interino; [`matriz-carriles-202607.md`](docs/analisis/matriz-carriles-202607.md)) · review adversarial 2M+2B curados. Evidencia rojo→verde: [`qa_runs/la-2-0-estable-20260722/LOG.md`](qa_runs/la-2-0-estable-20260722/LOG.md).
 
-**Follow-ups técnicos (nada bloquea):** aristas reales de la tubería (otro sprint) · reconciliar `~/.claude/skills/adr-helper` (higiene local) · restaurar `instalar.ps1`/`probar-instalador.ps1` si el AV los dejó en cuarentena (intactos en git).
+## Dónde estuvimos (2026-07-22 — Sprint 25 + consolidación · MERGEADOS, `v1.30.0`, PR #126)
 
-## Dónde estuvimos (2026-07-22 — «El pilar de flujo» FLU-1 · MERGEADO A `main`, `v1.28.0`, PR #122)
-
-**FLU-1 (el pilar JIT) se construyó (9/9 rebanadas verdes) y se MERGEÓ a `main`** (PR #122, `v1.28.0`, ADR 0049) — su ADR se renumeró 0045→0049 al reconciliar (main tomó 0045-0048). Introdujo los contratos con gate de HANDOFF/ROADMAP/CHANGELOG (`tools/flujo.json`), la expiración a `MUERTOS.md`, el límite WIP y la vista `estado-flujo`. Plan/entrega: [`sprint-22-pilar-de-flujo-plan.md`](docs/sprints/sprint-22-pilar-de-flujo-plan.md). **Kaizen vigente:** ante «voy más lento que tú», el agente por defecto se detiene — el ritmo lo marca quien absorbe.
-
-## Dónde estuvimos (2026-07-21 — «La app de la tubería» · MERGEADO Y LIBERADO `v1.27.0`, PR #121)
-
-**El sprint "La app de la tubería" TERMINÓ (7/7)**, mergeado y liberado el 2026-07-22 con orden nombrada. La superficie del gobierno es ahora una **app de escritorio Tauri fiel a la maqueta** (ADR 0048); la extensión VS Code se retiró (`v1.26.0` subsumida, PR #120). Récord: [`sprint-21-app-tuberia-entrega.md`](docs/sprints/sprint-21-app-tuberia-entrega.md). **[PENDIENTE del cliente] Gemba end-to-end** (la fidelidad de R2 ya la aprobó; el flujo completo no). Pendientes técnicos (nada bloquea): cert Authenticode del `.exe`, autoría de ligas en la app, atlas de los tools nuevos, multiplataforma del motor (fase 2).
+**El molde único de sprints/`qa_runs` (ADR 0056) y la consolidación `v1.29.0` llegaron a `main` en el PR #126**; los 2 Gembas (`flu-1`, `molde-sprints-qa`) aceptados con nombre el 2026-07-22 en `flujo.json`. Récord: [`sprint-25-molde-sprints-qa-entrega.md`](docs/sprints/sprint-25-molde-sprints-qa-entrega.md). Nota: `qa_runs/` ya no versiona el bulto — lo citado se agrega con `git add -f` (regla en `.gitignore`/`qa_runs/README.md`).
 
 ## Autorizaciones vigentes del cliente (dichas con nombre)
 

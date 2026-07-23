@@ -57,8 +57,8 @@ function Test-Pattern($path, $pattern) {
   if ($pattern -notlike '*/*' -and $path -like '*/*') { return $false }
   return ($path -like $pattern)
 }
-function Match-Any($paths, $pattern) {
-  foreach ($p in $paths) { if (Test-Pattern $p $pattern) { return $true } }
+function Match-Any($list, $pattern) {
+  foreach ($item in $list) { if (Test-Pattern $item $pattern) { return $true } }
   return $false
 }
 

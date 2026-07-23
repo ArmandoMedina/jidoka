@@ -117,6 +117,16 @@ Caso 'bloquea: borrar motor con ADR solo EDITADO no destraba (no-borres-el-motor
   @{ Cambiados = @('docs/decisions/0001-viejo.md'); BorradosInyectados = @('tools/verificar.ps1'); Manifiesto = $tmpB }
 Caso 'bloquea: borrar motor y ademas BORRAR un ADR no destraba (no-borres-el-motor, #88)' 1 '[BLOQUEA] [no-borres-el-motor]' '' `
   @{ Cambiados = @('docs/decisions/0001-viejo.md'); BorradosInyectados = @('tools/verificar.ps1', 'docs/decisions/0001-viejo.md'); Manifiesto = $tmpB }
+# Sprint 26: el salvavidas cubre TAMBIEN los hooks, el cableado y los git hooks
+# (borrar un Stop hook pasaba con exit 0 -- rojo demostrado en qa_runs del sprint).
+Caso 'bloquea: BORRAR un Stop hook sin ADR nuevo (no-borres-el-motor, sprint 26)' 1 '[BLOQUEA] [no-borres-el-motor]' '' `
+  @{ Cambiados = @('README.md'); BorradosInyectados = @('.claude/hooks/gemba-stop.ps1'); Manifiesto = $tmpB }
+Caso 'bloquea: BORRAR .claude/settings.json sin ADR nuevo (no-borres-el-motor, sprint 26)' 1 '[BLOQUEA] [no-borres-el-motor]' '' `
+  @{ Cambiados = @('README.md'); BorradosInyectados = @('.claude/settings.json'); Manifiesto = $tmpB }
+Caso 'bloquea: BORRAR un git hook sin ADR nuevo (no-borres-el-motor, sprint 26)' 1 '[BLOQUEA] [no-borres-el-motor]' '' `
+  @{ Cambiados = @('README.md'); BorradosInyectados = @('.githooks/pre-push'); Manifiesto = $tmpB }
+Caso 'pasa: BORRAR un Stop hook CON ADR nuevo en el mismo cambio (no-borres-el-motor, sprint 26)' 0 '' '[BLOQUEA]' `
+  @{ Cambiados = @('docs/decisions/0099-prueba.md'); AgregadosInyectados = @('docs/decisions/0099-prueba.md'); BorradosInyectados = @('.claude/hooks/gemba-stop.ps1'); Manifiesto = $tmpB }
 
 Remove-Item $tmpB -ErrorAction SilentlyContinue
 

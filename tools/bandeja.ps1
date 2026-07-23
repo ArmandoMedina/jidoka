@@ -58,7 +58,7 @@ function Test-Pattern($path, $pattern) {
   if ($pattern -notlike '*/*' -and $path -like '*/*') { return $false }
   return ($path -like $pattern)
 }
-function Test-NoVacio($x) { return ($null -ne $x -and @($x).Count -gt 0) }
+function Test-NoVacio($v) { return ($v -and @($v).Count -gt 0) }
 
 # Normaliza + Get-Secciones: calca estado-docs.ps1 (fold de acentos, salta code-fences)
 # para detectar el doc capa-2 DESVIADO con la MISMA regla que el detector oficial.

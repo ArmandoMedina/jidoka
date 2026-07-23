@@ -484,4 +484,14 @@ Write-Host "== Sembrado: $($script:copiados) archivo(s), $($script:stubs) stub(s
 Write-Host "Siguientes pasos:" -ForegroundColor Cyan
 $n = 1
 foreach ($p in $manif.post.siguientes_pasos) { Write-Host "  $n. $p"; $n++ }
+
+# Aviso ruidoso (sprint 26): lo sembrado son hooks LOCALES; el muro real (branch
+# protection server-side) es un paso humano que ningun script puede dar por ti.
+# Sin este grito, el recien instalado cree que ya esta protegido cuando no.
+if ($manif.post.PSObject.Properties['aviso'] -and $manif.post.aviso) {
+  Write-Host ""
+  Write-Host ("!" * 74) -ForegroundColor Yellow
+  foreach ($lin in @($manif.post.aviso)) { Write-Host "  $lin" -ForegroundColor Yellow }
+  Write-Host ("!" * 74) -ForegroundColor Yellow
+}
 exit 0

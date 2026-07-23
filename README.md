@@ -9,12 +9,12 @@ Es el Sistema de Producción Toyota, aplicado al trabajo con agentes.</p>
 
 <p align="center">
 <a href="LICENSE"><img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-green"></a>
-<img alt="Estado: 1.0 estable" src="https://img.shields.io/badge/estado-1.0%20estable-brightgreen">
+<img alt="Estado: v1.31.0" src="https://img.shields.io/badge/estado-v1.31.0-brightgreen">
 <img alt="Windows / PowerShell 5.1" src="https://img.shields.io/badge/hoy-Windows%20%C2%B7%20PS%205.1-blue">
 <a href="ROADMAP.md"><img alt="Multiplataforma en el roadmap" src="https://img.shields.io/badge/multiplataforma-roadmap-lightgrey"></a>
 </p>
 
-<p align="center">🟢 <strong><code>v1.0.0</code></strong> — <strong>este repo se gobierna con su propio Andon</strong>: los <a href="https://github.com/ArmandoMedina/jidoka/pulls?q=is%3Apr">PRs</a>, los <a href="https://github.com/ArmandoMedina/jidoka/actions">checks</a> y los <a href="docs/sprints/">sprints archivados</a> son la evidencia, no la palabra.</p>
+<p align="center">🟢 <strong>este repo se gobierna con su propio Andon</strong>: los <a href="https://github.com/ArmandoMedina/jidoka/pulls?q=is%3Apr">PRs</a>, los <a href="https://github.com/ArmandoMedina/jidoka/actions">checks</a> y los <a href="docs/sprints/">sprints archivados</a> son la evidencia, no la palabra.</p>
 
 <p align="center"><strong>En español, a propósito.</strong></p>
 

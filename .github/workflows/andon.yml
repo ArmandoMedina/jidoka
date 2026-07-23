@@ -46,6 +46,7 @@ jobs:
           .\tools\probar-ritual.ps1;   if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-anti-pii.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }
           .\tools\probar-adrs.ps1;     if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\tools\probar-gemelas.ps1;  if ($LASTEXITCODE -ne 0) { exit 1 }
           # Self-tests Jidoka-only (no sembrados): corren solo si estan presentes
           # (un hijo instalado no los tiene, y este mismo workflow se siembra).
           # probar-instalador y probar-sembrar corren AQUI a proposito: en Windows
@@ -57,6 +58,25 @@ jobs:
             if (Test-Path ".\tools\$jt.ps1") { & ".\tools\$jt.ps1"; if ($LASTEXITCODE -ne 0) { exit 1 } }
           }
           exit 0
+
+      - name: tablero de conformidad de docs (artefacto)
+        # Sprint 26: el CI produce conformidad-docs.html como artefacto (interino:
+        # la superficie definitiva es la app -- decision del cliente 2026-07-22;
+        # el sprint de UI absorbe esta verdad por documento).
+        # Vista, no gate: si falla, avisa; el veredicto lo dan los gates.
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Continue'
+          New-Item -ItemType Directory -Force _tableros | Out-Null
+          .\tools\estado-docs.ps1 -Reporte _tableros\conformidad-docs.html
+          exit 0
+
+      - name: publicar el tablero como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: tableros-sin-terminal
+          path: _tableros/
+          if-no-files-found: warn
 
       - name: andon sobre el rango del PR (ley y verificador de la BASE)
         shell: powershell

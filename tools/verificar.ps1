@@ -155,10 +155,16 @@ if (-not $hayFalta -and -not $hayAviso) { Ok "blast-radius al dia (o sin cambios
 # docs/decisions/ (el indice README.md no cuenta: no es una decision nueva).
 # Issue #88: "nuevo" = AGREGADO de verdad ($adiciones, --diff-filter=A). Un ADR
 # meramente editado -- o peor, borrado -- NO destraba el borrado del motor.
+# Sprint 26: el salvavidas cubre TAMBIEN los hooks (.claude/hooks/*.ps1), el
+# cableado (.claude/settings.json) y los git hooks (.githooks/*) -- son "el motor"
+# segun la propia area barreras, y borrar un Stop hook no disparaba nada.
 $decisionesNuevas = @($adiciones | Where-Object { $_ -ne 'docs/decisions/README.md' })
 $hayAdrNuevo = Match-Any $decisionesNuevas 'docs/decisions/*.md'
 foreach ($del in @($eliminados | Where-Object { $_ })) {
-  if (-not ((Test-Pattern $del 'tools/*.ps1') -or (Test-Pattern $del 'tools/blast-radius.json'))) { continue }
+  $esMotor = (Test-Pattern $del 'tools/*.ps1') -or (Test-Pattern $del 'tools/blast-radius.json') -or
+             (Test-Pattern $del '.claude/hooks/*.ps1') -or (Test-Pattern $del '.claude/settings.json') -or
+             (Test-Pattern $del '.githooks/*')
+  if (-not $esMotor) { continue }
   if ($hayAdrNuevo) {
     Ok "[no-borres-el-motor] el cambio BORRA $del (pieza del motor) con un ADR nuevo en el mismo cambio: decision documentada"
   }
